@@ -177,7 +177,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         decoration: BoxDecoration(
                           color: Colors.green.shade50,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.side(color: Colors.green.shade200),
+                          border: Border.all(color: Colors.green.shade200),
                         ),
                         child: Text(
                           'ETB',
@@ -619,37 +619,55 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => SimpleDialog(
         title: Text(l10n.themeMode),
         children: [
-          RadioListTile<ThemeMode>(
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.system
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.system
+                  ? context.colorScheme.primary
+                  : null,
+            ),
             title: Text(l10n.themeSystem),
-            value: ThemeMode.system,
-            groupValue: currentMode,
-            onChanged: (val) {
-              if (val != null) {
-                ref.read(themeModeControllerProvider.notifier).setThemeMode(val);
-                Navigator.pop(ctx);
-              }
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.system);
+              Navigator.pop(ctx);
             },
           ),
-          RadioListTile<ThemeMode>(
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.light
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.light
+                  ? context.colorScheme.primary
+                  : null,
+            ),
             title: Text(l10n.themeLight),
-            value: ThemeMode.light,
-            groupValue: currentMode,
-            onChanged: (val) {
-              if (val != null) {
-                ref.read(themeModeControllerProvider.notifier).setThemeMode(val);
-                Navigator.pop(ctx);
-              }
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.light);
+              Navigator.pop(ctx);
             },
           ),
-          RadioListTile<ThemeMode>(
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.dark
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.dark
+                  ? context.colorScheme.primary
+                  : null,
+            ),
             title: Text(l10n.themeDark),
-            value: ThemeMode.dark,
-            groupValue: currentMode,
-            onChanged: (val) {
-              if (val != null) {
-                ref.read(themeModeControllerProvider.notifier).setThemeMode(val);
-                Navigator.pop(ctx);
-              }
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.dark);
+              Navigator.pop(ctx);
             },
           ),
         ],
@@ -845,8 +863,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.logout),
-        content: Text(l10n.logoutConfirm),
+        title: Text(l10n.logoutConfirmTitle),
+        content: Text(l10n.logoutConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

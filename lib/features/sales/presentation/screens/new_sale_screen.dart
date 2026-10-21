@@ -343,8 +343,9 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         ElevatedButton.icon(
                           onPressed: _isSubmitting ? null : _submitSale,
                           style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(120, 52),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 14),
+                                horizontal: 20, vertical: 14),
                           ),
                           icon: _isSubmitting
                               ? const SizedBox(
@@ -587,14 +588,14 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
     final partsAsync = ref.watch(partsStreamProvider);
     final cartNotifier = ref.read(newSaleCartProvider.notifier);
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      child: Column(
+    return Material(
+      color: theme.scaffoldBackgroundColor,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.8,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Column(
         children: [
           Center(
             child: Container(
@@ -677,6 +678,10 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                         File(part.photoLocalPath!).existsSync();
 
                     return ListTile(
+                      onTap: () {
+                        cartNotifier.addPart(part);
+                        Navigator.pop(context);
+                      },
                       leading: Container(
                         width: 44,
                         height: 44,
@@ -733,6 +738,7 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
