@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - my_first_app/**
+    - "**/*.g.dart"
+    - "**/*.drift.dart"
+    - lib/l10n/app_localizations*.dart
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    avoid_print: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    unawaited_futures: true
+    directives_ordering: true

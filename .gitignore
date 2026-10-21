@@ -1,12 +1,57 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
 
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
 
-# Claude Config Manager Extension - Security Rules
-# Prevents accidental commit of private conversation data
+# Visual Studio Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# Coverage and Test Output
+coverage/
+
+# Symbols and Secrets
+*.keystore
+*.jks
+*.key
+google-services.json
+
+# System error dumps
+hs_err_pid*
+replay_pid*
+
+# Claude Config Manager Extension
 .claude/.chats/
 .claude/.chats/**
 .claude/settings.local.json
-
-# Team-sharable Claude Code files (tracked by git):
-# .claude/settings.json     # Team settings (official Claude Code)
-# .claude/commands/         # Team slash commands (official Claude Code)
-# .claude/.plans/           # Project documentation (extension-specific)
