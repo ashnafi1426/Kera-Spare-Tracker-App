@@ -1,0 +1,254 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+enum UserRole {
+  OWNER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum UserLanguage {
+  AMHARIC
+  ENGLISH
+}
+
+enum MovementType {
+  PURCHASE
+  SALE
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  RETURN
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT
+}
+
+enum SubscriptionPlan {
+  FREE
+  STANDARD
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  TRIAL
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+model User {
+  id           String       @id @db.Char(36)
+  phoneNumber  String       @unique @db.VarChar(20)
+  businessName String       @db.VarChar(100)
+  passwordHash String       @db.VarChar(255)
+  role         UserRole     @default(OWNER)
+  status       UserStatus   @default(ACTIVE)
+  language     UserLanguage @default(AMHARIC)
+  createdAt    DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime     @updatedAt @db.Timestamp(6)
+  deletedAt    DateTime?    @db.Timestamp(6)
+
+  // Relations
+  brands         Brand[]
+  categories     Category[]
+  locations      Location[]
+  spareParts     SparePart[]
+  stockMovements StockMovement[]
+  sales          Sale[]
+  saleItems      SaleItem[]
+  subscriptions  Subscription[]
+
+  @@map("users")
+}
+
+model Brand {
+  id        String    @id @db.Char(36)
+  ownerId   String?   @db.Char(36)
+  name      String    @db.VarChar(100)
+  isGlobal  Boolean   @default(false)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+
+  // Relations
+  owner      User?       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  spareParts SparePart[]
+
+  @@index([ownerId, updatedAt])
+  @@map("brands")
+}
+
+model Category {
+  id        String    @id @db.Char(36)
+  ownerId   String    @db.Char(36)
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+
+  // Relations
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  spareParts SparePart[]
+
+  @@index([ownerId, updatedAt])
+  @@map("categories")
+}
+
+model Location {
+  id        String    @id @db.Char(36)
+  ownerId   String    @db.Char(36)
+  name      String    @db.VarChar(100)
+  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime  @updatedAt @db.Timestamp(6)
+  deletedAt DateTime? @db.Timestamp(6)
+
+  // Relations
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  spareParts SparePart[]
+
+  @@index([ownerId, updatedAt])
+  @@map("locations")
+}
+
+model SparePart {
+  id             String    @id @db.Char(36)
+  ownerId        String    @db.Char(36)
+  name           String    @db.VarChar(200)
+  partNumber     String?   @db.VarChar(100)
+  photoUrl       String?   @db.VarChar(500)
+  brandId        String?   @db.Char(36)
+  categoryId     String?   @db.Char(36)
+  locationId     String?   @db.Char(36)
+  customLocation String?   @db.VarChar(100)
+  description    String?   @db.Text
+  unit           String?   @db.VarChar(50)
+  cachedQuantity Decimal   @default(0.000) @db.Decimal(12, 3)
+  purchasePrice  Decimal?  @db.Decimal(12, 2)
+  sellingPrice   Decimal?  @db.Decimal(12, 2)
+  notes          String?   @db.Text
+  sizeSpecs      String?   @db.VarChar(100)
+  createdAt      DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt      DateTime  @updatedAt @db.Timestamp(6)
+  deletedAt      DateTime? @db.Timestamp(6)
+
+  // Relations
+  owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  brand          Brand?          @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category       Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  location       Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  stockMovements StockMovement[]
+  saleItems      SaleItem[]
+
+  @@index([ownerId, updatedAt])
+  @@index([ownerId, name])
+  @@index([ownerId, partNumber])
+  @@map("spare_parts")
+}
+
+model StockMovement {
+  id           String       @id @db.Char(36)
+  ownerId      String       @db.Char(36)
+  partId       String       @db.Char(36)
+  movementType MovementType
+  quantity     Decimal      @db.Decimal(12, 3)
+  unitCost     Decimal?     @db.Decimal(12, 2)
+  reason       String?      @db.VarChar(255)
+  referenceId  String?      @db.VarChar(100)
+  createdAt    DateTime     @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime     @updatedAt @db.Timestamp(6)
+  deletedAt    DateTime?    @db.Timestamp(6)
+
+  // Relations
+  owner User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  part  SparePart @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, updatedAt])
+  @@index([ownerId, partId])
+  @@map("stock_movements")
+}
+
+model Sale {
+  id            String        @id @db.Char(36)
+  ownerId       String        @db.Char(36)
+  receiptNumber String        @db.VarChar(50)
+  totalAmount   Decimal       @db.Decimal(12, 2)
+  totalProfit   Decimal       @db.Decimal(12, 2)
+  paymentMethod PaymentMethod @default(CASH)
+  customerName  String?       @db.VarChar(100)
+  customerPhone String?       @db.VarChar(20)
+  notes         String?       @db.Text
+  soldAt        DateTime      @db.Timestamp(6)
+  createdAt     DateTime      @default(now()) @db.Timestamp(6)
+  updatedAt     DateTime      @updatedAt @db.Timestamp(6)
+  deletedAt     DateTime?     @db.Timestamp(6)
+
+  // Relations
+  owner User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items SaleItem[]
+
+  @@index([ownerId, updatedAt])
+  @@index([ownerId, soldAt])
+  @@map("sales")
+}
+
+model SaleItem {
+  id                String    @id @db.Char(36)
+  ownerId           String    @db.Char(36)
+  saleId            String    @db.Char(36)
+  partId            String?   @db.Char(36)
+  partNameSnapshot  String    @db.VarChar(200)
+  quantity          Decimal   @db.Decimal(12, 3)
+  unitCostSnapshot  Decimal   @db.Decimal(12, 2)
+  unitPriceSnapshot Decimal   @db.Decimal(12, 2)
+  subtotal          Decimal   @db.Decimal(12, 2)
+  profit            Decimal   @db.Decimal(12, 2)
+  createdAt         DateTime  @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime  @updatedAt @db.Timestamp(6)
+  deletedAt         DateTime? @db.Timestamp(6)
+
+  // Relations
+  owner User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  sale  Sale       @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  part  SparePart? @relation(fields: [partId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId, updatedAt])
+  @@index([saleId])
+  @@map("sale_items")
+}
+
+model Subscription {
+  id        String             @id @db.Char(36)
+  ownerId   String             @db.Char(36)
+  plan      SubscriptionPlan   @default(FREE)
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @db.Timestamp(6)
+  endDate   DateTime?          @db.Timestamp(6)
+  createdAt DateTime           @default(now()) @db.Timestamp(6)
+  updatedAt DateTime           @updatedAt @db.Timestamp(6)
+  deletedAt DateTime?          @db.Timestamp(6)
+
+  // Relations
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, updatedAt])
+  @@map("subscriptions")
+}
