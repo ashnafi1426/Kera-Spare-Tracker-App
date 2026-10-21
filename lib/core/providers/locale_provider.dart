@@ -1,29 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/constants.dart';
 
-/// State notifier managing the active application locale (defaults to Amharic).
-class LocaleNotifier extends Notifier<Locale> {
+import '../constants/constants.dart';
+import '../services/storage_service.dart';
+
+/// Provider for local storage service instance.
+final storageServiceProvider = Provider<LocalStorageService>((ref) {
+  return const LocalStorageService();
+});
+
+/// Initial locale code loaded at application boot, defaults to Amharic ('am').
+final initialLocaleCodeProvider = Provider<String>((ref) {
+  return AppConstants.defaultLocaleCode;
+});
+
+/// Controller managing application locale, persisting choices locally and updating UI live.
+class LocaleController extends Notifier<Locale> {
+  LocalStorageService get _storage => ref.read(storageServiceProvider);
+
   @override
   Locale build() {
-    return const Locale(AppConstants.defaultLocaleCode);
+    final initialCode = ref.watch(initialLocaleCodeProvider);
+    return Locale(initialCode);
   }
 
-  /// Changes the active locale.
-  void setLocale(Locale newLocale) {
+  /// Sets the application locale immediately and persists it.
+  Future<void> setLocale(Locale newLocale) async {
+    if (state == newLocale) return;
     state = newLocale;
+    await _storage.saveLocaleCode(newLocale.languageCode);
   }
 
   /// Toggles between Amharic and English.
-  void toggleLocale() {
+  Future<void> toggleLocale() async {
     if (state.languageCode == AppConstants.defaultLocaleCode) {
-      state = const Locale(AppConstants.englishLocaleCode);
+      await setLocale(const Locale(AppConstants.englishLocaleCode));
     } else {
-      state = const Locale(AppConstants.defaultLocaleCode);
+      await setLocale(const Locale(AppConstants.defaultLocaleCode));
     }
   }
 }
 
-/// Provider exposing the current application locale.
-final localeNotifierProvider =
-    NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
+/// Provider exposing the LocaleController.
+final localeControllerProvider =
+    NotifierProvider<LocaleController, Locale>(LocaleController.new);
+
+/// Backward-compatible alias for localeControllerProvider.
+final localeNotifierProvider = localeControllerProvider;

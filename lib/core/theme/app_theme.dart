@@ -50,6 +50,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'NotoSansEthiopic',
       colorScheme: colorScheme,
       scaffoldBackgroundColor: surfaceColor,
       cardTheme: CardThemeData(

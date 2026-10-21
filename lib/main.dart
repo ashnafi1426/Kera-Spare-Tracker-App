@@ -4,14 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/providers/locale_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load persisted user locale preference
+  const storage = LocalStorageService();
+  final savedLocaleCode = await storage.getSavedLocaleCode();
+
   runApp(
-    const ProviderScope(
-      child: KeraSpareTrackerApp(),
+    ProviderScope(
+      overrides: [
+        if (savedLocaleCode != null)
+          initialLocaleCodeProvider.overrideWithValue(savedLocaleCode),
+      ],
+      child: const KeraSpareTrackerApp(),
     ),
   );
 }
@@ -23,7 +33,7 @@ class KeraSpareTrackerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
-    final locale = ref.watch(localeNotifierProvider);
+    final locale = ref.watch(localeControllerProvider);
 
     return MaterialApp.router(
       title: 'Kera Spare Tracker',

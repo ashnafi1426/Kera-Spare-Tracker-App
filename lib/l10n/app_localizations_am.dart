@@ -17,4 +17,127 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get splashLoading => 'ዕቃዎችን በመጫን ላይ...';
+
+  @override
+  String get offlineBadge => 'ኦፍላይን ይሰራል';
+
+  @override
+  String get save => 'አስቀምጥ';
+
+  @override
+  String get cancel => 'ሰርዝ';
+
+  @override
+  String get delete => 'አጥፋ';
+
+  @override
+  String get edit => 'አስተካክል';
+
+  @override
+  String get search => 'ፈልግ';
+
+  @override
+  String get retry => 'እንደገና ሞክር';
+
+  @override
+  String get filter => 'አጣራ';
+
+  @override
+  String get add => 'አዲስ ጨምር';
+
+  @override
+  String get back => 'ተመለስ';
+
+  @override
+  String get close => 'ዝጋ';
+
+  @override
+  String get confirm => 'አረጋግጥ';
+
+  @override
+  String get refresh => 'አድስ';
+
+  @override
+  String get done => 'ተጠናቋል';
+
+  @override
+  String get navParts => 'መለዋወጫዎች';
+
+  @override
+  String get navSales => 'ሽያጮች';
+
+  @override
+  String get navStock => 'ስቶክ';
+
+  @override
+  String get navReports => 'ሪፖርቶች';
+
+  @override
+  String get navSettings => 'ቅንብሮች';
+
+  @override
+  String get navAdmin => 'አድሚን';
+
+  @override
+  String get phoneRequired => 'ስልክ ቁጥር ማስገባት ግዴታ ነው';
+
+  @override
+  String get phoneInvalid => 'ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ 09... ወይም 07...)';
+
+  @override
+  String get passwordRequired => 'የይለፍ ቃል ማስገባት ግዴታ ነው';
+
+  @override
+  String get passwordTooShort => 'የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት';
+
+  @override
+  String get fieldRequired => 'ይህ ቦታ መሞላት አለበት';
+
+  @override
+  String get quantityRequired => 'ብዛት ማስገባት ግዴታ ነው';
+
+  @override
+  String get quantityPositive => 'ብዛት ከ 0 በላይ መሆን አለበት';
+
+  @override
+  String get priceRequired => 'ዋጋ ማስገባት ግዴታ ነው';
+
+  @override
+  String get priceInvalid => 'ዋጋ 0 ወይም ከዚያ በላይ መሆን አለበት';
+
+  @override
+  String get noDataTitle => 'ምንም መረጃ አልተገኘም';
+
+  @override
+  String get noDataDesc => 'እስካሁን የተመዘገበ መረጃ የለም';
+
+  @override
+  String get noPartsFound => 'ምንም የተመዘገበ መለዋወጫ የለም';
+
+  @override
+  String get noPartsDesc => 'አዲስ መለዋወጫ ዕቃ ለማስገባት \'+\' ይጫኑ';
+
+  @override
+  String get noSalesFound => 'ምንም የሽያጭ መረጃ የለም';
+
+  @override
+  String get noSalesDesc => 'እስካሁን የተከናወነ ሽያጭ አልተመዘገበም';
+
+  @override
+  String get noStockMovements => 'ምንም የስቶክ እንቅስቃሴ አልተገኘም';
+
+  @override
+  String get language => 'ቋንቋ';
+
+  @override
+  String get selectLanguage => 'ቋንቋ ይምረጡ';
+
+  @override
+  String get amharic => 'አማርኛ';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get languageChangedNotice => 'ቋንቋ ወደ አማርኛ ተቀይሯል';
 }

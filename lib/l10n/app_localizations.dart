@@ -98,23 +98,269 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
-  /// No description provided for @appName.
+  /// Application display name
   ///
-  /// In en, this message translates to:
-  /// **'Kera Spare Tracker'**
+  /// In am, this message translates to:
+  /// **'የቄራ መለዋወጫ መከታተያ'**
   String get appName;
 
-  /// No description provided for @appSubtitle.
+  /// Application tagline/subtitle
   ///
-  /// In en, this message translates to:
-  /// **'Spare Parts & Sales Management'**
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ዕቃዎች እና የሽያጭ አስተዳደር'**
   String get appSubtitle;
 
-  /// No description provided for @splashLoading.
+  /// Splash loading message
   ///
-  /// In en, this message translates to:
-  /// **'Loading your inventory...'**
+  /// In am, this message translates to:
+  /// **'ዕቃዎችን በመጫን ላይ...'**
   String get splashLoading;
+
+  /// Offline-first capability badge
+  ///
+  /// In am, this message translates to:
+  /// **'ኦፍላይን ይሰራል'**
+  String get offlineBadge;
+
+  /// Save action button
+  ///
+  /// In am, this message translates to:
+  /// **'አስቀምጥ'**
+  String get save;
+
+  /// Cancel action button
+  ///
+  /// In am, this message translates to:
+  /// **'ሰርዝ'**
+  String get cancel;
+
+  /// Delete action button
+  ///
+  /// In am, this message translates to:
+  /// **'አጥፋ'**
+  String get delete;
+
+  /// Edit action button
+  ///
+  /// In am, this message translates to:
+  /// **'አስተካክል'**
+  String get edit;
+
+  /// Search action button or placeholder
+  ///
+  /// In am, this message translates to:
+  /// **'ፈልግ'**
+  String get search;
+
+  /// Retry action button
+  ///
+  /// In am, this message translates to:
+  /// **'እንደገና ሞክር'**
+  String get retry;
+
+  /// Filter action button
+  ///
+  /// In am, this message translates to:
+  /// **'አጣራ'**
+  String get filter;
+
+  /// Add new item action button
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ጨምር'**
+  String get add;
+
+  /// Back navigation button
+  ///
+  /// In am, this message translates to:
+  /// **'ተመለስ'**
+  String get back;
+
+  /// Close modal or screen button
+  ///
+  /// In am, this message translates to:
+  /// **'ዝጋ'**
+  String get close;
+
+  /// Confirm action button
+  ///
+  /// In am, this message translates to:
+  /// **'አረጋግጥ'**
+  String get confirm;
+
+  /// Refresh data action button
+  ///
+  /// In am, this message translates to:
+  /// **'አድስ'**
+  String get refresh;
+
+  /// Done action button
+  ///
+  /// In am, this message translates to:
+  /// **'ተጠናቋል'**
+  String get done;
+
+  /// Navigation label for parts inventory
+  ///
+  /// In am, this message translates to:
+  /// **'መለዋወጫዎች'**
+  String get navParts;
+
+  /// Navigation label for sales
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጮች'**
+  String get navSales;
+
+  /// Navigation label for stock
+  ///
+  /// In am, this message translates to:
+  /// **'ስቶክ'**
+  String get navStock;
+
+  /// Navigation label for reports
+  ///
+  /// In am, this message translates to:
+  /// **'ሪፖርቶች'**
+  String get navReports;
+
+  /// Navigation label for settings
+  ///
+  /// In am, this message translates to:
+  /// **'ቅንብሮች'**
+  String get navSettings;
+
+  /// Navigation label for admin
+  ///
+  /// In am, this message translates to:
+  /// **'አድሚን'**
+  String get navAdmin;
+
+  /// Validation error when phone is empty
+  ///
+  /// In am, this message translates to:
+  /// **'ስልክ ቁጥር ማስገባት ግዴታ ነው'**
+  String get phoneRequired;
+
+  /// Validation error for invalid Ethiopian phone number
+  ///
+  /// In am, this message translates to:
+  /// **'ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ 09... ወይም 07...)'**
+  String get phoneInvalid;
+
+  /// Validation error when password is empty
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ማስገባት ግዴታ ነው'**
+  String get passwordRequired;
+
+  /// Validation error when password is under 6 characters
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት'**
+  String get passwordTooShort;
+
+  /// Generic required field validation error
+  ///
+  /// In am, this message translates to:
+  /// **'ይህ ቦታ መሞላት አለበት'**
+  String get fieldRequired;
+
+  /// Validation error when quantity is empty
+  ///
+  /// In am, this message translates to:
+  /// **'ብዛት ማስገባት ግዴታ ነው'**
+  String get quantityRequired;
+
+  /// Validation error when quantity is zero or negative
+  ///
+  /// In am, this message translates to:
+  /// **'ብዛት ከ 0 በላይ መሆን አለበት'**
+  String get quantityPositive;
+
+  /// Validation error when price is empty
+  ///
+  /// In am, this message translates to:
+  /// **'ዋጋ ማስገባት ግዴታ ነው'**
+  String get priceRequired;
+
+  /// Validation error when price is negative
+  ///
+  /// In am, this message translates to:
+  /// **'ዋጋ 0 ወይም ከዚያ በላይ መሆን አለበት'**
+  String get priceInvalid;
+
+  /// Empty state title when list is empty
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም መረጃ አልተገኘም'**
+  String get noDataTitle;
+
+  /// Empty state description
+  ///
+  /// In am, this message translates to:
+  /// **'እስካሁን የተመዘገበ መረጃ የለም'**
+  String get noDataDesc;
+
+  /// Empty state title for parts catalog
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የተመዘገበ መለዋወጫ የለም'**
+  String get noPartsFound;
+
+  /// Empty state instruction for adding first part
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ መለዋወጫ ዕቃ ለማስገባት \'+\' ይጫኑ'**
+  String get noPartsDesc;
+
+  /// Empty state title for sales list
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የሽያጭ መረጃ የለም'**
+  String get noSalesFound;
+
+  /// Empty state description for sales
+  ///
+  /// In am, this message translates to:
+  /// **'እስካሁን የተከናወነ ሽያጭ አልተመዘገበም'**
+  String get noSalesDesc;
+
+  /// Empty state title for stock ledger
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የስቶክ እንቅስቃሴ አልተገኘም'**
+  String get noStockMovements;
+
+  /// Language label
+  ///
+  /// In am, this message translates to:
+  /// **'ቋንቋ'**
+  String get language;
+
+  /// Prompt to select application language
+  ///
+  /// In am, this message translates to:
+  /// **'ቋንቋ ይምረጡ'**
+  String get selectLanguage;
+
+  /// Amharic language name
+  ///
+  /// In am, this message translates to:
+  /// **'አማርኛ'**
+  String get amharic;
+
+  /// English language name
+  ///
+  /// In am, this message translates to:
+  /// **'English'**
+  String get english;
+
+  /// Notice shown when language changes
+  ///
+  /// In am, this message translates to:
+  /// **'ቋንቋ ወደ አማርኛ ተቀይሯል'**
+  String get languageChangedNotice;
 }
 
 class _AppLocalizationsDelegate

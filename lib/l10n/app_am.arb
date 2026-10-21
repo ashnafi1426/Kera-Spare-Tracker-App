@@ -1,6 +1,223 @@
 {
   "@@locale": "am",
+
   "appName": "የቄራ መለዋወጫ መከታተያ",
+  "@appName": {
+    "description": "Application display name"
+  },
+
   "appSubtitle": "የመለዋወጫ ዕቃዎች እና የሽያጭ አስተዳደር",
-  "splashLoading": "ዕቃዎችን በመጫን ላይ..."
+  "@appSubtitle": {
+    "description": "Application tagline/subtitle"
+  },
+
+  "splashLoading": "ዕቃዎችን በመጫን ላይ...",
+  "@splashLoading": {
+    "description": "Splash loading message"
+  },
+
+  "offlineBadge": "ኦፍላይን ይሰራል",
+  "@offlineBadge": {
+    "description": "Offline-first capability badge"
+  },
+
+  "save": "አስቀምጥ",
+  "@save": {
+    "description": "Save action button"
+  },
+
+  "cancel": "ሰርዝ",
+  "@cancel": {
+    "description": "Cancel action button"
+  },
+
+  "delete": "አጥፋ",
+  "@delete": {
+    "description": "Delete action button"
+  },
+
+  "edit": "አስተካክል",
+  "@edit": {
+    "description": "Edit action button"
+  },
+
+  "search": "ፈልግ",
+  "@search": {
+    "description": "Search action button or placeholder"
+  },
+
+  "retry": "እንደገና ሞክር",
+  "@retry": {
+    "description": "Retry action button"
+  },
+
+  "filter": "አጣራ",
+  "@filter": {
+    "description": "Filter action button"
+  },
+
+  "add": "አዲስ ጨምር",
+  "@add": {
+    "description": "Add new item action button"
+  },
+
+  "back": "ተመለስ",
+  "@back": {
+    "description": "Back navigation button"
+  },
+
+  "close": "ዝጋ",
+  "@close": {
+    "description": "Close modal or screen button"
+  },
+
+  "confirm": "አረጋግጥ",
+  "@confirm": {
+    "description": "Confirm action button"
+  },
+
+  "refresh": "አድስ",
+  "@refresh": {
+    "description": "Refresh data action button"
+  },
+
+  "done": "ተጠናቋል",
+  "@done": {
+    "description": "Done action button"
+  },
+
+  "navParts": "መለዋወጫዎች",
+  "@navParts": {
+    "description": "Navigation label for parts inventory"
+  },
+
+  "navSales": "ሽያጮች",
+  "@navSales": {
+    "description": "Navigation label for sales"
+  },
+
+  "navStock": "ስቶክ",
+  "@navStock": {
+    "description": "Navigation label for stock"
+  },
+
+  "navReports": "ሪፖርቶች",
+  "@navReports": {
+    "description": "Navigation label for reports"
+  },
+
+  "navSettings": "ቅንብሮች",
+  "@navSettings": {
+    "description": "Navigation label for settings"
+  },
+
+  "navAdmin": "አድሚን",
+  "@navAdmin": {
+    "description": "Navigation label for admin"
+  },
+
+  "phoneRequired": "ስልክ ቁጥር ማስገባት ግዴታ ነው",
+  "@phoneRequired": {
+    "description": "Validation error when phone is empty"
+  },
+
+  "phoneInvalid": "ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ 09... ወይም 07...)",
+  "@phoneInvalid": {
+    "description": "Validation error for invalid Ethiopian phone number"
+  },
+
+  "passwordRequired": "የይለፍ ቃል ማስገባት ግዴታ ነው",
+  "@passwordRequired": {
+    "description": "Validation error when password is empty"
+  },
+
+  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት",
+  "@passwordTooShort": {
+    "description": "Validation error when password is under 6 characters"
+  },
+
+  "fieldRequired": "ይህ ቦታ መሞላት አለበት",
+  "@fieldRequired": {
+    "description": "Generic required field validation error"
+  },
+
+  "quantityRequired": "ብዛት ማስገባት ግዴታ ነው",
+  "@quantityRequired": {
+    "description": "Validation error when quantity is empty"
+  },
+
+  "quantityPositive": "ብዛት ከ 0 በላይ መሆን አለበት",
+  "@quantityPositive": {
+    "description": "Validation error when quantity is zero or negative"
+  },
+
+  "priceRequired": "ዋጋ ማስገባት ግዴታ ነው",
+  "@priceRequired": {
+    "description": "Validation error when price is empty"
+  },
+
+  "priceInvalid": "ዋጋ 0 ወይም ከዚያ በላይ መሆን አለበት",
+  "@priceInvalid": {
+    "description": "Validation error when price is negative"
+  },
+
+  "noDataTitle": "ምንም መረጃ አልተገኘም",
+  "@noDataTitle": {
+    "description": "Empty state title when list is empty"
+  },
+
+  "noDataDesc": "እስካሁን የተመዘገበ መረጃ የለም",
+  "@noDataDesc": {
+    "description": "Empty state description"
+  },
+
+  "noPartsFound": "ምንም የተመዘገበ መለዋወጫ የለም",
+  "@noPartsFound": {
+    "description": "Empty state title for parts catalog"
+  },
+
+  "noPartsDesc": "አዲስ መለዋወጫ ዕቃ ለማስገባት '+' ይጫኑ",
+  "@noPartsDesc": {
+    "description": "Empty state instruction for adding first part"
+  },
+
+  "noSalesFound": "ምንም የሽያጭ መረጃ የለም",
+  "@noSalesFound": {
+    "description": "Empty state title for sales list"
+  },
+
+  "noSalesDesc": "እስካሁን የተከናወነ ሽያጭ አልተመዘገበም",
+  "@noSalesDesc": {
+    "description": "Empty state description for sales"
+  },
+
+  "noStockMovements": "ምንም የስቶክ እንቅስቃሴ አልተገኘም",
+  "@noStockMovements": {
+    "description": "Empty state title for stock ledger"
+  },
+
+  "language": "ቋንቋ",
+  "@language": {
+    "description": "Language label"
+  },
+
+  "selectLanguage": "ቋንቋ ይምረጡ",
+  "@selectLanguage": {
+    "description": "Prompt to select application language"
+  },
+
+  "amharic": "አማርኛ",
+  "@amharic": {
+    "description": "Amharic language name"
+  },
+
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+
+  "languageChangedNotice": "ቋንቋ ወደ አማርኛ ተቀይሯል",
+  "@languageChangedNotice": {
+    "description": "Notice shown when language changes"
+  }
 }

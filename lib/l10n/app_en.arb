@@ -1,6 +1,53 @@
 {
   "@@locale": "en",
+
   "appName": "Kera Spare Tracker",
   "appSubtitle": "Spare Parts & Sales Management",
-  "splashLoading": "Loading your inventory..."
+  "splashLoading": "Loading your inventory...",
+  "offlineBadge": "Offline-First",
+
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "search": "Search",
+  "retry": "Retry",
+  "filter": "Filter",
+  "add": "Add New",
+  "back": "Back",
+  "close": "Close",
+  "confirm": "Confirm",
+  "refresh": "Refresh",
+  "done": "Done",
+
+  "navParts": "Parts",
+  "navSales": "Sales",
+  "navStock": "Stock",
+  "navReports": "Reports",
+  "navSettings": "Settings",
+  "navAdmin": "Admin",
+
+  "phoneRequired": "Phone number is required",
+  "phoneInvalid": "Enter a valid Ethiopian phone number (e.g. 09... or 07...)",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "fieldRequired": "This field is required",
+  "quantityRequired": "Quantity is required",
+  "quantityPositive": "Quantity must be greater than 0",
+  "priceRequired": "Price is required",
+  "priceInvalid": "Price must be 0 or greater",
+
+  "noDataTitle": "No Data Found",
+  "noDataDesc": "There is no recorded data yet",
+  "noPartsFound": "No Parts Found",
+  "noPartsDesc": "Tap '+' to add your first spare part",
+  "noSalesFound": "No Sales Found",
+  "noSalesDesc": "No sales transactions have been recorded yet",
+  "noStockMovements": "No Stock Movements Found",
+
+  "language": "Language",
+  "selectLanguage": "Select Language",
+  "amharic": "አማርኛ (Amharic)",
+  "english": "English",
+  "languageChangedNotice": "Language switched to English"
 }
