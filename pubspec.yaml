@@ -40,6 +40,7 @@ dependencies:
 
   # Remote Backend & Sync
   supabase_flutter: ^2.18.3
+  cryptography: ^2.9.0
 
 dev_dependencies:
   flutter_test:

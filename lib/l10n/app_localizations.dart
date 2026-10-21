@@ -361,6 +361,174 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ቋንቋ ወደ አማርኛ ተቀይሯል'**
   String get languageChangedNotice;
+
+  /// Log In button
+  ///
+  /// In am, this message translates to:
+  /// **'ግባ'**
+  String get login;
+
+  /// Register button
+  ///
+  /// In am, this message translates to:
+  /// **'ይመዝገቡ'**
+  String get register;
+
+  /// Log Out button
+  ///
+  /// In am, this message translates to:
+  /// **'ውጣ'**
+  String get logout;
+
+  /// Logout confirmation title
+  ///
+  /// In am, this message translates to:
+  /// **'ከመተግበሪያው መውጣት ይፈልጋሉ?'**
+  String get logoutConfirmTitle;
+
+  /// Logout confirmation message
+  ///
+  /// In am, this message translates to:
+  /// **'እንደገና ለመግባት ስልክ ቁጥርዎን እና የይለፍ ቃልዎን ማስገባት ያስፈልግዎታል::'**
+  String get logoutConfirmMessage;
+
+  /// Phone number label
+  ///
+  /// In am, this message translates to:
+  /// **'ስልክ ቁጥር'**
+  String get phoneNumber;
+
+  /// Phone number hint
+  ///
+  /// In am, this message translates to:
+  /// **'09XXXXXXXX ወይም 07XXXXXXXX'**
+  String get phoneNumberHint;
+
+  /// Business name label
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ ስም'**
+  String get businessName;
+
+  /// Business name hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ ቄራ መለዋወጫ መደብር'**
+  String get businessNameHint;
+
+  /// Business name validation error
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ ስም ማስገባት ግዴታ ነው'**
+  String get businessNameRequired;
+
+  /// Password label
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል'**
+  String get password;
+
+  /// Password hint
+  ///
+  /// In am, this message translates to:
+  /// **'ቢያንስ 6 ፊደላት ወይም ቁጥሮች'**
+  String get passwordHint;
+
+  /// Confirm password label
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ያረጋግጡ'**
+  String get confirmPassword;
+
+  /// Passwords mismatch validation error
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃሎች አይመሳሰሉም'**
+  String get passwordsDoNotMatch;
+
+  /// Prompt for users with existing accounts
+  ///
+  /// In am, this message translates to:
+  /// **'ቀደም ሲል መለያ አለዎት? ይግቡ'**
+  String get alreadyHaveAccount;
+
+  /// Prompt for new users to register
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ነዎት? ይመዝገቡ'**
+  String get dontHaveAccount;
+
+  /// Login screen title
+  ///
+  /// In am, this message translates to:
+  /// **'ወደ መለያዎ ይግቡ'**
+  String get loginTitle;
+
+  /// Login screen subtitle
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ዕቃዎችዎን እና ሽያጭዎን ለማስተዳደር ይግቡ'**
+  String get loginSubtitle;
+
+  /// Register screen title
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ የንግድ መለያ ይክፈቱ'**
+  String get registerTitle;
+
+  /// Register screen subtitle
+  ///
+  /// In am, this message translates to:
+  /// **'በቀላሉ እና ያለ ኢንተርኔት ዕቃዎን ይከታተሉ'**
+  String get registerSubtitle;
+
+  /// Home title
+  ///
+  /// In am, this message translates to:
+  /// **'ዋና ገጽ'**
+  String get homeTitle;
+
+  /// Welcome message
+  ///
+  /// In am, this message translates to:
+  /// **'እንኳን ደህና መጡ'**
+  String get welcomeUser;
+
+  /// Bottom nav inventory tab
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎች'**
+  String get inventoryTab;
+
+  /// Bottom nav sales tab
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ'**
+  String get salesTab;
+
+  /// Bottom nav reports tab
+  ///
+  /// In am, this message translates to:
+  /// **'ሪፖርት'**
+  String get reportsTab;
+
+  /// Bottom nav settings tab
+  ///
+  /// In am, this message translates to:
+  /// **'ቅንብሮች'**
+  String get settingsTab;
+
+  /// Business profile section header
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ መገለጫ'**
+  String get businessProfile;
+
+  /// Offline data indicator notice
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::'**
+  String get offlineStatusNotice;
 }
 
 class _AppLocalizationsDelegate

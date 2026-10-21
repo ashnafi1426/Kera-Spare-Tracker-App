@@ -219,5 +219,145 @@
   "languageChangedNotice": "ቋንቋ ወደ አማርኛ ተቀይሯል",
   "@languageChangedNotice": {
     "description": "Notice shown when language changes"
+  },
+
+  "login": "ግባ",
+  "@login": {
+    "description": "Log In button"
+  },
+
+  "register": "ይመዝገቡ",
+  "@register": {
+    "description": "Register button"
+  },
+
+  "logout": "ውጣ",
+  "@logout": {
+    "description": "Log Out button"
+  },
+
+  "logoutConfirmTitle": "ከመተግበሪያው መውጣት ይፈልጋሉ?",
+  "@logoutConfirmTitle": {
+    "description": "Logout confirmation title"
+  },
+
+  "logoutConfirmMessage": "እንደገና ለመግባት ስልክ ቁጥርዎን እና የይለፍ ቃልዎን ማስገባት ያስፈልግዎታል::",
+  "@logoutConfirmMessage": {
+    "description": "Logout confirmation message"
+  },
+
+  "phoneNumber": "ስልክ ቁጥር",
+  "@phoneNumber": {
+    "description": "Phone number label"
+  },
+
+  "phoneNumberHint": "09XXXXXXXX ወይም 07XXXXXXXX",
+  "@phoneNumberHint": {
+    "description": "Phone number hint"
+  },
+
+  "businessName": "የንግድ ስም",
+  "@businessName": {
+    "description": "Business name label"
+  },
+
+  "businessNameHint": "ለምሳሌ ቄራ መለዋወጫ መደብር",
+  "@businessNameHint": {
+    "description": "Business name hint"
+  },
+
+  "businessNameRequired": "የንግድ ስም ማስገባት ግዴታ ነው",
+  "@businessNameRequired": {
+    "description": "Business name validation error"
+  },
+
+  "password": "የይለፍ ቃል",
+  "@password": {
+    "description": "Password label"
+  },
+
+  "passwordHint": "ቢያንስ 6 ፊደላት ወይም ቁጥሮች",
+  "@passwordHint": {
+    "description": "Password hint"
+  },
+
+  "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+  "@confirmPassword": {
+    "description": "Confirm password label"
+  },
+
+  "passwordsDoNotMatch": "የይለፍ ቃሎች አይመሳሰሉም",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords mismatch validation error"
+  },
+
+  "alreadyHaveAccount": "ቀደም ሲል መለያ አለዎት? ይግቡ",
+  "@alreadyHaveAccount": {
+    "description": "Prompt for users with existing accounts"
+  },
+
+  "dontHaveAccount": "አዲስ ነዎት? ይመዝገቡ",
+  "@dontHaveAccount": {
+    "description": "Prompt for new users to register"
+  },
+
+  "loginTitle": "ወደ መለያዎ ይግቡ",
+  "@loginTitle": {
+    "description": "Login screen title"
+  },
+
+  "loginSubtitle": "የመለዋወጫ ዕቃዎችዎን እና ሽያጭዎን ለማስተዳደር ይግቡ",
+  "@loginSubtitle": {
+    "description": "Login screen subtitle"
+  },
+
+  "registerTitle": "አዲስ የንግድ መለያ ይክፈቱ",
+  "@registerTitle": {
+    "description": "Register screen title"
+  },
+
+  "registerSubtitle": "በቀላሉ እና ያለ ኢንተርኔት ዕቃዎን ይከታተሉ",
+  "@registerSubtitle": {
+    "description": "Register screen subtitle"
+  },
+
+  "homeTitle": "ዋና ገጽ",
+  "@homeTitle": {
+    "description": "Home title"
+  },
+
+  "welcomeUser": "እንኳን ደህና መጡ",
+  "@welcomeUser": {
+    "description": "Welcome message"
+  },
+
+  "inventoryTab": "ዕቃዎች",
+  "@inventoryTab": {
+    "description": "Bottom nav inventory tab"
+  },
+
+  "salesTab": "ሽያጭ",
+  "@salesTab": {
+    "description": "Bottom nav sales tab"
+  },
+
+  "reportsTab": "ሪፖርት",
+  "@reportsTab": {
+    "description": "Bottom nav reports tab"
+  },
+
+  "settingsTab": "ቅንብሮች",
+  "@settingsTab": {
+    "description": "Bottom nav settings tab"
+  },
+
+  "businessProfile": "የንግድ መገለጫ",
+  "@businessProfile": {
+    "description": "Business profile section header"
+  },
+
+  "offlineStatusNotice": "ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::",
+  "@offlineStatusNotice": {
+    "description": "Offline data indicator notice"
   }
 }

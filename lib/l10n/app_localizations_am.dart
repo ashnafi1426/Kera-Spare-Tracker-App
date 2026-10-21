@@ -140,4 +140,89 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get languageChangedNotice => 'ቋንቋ ወደ አማርኛ ተቀይሯል';
+
+  @override
+  String get login => 'ግባ';
+
+  @override
+  String get register => 'ይመዝገቡ';
+
+  @override
+  String get logout => 'ውጣ';
+
+  @override
+  String get logoutConfirmTitle => 'ከመተግበሪያው መውጣት ይፈልጋሉ?';
+
+  @override
+  String get logoutConfirmMessage =>
+      'እንደገና ለመግባት ስልክ ቁጥርዎን እና የይለፍ ቃልዎን ማስገባት ያስፈልግዎታል::';
+
+  @override
+  String get phoneNumber => 'ስልክ ቁጥር';
+
+  @override
+  String get phoneNumberHint => '09XXXXXXXX ወይም 07XXXXXXXX';
+
+  @override
+  String get businessName => 'የንግድ ስም';
+
+  @override
+  String get businessNameHint => 'ለምሳሌ ቄራ መለዋወጫ መደብር';
+
+  @override
+  String get businessNameRequired => 'የንግድ ስም ማስገባት ግዴታ ነው';
+
+  @override
+  String get password => 'የይለፍ ቃል';
+
+  @override
+  String get passwordHint => 'ቢያንስ 6 ፊደላት ወይም ቁጥሮች';
+
+  @override
+  String get confirmPassword => 'የይለፍ ቃል ያረጋግጡ';
+
+  @override
+  String get passwordsDoNotMatch => 'የይለፍ ቃሎች አይመሳሰሉም';
+
+  @override
+  String get alreadyHaveAccount => 'ቀደም ሲል መለያ አለዎት? ይግቡ';
+
+  @override
+  String get dontHaveAccount => 'አዲስ ነዎት? ይመዝገቡ';
+
+  @override
+  String get loginTitle => 'ወደ መለያዎ ይግቡ';
+
+  @override
+  String get loginSubtitle => 'የመለዋወጫ ዕቃዎችዎን እና ሽያጭዎን ለማስተዳደር ይግቡ';
+
+  @override
+  String get registerTitle => 'አዲስ የንግድ መለያ ይክፈቱ';
+
+  @override
+  String get registerSubtitle => 'በቀላሉ እና ያለ ኢንተርኔት ዕቃዎን ይከታተሉ';
+
+  @override
+  String get homeTitle => 'ዋና ገጽ';
+
+  @override
+  String get welcomeUser => 'እንኳን ደህና መጡ';
+
+  @override
+  String get inventoryTab => 'ዕቃዎች';
+
+  @override
+  String get salesTab => 'ሽያጭ';
+
+  @override
+  String get reportsTab => 'ሪፖርት';
+
+  @override
+  String get settingsTab => 'ቅንብሮች';
+
+  @override
+  String get businessProfile => 'የንግድ መገለጫ';
+
+  @override
+  String get offlineStatusNotice => 'ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::';
 }

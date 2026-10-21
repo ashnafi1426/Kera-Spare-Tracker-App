@@ -141,4 +141,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageChangedNotice => 'Language switched to English';
+
+  @override
+  String get login => 'Log In';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get logout => 'Log Out';
+
+  @override
+  String get logoutConfirmTitle => 'Log out of your account?';
+
+  @override
+  String get logoutConfirmMessage =>
+      'You will need to enter your phone number and password to log in again.';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get phoneNumberHint => '09XXXXXXXX or 07XXXXXXXX';
+
+  @override
+  String get businessName => 'Business Name';
+
+  @override
+  String get businessNameHint => 'e.g. Kera Spare Parts Store';
+
+  @override
+  String get businessNameRequired => 'Business name is required';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get passwordHint => 'At least 6 characters';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Log In';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? Register';
+
+  @override
+  String get loginTitle => 'Welcome Back';
+
+  @override
+  String get loginSubtitle => 'Manage your spare parts inventory and sales';
+
+  @override
+  String get registerTitle => 'Create Business Account';
+
+  @override
+  String get registerSubtitle => 'Track parts and sales seamlessly offline';
+
+  @override
+  String get homeTitle => 'Home';
+
+  @override
+  String get welcomeUser => 'Welcome';
+
+  @override
+  String get inventoryTab => 'Inventory';
+
+  @override
+  String get salesTab => 'Sales';
+
+  @override
+  String get reportsTab => 'Reports';
+
+  @override
+  String get settingsTab => 'Settings';
+
+  @override
+  String get businessProfile => 'Business Profile';
+
+  @override
+  String get offlineStatusNotice =>
+      'All data is securely saved on your device.';
 }
