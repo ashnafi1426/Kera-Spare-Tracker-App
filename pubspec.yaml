@@ -42,6 +42,7 @@ dependencies:
   fl_chart: ^1.2.0
 
   # Remote Backend & Sync
+  dio: ^5.8.0+1
   supabase_flutter: ^2.18.3
   cryptography: ^2.9.0
 

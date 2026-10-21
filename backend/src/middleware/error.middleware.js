@@ -21,11 +21,14 @@ export function errorHandler(err, req, res, next) {
 
   // Handle Prisma known errors
   if (err.code === 'P2002') {
+    const isPhone = Array.isArray(err.meta?.target) && err.meta.target.includes('phoneNumber');
     return res.status(409).json({
       success: false,
       error: {
-        code: 'DUPLICATE_ENTRY',
-        message: 'A record with this unique identifier already exists.',
+        code: isPhone ? 'PHONE_TAKEN' : 'DUPLICATE_ENTRY',
+        message: isPhone
+          ? 'A business owner with this phone number is already registered.'
+          : 'A record with this unique identifier already exists.',
         details: err.meta,
       },
     });

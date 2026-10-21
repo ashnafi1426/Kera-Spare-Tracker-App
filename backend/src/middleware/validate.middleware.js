@@ -1,4 +1,4 @@
-import { BadRequestError } from '../utils/errors.js';
+import { ValidationError } from '../utils/errors.js';
 
 export function validate(schema) {
   return (req, res, next) => {
@@ -21,7 +21,7 @@ export function validate(schema) {
           field: e.path.join('.').replace(/^(body|query|params)\./, ''),
           message: e.message,
         }));
-        return next(new BadRequestError('Validation failed', details));
+        return next(new ValidationError('Validation failed', details));
       }
       next(err);
     }

@@ -1,9 +1,8 @@
 import bcrypt from 'bcryptjs';
-
-const SALT_ROUNDS = 10;
+import { config } from '../config/env.js';
 
 export async function hashPassword(plainPassword) {
-  return bcrypt.hash(plainPassword, SALT_ROUNDS);
+  return bcrypt.hash(plainPassword, config.bcryptSaltRounds);
 }
 
 export async function comparePassword(plainPassword, hashedPassword) {

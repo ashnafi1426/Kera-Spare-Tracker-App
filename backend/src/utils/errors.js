@@ -15,26 +15,62 @@ export class BadRequestError extends AppError {
   }
 }
 
+export class ValidationError extends AppError {
+  constructor(message = 'Validation failed', details = null) {
+    super(message, 400, 'VALIDATION_ERROR', details);
+  }
+}
+
 export class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized') {
-    super(message, 401, 'UNAUTHORIZED');
+  constructor(message = 'Unauthorized', code = 'UNAUTHORIZED') {
+    super(message, 401, code);
+  }
+}
+
+export class InvalidCredentialsError extends AppError {
+  constructor(message = 'Invalid phone number or password') {
+    super(message, 401, 'INVALID_CREDENTIALS');
+  }
+}
+
+export class TokenExpiredError extends AppError {
+  constructor(message = 'Authentication token has expired') {
+    super(message, 401, 'TOKEN_EXPIRED');
+  }
+}
+
+export class InvalidTokenError extends AppError {
+  constructor(message = 'Invalid or revoked token') {
+    super(message, 401, 'INVALID_TOKEN');
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message = 'Forbidden') {
-    super(message, 403, 'FORBIDDEN');
+  constructor(message = 'Forbidden', code = 'FORBIDDEN') {
+    super(message, 403, code);
+  }
+}
+
+export class AccountSuspendedError extends AppError {
+  constructor(message = 'Account is suspended. Please contact system administrator.') {
+    super(message, 403, 'ACCOUNT_SUSPENDED');
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = 'Resource not found') {
-    super(message, 404, 'NOT_FOUND');
+  constructor(message = 'Resource not found', code = 'NOT_FOUND') {
+    super(message, 404, code);
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message = 'Resource already exists') {
-    super(message, 409, 'CONFLICT');
+  constructor(message = 'Resource already exists', code = 'CONFLICT') {
+    super(message, 409, code);
+  }
+}
+
+export class PhoneTakenError extends AppError {
+  constructor(message = 'A business account with this phone number already exists.') {
+    super(message, 409, 'PHONE_TAKEN');
   }
 }

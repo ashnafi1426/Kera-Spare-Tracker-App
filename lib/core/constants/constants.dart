@@ -56,9 +56,16 @@ class AppConstants {
 
   /// Local storage and secure storage keys.
   static const String secureStorageTokenKey = 'kera_auth_token';
+  static const String secureStorageRefreshTokenKey = 'kera_refresh_token';
   static const String secureStorageOwnerIdKey = 'kera_owner_id';
   static const String localePreferenceKey = 'kera_user_locale';
   static const String themeModePreferenceKey = 'kera_user_theme_mode';
+
+  /// API Configuration loaded from --dart-define
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:7000/api/v1',
+  );
 
   /// Touch targets for low-end Android mobile accessibility.
   static const double minTouchTargetSize = 48.0;

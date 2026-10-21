@@ -350,7 +350,13 @@
       "error": { "type": "String" }
     }
   },
-  "saveToStorage": "Save to Storage"
+  "saveToStorage": "Save to Storage",
+  "authRequiresInternetNotice": "An active internet connection is required for registration and the first login. Once logged in, the app works 100% offline.",
+  "authWrongPassword": "Incorrect phone number or password",
+  "authPhoneTaken": "This phone number is already registered",
+  "authNoInternet": "No internet connection. Please connect to the internet to authenticate.",
+  "authAccountSuspended": "Your business account has been suspended. Please contact the administrator.",
+  "authServerError": "Server error occurred. Please try again later."
 }
 
 

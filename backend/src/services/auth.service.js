@@ -1,22 +1,29 @@
 import prisma from '../config/db.js';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword, comparePassword } from '../utils/password.js';
-import { signJwt } from '../utils/jwt.js';
-import { ConflictError, UnauthorizedError, NotFoundError, BadRequestError } from '../utils/errors.js';
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
+import {
+  PhoneTakenError,
+  InvalidCredentialsError,
+  AccountSuspendedError,
+  TokenExpiredError,
+  InvalidTokenError,
+  NotFoundError,
+} from '../utils/errors.js';
+import crypto from 'crypto';
+
+// Hash helper for storing refresh tokens securely in database
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 export async function registerOwner({ phoneNumber, businessName, password, language = 'AMHARIC' }) {
-  // Normalize phone number (standard Ethiopian format e.g. +251...)
-  let formattedPhone = phoneNumber.trim();
-  if (formattedPhone.startsWith('09') || formattedPhone.startsWith('07')) {
-    formattedPhone = `+251${formattedPhone.substring(1)}`;
-  }
-
   const existing = await prisma.user.findUnique({
-    where: { phoneNumber: formattedPhone },
+    where: { phoneNumber },
   });
 
   if (existing) {
-    throw new ConflictError('A business account with this phone number already exists.');
+    throw new PhoneTakenError();
   }
 
   const passwordHash = await hashPassword(password);
@@ -25,7 +32,7 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
   const user = await prisma.user.create({
     data: {
       id: userId,
-      phoneNumber: formattedPhone,
+      phoneNumber,
       businessName,
       passwordHash,
       role: 'OWNER',
@@ -43,38 +50,63 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
     },
   });
 
-  const token = signJwt({ id: user.id, role: user.role, status: user.status });
+  // Issue access & refresh tokens
+  const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
+  const refreshToken = signRefreshToken({ id: user.id });
 
-  return { user, token };
+  // Store hashed refresh token in database (valid for 30 days)
+  const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.refreshToken.create({
+    data: {
+      id: uuidv4(),
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    },
+  });
+
+  return { user, accessToken, refreshToken };
 }
 
 export async function loginUser({ phoneNumber, password }) {
-  let formattedPhone = phoneNumber.trim();
-  if (formattedPhone.startsWith('09') || formattedPhone.startsWith('07')) {
-    formattedPhone = `+251${formattedPhone.substring(1)}`;
-  }
-
   const user = await prisma.user.findFirst({
     where: {
-      phoneNumber: formattedPhone,
+      phoneNumber,
       deletedAt: null,
     },
   });
 
   if (!user) {
-    throw new UnauthorizedError('Invalid phone number or password.');
+    throw new InvalidCredentialsError();
   }
 
   const isPasswordValid = await comparePassword(password, user.passwordHash);
   if (!isPasswordValid) {
-    throw new UnauthorizedError('Invalid phone number or password.');
+    throw new InvalidCredentialsError();
   }
 
   if (user.status === 'SUSPENDED') {
-    throw new UnauthorizedError('Account is suspended. Please contact system administrator.');
+    throw new AccountSuspendedError();
   }
 
-  const token = signJwt({ id: user.id, role: user.role, status: user.status });
+  // Generate tokens
+  const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
+  const refreshToken = signRefreshToken({ id: user.id });
+
+  // Store hashed refresh token
+  const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.refreshToken.create({
+    data: {
+      id: uuidv4(),
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    },
+  });
 
   return {
     user: {
@@ -85,8 +117,110 @@ export async function loginUser({ phoneNumber, password }) {
       status: user.status,
       language: user.language,
     },
-    token,
+    accessToken,
+    refreshToken,
   };
+}
+
+export async function refreshUserToken({ refreshToken }) {
+  if (!refreshToken) {
+    throw new InvalidTokenError('Refresh token required');
+  }
+
+  // 1. Verify token signature
+  const verifyResult = verifyRefreshToken(refreshToken);
+  if (!verifyResult.valid) {
+    if (verifyResult.expired) {
+      throw new TokenExpiredError('Refresh token has expired. Please log in again.');
+    }
+    throw new InvalidTokenError('Invalid refresh token.');
+  }
+
+  const userId = verifyResult.decoded.id;
+  const tokenHash = hashToken(refreshToken);
+
+  // 2. Check token in database
+  const storedToken = await prisma.refreshToken.findFirst({
+    where: {
+      userId,
+      tokenHash,
+      revokedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+  });
+
+  if (!storedToken) {
+    throw new InvalidTokenError('Refresh token revoked or not found');
+  }
+
+  // 3. Verify user is still active
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+  });
+
+  if (!user) {
+    throw new InvalidTokenError('User not found');
+  }
+
+  if (user.status === 'SUSPENDED') {
+    throw new AccountSuspendedError();
+  }
+
+  // 4. Revoke old refresh token (Token rotation)
+  await prisma.refreshToken.update({
+    where: { id: storedToken.id },
+    data: { revokedAt: new Date() },
+  });
+
+  // 5. Issue new access token and rotated refresh token
+  const newAccessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
+  const newRefreshToken = signRefreshToken({ id: user.id });
+
+  const newTokenHash = hashToken(newRefreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.refreshToken.create({
+    data: {
+      id: uuidv4(),
+      userId: user.id,
+      tokenHash: newTokenHash,
+      expiresAt,
+    },
+  });
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+}
+
+export async function logoutUser(userId, refreshToken) {
+  if (refreshToken) {
+    const tokenHash = hashToken(refreshToken);
+    await prisma.refreshToken.updateMany({
+      where: {
+        userId,
+        tokenHash,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  } else {
+    // Revoke all active tokens for this user
+    await prisma.refreshToken.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  }
+
+  return { message: 'Logged out successfully' };
 }
 
 export async function changeUserPassword(userId, { currentPassword, newPassword }) {
@@ -100,7 +234,7 @@ export async function changeUserPassword(userId, { currentPassword, newPassword 
 
   const isValid = await comparePassword(currentPassword, user.passwordHash);
   if (!isValid) {
-    throw new BadRequestError('Current password is incorrect.');
+    throw new InvalidCredentialsError('Current password is incorrect.');
   }
 
   const newHash = await hashPassword(newPassword);
@@ -109,7 +243,13 @@ export async function changeUserPassword(userId, { currentPassword, newPassword 
     data: { passwordHash: newHash },
   });
 
-  return { message: 'Password updated successfully.' };
+  // Revoke all refresh tokens on password change for security
+  await prisma.refreshToken.updateMany({
+    where: { userId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+
+  return { message: 'Password updated successfully. Please log in with new password.' };
 }
 
 export async function getUserProfile(userId) {

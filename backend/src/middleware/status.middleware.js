@@ -1,4 +1,4 @@
-import { ForbiddenError, UnauthorizedError } from '../utils/errors.js';
+import { AccountSuspendedError, UnauthorizedError } from '../utils/errors.js';
 
 export function requireActive(req, res, next) {
   if (!req.user) {
@@ -6,9 +6,7 @@ export function requireActive(req, res, next) {
   }
 
   if (req.user.status === 'SUSPENDED') {
-    return next(
-      new ForbiddenError('Account is suspended. Please contact system administration.')
-    );
+    return next(new AccountSuspendedError());
   }
 
   next();
