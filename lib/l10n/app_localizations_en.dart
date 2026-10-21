@@ -227,4 +227,121 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineStatusNotice =>
       'All data is securely saved on your device.';
+
+  @override
+  String get brandsTitle => 'Brands';
+
+  @override
+  String get categoriesTitle => 'Categories';
+
+  @override
+  String get locationsTitle => 'Storage Locations';
+
+  @override
+  String get manageBrandsDesc =>
+      'View default brands and manage your custom brands';
+
+  @override
+  String get manageCategoriesDesc => 'Organize spare parts into categories';
+
+  @override
+  String get manageLocationsDesc => 'Shelves and custom storage locations';
+
+  @override
+  String get globalDefaultBadge => 'Default';
+
+  @override
+  String get customBadge => 'Custom';
+
+  @override
+  String get addBrand => 'Add Brand';
+
+  @override
+  String get editBrand => 'Edit Brand';
+
+  @override
+  String get deactivateBrand => 'Deactivate Brand';
+
+  @override
+  String get deactivateConfirmTitle => 'Deactivate Item?';
+
+  @override
+  String get deactivateConfirmMessage =>
+      'This item will no longer appear in selection lists.';
+
+  @override
+  String get deactivate => 'Deactivate';
+
+  @override
+  String get brandName => 'Brand Name';
+
+  @override
+  String get brandNameHint => 'e.g. Toyota, CAT, Perkins...';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get deactivateCategory => 'Deactivate Category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get categoryNameHint => 'e.g. Engine, Hydraulic, Transmission...';
+
+  @override
+  String get addLocation => 'Add Storage Location';
+
+  @override
+  String get editLocation => 'Edit Storage Location';
+
+  @override
+  String get deactivateLocation => 'Deactivate Storage Location';
+
+  @override
+  String get locationName => 'Location / Shelf Name';
+
+  @override
+  String get locationNameHint => 'e.g. Shelf 6, Drawer A, Backroom...';
+
+  @override
+  String get duplicateNameError => 'An item with this name already exists';
+
+  @override
+  String get cannotModifyDefault =>
+      'Default items cannot be modified or deactivated';
+
+  @override
+  String get selectBrand => 'Select Brand';
+
+  @override
+  String get selectCategory => 'Select Category';
+
+  @override
+  String get selectLocation => 'Select Location';
+
+  @override
+  String get noBrandsFound => 'No brands found';
+
+  @override
+  String get noCategoriesFound => 'No categories found';
+
+  @override
+  String get noLocationsFound => 'No storage locations found';
+
+  @override
+  String get searchBrands => 'Search brands...';
+
+  @override
+  String get searchCategories => 'Search categories...';
+
+  @override
+  String get searchLocations => 'Search locations...';
+
+  @override
+  String get quickAddNew => 'Add New';
 }

@@ -225,4 +225,118 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get offlineStatusNotice => 'ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::';
+
+  @override
+  String get brandsTitle => 'ብራንዶች';
+
+  @override
+  String get categoriesTitle => 'ምድቦች';
+
+  @override
+  String get locationsTitle => 'የማስቀመጫ ቦታዎች';
+
+  @override
+  String get manageBrandsDesc => 'መደበኛ እና የራስዎን የዕቃ ብራንዶች ያስተዳድሩ';
+
+  @override
+  String get manageCategoriesDesc => 'ዕቃዎችን በተለያዩ ምድቦች ያደራጁ';
+
+  @override
+  String get manageLocationsDesc => 'መደርደሪያዎች እና የተለዩ የማስቀመጫ ቦታዎች';
+
+  @override
+  String get globalDefaultBadge => 'መደበኛ';
+
+  @override
+  String get customBadge => 'የራስዎ';
+
+  @override
+  String get addBrand => 'አዲስ ብራንድ ጨምር';
+
+  @override
+  String get editBrand => 'ብራንድ አስተካክል';
+
+  @override
+  String get deactivateBrand => 'ብራንድ አቦዝን';
+
+  @override
+  String get deactivateConfirmTitle => 'ዕቃውን ማቦዘን ይፈልጋሉ?';
+
+  @override
+  String get deactivateConfirmMessage => 'ይህ ዕቃ ከዚህ በኋላ በምርጫ ዝርዝር ውስጥ አይታይም።';
+
+  @override
+  String get deactivate => 'አቦዝን';
+
+  @override
+  String get brandName => 'የብራንድ ስም';
+
+  @override
+  String get brandNameHint => 'ለምሳሌ፦ ቶዮታ፣ ካት፣ ፐርኪንስ...';
+
+  @override
+  String get addCategory => 'አዲስ ምድብ ጨምር';
+
+  @override
+  String get editCategory => 'ምድብ አስተካክል';
+
+  @override
+  String get deactivateCategory => 'ምድብ አቦዝን';
+
+  @override
+  String get categoryName => 'የምድብ ስም';
+
+  @override
+  String get categoryNameHint => 'ለምሳሌ፦ ሞተር፣ ሃይድሮሊክ፣ ትራንስሚሽን...';
+
+  @override
+  String get addLocation => 'አዲስ ቦታ ጨምር';
+
+  @override
+  String get editLocation => 'የማስቀመጫ ቦታ አስተካክል';
+
+  @override
+  String get deactivateLocation => 'የማስቀመጫ ቦታ አቦዝን';
+
+  @override
+  String get locationName => 'የመደርደሪያ ወይም የቦታ ስም';
+
+  @override
+  String get locationNameHint => 'ለምሳሌ፦ መደርደሪያ 6፣ ሳጥን ሀ...';
+
+  @override
+  String get duplicateNameError => 'በዚህ ስም አስቀድሞ የተመዘገበ ዕቃ አለ';
+
+  @override
+  String get cannotModifyDefault => 'መደበኛ ዕቃዎችን ማስተካከል ወይም ማቦዘን አይቻልም';
+
+  @override
+  String get selectBrand => 'ብራንድ ይምረጡ';
+
+  @override
+  String get selectCategory => 'ምድብ ይምረጡ';
+
+  @override
+  String get selectLocation => 'የማስቀመጫ ቦታ ይምረጡ';
+
+  @override
+  String get noBrandsFound => 'ምንም ብራንድ አልተገኘም';
+
+  @override
+  String get noCategoriesFound => 'ምንም ምድብ አልተገኘም';
+
+  @override
+  String get noLocationsFound => 'ምንም የማስቀመጫ ቦታ አልተገኘም';
+
+  @override
+  String get searchBrands => 'ብራንድ ይፈልጉ...';
+
+  @override
+  String get searchCategories => 'ምድብ ይፈልጉ...';
+
+  @override
+  String get searchLocations => 'የማስቀመጫ ቦታ ይፈልጉ...';
+
+  @override
+  String get quickAddNew => 'አዲስ ጨምር';
 }

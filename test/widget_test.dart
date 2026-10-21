@@ -148,8 +148,9 @@ void main() {
     expect(find.text('Kera Turbo Spares'), findsOneWidget);
     expect(find.text('+251911223344'), findsOneWidget);
 
-    // Tap Logout button
+    // Scroll to and tap Logout button
     final logoutBtn = find.widgetWithText(OutlinedButton, 'ውጣ');
+    await tester.scrollUntilVisible(logoutBtn, 200);
     expect(logoutBtn, findsOneWidget);
     await tester.tap(logoutBtn);
     await tester.pumpAndSettle();

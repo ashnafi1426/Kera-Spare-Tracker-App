@@ -529,6 +529,234 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::'**
   String get offlineStatusNotice;
+
+  /// Brands management title
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንዶች'**
+  String get brandsTitle;
+
+  /// Categories management title
+  ///
+  /// In am, this message translates to:
+  /// **'ምድቦች'**
+  String get categoriesTitle;
+
+  /// Storage locations management title
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ ቦታዎች'**
+  String get locationsTitle;
+
+  /// Description for brands settings tile
+  ///
+  /// In am, this message translates to:
+  /// **'መደበኛ እና የራስዎን የዕቃ ብራንዶች ያስተዳድሩ'**
+  String get manageBrandsDesc;
+
+  /// Description for categories settings tile
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎችን በተለያዩ ምድቦች ያደራጁ'**
+  String get manageCategoriesDesc;
+
+  /// Description for locations settings tile
+  ///
+  /// In am, this message translates to:
+  /// **'መደርደሪያዎች እና የተለዩ የማስቀመጫ ቦታዎች'**
+  String get manageLocationsDesc;
+
+  /// Badge for global default system items
+  ///
+  /// In am, this message translates to:
+  /// **'መደበኛ'**
+  String get globalDefaultBadge;
+
+  /// Badge for owner-created items
+  ///
+  /// In am, this message translates to:
+  /// **'የራስዎ'**
+  String get customBadge;
+
+  /// Add brand button label
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ብራንድ ጨምር'**
+  String get addBrand;
+
+  /// Edit brand title
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ አስተካክል'**
+  String get editBrand;
+
+  /// Deactivate brand action
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ አቦዝን'**
+  String get deactivateBrand;
+
+  /// Deactivate confirmation dialog title
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃውን ማቦዘን ይፈልጋሉ?'**
+  String get deactivateConfirmTitle;
+
+  /// Deactivate confirmation dialog message
+  ///
+  /// In am, this message translates to:
+  /// **'ይህ ዕቃ ከዚህ በኋላ በምርጫ ዝርዝር ውስጥ አይታይም።'**
+  String get deactivateConfirmMessage;
+
+  /// Deactivate button text
+  ///
+  /// In am, this message translates to:
+  /// **'አቦዝን'**
+  String get deactivate;
+
+  /// Brand name field label
+  ///
+  /// In am, this message translates to:
+  /// **'የብራንድ ስም'**
+  String get brandName;
+
+  /// Brand name input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ቶዮታ፣ ካት፣ ፐርኪንስ...'**
+  String get brandNameHint;
+
+  /// Add category button label
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ምድብ ጨምር'**
+  String get addCategory;
+
+  /// Edit category title
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ አስተካክል'**
+  String get editCategory;
+
+  /// Deactivate category action
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ አቦዝን'**
+  String get deactivateCategory;
+
+  /// Category name field label
+  ///
+  /// In am, this message translates to:
+  /// **'የምድብ ስም'**
+  String get categoryName;
+
+  /// Category name input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ሞተር፣ ሃይድሮሊክ፣ ትራንስሚሽን...'**
+  String get categoryNameHint;
+
+  /// Add location button label
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ቦታ ጨምር'**
+  String get addLocation;
+
+  /// Edit location title
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ ቦታ አስተካክል'**
+  String get editLocation;
+
+  /// Deactivate location action
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ ቦታ አቦዝን'**
+  String get deactivateLocation;
+
+  /// Location name field label
+  ///
+  /// In am, this message translates to:
+  /// **'የመደርደሪያ ወይም የቦታ ስም'**
+  String get locationName;
+
+  /// Location name input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ መደርደሪያ 6፣ ሳጥን ሀ...'**
+  String get locationNameHint;
+
+  /// Error when name already exists
+  ///
+  /// In am, this message translates to:
+  /// **'በዚህ ስም አስቀድሞ የተመዘገበ ዕቃ አለ'**
+  String get duplicateNameError;
+
+  /// Error message when attempting to modify default items
+  ///
+  /// In am, this message translates to:
+  /// **'መደበኛ ዕቃዎችን ማስተካከል ወይም ማቦዘን አይቻልም'**
+  String get cannotModifyDefault;
+
+  /// Select brand picker title
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ ይምረጡ'**
+  String get selectBrand;
+
+  /// Select category picker title
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ ይምረጡ'**
+  String get selectCategory;
+
+  /// Select location picker title
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ ቦታ ይምረጡ'**
+  String get selectLocation;
+
+  /// Empty state text for brands
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም ብራንድ አልተገኘም'**
+  String get noBrandsFound;
+
+  /// Empty state text for categories
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም ምድብ አልተገኘም'**
+  String get noCategoriesFound;
+
+  /// Empty state text for locations
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የማስቀመጫ ቦታ አልተገኘም'**
+  String get noLocationsFound;
+
+  /// Search brands field hint
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ ይፈልጉ...'**
+  String get searchBrands;
+
+  /// Search categories field hint
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ ይፈልጉ...'**
+  String get searchCategories;
+
+  /// Search locations field hint
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ ቦታ ይፈልጉ...'**
+  String get searchLocations;
+
+  /// Quick add new button in picker
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ጨምር'**
+  String get quickAddNew;
 }
 
 class _AppLocalizationsDelegate

@@ -18,4 +18,15 @@ extension LocalizationX on BuildContext {
 
   /// Convenient accessor for MediaQuery size.
   Size get screenSize => MediaQuery.sizeOf(this);
+
+  /// Displays a brief snackbar message.
+  void showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(this).hideCurrentSnackBar();
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? colorScheme.error : null,
+      ),
+    );
+  }
 }

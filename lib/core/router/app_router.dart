@@ -6,6 +6,9 @@ import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/settings/presentation/screens/brands_management_screen.dart';
+import '../../features/settings/presentation/screens/categories_management_screen.dart';
+import '../../features/settings/presentation/screens/locations_management_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 
 /// Helper ChangeNotifier that notifies GoRouter when Riverpod auth state changes.
@@ -67,6 +70,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/settings/brands',
+        name: 'settings-brands',
+        builder: (context, state) => const BrandsManagementScreen(),
+      ),
+      GoRoute(
+        path: '/settings/categories',
+        name: 'settings-categories',
+        builder: (context, state) => const CategoriesManagementScreen(),
+      ),
+      GoRoute(
+        path: '/settings/locations',
+        name: 'settings-locations',
+        builder: (context, state) => const LocationsManagementScreen(),
       ),
     ],
   );

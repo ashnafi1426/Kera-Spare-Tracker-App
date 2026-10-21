@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/utils/context_extensions.dart';
@@ -236,6 +237,38 @@ class _SettingsTab extends ConsumerWidget {
           // Language Setting Tile
           const Card(
             child: LanguageSettingTile(),
+          ),
+          const SizedBox(height: 12),
+
+          // Inventory & Master Data Configurations
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.directions_car_rounded, color: colorScheme.primary),
+                  title: Text(l10n.brandsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(l10n.manageBrandsDesc),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/settings/brands'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.folder_open_rounded, color: colorScheme.secondary),
+                  title: Text(l10n.categoriesTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(l10n.manageCategoriesDesc),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/settings/categories'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.shelves, color: colorScheme.tertiary),
+                  title: Text(l10n.locationsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(l10n.manageLocationsDesc),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push('/settings/locations'),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
 
