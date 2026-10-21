@@ -6,6 +6,8 @@ import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/parts/presentation/screens/part_details_screen.dart';
+import '../../features/parts/presentation/screens/part_form_screen.dart';
 import '../../features/settings/presentation/screens/brands_management_screen.dart';
 import '../../features/settings/presentation/screens/categories_management_screen.dart';
 import '../../features/settings/presentation/screens/locations_management_screen.dart';
@@ -17,8 +19,6 @@ class _AuthRefreshNotifier extends ChangeNotifier {
     ref.listen(authControllerProvider, (_, _) => notifyListeners());
   }
 }
-
-/// App routing table managed via GoRouter with authentication route guards.
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _AuthRefreshNotifier(ref);
   ref.onDispose(refreshNotifier.dispose);
@@ -85,6 +85,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings/locations',
         name: 'settings-locations',
         builder: (context, state) => const LocationsManagementScreen(),
+      ),
+      GoRoute(
+        path: '/parts/add',
+        name: 'parts-add',
+        builder: (context, state) => const PartFormScreen(),
+      ),
+      GoRoute(
+        path: '/parts/:id',
+        name: 'parts-details',
+        builder: (context, state) => PartDetailsScreen(
+          partId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/parts/:id/edit',
+        name: 'parts-edit',
+        builder: (context, state) => PartFormScreen(
+          partId: state.pathParameters['id'],
+        ),
       ),
     ],
   );

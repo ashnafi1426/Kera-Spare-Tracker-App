@@ -11,6 +11,7 @@ import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_c
 import 'package:kera_spare_tracker/features/auth/presentation/screens/login_screen.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/screens/register_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
+import 'package:kera_spare_tracker/features/parts/presentation/providers/parts_providers.dart';
 import 'package:kera_spare_tracker/main.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -126,6 +127,7 @@ void main() {
         overrides: [
           storageServiceProvider.overrideWithValue(mockStorage),
           authRepositoryProvider.overrideWithValue(mockAuth),
+          partsStreamProvider.overrideWith((ref) => Stream.value([])),
         ],
         child: const KeraSpareTrackerApp(),
       ),
@@ -135,7 +137,7 @@ void main() {
 
     // Verify user lands on HomeScreen
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('ዕቃዎች'), findsOneWidget);
+    expect(find.text('ዕቃዎች'), findsWidgets);
     expect(find.text('ሽያጭ'), findsOneWidget);
     expect(find.text('ሪፖርት'), findsOneWidget);
     expect(find.text('ቅንብሮች'), findsOneWidget);

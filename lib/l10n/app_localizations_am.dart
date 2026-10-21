@@ -339,4 +339,128 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get quickAddNew => 'አዲስ ጨምር';
+
+  @override
+  String get addPart => 'አዲስ የመለዋወጫ ዕቃ መዝግብ';
+
+  @override
+  String get editPart => 'የመለዋወጫ ዕቃውን አስተካክል';
+
+  @override
+  String get partDetails => 'የዕቃው ዝርዝር መረጃ';
+
+  @override
+  String get partName => 'የዕቃው ስም';
+
+  @override
+  String get partNameHint => 'ለምሳሌ፦ ሃይድሮሊክ ፓምፕ፣ የዘይት ፊልተር...';
+
+  @override
+  String get partNumber => 'የዕቃ መለያ ቁጥር (Part No)';
+
+  @override
+  String get partNumberHint => 'ለምሳሌ፦ 1R-0716፣ 9T-0988...';
+
+  @override
+  String get brand => 'ብራንድ';
+
+  @override
+  String get category => 'ምድብ';
+
+  @override
+  String get storageLocation => 'የማስቀመጫ መደርደሪያ / ቦታ';
+
+  @override
+  String get customLocation => 'የተለየ የማስቀመጫ ቦታ';
+
+  @override
+  String get customLocationHint => 'ለምሳሌ፦ የላይኛው ሳጥን፣ ጥግ ላይ...';
+
+  @override
+  String get description => 'ተጨማሪ ማብራሪያ';
+
+  @override
+  String get descriptionHint => 'ስለ ዕቃው አጭር መግለጫ...';
+
+  @override
+  String get unit => 'መለኪያ';
+
+  @override
+  String get unitHint => 'ለምሳሌ፦ ፍሬ፣ ሴት፣ ሜትር፣ ሊትር...';
+
+  @override
+  String get quantityInStock => 'በክምችት ያለ ብዛት';
+
+  @override
+  String get purchasePrice => 'የግዢ ዋጋ (ብር)';
+
+  @override
+  String get sellingPrice => 'የመሸጫ ዋጋ (ብር)';
+
+  @override
+  String get estimatedProfit => 'በነጠላ የሚገኝ ትርፍ';
+
+  @override
+  String get sizeSpecs => 'መጠን ወይም ዝርዝር መረጃ';
+
+  @override
+  String get sizeSpecsHint => 'ለምሳሌ፦ 10 ሚሜ፣ 24 ቮልት...';
+
+  @override
+  String get notes => 'የግል ማስታወሻ';
+
+  @override
+  String get notesHint => 'ተጨማሪ የግል ማስታወሻ...';
+
+  @override
+  String get takePhoto => 'ፎቶ አንሳ';
+
+  @override
+  String get chooseFromGallery => 'ከጋለሪ ምረጥ';
+
+  @override
+  String get removePhoto => 'ፎቶውን አስወግድ';
+
+  @override
+  String get unsavedChangesTitle => 'ያልተቀመጡ ለውጦች';
+
+  @override
+  String get unsavedChangesMessage => 'ያልተቀመጡ ለውጦች አሉ። ገጹን መተው ይፈልጋሉ?';
+
+  @override
+  String get discard => 'ተወው';
+
+  @override
+  String get keepEditing => 'ማረም ቀጥል';
+
+  @override
+  String get deletePart => 'ዕቃውን አጥፋ';
+
+  @override
+  String get deletePartConfirmTitle => 'ይህንን ዕቃ መሰረዝ ይፈልጋሉ?';
+
+  @override
+  String get deletePartConfirmMessage =>
+      'ዕቃው ከክምችት ይሰረዛል። ከዚህ በፊት የተመዘገቡ የሽያጭ መረጃዎች አይነኩም።';
+
+  @override
+  String get partSavedSuccess => 'የመለዋወጫ ዕቃው በተሳካ ሁኔታ ተቀምጧል';
+
+  @override
+  String get partDeletedSuccess => 'የመለዋወጫ ዕቃው ተሰርዟል';
+
+  @override
+  String get negativeNumberError => 'ዋጋው ወይም ብዛቱ ከዜሮ በታች ሊሆን አይችልም';
+
+  @override
+  String get noPhoto => 'ፎቶ የለም';
+
+  @override
+  String get stockStatus => 'የክምችት ሁኔታ';
+
+  @override
+  String get inStock => 'ክምችት አለ';
+
+  @override
+  String get outOfStock => 'ያለቀ';
 }

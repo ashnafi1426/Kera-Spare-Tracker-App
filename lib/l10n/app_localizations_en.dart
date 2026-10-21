@@ -344,4 +344,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickAddNew => 'Add New';
+
+  @override
+  String get addPart => 'Add Spare Part';
+
+  @override
+  String get editPart => 'Edit Spare Part';
+
+  @override
+  String get partDetails => 'Part Details';
+
+  @override
+  String get partName => 'Part Name';
+
+  @override
+  String get partNameHint => 'e.g. Hydraulic Pump, Oil Filter...';
+
+  @override
+  String get partNumber => 'Part Number';
+
+  @override
+  String get partNumberHint => 'e.g. 1R-0716, 9T-0988...';
+
+  @override
+  String get brand => 'Brand';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get storageLocation => 'Storage Location';
+
+  @override
+  String get customLocation => 'Custom / Specific Spot';
+
+  @override
+  String get customLocationHint => 'e.g. Top drawer, corner basket...';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get descriptionHint => 'Brief notes about the part...';
+
+  @override
+  String get unit => 'Unit';
+
+  @override
+  String get unitHint => 'e.g. pcs, set, meter, liter';
+
+  @override
+  String get quantityInStock => 'Quantity in Stock';
+
+  @override
+  String get purchasePrice => 'Purchase Price (ETB)';
+
+  @override
+  String get sellingPrice => 'Selling Price (ETB)';
+
+  @override
+  String get estimatedProfit => 'Estimated Unit Profit';
+
+  @override
+  String get sizeSpecs => 'Size / Specifications';
+
+  @override
+  String get sizeSpecsHint => 'e.g. 10mm, 24V, Standard...';
+
+  @override
+  String get notes => 'Internal Notes';
+
+  @override
+  String get notesHint => 'Any additional private notes...';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from Gallery';
+
+  @override
+  String get removePhoto => 'Remove Photo';
+
+  @override
+  String get unsavedChangesTitle => 'Unsaved Changes';
+
+  @override
+  String get unsavedChangesMessage =>
+      'You have unsaved changes. Are you sure you want to discard them?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get keepEditing => 'Keep Editing';
+
+  @override
+  String get deletePart => 'Delete Part';
+
+  @override
+  String get deletePartConfirmTitle => 'Delete this spare part?';
+
+  @override
+  String get deletePartConfirmMessage =>
+      'The part will be removed from active inventory. Past sales records will be preserved.';
+
+  @override
+  String get partSavedSuccess => 'Spare part saved successfully';
+
+  @override
+  String get partDeletedSuccess => 'Spare part deleted';
+
+  @override
+  String get negativeNumberError => 'Value cannot be negative';
+
+  @override
+  String get noPhoto => 'No Photo';
+
+  @override
+  String get stockStatus => 'Stock Status';
+
+  @override
+  String get inStock => 'In Stock';
+
+  @override
+  String get outOfStock => 'Out of Stock';
 }

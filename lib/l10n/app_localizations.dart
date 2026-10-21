@@ -757,6 +757,252 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'አዲስ ጨምር'**
   String get quickAddNew;
+
+  /// Add spare part screen title and button
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ የመለዋወጫ ዕቃ መዝግብ'**
+  String get addPart;
+
+  /// Edit spare part screen title
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ዕቃውን አስተካክል'**
+  String get editPart;
+
+  /// Part details screen title
+  ///
+  /// In am, this message translates to:
+  /// **'የዕቃው ዝርዝር መረጃ'**
+  String get partDetails;
+
+  /// Part name field label
+  ///
+  /// In am, this message translates to:
+  /// **'የዕቃው ስም'**
+  String get partName;
+
+  /// Part name input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ሃይድሮሊክ ፓምፕ፣ የዘይት ፊልተር...'**
+  String get partNameHint;
+
+  /// Part number field label
+  ///
+  /// In am, this message translates to:
+  /// **'የዕቃ መለያ ቁጥር (Part No)'**
+  String get partNumber;
+
+  /// Part number input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ 1R-0716፣ 9T-0988...'**
+  String get partNumberHint;
+
+  /// Brand label
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ'**
+  String get brand;
+
+  /// Category label
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ'**
+  String get category;
+
+  /// Storage location label
+  ///
+  /// In am, this message translates to:
+  /// **'የማስቀመጫ መደርደሪያ / ቦታ'**
+  String get storageLocation;
+
+  /// Custom spot label
+  ///
+  /// In am, this message translates to:
+  /// **'የተለየ የማስቀመጫ ቦታ'**
+  String get customLocation;
+
+  /// Custom spot input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ የላይኛው ሳጥን፣ ጥግ ላይ...'**
+  String get customLocationHint;
+
+  /// Description field label
+  ///
+  /// In am, this message translates to:
+  /// **'ተጨማሪ ማብራሪያ'**
+  String get description;
+
+  /// Description input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ስለ ዕቃው አጭር መግለጫ...'**
+  String get descriptionHint;
+
+  /// Unit field label
+  ///
+  /// In am, this message translates to:
+  /// **'መለኪያ'**
+  String get unit;
+
+  /// Unit input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ፍሬ፣ ሴት፣ ሜትር፣ ሊትር...'**
+  String get unitHint;
+
+  /// Quantity field label
+  ///
+  /// In am, this message translates to:
+  /// **'በክምችት ያለ ብዛት'**
+  String get quantityInStock;
+
+  /// Purchase price field label
+  ///
+  /// In am, this message translates to:
+  /// **'የግዢ ዋጋ (ብር)'**
+  String get purchasePrice;
+
+  /// Selling price field label
+  ///
+  /// In am, this message translates to:
+  /// **'የመሸጫ ዋጋ (ብር)'**
+  String get sellingPrice;
+
+  /// Estimated profit label
+  ///
+  /// In am, this message translates to:
+  /// **'በነጠላ የሚገኝ ትርፍ'**
+  String get estimatedProfit;
+
+  /// Size and specs label
+  ///
+  /// In am, this message translates to:
+  /// **'መጠን ወይም ዝርዝር መረጃ'**
+  String get sizeSpecs;
+
+  /// Size and specs input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ 10 ሚሜ፣ 24 ቮልት...'**
+  String get sizeSpecsHint;
+
+  /// Internal notes label
+  ///
+  /// In am, this message translates to:
+  /// **'የግል ማስታወሻ'**
+  String get notes;
+
+  /// Internal notes input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ተጨማሪ የግል ማስታወሻ...'**
+  String get notesHint;
+
+  /// Take photo action
+  ///
+  /// In am, this message translates to:
+  /// **'ፎቶ አንሳ'**
+  String get takePhoto;
+
+  /// Choose from gallery action
+  ///
+  /// In am, this message translates to:
+  /// **'ከጋለሪ ምረጥ'**
+  String get chooseFromGallery;
+
+  /// Remove photo action
+  ///
+  /// In am, this message translates to:
+  /// **'ፎቶውን አስወግድ'**
+  String get removePhoto;
+
+  /// Unsaved changes dialog title
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተቀመጡ ለውጦች'**
+  String get unsavedChangesTitle;
+
+  /// Unsaved changes dialog message
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተቀመጡ ለውጦች አሉ። ገጹን መተው ይፈልጋሉ?'**
+  String get unsavedChangesMessage;
+
+  /// Discard changes button
+  ///
+  /// In am, this message translates to:
+  /// **'ተወው'**
+  String get discard;
+
+  /// Keep editing button
+  ///
+  /// In am, this message translates to:
+  /// **'ማረም ቀጥል'**
+  String get keepEditing;
+
+  /// Delete part action
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃውን አጥፋ'**
+  String get deletePart;
+
+  /// Delete part confirmation title
+  ///
+  /// In am, this message translates to:
+  /// **'ይህንን ዕቃ መሰረዝ ይፈልጋሉ?'**
+  String get deletePartConfirmTitle;
+
+  /// Delete part confirmation message
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃው ከክምችት ይሰረዛል። ከዚህ በፊት የተመዘገቡ የሽያጭ መረጃዎች አይነኩም።'**
+  String get deletePartConfirmMessage;
+
+  /// Part saved success message
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ዕቃው በተሳካ ሁኔታ ተቀምጧል'**
+  String get partSavedSuccess;
+
+  /// Part deleted success message
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ዕቃው ተሰርዟል'**
+  String get partDeletedSuccess;
+
+  /// Negative number validation error
+  ///
+  /// In am, this message translates to:
+  /// **'ዋጋው ወይም ብዛቱ ከዜሮ በታች ሊሆን አይችልም'**
+  String get negativeNumberError;
+
+  /// No photo placeholder label
+  ///
+  /// In am, this message translates to:
+  /// **'ፎቶ የለም'**
+  String get noPhoto;
+
+  /// Stock status label
+  ///
+  /// In am, this message translates to:
+  /// **'የክምችት ሁኔታ'**
+  String get stockStatus;
+
+  /// In stock badge text
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት አለ'**
+  String get inStock;
+
+  /// Out of stock badge text
+  ///
+  /// In am, this message translates to:
+  /// **'ያለቀ'**
+  String get outOfStock;
 }
 
 class _AppLocalizationsDelegate

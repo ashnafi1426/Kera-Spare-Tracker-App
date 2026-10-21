@@ -25,6 +25,7 @@ dependencies:
   # Utilities & Localization
   intl: ^0.20.3
   uuid: ^4.6.0
+  path: ^1.9.1
 
   # Connectivity & Background Tasks
   connectivity_plus: ^7.3.2

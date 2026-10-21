@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import '../../../../core/constants/constants.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../parts/presentation/providers/parts_providers.dart';
 
 /// Main container screen with bottom navigation for Inventory, Sales, Reports, and Settings.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -23,12 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = context.l10n;
 
     final tabs = [
-      _PlaceholderTab(
-        title: l10n.navParts,
-        icon: Icons.inventory_2_outlined,
-        emptyTitle: l10n.noPartsFound,
-        emptyDesc: l10n.noPartsDesc,
-      ),
+      const _InventoryTab(),
       _PlaceholderTab(
         title: l10n.navSales,
         icon: Icons.point_of_sale_outlined,
@@ -78,6 +75,155 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: l10n.settingsTab,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _InventoryTab extends ConsumerWidget {
+  const _InventoryTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final theme = context.theme;
+    final colorScheme = context.colorScheme;
+    final partsAsync = ref.watch(partsStreamProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.inventoryTab),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/parts/add'),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.add),
+      ),
+      body: partsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text(err.toString())),
+        data: (parts) {
+          if (parts.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.inventory_2_outlined,
+                          size: 40, color: colorScheme.primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.noPartsFound,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.noPartsDesc,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => context.push('/parts/add'),
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(l10n.add),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+            itemCount: parts.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final part = parts[index];
+              final hasPhoto = part.photoLocalPath != null &&
+                  File(part.photoLocalPath!).existsSync();
+
+              return Card(
+                child: ListTile(
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      color: colorScheme.surfaceContainerHighest,
+                      child: hasPhoto
+                          ? Image.file(
+                              File(part.photoLocalPath!),
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(
+                              Icons.build_circle_outlined,
+                              color: colorScheme.primary,
+                            ),
+                    ),
+                  ),
+                  title: Text(
+                    part.displayName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    part.partNumber != null && part.partNumber!.isNotEmpty
+                        ? 'Part: ${part.partNumber}'
+                        : '${part.cachedQuantity.toStringAsFixed(0)} ${part.unit ?? ''}',
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (part.sellingPrice != null)
+                        Text(
+                          '${part.sellingPrice!.toStringAsFixed(0)} ብር',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: part.cachedQuantity > 0
+                              ? Colors.green.withValues(alpha: 0.15)
+                              : colorScheme.error.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          part.cachedQuantity > 0 ? l10n.inStock : l10n.outOfStock,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: part.cachedQuantity > 0
+                                ? Colors.green.shade800
+                                : colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () => context.push('/parts/${part.id}'),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
