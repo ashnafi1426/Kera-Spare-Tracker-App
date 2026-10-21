@@ -862,7 +862,19 @@
     }
   },
   "saveToStorage": "ወደ ማከማቻ አስቀምጥ",
-  "@saveToStorage": { "description": "Save to storage label" }
+  "@saveToStorage": { "description": "Save to storage label" },
+  "authRequiresInternetNotice": "ለመመዝገብ እና ለመጀመሪያ ጊዜ ለመግባት የበይነመረብ (ኢንተርኔት) ግንኙነት ያስፈልጋል። አንዴ ከገቡ በኋላ መተግበሪያው ሙሉ በሙሉ ከመስመር ውጭ (ኦፍላይን) ይሰራል።",
+  "@authRequiresInternetNotice": { "description": "Notice that internet is required for first login" },
+  "authWrongPassword": "የተሳሳተ ስልክ ቁጥር ወይም የይለፍ ቃል",
+  "@authWrongPassword": { "description": "Wrong password error message" },
+  "authPhoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ ተመዝግቧል",
+  "@authPhoneTaken": { "description": "Phone already registered message" },
+  "authNoInternet": "የበይነመረብ ግንኙነት የለም። እባክዎ ለመግባት ከበይነመረብ ጋር ይገናኙ።",
+  "@authNoInternet": { "description": "No internet connection message" },
+  "authAccountSuspended": "የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።",
+  "@authAccountSuspended": { "description": "Account suspended message" },
+  "authServerError": "የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
+  "@authServerError": { "description": "Server error message" }
 }
 
 

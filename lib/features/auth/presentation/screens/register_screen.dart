@@ -50,12 +50,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
+    final l10n = context.l10n;
     result.when(
       onSuccess: (_) {
         context.go('/home');
       },
       onFailure: (failure) {
-        setState(() => _errorMessage = failure.message);
+        String msg;
+        switch (failure.code) {
+          case 'PHONE_TAKEN':
+            msg = l10n.authPhoneTaken;
+            break;
+          case 'ACCOUNT_SUSPENDED':
+            msg = l10n.authAccountSuspended;
+            break;
+          case 'NO_INTERNET':
+            msg = l10n.authNoInternet;
+            break;
+          case 'SERVER_ERROR':
+            msg = l10n.authServerError;
+            break;
+          default:
+            msg = failure.message;
+        }
+        setState(() => _errorMessage = msg);
       },
     );
   }
@@ -133,6 +151,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     const SizedBox(height: 20),
                   ],
+
+                  // Online Requirement Notice Banner
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest.withAlpha(120),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorScheme.outlineVariant.withAlpha(80)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.wifi_outlined, size: 20, color: colorScheme.primary),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            l10n.authRequiresInternetNotice,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Business Name Input
                   Text(

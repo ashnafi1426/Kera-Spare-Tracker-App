@@ -1,14 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../data/local/database_provider.dart';
-import '../../data/repositories/local_auth_repository.dart';
+import '../../data/repositories/api_auth_repository.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 
-/// Provider for AuthRepository. Defaults to LocalAuthRepository.
+/// Provider for AuthRepository. Defaults to ApiAuthRepository connecting to Node.js backend.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
-  final repo = LocalAuthRepository(db: db);
+  final repo = ApiAuthRepository(db: db);
   ref.onDispose(repo.dispose);
   return repo;
 });

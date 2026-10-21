@@ -924,4 +924,24 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get saveToStorage => 'ወደ ማከማቻ አስቀምጥ';
+
+  @override
+  String get authRequiresInternetNotice =>
+      'ለመመዝገብ እና ለመጀመሪያ ጊዜ ለመግባት የበይነመረብ (ኢንተርኔት) ግንኙነት ያስፈልጋል። አንዴ ከገቡ በኋላ መተግበሪያው ሙሉ በሙሉ ከመስመር ውጭ (ኦፍላይን) ይሰራል።';
+
+  @override
+  String get authWrongPassword => 'የተሳሳተ ስልክ ቁጥር ወይም የይለፍ ቃል';
+
+  @override
+  String get authPhoneTaken => 'ይህ ስልክ ቁጥር አስቀድሞ ተመዝግቧል';
+
+  @override
+  String get authNoInternet => 'የበይነመረብ ግንኙነት የለም። እባክዎ ለመግባት ከበይነመረብ ጋር ይገናኙ።';
+
+  @override
+  String get authAccountSuspended =>
+      'የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።';
+
+  @override
+  String get authServerError => 'የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።';
 }

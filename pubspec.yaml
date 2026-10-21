@@ -35,8 +35,8 @@ dependencies:
   flutter_secure_storage: ^10.3.4
   image_picker: ^1.2.4
   flutter_image_compress: ^2.5.1
-  share_plus: ^10.1.4
-  file_picker: ^8.1.7
+  share_plus: 13.3.1
+  file_picker: 13.1.0
 
   # Visuals & Reports
   fl_chart: ^1.2.0

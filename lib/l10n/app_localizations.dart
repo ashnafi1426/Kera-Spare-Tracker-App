@@ -1871,6 +1871,42 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ወደ ማከማቻ አስቀምጥ'**
   String get saveToStorage;
+
+  /// Notice that internet is required for first login
+  ///
+  /// In am, this message translates to:
+  /// **'ለመመዝገብ እና ለመጀመሪያ ጊዜ ለመግባት የበይነመረብ (ኢንተርኔት) ግንኙነት ያስፈልጋል። አንዴ ከገቡ በኋላ መተግበሪያው ሙሉ በሙሉ ከመስመር ውጭ (ኦፍላይን) ይሰራል።'**
+  String get authRequiresInternetNotice;
+
+  /// Wrong password error message
+  ///
+  /// In am, this message translates to:
+  /// **'የተሳሳተ ስልክ ቁጥር ወይም የይለፍ ቃል'**
+  String get authWrongPassword;
+
+  /// Phone already registered message
+  ///
+  /// In am, this message translates to:
+  /// **'ይህ ስልክ ቁጥር አስቀድሞ ተመዝግቧል'**
+  String get authPhoneTaken;
+
+  /// No internet connection message
+  ///
+  /// In am, this message translates to:
+  /// **'የበይነመረብ ግንኙነት የለም። እባክዎ ለመግባት ከበይነመረብ ጋር ይገናኙ።'**
+  String get authNoInternet;
+
+  /// Account suspended message
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።'**
+  String get authAccountSuspended;
+
+  /// Server error message
+  ///
+  /// In am, this message translates to:
+  /// **'የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።'**
+  String get authServerError;
 }
 
 class _AppLocalizationsDelegate

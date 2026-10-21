@@ -959,4 +959,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveToStorage => 'Save to Storage';
+
+  @override
+  String get authRequiresInternetNotice =>
+      'An active internet connection is required for registration and the first login. Once logged in, the app works 100% offline.';
+
+  @override
+  String get authWrongPassword => 'Incorrect phone number or password';
+
+  @override
+  String get authPhoneTaken => 'This phone number is already registered';
+
+  @override
+  String get authNoInternet =>
+      'No internet connection. Please connect to the internet to authenticate.';
+
+  @override
+  String get authAccountSuspended =>
+      'Your business account has been suspended. Please contact the administrator.';
+
+  @override
+  String get authServerError =>
+      'Server error occurred. Please try again later.';
 }
