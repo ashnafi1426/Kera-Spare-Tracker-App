@@ -16,6 +16,22 @@ class AuthUser {
 
   bool get isAdmin => role == 'admin';
 
+  AuthUser copyWith({
+    String? id,
+    String? ownerId,
+    String? phoneNumber,
+    String? businessName,
+    String? role,
+  }) {
+    return AuthUser(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      businessName: businessName ?? this.businessName,
+      role: role ?? this.role,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'owner_id': ownerId,

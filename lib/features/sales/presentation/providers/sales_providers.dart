@@ -24,16 +24,44 @@ final activeSalesStreamProvider = StreamProvider<List<SaleModel>>((ref) {
   return repo.watchActiveSales(ownerId);
 });
 
-/// Selected date filter for the sales history screen (today, thisWeek, thisMonth, custom).
+/// Notifier for selected date filter for the sales history screen.
+class SalesHistoryDateFilterNotifier extends Notifier<DateRangeType> {
+  @override
+  DateRangeType build() => DateRangeType.thisMonth;
+
+  void setFilter(DateRangeType type) => state = type;
+}
+
 final salesHistoryDateFilterProvider =
-    StateProvider<DateRangeType>((ref) => DateRangeType.thisMonth);
+    NotifierProvider<SalesHistoryDateFilterNotifier, DateRangeType>(
+  SalesHistoryDateFilterNotifier.new,
+);
 
-/// Selected custom date range when [salesHistoryDateFilterProvider] is custom.
+/// Notifier for selected custom date range when date filter is custom.
+class SalesHistoryCustomRangeNotifier extends Notifier<DateTimeRange?> {
+  @override
+  DateTimeRange? build() => null;
+
+  void setRange(DateTimeRange? range) => state = range;
+}
+
 final salesHistoryCustomRangeProvider =
-    StateProvider<DateTimeRange?>((ref) => null);
+    NotifierProvider<SalesHistoryCustomRangeNotifier, DateTimeRange?>(
+  SalesHistoryCustomRangeNotifier.new,
+);
 
-/// Search query string for sales history screen.
-final salesHistorySearchQueryProvider = StateProvider<String>((ref) => '');
+/// Notifier for search query string on sales history screen.
+class SalesHistorySearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void setQuery(String q) => state = q;
+}
+
+final salesHistorySearchQueryProvider =
+    NotifierProvider<SalesHistorySearchQueryNotifier, String>(
+  SalesHistorySearchQueryNotifier.new,
+);
 
 /// Filtered sales stream respecting active search query and date range.
 final filteredSalesStreamProvider = StreamProvider<List<SaleModel>>((ref) {

@@ -9,6 +9,7 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
 import '../../features/sales/presentation/screens/new_sale_screen.dart';
+import '../../features/sales/presentation/screens/sale_details_screen.dart';
 import '../../features/sales/presentation/screens/sale_success_screen.dart';
 import '../../features/settings/presentation/screens/brands_management_screen.dart';
 import '../../features/settings/presentation/screens/categories_management_screen.dart';

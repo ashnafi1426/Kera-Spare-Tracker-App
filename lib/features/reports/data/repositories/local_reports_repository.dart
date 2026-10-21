@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../data/local/app_database.dart';
 import '../../domain/models/chart_point.dart';

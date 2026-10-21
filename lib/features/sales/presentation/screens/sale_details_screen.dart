@@ -59,7 +59,10 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
             context.pop();
           } else {
             setState(() => _isDeleting = false);
-            context.showSnackBar(res.error?.message ?? 'Failed to delete sale', isError: true);
+            context.showSnackBar(
+              res.failureOrNull?.message ?? 'Failed to delete sale',
+              isError: true,
+            );
           }
         }
       }
@@ -236,12 +239,15 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                '${CurrencyFormatter.formatQuantity(item.quantity)} × ${CurrencyFormatter.formatEtb(item.unitPrice)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                              Expanded(
+                                child: Text(
+                                  '${CurrencyFormatter.formatQuantity(item.quantity)} × ${CurrencyFormatter.formatEtb(item.unitPrice)}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Text(
                                 '${l10n.lineProfit}: ${CurrencyFormatter.formatEtb(item.lineProfit)}',
                                 style: theme.textTheme.bodySmall?.copyWith(
@@ -282,7 +288,12 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(l10n.totalRevenue, style: theme.textTheme.bodyMedium),
+                            Expanded(
+                              child: Text(
+                                l10n.totalRevenue,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
                             Text(
                               CurrencyFormatter.formatEtb(sale.totalAmount),
                               style: theme.textTheme.titleMedium?.copyWith(
@@ -295,7 +306,12 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(l10n.totalCost, style: theme.textTheme.bodyMedium),
+                            Expanded(
+                              child: Text(
+                                l10n.totalCost,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
                             Text(
                               CurrencyFormatter.formatEtb(totalCost),
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -308,12 +324,15 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              l10n.totalProfit,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                l10n.totalProfit,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             Text(
                               CurrencyFormatter.formatEtb(sale.totalProfit),
                               style: theme.textTheme.titleLarge?.copyWith(

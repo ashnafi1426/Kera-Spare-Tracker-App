@@ -25,4 +25,22 @@ class LocalStorageService {
       // Ignored for resilience on restricted storage devices
     }
   }
+
+  /// Retrieves the persisted theme mode ('system', 'light', 'dark'), or null if unset.
+  Future<String?> getSavedThemeMode() async {
+    try {
+      return await _storage.read(key: AppConstants.themeModePreferenceKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Persists the selected theme mode.
+  Future<void> saveThemeMode(String mode) async {
+    try {
+      await _storage.write(key: AppConstants.themeModePreferenceKey, value: mode);
+    } catch (_) {
+      // Ignored
+    }
+  }
 }

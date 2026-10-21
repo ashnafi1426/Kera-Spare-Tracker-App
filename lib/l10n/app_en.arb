@@ -297,7 +297,60 @@
   },
   "salesTrend": "Sales Trend",
   "noSalesInPeriod": "No sales recorded for this period",
-  "viewLowStock": "View Low Stock"
+  "viewLowStock": "View Low Stock",
+  "accountDetails": "Account Details",
+  "editProfile": "Edit Profile",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "passwordChangedSuccess": "Password changed successfully",
+  "invalidCurrentPassword": "Incorrect current password",
+  "passwordMismatch": "Passwords do not match",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "currencyLabel": "System Currency",
+  "currencyDesc": "All financial figures and reports are calculated in Ethiopian Birr (ETB).",
+  "aboutTitle": "About Kera Spare Tracker",
+  "aboutDesc": "Offline-first inventory and sales management for spare parts businesses in Kera, Addis Ababa.",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "description": "App version label",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "themeMode": "App Theme",
+  "themeSystem": "System Default",
+  "themeLight": "Light Mode",
+  "themeDark": "Dark Mode",
+  "dataManagement": "Data Management & Export",
+  "exportInventoryCsv": "Export Inventory (CSV)",
+  "exportInventoryDesc": "Generate and share CSV spreadsheet of all parts",
+  "exportSalesCsv": "Export Sales History (CSV)",
+  "exportSalesDesc": "Generate and share CSV spreadsheet of sales records",
+  "backupDatabase": "Backup Local Database",
+  "backupDatabaseDesc": "Export database file to share or store safely",
+  "restoreDatabase": "Restore Database from Backup",
+  "restoreDatabaseDesc": "Restore all local data from a backup SQLite file",
+  "restoreConfirmTitle": "Restore Database?",
+  "restoreConfirmMessage": "WARNING: Restoring will overwrite all current inventory, stock ledger, and sales records with data from the backup file. This cannot be undone. Do you wish to continue?",
+  "restoreSuccess": "Database restored successfully. Reloading...",
+  "restoreError": "Failed to restore database from selected file",
+  "exportSuccess": "Export file created: {filename}",
+  "@exportSuccess": {
+    "description": "Export file success",
+    "placeholders": {
+      "filename": { "type": "String" }
+    }
+  },
+  "exportError": "Failed to export data: {error}",
+  "@exportError": {
+    "description": "Export error message",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "saveToStorage": "Save to Storage"
 }
 
 

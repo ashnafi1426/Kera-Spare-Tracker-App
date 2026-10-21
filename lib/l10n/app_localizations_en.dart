@@ -844,4 +844,119 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewLowStock => 'View Low Stock';
+
+  @override
+  String get accountDetails => 'Account Details';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully';
+
+  @override
+  String get invalidCurrentPassword => 'Incorrect current password';
+
+  @override
+  String get passwordMismatch => 'Passwords do not match';
+
+  @override
+  String get currencyLabel => 'System Currency';
+
+  @override
+  String get currencyDesc =>
+      'All financial figures and reports are calculated in Ethiopian Birr (ETB).';
+
+  @override
+  String get aboutTitle => 'About Kera Spare Tracker';
+
+  @override
+  String get aboutDesc =>
+      'Offline-first inventory and sales management for spare parts businesses in Kera, Addis Ababa.';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get themeMode => 'App Theme';
+
+  @override
+  String get themeSystem => 'System Default';
+
+  @override
+  String get themeLight => 'Light Mode';
+
+  @override
+  String get themeDark => 'Dark Mode';
+
+  @override
+  String get dataManagement => 'Data Management & Export';
+
+  @override
+  String get exportInventoryCsv => 'Export Inventory (CSV)';
+
+  @override
+  String get exportInventoryDesc =>
+      'Generate and share CSV spreadsheet of all parts';
+
+  @override
+  String get exportSalesCsv => 'Export Sales History (CSV)';
+
+  @override
+  String get exportSalesDesc =>
+      'Generate and share CSV spreadsheet of sales records';
+
+  @override
+  String get backupDatabase => 'Backup Local Database';
+
+  @override
+  String get backupDatabaseDesc =>
+      'Export database file to share or store safely';
+
+  @override
+  String get restoreDatabase => 'Restore Database from Backup';
+
+  @override
+  String get restoreDatabaseDesc =>
+      'Restore all local data from a backup SQLite file';
+
+  @override
+  String get restoreConfirmTitle => 'Restore Database?';
+
+  @override
+  String get restoreConfirmMessage =>
+      'WARNING: Restoring will overwrite all current inventory, stock ledger, and sales records with data from the backup file. This cannot be undone. Do you wish to continue?';
+
+  @override
+  String get restoreSuccess => 'Database restored successfully. Reloading...';
+
+  @override
+  String get restoreError => 'Failed to restore database from selected file';
+
+  @override
+  String exportSuccess(String filename) {
+    return 'Export file created: $filename';
+  }
+
+  @override
+  String exportError(String error) {
+    return 'Failed to export data: $error';
+  }
+
+  @override
+  String get saveToStorage => 'Save to Storage';
 }

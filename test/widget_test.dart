@@ -12,6 +12,7 @@ import 'package:kera_spare_tracker/features/auth/presentation/screens/login_scre
 import 'package:kera_spare_tracker/features/auth/presentation/screens/register_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
+import 'package:kera_spare_tracker/features/parts/presentation/providers/parts_providers.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valuation.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/sales_summary.dart';
 import 'package:kera_spare_tracker/features/reports/presentation/providers/reports_providers.dart';
@@ -156,7 +157,6 @@ void main() {
         child: const KeraSpareTrackerApp(),
       ),
     );
-
     await tester.pumpAndSettle();
 
     // Verify user lands on HomeScreen

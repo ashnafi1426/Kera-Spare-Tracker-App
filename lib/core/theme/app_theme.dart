@@ -158,4 +158,153 @@ class AppTheme {
       ),
     );
   }
+
+  /// Dark theme for the application.
+  static ThemeData get darkTheme {
+    const darkPrimary = Color(0xFF60A5FA); // Light blue for contrast
+    const darkOnPrimary = Color(0xFF0F172A);
+    const darkPrimaryContainer = Color(0xFF1E3A8A);
+    const darkOnPrimaryContainer = Color(0xFFDBEAFE);
+
+    const darkSecondary = Color(0xFFFBBF24); // Warm Amber
+    const darkOnSecondary = Color(0xFF451A03);
+    const darkSecondaryContainer = Color(0xFF78350F);
+    const darkOnSecondaryContainer = Color(0xFFFEF3C7);
+
+    const darkSurface = Color(0xFF0F172A); // Slate 900
+    const darkCard = Color(0xFF1E293B); // Slate 800
+    const darkOnSurface = Color(0xFFF8FAFC);
+    const darkOnSurfaceVariant = Color(0xFF94A3B8);
+
+    const darkOutline = Color(0xFF334155);
+    const darkError = Color(0xFFF87171);
+
+    const colorScheme = ColorScheme(
+      brightness: Brightness.dark,
+      primary: darkPrimary,
+      onPrimary: darkOnPrimary,
+      primaryContainer: darkPrimaryContainer,
+      onPrimaryContainer: darkOnPrimaryContainer,
+      secondary: darkSecondary,
+      onSecondary: darkOnSecondary,
+      secondaryContainer: darkSecondaryContainer,
+      onSecondaryContainer: darkOnSecondaryContainer,
+      surface: darkSurface,
+      onSurface: darkOnSurface,
+      onSurfaceVariant: darkOnSurfaceVariant,
+      error: darkError,
+      onError: Colors.black,
+      outline: darkOutline,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      fontFamily: 'NotoSansEthiopic',
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: darkSurface,
+      cardTheme: CardThemeData(
+        color: darkCard,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: darkOutline, width: 1),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: darkCard,
+        foregroundColor: darkOnSurface,
+        elevation: 0,
+        centerTitle: false,
+        scrolledUnderElevation: 1,
+        titleTextStyle: TextStyle(
+          color: darkOnSurface,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: darkPrimary,
+          foregroundColor: darkOnPrimary,
+          minimumSize: const Size(double.infinity, AppConstants.standardButtonHeight),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: darkPrimary,
+          minimumSize: const Size(double.infinity, AppConstants.standardButtonHeight),
+          side: const BorderSide(color: darkPrimary, width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: darkPrimary,
+          minimumSize: const Size(AppConstants.minTouchTargetSize, AppConstants.minTouchTargetSize),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkCard,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: darkOutline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: darkOutline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: darkPrimary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: darkError),
+        ),
+        labelStyle: const TextStyle(fontSize: 15, color: darkOnSurfaceVariant),
+        hintStyle: const TextStyle(fontSize: 14, color: darkOnSurfaceVariant),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: darkSecondary,
+        foregroundColor: darkOnSecondary,
+        elevation: 2,
+        sizeConstraints: const BoxConstraints.tightFor(
+          width: 56,
+          height: 56,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: darkOutline,
+        thickness: 1,
+        space: 1,
+      ),
+    );
+  }
 }

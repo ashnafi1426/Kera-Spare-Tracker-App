@@ -325,7 +325,7 @@ class PartsDao extends DatabaseAccessor<AppDatabase> with _$PartsDaoMixin {
         spareParts.ownerId.equals(ownerId) &
             spareParts.deletedAt.isNull() &
             spareParts.cachedQuantity
-                .isSmallerOrEqual(spareParts.lowStockThreshold),
+                .isSmallerOrEqual(spareParts.lowStockLevel),
       );
     final lowStockRow = await lowStockQuery.getSingle();
     final lowCount = lowStockRow.read(lowStockExpr) ?? 0;

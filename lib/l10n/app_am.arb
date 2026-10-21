@@ -777,7 +777,92 @@
   "noSalesInPeriod": "በዚህ ጊዜ ውስጥ ምንም ሽያጭ አልተመዘገበም",
   "@noSalesInPeriod": { "description": "Empty sales report state" },
   "viewLowStock": "ዝቅተኛ ክምችቶችን ይመልከቱ",
-  "@viewLowStock": { "description": "View low stock button" }
+  "@viewLowStock": { "description": "View low stock button" },
+  "accountDetails": "የመለያ ዝርዝሮች",
+  "@accountDetails": { "description": "Account details header" },
+  "editProfile": "መገለጫ አርትዕ",
+  "@editProfile": { "description": "Edit profile dialog button" },
+  "changePassword": "የይለፍ ቃል ቀይር",
+  "@changePassword": { "description": "Change password button" },
+  "currentPassword": "የአሁኑ የይለፍ ቃል",
+  "@currentPassword": { "description": "Current password field" },
+  "newPassword": "አዲስ የይለፍ ቃል",
+  "@newPassword": { "description": "New password field" },
+  "confirmNewPassword": "አዲሱን የይለፍ ቃል ያረጋግጡ",
+  "@confirmNewPassword": { "description": "Confirm new password field" },
+  "passwordChangedSuccess": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
+  "@passwordChangedSuccess": { "description": "Password changed success snackbar" },
+  "invalidCurrentPassword": "የተሳሳተ የአሁኑ የይለፍ ቃል",
+  "@invalidCurrentPassword": { "description": "Incorrect current password error" },
+  "passwordMismatch": "የይለፍ ቃሎች አይዛመዱም",
+  "@passwordMismatch": { "description": "Passwords do not match error" },
+  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት",
+  "@passwordTooShort": { "description": "Password too short error" },
+  "currencyLabel": "የስርዓቱ ገንዘብ",
+  "@currencyLabel": { "description": "Currency label" },
+  "currencyDesc": "ሁሉም የፋይናንስ አሃዞች እና ሪፖርቶች በኢትዮጵያ ብር (ETB) ይሰላሉ።",
+  "@currencyDesc": { "description": "Currency explanation description" },
+  "aboutTitle": "ስለ ቄራ ስፔር ትራከር",
+  "@aboutTitle": { "description": "About app title" },
+  "aboutDesc": "በቄራ አዲስ አበባ ለሚገኙ የመለዋወጫ ንግዶች ከመስመር ውጭ የሚሰራ የእቃ ዝርዝር እና የሽያጭ አስተዳደር።",
+  "@aboutDesc": { "description": "About app description" },
+  "appVersion": "ስሪት {version}",
+  "@appVersion": {
+    "description": "App version label",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "themeMode": "የመተግበሪያ ገጽታ",
+  "@themeMode": { "description": "Theme selector title" },
+  "themeSystem": "የስርዓቱ ነባሪ",
+  "@themeSystem": { "description": "System theme choice" },
+  "themeLight": "ብሩህ ገጽታ",
+  "@themeLight": { "description": "Light theme choice" },
+  "themeDark": "ጨለማ ገጽታ",
+  "@themeDark": { "description": "Dark theme choice" },
+  "dataManagement": "የውሂብ አስተዳደር እና ኤክስፖርት",
+  "@dataManagement": { "description": "Data management section header" },
+  "exportInventoryCsv": "የእቃ ዝርዝር ኤክስፖርት (CSV)",
+  "@exportInventoryCsv": { "description": "Export inventory CSV button" },
+  "exportInventoryDesc": "የሁሉም መለዋወጫዎች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ",
+  "@exportInventoryDesc": { "description": "Export inventory CSV description" },
+  "exportSalesCsv": "የሽያጭ ታሪክ ኤክስፖርት (CSV)",
+  "@exportSalesCsv": { "description": "Export sales CSV button" },
+  "exportSalesDesc": "የሽያጭ መዝገቦች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ",
+  "@exportSalesDesc": { "description": "Export sales CSV description" },
+  "backupDatabase": "የአካባቢ ዳታቤዝ ቅጂ (Backup)",
+  "@backupDatabase": { "description": "Backup database button" },
+  "backupDatabaseDesc": "የዳታቤዝ ፋይልን ለማጋራት ወይም በደህና ለማስቀመጥ ኤክስፖርት ያድርጉ",
+  "@backupDatabaseDesc": { "description": "Backup database description" },
+  "restoreDatabase": "ዳታቤዝ ከመጠባበቂያ ፋይል ይመልሱ",
+  "@restoreDatabase": { "description": "Restore database button" },
+  "restoreDatabaseDesc": "ሁሉንም የአካባቢ ውሂብ ከመጠባበቂያ የ SQLite ፋይል ይመልሱ",
+  "@restoreDatabaseDesc": { "description": "Restore database description" },
+  "restoreConfirmTitle": "ዳታቤዙን መመለስ ይፈልጋሉ?",
+  "@restoreConfirmTitle": { "description": "Restore confirmation title" },
+  "restoreConfirmMessage": "ማስጠንቀቂያ፡ ወደነበረበት መመለስ አሁን ያለውን ሁሉንም የእቃ ዝርዝር፣ የክምችት መዝገብ እና የሽያጭ መረጃዎች በመጠባበቂያ ፋይሉ ውሂብ ይተካዋል። ይህ እርምጃ ሊቀለበስ አይችልም። መቀጠል ይፈልጋሉ?",
+  "@restoreConfirmMessage": { "description": "Restore confirmation warning message" },
+  "restoreSuccess": "ዳታቤዙ በተሳካ ሁኔታ ተመልሷል። እንደገና በመጫን ላይ...",
+  "@restoreSuccess": { "description": "Restore success message" },
+  "restoreError": "ከተመረጠው ፋይል ዳታቤዙን መመለስ አልተቻለም",
+  "@restoreError": { "description": "Restore error message" },
+  "exportSuccess": "የኤክስፖርት ፋይል ተፈጥሯል፡ {filename}",
+  "@exportSuccess": {
+    "description": "Export file success",
+    "placeholders": {
+      "filename": { "type": "String" }
+    }
+  },
+  "exportError": "ውሂብ ኤክስፖርት ማድረግ አልተቻለም፡ {error}",
+  "@exportError": {
+    "description": "Export error message",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "saveToStorage": "ወደ ማከማቻ አስቀምጥ",
+  "@saveToStorage": { "description": "Save to storage label" }
 }
 
 

@@ -88,7 +88,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get passwordRequired => 'የይለፍ ቃል ማስገባት ግዴታ ነው';
 
   @override
-  String get passwordTooShort => 'የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት';
+  String get passwordTooShort => 'የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት';
 
   @override
   String get fieldRequired => 'ይህ ቦታ መሞላት አለበት';
@@ -813,4 +813,115 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get viewLowStock => 'ዝቅተኛ ክምችቶችን ይመልከቱ';
+
+  @override
+  String get accountDetails => 'የመለያ ዝርዝሮች';
+
+  @override
+  String get editProfile => 'መገለጫ አርትዕ';
+
+  @override
+  String get changePassword => 'የይለፍ ቃል ቀይር';
+
+  @override
+  String get currentPassword => 'የአሁኑ የይለፍ ቃል';
+
+  @override
+  String get newPassword => 'አዲስ የይለፍ ቃል';
+
+  @override
+  String get confirmNewPassword => 'አዲሱን የይለፍ ቃል ያረጋግጡ';
+
+  @override
+  String get passwordChangedSuccess => 'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል';
+
+  @override
+  String get invalidCurrentPassword => 'የተሳሳተ የአሁኑ የይለፍ ቃል';
+
+  @override
+  String get passwordMismatch => 'የይለፍ ቃሎች አይዛመዱም';
+
+  @override
+  String get currencyLabel => 'የስርዓቱ ገንዘብ';
+
+  @override
+  String get currencyDesc => 'ሁሉም የፋይናንስ አሃዞች እና ሪፖርቶች በኢትዮጵያ ብር (ETB) ይሰላሉ።';
+
+  @override
+  String get aboutTitle => 'ስለ ቄራ ስፔር ትራከር';
+
+  @override
+  String get aboutDesc =>
+      'በቄራ አዲስ አበባ ለሚገኙ የመለዋወጫ ንግዶች ከመስመር ውጭ የሚሰራ የእቃ ዝርዝር እና የሽያጭ አስተዳደር።';
+
+  @override
+  String appVersion(String version) {
+    return 'ስሪት $version';
+  }
+
+  @override
+  String get themeMode => 'የመተግበሪያ ገጽታ';
+
+  @override
+  String get themeSystem => 'የስርዓቱ ነባሪ';
+
+  @override
+  String get themeLight => 'ብሩህ ገጽታ';
+
+  @override
+  String get themeDark => 'ጨለማ ገጽታ';
+
+  @override
+  String get dataManagement => 'የውሂብ አስተዳደር እና ኤክስፖርት';
+
+  @override
+  String get exportInventoryCsv => 'የእቃ ዝርዝር ኤክስፖርት (CSV)';
+
+  @override
+  String get exportInventoryDesc => 'የሁሉም መለዋወጫዎች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ';
+
+  @override
+  String get exportSalesCsv => 'የሽያጭ ታሪክ ኤክስፖርት (CSV)';
+
+  @override
+  String get exportSalesDesc => 'የሽያጭ መዝገቦች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ';
+
+  @override
+  String get backupDatabase => 'የአካባቢ ዳታቤዝ ቅጂ (Backup)';
+
+  @override
+  String get backupDatabaseDesc =>
+      'የዳታቤዝ ፋይልን ለማጋራት ወይም በደህና ለማስቀመጥ ኤክስፖርት ያድርጉ';
+
+  @override
+  String get restoreDatabase => 'ዳታቤዝ ከመጠባበቂያ ፋይል ይመልሱ';
+
+  @override
+  String get restoreDatabaseDesc => 'ሁሉንም የአካባቢ ውሂብ ከመጠባበቂያ የ SQLite ፋይል ይመልሱ';
+
+  @override
+  String get restoreConfirmTitle => 'ዳታቤዙን መመለስ ይፈልጋሉ?';
+
+  @override
+  String get restoreConfirmMessage =>
+      'ማስጠንቀቂያ፡ ወደነበረበት መመለስ አሁን ያለውን ሁሉንም የእቃ ዝርዝር፣ የክምችት መዝገብ እና የሽያጭ መረጃዎች በመጠባበቂያ ፋይሉ ውሂብ ይተካዋል። ይህ እርምጃ ሊቀለበስ አይችልም። መቀጠል ይፈልጋሉ?';
+
+  @override
+  String get restoreSuccess => 'ዳታቤዙ በተሳካ ሁኔታ ተመልሷል። እንደገና በመጫን ላይ...';
+
+  @override
+  String get restoreError => 'ከተመረጠው ፋይል ዳታቤዙን መመለስ አልተቻለም';
+
+  @override
+  String exportSuccess(String filename) {
+    return 'የኤክስፖርት ፋይል ተፈጥሯል፡ $filename';
+  }
+
+  @override
+  String exportError(String error) {
+    return 'ውሂብ ኤክስፖርት ማድረግ አልተቻለም፡ $error';
+  }
+
+  @override
+  String get saveToStorage => 'ወደ ማከማቻ አስቀምጥ';
 }

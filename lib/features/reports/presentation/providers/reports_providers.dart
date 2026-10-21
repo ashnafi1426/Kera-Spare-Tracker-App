@@ -17,9 +17,18 @@ final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
   return LocalReportsRepository(db: db);
 });
 
-/// Currently selected period on the reports screen (daily, weekly, monthly).
+/// Notifier for the currently selected period on the reports screen.
+class SelectedReportPeriodNotifier extends Notifier<ReportPeriod> {
+  @override
+  ReportPeriod build() => ReportPeriod.daily;
+
+  void setPeriod(ReportPeriod period) => state = period;
+}
+
 final selectedReportPeriodProvider =
-    StateProvider<ReportPeriod>((ref) => ReportPeriod.daily);
+    NotifierProvider<SelectedReportPeriodNotifier, ReportPeriod>(
+  SelectedReportPeriodNotifier.new,
+);
 
 /// Provider for the high-level sales metrics for the selected period.
 final salesSummaryProvider = FutureProvider<SalesSummary>((ref) async {

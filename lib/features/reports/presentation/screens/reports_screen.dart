@@ -66,8 +66,9 @@ class ReportsScreen extends ConsumerWidget {
                 ],
                 selected: {selectedPeriod},
                 onSelectionChanged: (newSelection) {
-                  ref.read(selectedReportPeriodProvider.notifier).state =
-                      newSelection.first;
+                  ref.read(selectedReportPeriodProvider.notifier).setPeriod(
+                        newSelection.first,
+                      );
                 },
               ),
               const SizedBox(height: 16),
@@ -150,8 +151,11 @@ class ReportsScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 12,
+                            runSpacing: 8,
                             children: [
                               Text(
                                 l10n.salesTrend,
@@ -160,6 +164,7 @@ class ReportsScreen extends ConsumerWidget {
                                 ),
                               ),
                               Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   _buildLegendIndicator(
                                     color: colorScheme.primary,
@@ -334,35 +339,51 @@ class ReportsScreen extends ConsumerWidget {
                                 .withValues(alpha: 0.5),
                           ),
                         ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 16,
-                            vertical: 8,
+                            vertical: 12,
                           ),
-                          leading: CircleAvatar(
-                            backgroundColor: colorScheme.primaryContainer,
-                            child: Icon(
-                              Icons.inventory_2_rounded,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          title: Text(
-                            l10n.totalStockValue,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${valuation.totalActiveParts} ${l10n.inventoryTab.toLowerCase()}',
-                          ),
-                          trailing: Text(
-                            CurrencyFormatter.formatEtb(
-                              valuation.totalStockValue,
-                            ),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: colorScheme.primaryContainer,
+                                child: Icon(
+                                  Icons.inventory_2_rounded,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      l10n.totalStockValue,
+                                      style: theme.textTheme.titleSmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${valuation.totalActiveParts} ${l10n.inventoryTab.toLowerCase()}',
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                CurrencyFormatter.formatEtb(
+                                  valuation.totalStockValue,
+                                ),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -384,40 +405,58 @@ class ReportsScreen extends ConsumerWidget {
                                     .withValues(alpha: 0.5),
                           ),
                         ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 16,
-                            vertical: 8,
+                            vertical: 12,
                           ),
-                          leading: CircleAvatar(
-                            backgroundColor: valuation.lowStockCount > 0
-                                ? Colors.amber.shade200
-                                : colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.warning_amber_rounded,
-                              color: valuation.lowStockCount > 0
-                                  ? Colors.amber.shade900
-                                  : colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          title: Text(
-                            l10n.lowStockCount,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: valuation.lowStockCount > 0
-                                  ? Colors.amber.shade900
-                                  : colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          subtitle: Text(
-                            valuation.lowStockCount > 0
-                                ? '${valuation.lowStockCount} items at or below reorder limit'
-                                : l10n.noLowStockItems,
-                            style: theme.textTheme.bodySmall,
-                          ),
-                          trailing: valuation.lowStockCount > 0
-                              ? OutlinedButton(
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: valuation.lowStockCount > 0
+                                    ? Colors.amber.shade200
+                                    : colorScheme.surfaceContainerHighest,
+                                child: Icon(
+                                  Icons.warning_amber_rounded,
+                                  color: valuation.lowStockCount > 0
+                                      ? Colors.amber.shade900
+                                      : colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      l10n.lowStockCount,
+                                      style: theme.textTheme.titleSmall?.copyWith(
+                                        color: valuation.lowStockCount > 0
+                                            ? Colors.amber.shade900
+                                            : colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      valuation.lowStockCount > 0
+                                          ? '${valuation.lowStockCount} items at or below reorder limit'
+                                          : l10n.noLowStockItems,
+                                      style: theme.textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (valuation.lowStockCount > 0) ...[
+                                const SizedBox(width: 8),
+                                OutlinedButton(
                                   style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size(0, 36),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
                                     foregroundColor: Colors.amber.shade900,
                                     side: BorderSide(
                                       color: Colors.amber.shade700,
@@ -426,8 +465,10 @@ class ReportsScreen extends ConsumerWidget {
                                   onPressed: () =>
                                       context.push('/stock/low-stock'),
                                   child: Text(l10n.viewLowStock),
-                                )
-                              : null,
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ],

@@ -43,9 +43,10 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
     );
 
     if (picked != null) {
-      ref.read(salesHistoryCustomRangeProvider.notifier).state = picked;
-      ref.read(salesHistoryDateFilterProvider.notifier).state =
-          DateRangeType.custom;
+      ref.read(salesHistoryCustomRangeProvider.notifier).setRange(picked);
+      ref.read(salesHistoryDateFilterProvider.notifier).setFilter(
+            DateRangeType.custom,
+          );
     }
   }
 
@@ -87,7 +88,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                           _searchController.clear();
                           ref
                               .read(salesHistorySearchQueryProvider.notifier)
-                              .state = '';
+                              .setQuery('');
                           setState(() {});
                         },
                       )
@@ -100,7 +101,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 ),
               ),
               onChanged: (val) {
-                ref.read(salesHistorySearchQueryProvider.notifier).state = val;
+                ref
+                    .read(salesHistorySearchQueryProvider.notifier)
+                    .setQuery(val);
                 setState(() {});
               },
             ),
@@ -116,8 +119,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   label: l10n.filterToday,
                   isSelected: selectedFilter == DateRangeType.today,
                   onSelected: () {
-                    ref.read(salesHistoryDateFilterProvider.notifier).state =
-                        DateRangeType.today;
+                    ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.today);
                   },
                 ),
                 const SizedBox(width: 8),
@@ -125,8 +129,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   label: l10n.filterThisWeek,
                   isSelected: selectedFilter == DateRangeType.thisWeek,
                   onSelected: () {
-                    ref.read(salesHistoryDateFilterProvider.notifier).state =
-                        DateRangeType.thisWeek;
+                    ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.thisWeek);
                   },
                 ),
                 const SizedBox(width: 8),
@@ -134,8 +139,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   label: l10n.filterThisMonth,
                   isSelected: selectedFilter == DateRangeType.thisMonth,
                   onSelected: () {
-                    ref.read(salesHistoryDateFilterProvider.notifier).state =
-                        DateRangeType.thisMonth;
+                    ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.thisMonth);
                   },
                 ),
                 const SizedBox(width: 8),

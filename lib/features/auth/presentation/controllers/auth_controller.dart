@@ -60,6 +60,26 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     state = const AsyncValue.data(null);
     return result;
   }
+
+  /// Changes the user password.
+  Future<Result<void>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    return _repo.changePassword(
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
+  }
+
+  /// Updates the business name and reflects it in auth state.
+  Future<Result<AuthUser>> updateBusinessName(String newName) async {
+    final result = await _repo.updateBusinessName(newName);
+    if (result.isSuccess) {
+      state = AsyncValue.data(result.valueOrNull);
+    }
+    return result;
+  }
 }
 
 /// Provider exposing AuthController and the current AuthUser.

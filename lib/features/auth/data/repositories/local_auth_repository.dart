@@ -265,6 +265,36 @@ class LocalAuthRepository implements AuthRepository {
     }
   }
 
+  @override
+  Future<Result<AuthUser>> updateBusinessName(String newBusinessName) async {
+    try {
+      final userResult = await currentUser();
+      final user = userResult.valueOrNull;
+      if (user == null) {
+        return const Result.failure(
+          AuthFailure(message: 'User is not logged in'),
+        );
+      }
+
+      final now = DateTime.now();
+      await (db.update(db.profiles)..where((t) => t.id.equals(user.id))).write(
+        ProfilesCompanion(
+          businessName: Value(newBusinessName),
+          updatedAt: Value(now),
+          syncStatus: const Value(SyncStatus.pending),
+        ),
+      );
+
+      final updatedUser = user.copyWith(businessName: newBusinessName);
+      await _persistSession(updatedUser);
+      return Result.success(updatedUser);
+    } catch (e) {
+      return Result.failure(
+        AuthFailure(message: 'Update profile failed: ${e.toString()}', cause: e),
+      );
+    }
+  }
+
   Future<void> _persistSession(AuthUser user) async {
     _cachedUser = user;
     await _storage.write(

@@ -29,6 +29,9 @@ abstract class AuthRepository {
     required String newPassword,
   });
 
+  /// Updates the business name for the active user.
+  Future<Result<AuthUser>> updateBusinessName(String newBusinessName);
+
   /// Stream of authentication state changes.
   Stream<AuthUser?> watchCurrentUser();
 }

@@ -58,6 +58,7 @@ class AppConstants {
   static const String secureStorageTokenKey = 'kera_auth_token';
   static const String secureStorageOwnerIdKey = 'kera_owner_id';
   static const String localePreferenceKey = 'kera_user_locale';
+  static const String themeModePreferenceKey = 'kera_user_theme_mode';
 
   /// Touch targets for low-end Android mobile accessibility.
   static const double minTouchTargetSize = 48.0;

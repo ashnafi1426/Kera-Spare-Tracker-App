@@ -80,12 +80,13 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
         final clean = '%${query.trim()}%';
         final receiptMatch = t.receiptNumber.like(clean);
         final itemMatch = existsQuery(
-          selectOnly(saleItems)
+          select(saleItems)
             ..where(
-              saleItems.saleId.equalsExp(t.id) &
-                  saleItems.ownerId.equals(ownerId) &
-                  saleItems.deletedAt.isNull() &
-                  saleItems.partNameSnapshot.like(clean),
+              (i) =>
+                  i.saleId.equalsExp(t.id) &
+                  i.ownerId.equals(ownerId) &
+                  i.deletedAt.isNull() &
+                  i.partNameSnapshot.like(clean),
             ),
         );
         pred = pred & (receiptMatch | itemMatch);
@@ -116,12 +117,13 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
         final clean = '%${query.trim()}%';
         final receiptMatch = t.receiptNumber.like(clean);
         final itemMatch = existsQuery(
-          selectOnly(saleItems)
+          select(saleItems)
             ..where(
-              saleItems.saleId.equalsExp(t.id) &
-                  saleItems.ownerId.equals(ownerId) &
-                  saleItems.deletedAt.isNull() &
-                  saleItems.partNameSnapshot.like(clean),
+              (i) =>
+                  i.saleId.equalsExp(t.id) &
+                  i.ownerId.equals(ownerId) &
+                  i.deletedAt.isNull() &
+                  i.partNameSnapshot.like(clean),
             ),
         );
         pred = pred & (receiptMatch | itemMatch);
@@ -131,7 +133,6 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
     statement.orderBy([(t) => OrderingTerm.desc(t.soldAt)]);
     return statement.watch();
   }
-
   /// Retrieves line items for a sale.
   Future<List<SaleItem>> getSaleItems(String saleId, String ownerId) {
     return (select(saleItems)

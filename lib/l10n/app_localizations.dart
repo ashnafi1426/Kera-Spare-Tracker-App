@@ -254,10 +254,10 @@ abstract class AppLocalizations {
   /// **'የይለፍ ቃል ማስገባት ግዴታ ነው'**
   String get passwordRequired;
 
-  /// Validation error when password is under 6 characters
+  /// Password too short error
   ///
   /// In am, this message translates to:
-  /// **'የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት'**
+  /// **'የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት'**
   String get passwordTooShort;
 
   /// Generic required field validation error
@@ -1667,6 +1667,210 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ዝቅተኛ ክምችቶችን ይመልከቱ'**
   String get viewLowStock;
+
+  /// Account details header
+  ///
+  /// In am, this message translates to:
+  /// **'የመለያ ዝርዝሮች'**
+  String get accountDetails;
+
+  /// Edit profile dialog button
+  ///
+  /// In am, this message translates to:
+  /// **'መገለጫ አርትዕ'**
+  String get editProfile;
+
+  /// Change password button
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ቀይር'**
+  String get changePassword;
+
+  /// Current password field
+  ///
+  /// In am, this message translates to:
+  /// **'የአሁኑ የይለፍ ቃል'**
+  String get currentPassword;
+
+  /// New password field
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ የይለፍ ቃል'**
+  String get newPassword;
+
+  /// Confirm new password field
+  ///
+  /// In am, this message translates to:
+  /// **'አዲሱን የይለፍ ቃል ያረጋግጡ'**
+  String get confirmNewPassword;
+
+  /// Password changed success snackbar
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል'**
+  String get passwordChangedSuccess;
+
+  /// Incorrect current password error
+  ///
+  /// In am, this message translates to:
+  /// **'የተሳሳተ የአሁኑ የይለፍ ቃል'**
+  String get invalidCurrentPassword;
+
+  /// Passwords do not match error
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃሎች አይዛመዱም'**
+  String get passwordMismatch;
+
+  /// Currency label
+  ///
+  /// In am, this message translates to:
+  /// **'የስርዓቱ ገንዘብ'**
+  String get currencyLabel;
+
+  /// Currency explanation description
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም የፋይናንስ አሃዞች እና ሪፖርቶች በኢትዮጵያ ብር (ETB) ይሰላሉ።'**
+  String get currencyDesc;
+
+  /// About app title
+  ///
+  /// In am, this message translates to:
+  /// **'ስለ ቄራ ስፔር ትራከር'**
+  String get aboutTitle;
+
+  /// About app description
+  ///
+  /// In am, this message translates to:
+  /// **'በቄራ አዲስ አበባ ለሚገኙ የመለዋወጫ ንግዶች ከመስመር ውጭ የሚሰራ የእቃ ዝርዝር እና የሽያጭ አስተዳደር።'**
+  String get aboutDesc;
+
+  /// App version label
+  ///
+  /// In am, this message translates to:
+  /// **'ስሪት {version}'**
+  String appVersion(String version);
+
+  /// Theme selector title
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ገጽታ'**
+  String get themeMode;
+
+  /// System theme choice
+  ///
+  /// In am, this message translates to:
+  /// **'የስርዓቱ ነባሪ'**
+  String get themeSystem;
+
+  /// Light theme choice
+  ///
+  /// In am, this message translates to:
+  /// **'ብሩህ ገጽታ'**
+  String get themeLight;
+
+  /// Dark theme choice
+  ///
+  /// In am, this message translates to:
+  /// **'ጨለማ ገጽታ'**
+  String get themeDark;
+
+  /// Data management section header
+  ///
+  /// In am, this message translates to:
+  /// **'የውሂብ አስተዳደር እና ኤክስፖርት'**
+  String get dataManagement;
+
+  /// Export inventory CSV button
+  ///
+  /// In am, this message translates to:
+  /// **'የእቃ ዝርዝር ኤክስፖርት (CSV)'**
+  String get exportInventoryCsv;
+
+  /// Export inventory CSV description
+  ///
+  /// In am, this message translates to:
+  /// **'የሁሉም መለዋወጫዎች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ'**
+  String get exportInventoryDesc;
+
+  /// Export sales CSV button
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ታሪክ ኤክስፖርት (CSV)'**
+  String get exportSalesCsv;
+
+  /// Export sales CSV description
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ መዝገቦች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ'**
+  String get exportSalesDesc;
+
+  /// Backup database button
+  ///
+  /// In am, this message translates to:
+  /// **'የአካባቢ ዳታቤዝ ቅጂ (Backup)'**
+  String get backupDatabase;
+
+  /// Backup database description
+  ///
+  /// In am, this message translates to:
+  /// **'የዳታቤዝ ፋይልን ለማጋራት ወይም በደህና ለማስቀመጥ ኤክስፖርት ያድርጉ'**
+  String get backupDatabaseDesc;
+
+  /// Restore database button
+  ///
+  /// In am, this message translates to:
+  /// **'ዳታቤዝ ከመጠባበቂያ ፋይል ይመልሱ'**
+  String get restoreDatabase;
+
+  /// Restore database description
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉንም የአካባቢ ውሂብ ከመጠባበቂያ የ SQLite ፋይል ይመልሱ'**
+  String get restoreDatabaseDesc;
+
+  /// Restore confirmation title
+  ///
+  /// In am, this message translates to:
+  /// **'ዳታቤዙን መመለስ ይፈልጋሉ?'**
+  String get restoreConfirmTitle;
+
+  /// Restore confirmation warning message
+  ///
+  /// In am, this message translates to:
+  /// **'ማስጠንቀቂያ፡ ወደነበረበት መመለስ አሁን ያለውን ሁሉንም የእቃ ዝርዝር፣ የክምችት መዝገብ እና የሽያጭ መረጃዎች በመጠባበቂያ ፋይሉ ውሂብ ይተካዋል። ይህ እርምጃ ሊቀለበስ አይችልም። መቀጠል ይፈልጋሉ?'**
+  String get restoreConfirmMessage;
+
+  /// Restore success message
+  ///
+  /// In am, this message translates to:
+  /// **'ዳታቤዙ በተሳካ ሁኔታ ተመልሷል። እንደገና በመጫን ላይ...'**
+  String get restoreSuccess;
+
+  /// Restore error message
+  ///
+  /// In am, this message translates to:
+  /// **'ከተመረጠው ፋይል ዳታቤዙን መመለስ አልተቻለም'**
+  String get restoreError;
+
+  /// Export file success
+  ///
+  /// In am, this message translates to:
+  /// **'የኤክስፖርት ፋይል ተፈጥሯል፡ {filename}'**
+  String exportSuccess(String filename);
+
+  /// Export error message
+  ///
+  /// In am, this message translates to:
+  /// **'ውሂብ ኤክስፖርት ማድረግ አልተቻለም፡ {error}'**
+  String exportError(String error);
+
+  /// Save to storage label
+  ///
+  /// In am, this message translates to:
+  /// **'ወደ ማከማቻ አስቀምጥ'**
+  String get saveToStorage;
 }
 
 class _AppLocalizationsDelegate
