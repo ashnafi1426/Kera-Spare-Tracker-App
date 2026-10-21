@@ -872,10 +872,10 @@ abstract class AppLocalizations {
   /// **'የመሸጫ ዋጋ (ብር)'**
   String get sellingPrice;
 
-  /// Estimated profit label
+  /// Estimated profit metric
   ///
   /// In am, this message translates to:
-  /// **'በነጠላ የሚገኝ ትርፍ'**
+  /// **'የተገመተ ትርፍ'**
   String get estimatedProfit;
 
   /// Size and specs label
@@ -1165,6 +1165,508 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'የሙከራ ዕቃዎች ተሰርዘዋል'**
   String get clearTestPartsSuccess;
+
+  /// Update stock action title
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት አስተካክል'**
+  String get updateStock;
+
+  /// Add stock purchase action
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት ጨምር (ግዢ)'**
+  String get addStockPurchase;
+
+  /// Remove stock action
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት ቀንስ'**
+  String get removeStock;
+
+  /// Adjust stock to physical count
+  ///
+  /// In am, this message translates to:
+  /// **'የተቆጠረውን ትክክለኛ ብዛት መዝግብ'**
+  String get adjustStockCount;
+
+  /// Stock movement history title
+  ///
+  /// In am, this message translates to:
+  /// **'የእንቅስቃሴ ታሪክ'**
+  String get stockMovementHistory;
+
+  /// Quantity to add input label
+  ///
+  /// In am, this message translates to:
+  /// **'የሚጨመረው ብዛት'**
+  String get quantityToAdd;
+
+  /// Quantity to remove input label
+  ///
+  /// In am, this message translates to:
+  /// **'የሚቀነሰው ብዛት'**
+  String get quantityToRemove;
+
+  /// Counted quantity input label
+  ///
+  /// In am, this message translates to:
+  /// **'የተቆጠረው ብዛት'**
+  String get countedQuantity;
+
+  /// Unit cost input label
+  ///
+  /// In am, this message translates to:
+  /// **'የአንዱ ዋጋ (ብር)'**
+  String get unitCost;
+
+  /// Reason or note input label
+  ///
+  /// In am, this message translates to:
+  /// **'ምክንያት ወይም ማስታወሻ'**
+  String get reasonOrNote;
+
+  /// Reason or note input hint
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ከአቅራቢ የገባ፣ የተበላሸ፣ ቆጠራ የተደረገ...'**
+  String get reasonOrNoteHint;
+
+  /// Current stock label
+  ///
+  /// In am, this message translates to:
+  /// **'የአሁን ክምችት'**
+  String get currentStock;
+
+  /// Difference label
+  ///
+  /// In am, this message translates to:
+  /// **'ልዩነት'**
+  String get difference;
+
+  /// Running balance label
+  ///
+  /// In am, this message translates to:
+  /// **'የቀረው ክምችት'**
+  String get runningBalance;
+
+  /// Recalculate stock action
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት እንደገና አስላ'**
+  String get recalculateStock;
+
+  /// Recalculate stock description
+  ///
+  /// In am, this message translates to:
+  /// **'የክምችት ትክክለኛነትን ለማረጋገጥ ከእንቅስቃሴ መዝገቡ ላይ እንደገና ያሰላል'**
+  String get recalculateStockDesc;
+
+  /// Stock recalculated success message
+  ///
+  /// In am, this message translates to:
+  /// **'የክምችት ብዛት ከመዝገቡ ላይ በተሳካ ሁኔታ ተሰልቷል'**
+  String get stockRecalculatedSuccess;
+
+  /// Allow negative stock setting title
+  ///
+  /// In am, this message translates to:
+  /// **'ከዜሮ በታች እንዲሆን ፍቀድ'**
+  String get allowNegativeStock;
+
+  /// Allow negative stock setting description
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎችን ሲቀንሱ ወይም ሲሸጡ ክምችቱ ከዜሮ በታች እንዲወርድ ይፈቅዳል'**
+  String get allowNegativeStockDesc;
+
+  /// Negative stock warning dialog title
+  ///
+  /// In am, this message translates to:
+  /// **'የክምችት እጥረት ማስጠንቀቂያ'**
+  String get negativeStockWarningTitle;
+
+  /// Negative stock warning confirmation message
+  ///
+  /// In am, this message translates to:
+  /// **'ይህንን ብዛት መቀነስ ክምችቱን ከዜሮ በታች ({newStock}) ያደርገዋል። እርግጠኛ ነዎት?'**
+  String negativeStockWarningMessage(String newStock);
+
+  /// Negative stock disallowed message
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት ከዜሮ በታች ሊሆን አይችልም። አስፈላጊ ከሆነ በቅንብሮች ውስጥ ይፍቀዱ።'**
+  String get negativeStockNotAllowed;
+
+  /// Low stock items screen title
+  ///
+  /// In am, this message translates to:
+  /// **'አነስተኛ ክምችት ያላቸው ዕቃዎች'**
+  String get lowStockListTitle;
+
+  /// Low stock items screen subtitle
+  ///
+  /// In am, this message translates to:
+  /// **'ከዝቅተኛው የመጠን ገደብ በታች የሆኑ ዕቃዎች'**
+  String get lowStockListDesc;
+
+  /// Empty state for low stock screen
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም አነስተኛ ክምችት ያለው ዕቃ የለም። ሁሉም በቂ ክምችት አላቸው!'**
+  String get noLowStockItems;
+
+  /// Initial stock movement type
+  ///
+  /// In am, this message translates to:
+  /// **'የመጀመሪያ ክምችት'**
+  String get movementTypeInitial;
+
+  /// Purchase movement type
+  ///
+  /// In am, this message translates to:
+  /// **'ግዢ'**
+  String get movementTypePurchase;
+
+  /// Sale movement type
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ'**
+  String get movementTypeSale;
+
+  /// Adjustment movement type
+  ///
+  /// In am, this message translates to:
+  /// **'ማስተካከያ'**
+  String get movementTypeAdjustment;
+
+  /// Return movement type
+  ///
+  /// In am, this message translates to:
+  /// **'ተመላሽ'**
+  String get movementTypeReturn;
+
+  /// No movements empty state title
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የክምችት እንቅስቃሴ የለም'**
+  String get noMovementsTitle;
+
+  /// No movements empty state description
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት ሲጨመር፣ ሲቀነስ ወይም ሲስተካከል እንቅስቃሴዎች እዚህ ይታያሉ።'**
+  String get noMovementsDesc;
+
+  /// New sale button and title
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ሽያጭ'**
+  String get newSale;
+
+  /// Record sale title
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ መዝግብ'**
+  String get recordSale;
+
+  /// Sale details title
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ዝርዝር'**
+  String get saleDetails;
+
+  /// Add parts to sale button
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎችን ጨምር'**
+  String get addPartsToSale;
+
+  /// Empty sale cart title
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም ዕቃ አልተመረጠም'**
+  String get cartEmptyTitle;
+
+  /// Empty sale cart description
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጩን ለመመዝገብ ዕቃዎችን ይፈልጉ እና ይጨምሩ'**
+  String get cartEmptyDesc;
+
+  /// Unit price label
+  ///
+  /// In am, this message translates to:
+  /// **'የነጠላ መሸጫ ዋጋ'**
+  String get unitPrice;
+
+  /// Line total label
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ዋጋ'**
+  String get lineTotal;
+
+  /// Line profit label
+  ///
+  /// In am, this message translates to:
+  /// **'ትርፍ'**
+  String get lineProfit;
+
+  /// Total estimated profit label
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ የሚገኝ ትርፍ'**
+  String get totalProfit;
+
+  /// Customer notes label
+  ///
+  /// In am, this message translates to:
+  /// **'የደንበኛ ወይም የደረሰኝ ማስታወሻ'**
+  String get customerNotes;
+
+  /// Customer notes hint
+  ///
+  /// In am, this message translates to:
+  /// **'አማራጭ ማስታወሻ ወይም የደንበኛ ስም...'**
+  String get customerNotesHint;
+
+  /// Total items count label
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ዕቃዎች'**
+  String get totalItems;
+
+  /// Total cost label
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ወጪ'**
+  String get totalCost;
+
+  /// Complete sale button
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጩን ጨርስ'**
+  String get completeSale;
+
+  /// Sale success screen title
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጩ በተሳካ ሁኔታ ተመዝግቧል!'**
+  String get saleSuccessTitle;
+
+  /// Receipt number label
+  ///
+  /// In am, this message translates to:
+  /// **'የደረሰኝ ቁጥር'**
+  String get receiptNumber;
+
+  /// Sale date and time label
+  ///
+  /// In am, this message translates to:
+  /// **'የተሸጠበት ቀን እና ሰዓት'**
+  String get soldAt;
+
+  /// Warning when part has no purchase price
+  ///
+  /// In am, this message translates to:
+  /// **'የግዢ ዋጋ አልተመዘገበም፤ ትርፉ ከተጨባጩ በላይ ሊታይ ይችላል'**
+  String get noCostWarning;
+
+  /// Warning when a sale item exceeds stock
+  ///
+  /// In am, this message translates to:
+  /// **'የ\"{partName}\" ብዛት ከአሁን ክምችት ({stock}) ይበልጣል። ቀሪው ክምችት {newStock} ይሆናል።'**
+  String saleStockWarningMessage(
+    String partName,
+    String stock,
+    String newStock,
+  );
+
+  /// Sale recorded success message
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጩ በተሳካ ሁኔታ ተመዝግቧል'**
+  String get saleRecordedSuccess;
+
+  /// Back to home button
+  ///
+  /// In am, this message translates to:
+  /// **'ወደ ዋና ገጽ ተመለስ'**
+  String get backToHome;
+
+  /// Empty sale validation error
+  ///
+  /// In am, this message translates to:
+  /// **'ባዶ ሽያጭ ማስቀመጥ አይቻልም። እባክዎ ቢያንስ አንድ ዕቃ ይጨምሩ።'**
+  String get emptySaleError;
+
+  /// Search and add parts button
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎችን ፈልግ እና ጨምር'**
+  String get searchAndAddParts;
+
+  /// Filter today
+  ///
+  /// In am, this message translates to:
+  /// **'ዛሬ'**
+  String get filterToday;
+
+  /// Filter this week
+  ///
+  /// In am, this message translates to:
+  /// **'በዚህ ሳምንት'**
+  String get filterThisWeek;
+
+  /// Filter this month
+  ///
+  /// In am, this message translates to:
+  /// **'በዚህ ወር'**
+  String get filterThisMonth;
+
+  /// Filter custom date range
+  ///
+  /// In am, this message translates to:
+  /// **'ብጁ'**
+  String get filterCustom;
+
+  /// Select date range dialog title
+  ///
+  /// In am, this message translates to:
+  /// **'የቀን ክልል ይምረጡ'**
+  String get selectDateRange;
+
+  /// Search sales input hint
+  ///
+  /// In am, this message translates to:
+  /// **'በዕቃ ስም ወይም ደረሰኝ ቁጥር ፈልግ...'**
+  String get searchSalesHint;
+
+  /// Total sales for the day
+  ///
+  /// In am, this message translates to:
+  /// **'የቀኑ ድምር'**
+  String get dayTotal;
+
+  /// Item count badge
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ዕቃዎች'**
+  String itemsCount(int count);
+
+  /// Empty sales list for filter
+  ///
+  /// In am, this message translates to:
+  /// **'ለተመረጠው ማጣሪያ ምንም ሽያጭ አልተገኘም'**
+  String get noSalesForFilter;
+
+  /// Sale details screen title
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ዝርዝር'**
+  String get saleDetailsTitle;
+
+  /// Payment method label
+  ///
+  /// In am, this message translates to:
+  /// **'የክፍያ ዘዴ'**
+  String get paymentMethod;
+
+  /// Line cost label
+  ///
+  /// In am, this message translates to:
+  /// **'ወጪ'**
+  String get lineCost;
+
+  /// Delete sale button
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ ሰርዝ'**
+  String get deleteSale;
+
+  /// Delete sale confirmation dialog
+  ///
+  /// In am, this message translates to:
+  /// **'ይህን ሽያጭ መሰረዝ እርግጠኛ ነዎት?'**
+  String get deleteSaleConfirm;
+
+  /// Reports screen title
+  ///
+  /// In am, this message translates to:
+  /// **'ሪፖርት እና ትንታኔ'**
+  String get reportsTitle;
+
+  /// Daily report tab
+  ///
+  /// In am, this message translates to:
+  /// **'ዕለታዊ'**
+  String get reportDaily;
+
+  /// Weekly report tab
+  ///
+  /// In am, this message translates to:
+  /// **'ሳምንታዊ'**
+  String get reportWeekly;
+
+  /// Monthly report tab
+  ///
+  /// In am, this message translates to:
+  /// **'ወርሃዊ'**
+  String get reportMonthly;
+
+  /// Sales count metric
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ብዛት'**
+  String get salesCount;
+
+  /// Total revenue metric
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ገቢ'**
+  String get totalRevenue;
+
+  /// Top 5 selling parts card title
+  ///
+  /// In am, this message translates to:
+  /// **'ከፍተኛ ሽያጭ ያላቸው 5 ዕቃዎች'**
+  String get topSellingParts;
+
+  /// Total inventory stock value
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ የክምችት ዋጋ'**
+  String get totalStockValue;
+
+  /// Low stock alert count
+  ///
+  /// In am, this message translates to:
+  /// **'ዝቅተኛ ክምችት ብዛት'**
+  String get lowStockCount;
+
+  /// Quantity of parts sold
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ተሽጧል'**
+  String unitsSold(String count);
+
+  /// Sales chart title
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ሂደት'**
+  String get salesTrend;
+
+  /// Empty sales report state
+  ///
+  /// In am, this message translates to:
+  /// **'በዚህ ጊዜ ውስጥ ምንም ሽያጭ አልተመዘገበም'**
+  String get noSalesInPeriod;
+
+  /// View low stock button
+  ///
+  /// In am, this message translates to:
+  /// **'ዝቅተኛ ክምችቶችን ይመልከቱ'**
+  String get viewLowStock;
 }
 
 class _AppLocalizationsDelegate

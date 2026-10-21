@@ -84,3 +84,16 @@ class NotFoundFailure extends Failure {
     super.cause,
   });
 }
+
+/// Represents an attempt to reduce stock below zero when not permitted.
+class NegativeStockFailure extends Failure {
+  final double projectedStock;
+
+  const NegativeStockFailure({
+    required super.message,
+    required this.projectedStock,
+    super.code,
+    super.cause,
+  });
+}
+

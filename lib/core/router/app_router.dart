@@ -8,10 +8,15 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
+import '../../features/sales/presentation/screens/new_sale_screen.dart';
+import '../../features/sales/presentation/screens/sale_success_screen.dart';
 import '../../features/settings/presentation/screens/brands_management_screen.dart';
 import '../../features/settings/presentation/screens/categories_management_screen.dart';
 import '../../features/settings/presentation/screens/locations_management_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/stock/presentation/screens/low_stock_screen.dart';
+import '../../features/stock/presentation/screens/stock_history_screen.dart';
+
 
 /// Helper ChangeNotifier that notifies GoRouter when Riverpod auth state changes.
 class _AuthRefreshNotifier extends ChangeNotifier {
@@ -105,6 +110,43 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           partId: state.pathParameters['id'],
         ),
       ),
+      GoRoute(
+        path: '/parts/:id/history',
+        name: 'parts-history',
+        builder: (context, state) => StockHistoryScreen(
+          partId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/stock/low',
+        name: 'stock-low',
+        builder: (context, state) => const LowStockScreen(),
+      ),
+      GoRoute(
+        path: '/sales/new',
+        name: 'sales-new',
+        builder: (context, state) => const NewSaleScreen(),
+      ),
+      GoRoute(
+        path: '/sales/success/:id',
+        name: 'sales-success',
+        builder: (context, state) => SaleSuccessScreen(
+          saleId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/sales/:id',
+        name: 'sales-details',
+        builder: (context, state) => SaleDetailsScreen(
+          saleId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/stock/low-stock',
+        name: 'stock-low-stock',
+        builder: (context, state) => const LowStockScreen(),
+      ),
     ],
   );
 });
+

@@ -398,7 +398,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get sellingPrice => 'የመሸጫ ዋጋ (ብር)';
 
   @override
-  String get estimatedProfit => 'በነጠላ የሚገኝ ትርፍ';
+  String get estimatedProfit => 'የተገመተ ትርፍ';
 
   @override
   String get sizeSpecs => 'መጠን ወይም ዝርዝር መረጃ';
@@ -549,4 +549,268 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get clearTestPartsSuccess => 'የሙከራ ዕቃዎች ተሰርዘዋል';
+
+  @override
+  String get updateStock => 'ክምችት አስተካክል';
+
+  @override
+  String get addStockPurchase => 'ክምችት ጨምር (ግዢ)';
+
+  @override
+  String get removeStock => 'ክምችት ቀንስ';
+
+  @override
+  String get adjustStockCount => 'የተቆጠረውን ትክክለኛ ብዛት መዝግብ';
+
+  @override
+  String get stockMovementHistory => 'የእንቅስቃሴ ታሪክ';
+
+  @override
+  String get quantityToAdd => 'የሚጨመረው ብዛት';
+
+  @override
+  String get quantityToRemove => 'የሚቀነሰው ብዛት';
+
+  @override
+  String get countedQuantity => 'የተቆጠረው ብዛት';
+
+  @override
+  String get unitCost => 'የአንዱ ዋጋ (ብር)';
+
+  @override
+  String get reasonOrNote => 'ምክንያት ወይም ማስታወሻ';
+
+  @override
+  String get reasonOrNoteHint => 'ለምሳሌ፦ ከአቅራቢ የገባ፣ የተበላሸ፣ ቆጠራ የተደረገ...';
+
+  @override
+  String get currentStock => 'የአሁን ክምችት';
+
+  @override
+  String get difference => 'ልዩነት';
+
+  @override
+  String get runningBalance => 'የቀረው ክምችት';
+
+  @override
+  String get recalculateStock => 'ክምችት እንደገና አስላ';
+
+  @override
+  String get recalculateStockDesc =>
+      'የክምችት ትክክለኛነትን ለማረጋገጥ ከእንቅስቃሴ መዝገቡ ላይ እንደገና ያሰላል';
+
+  @override
+  String get stockRecalculatedSuccess => 'የክምችት ብዛት ከመዝገቡ ላይ በተሳካ ሁኔታ ተሰልቷል';
+
+  @override
+  String get allowNegativeStock => 'ከዜሮ በታች እንዲሆን ፍቀድ';
+
+  @override
+  String get allowNegativeStockDesc =>
+      'ዕቃዎችን ሲቀንሱ ወይም ሲሸጡ ክምችቱ ከዜሮ በታች እንዲወርድ ይፈቅዳል';
+
+  @override
+  String get negativeStockWarningTitle => 'የክምችት እጥረት ማስጠንቀቂያ';
+
+  @override
+  String negativeStockWarningMessage(String newStock) {
+    return 'ይህንን ብዛት መቀነስ ክምችቱን ከዜሮ በታች ($newStock) ያደርገዋል። እርግጠኛ ነዎት?';
+  }
+
+  @override
+  String get negativeStockNotAllowed =>
+      'ክምችት ከዜሮ በታች ሊሆን አይችልም። አስፈላጊ ከሆነ በቅንብሮች ውስጥ ይፍቀዱ።';
+
+  @override
+  String get lowStockListTitle => 'አነስተኛ ክምችት ያላቸው ዕቃዎች';
+
+  @override
+  String get lowStockListDesc => 'ከዝቅተኛው የመጠን ገደብ በታች የሆኑ ዕቃዎች';
+
+  @override
+  String get noLowStockItems => 'ምንም አነስተኛ ክምችት ያለው ዕቃ የለም። ሁሉም በቂ ክምችት አላቸው!';
+
+  @override
+  String get movementTypeInitial => 'የመጀመሪያ ክምችት';
+
+  @override
+  String get movementTypePurchase => 'ግዢ';
+
+  @override
+  String get movementTypeSale => 'ሽያጭ';
+
+  @override
+  String get movementTypeAdjustment => 'ማስተካከያ';
+
+  @override
+  String get movementTypeReturn => 'ተመላሽ';
+
+  @override
+  String get noMovementsTitle => 'ምንም የክምችት እንቅስቃሴ የለም';
+
+  @override
+  String get noMovementsDesc => 'ክምችት ሲጨመር፣ ሲቀነስ ወይም ሲስተካከል እንቅስቃሴዎች እዚህ ይታያሉ።';
+
+  @override
+  String get newSale => 'አዲስ ሽያጭ';
+
+  @override
+  String get recordSale => 'ሽያጭ መዝግብ';
+
+  @override
+  String get saleDetails => 'የሽያጭ ዝርዝር';
+
+  @override
+  String get addPartsToSale => 'ዕቃዎችን ጨምር';
+
+  @override
+  String get cartEmptyTitle => 'ምንም ዕቃ አልተመረጠም';
+
+  @override
+  String get cartEmptyDesc => 'ሽያጩን ለመመዝገብ ዕቃዎችን ይፈልጉ እና ይጨምሩ';
+
+  @override
+  String get unitPrice => 'የነጠላ መሸጫ ዋጋ';
+
+  @override
+  String get lineTotal => 'ጠቅላላ ዋጋ';
+
+  @override
+  String get lineProfit => 'ትርፍ';
+
+  @override
+  String get totalProfit => 'ጠቅላላ የሚገኝ ትርፍ';
+
+  @override
+  String get customerNotes => 'የደንበኛ ወይም የደረሰኝ ማስታወሻ';
+
+  @override
+  String get customerNotesHint => 'አማራጭ ማስታወሻ ወይም የደንበኛ ስም...';
+
+  @override
+  String get totalItems => 'ጠቅላላ ዕቃዎች';
+
+  @override
+  String get totalCost => 'ጠቅላላ ወጪ';
+
+  @override
+  String get completeSale => 'ሽያጩን ጨርስ';
+
+  @override
+  String get saleSuccessTitle => 'ሽያጩ በተሳካ ሁኔታ ተመዝግቧል!';
+
+  @override
+  String get receiptNumber => 'የደረሰኝ ቁጥር';
+
+  @override
+  String get soldAt => 'የተሸጠበት ቀን እና ሰዓት';
+
+  @override
+  String get noCostWarning => 'የግዢ ዋጋ አልተመዘገበም፤ ትርፉ ከተጨባጩ በላይ ሊታይ ይችላል';
+
+  @override
+  String saleStockWarningMessage(
+    String partName,
+    String stock,
+    String newStock,
+  ) {
+    return 'የ\"$partName\" ብዛት ከአሁን ክምችት ($stock) ይበልጣል። ቀሪው ክምችት $newStock ይሆናል።';
+  }
+
+  @override
+  String get saleRecordedSuccess => 'ሽያጩ በተሳካ ሁኔታ ተመዝግቧል';
+
+  @override
+  String get backToHome => 'ወደ ዋና ገጽ ተመለስ';
+
+  @override
+  String get emptySaleError => 'ባዶ ሽያጭ ማስቀመጥ አይቻልም። እባክዎ ቢያንስ አንድ ዕቃ ይጨምሩ።';
+
+  @override
+  String get searchAndAddParts => 'ዕቃዎችን ፈልግ እና ጨምር';
+
+  @override
+  String get filterToday => 'ዛሬ';
+
+  @override
+  String get filterThisWeek => 'በዚህ ሳምንት';
+
+  @override
+  String get filterThisMonth => 'በዚህ ወር';
+
+  @override
+  String get filterCustom => 'ብጁ';
+
+  @override
+  String get selectDateRange => 'የቀን ክልል ይምረጡ';
+
+  @override
+  String get searchSalesHint => 'በዕቃ ስም ወይም ደረሰኝ ቁጥር ፈልግ...';
+
+  @override
+  String get dayTotal => 'የቀኑ ድምር';
+
+  @override
+  String itemsCount(int count) {
+    return '$count ዕቃዎች';
+  }
+
+  @override
+  String get noSalesForFilter => 'ለተመረጠው ማጣሪያ ምንም ሽያጭ አልተገኘም';
+
+  @override
+  String get saleDetailsTitle => 'የሽያጭ ዝርዝር';
+
+  @override
+  String get paymentMethod => 'የክፍያ ዘዴ';
+
+  @override
+  String get lineCost => 'ወጪ';
+
+  @override
+  String get deleteSale => 'ሽያጭ ሰርዝ';
+
+  @override
+  String get deleteSaleConfirm => 'ይህን ሽያጭ መሰረዝ እርግጠኛ ነዎት?';
+
+  @override
+  String get reportsTitle => 'ሪፖርት እና ትንታኔ';
+
+  @override
+  String get reportDaily => 'ዕለታዊ';
+
+  @override
+  String get reportWeekly => 'ሳምንታዊ';
+
+  @override
+  String get reportMonthly => 'ወርሃዊ';
+
+  @override
+  String get salesCount => 'የሽያጭ ብዛት';
+
+  @override
+  String get totalRevenue => 'ጠቅላላ ገቢ';
+
+  @override
+  String get topSellingParts => 'ከፍተኛ ሽያጭ ያላቸው 5 ዕቃዎች';
+
+  @override
+  String get totalStockValue => 'ጠቅላላ የክምችት ዋጋ';
+
+  @override
+  String get lowStockCount => 'ዝቅተኛ ክምችት ብዛት';
+
+  @override
+  String unitsSold(String count) {
+    return '$count ተሽጧል';
+  }
+
+  @override
+  String get salesTrend => 'የሽያጭ ሂደት';
+
+  @override
+  String get noSalesInPeriod => 'በዚህ ጊዜ ውስጥ ምንም ሽያጭ አልተመዘገበም';
+
+  @override
+  String get viewLowStock => 'ዝቅተኛ ክምችቶችን ይመልከቱ';
 }

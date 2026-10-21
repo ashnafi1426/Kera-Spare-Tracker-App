@@ -198,6 +198,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
         icon: const Icon(Icons.add_rounded),
         label: Text(l10n.add),

@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/context_extensions.dart';
+import '../../../stock/presentation/dialogs/update_stock_dialog.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
+
+
 
 /// Detailed view of a spare part displaying photo, catalog attributes,
 /// stock level, unit pricing, profit margin, and management actions (edit, delete).
@@ -297,6 +300,26 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
                             title: l10n.estimatedProfit,
                             amount: part.unitProfit,
                             color: Colors.green.shade700,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Stock Actions: Update Stock & Movement History
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.edit_note_rounded),
+                              label: Text(l10n.updateStock),
+                              onPressed: () => UpdateStockDialog.show(context, part),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.outlined(
+                            icon: const Icon(Icons.history_rounded),
+                            tooltip: l10n.stockMovementHistory,
+                            onPressed: () =>
+                                context.push('/parts/${part.id}/history'),
                           ),
                         ],
                       ),

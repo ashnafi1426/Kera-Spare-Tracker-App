@@ -12,7 +12,10 @@ import 'package:kera_spare_tracker/features/auth/presentation/screens/login_scre
 import 'package:kera_spare_tracker/features/auth/presentation/screens/register_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
-import 'package:kera_spare_tracker/features/parts/presentation/providers/parts_providers.dart';
+import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valuation.dart';
+import 'package:kera_spare_tracker/features/reports/domain/models/sales_summary.dart';
+import 'package:kera_spare_tracker/features/reports/presentation/providers/reports_providers.dart';
+import 'package:kera_spare_tracker/features/sales/presentation/providers/sales_providers.dart';
 import 'package:kera_spare_tracker/main.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -142,6 +145,12 @@ void main() {
           storageServiceProvider.overrideWithValue(mockStorage),
           authRepositoryProvider.overrideWithValue(mockAuth),
           partsStreamProvider.overrideWith((ref) => Stream.value([])),
+          activeSalesStreamProvider.overrideWith((ref) => Stream.value([])),
+          filteredSalesStreamProvider.overrideWith((ref) => Stream.value([])),
+          salesSummaryProvider.overrideWith((ref) async => SalesSummary.zero),
+          chartPointsProvider.overrideWith((ref) async => []),
+          topSellingPartsProvider.overrideWith((ref) async => []),
+          inventoryValuationProvider.overrideWith((ref) async => InventoryValuation.zero),
           inventoryListProvider.overrideWith(_FakeInventoryListNotifier.new),
         ],
         child: const KeraSpareTrackerApp(),

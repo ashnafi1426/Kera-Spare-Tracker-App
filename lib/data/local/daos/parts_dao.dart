@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/inventory_filter.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/paged_result.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/part_item.dart';
+import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valuation.dart';
 import '../app_database.dart';
 import '../tables/enums.dart';
 import '../tables/spare_parts_table.dart';
@@ -301,4 +302,48 @@ class PartsDao extends DatabaseAccessor<AppDatabase> with _$PartsDaoMixin {
               t.ownerId.equals(ownerId) & t.notes.like('%[TEST_SEED]%')))
         .go();
   }
+
+  /// Computes total inventory valuation, low stock count, and total active parts via SQL aggregation.
+  Future<InventoryValuation> getInventoryValuation(String ownerId) async {
+    final valueExpr =
+        (spareParts.cachedQuantity * spareParts.purchasePrice).sum();
+    final valuationQuery = selectOnly(spareParts)
+      ..addColumns([valueExpr])
+      ..where(
+        spareParts.ownerId.equals(ownerId) &
+            spareParts.deletedAt.isNull() &
+            spareParts.purchasePrice.isNotNull() &
+            spareParts.cachedQuantity.isBiggerThanValue(0.0),
+      );
+    final valuationRow = await valuationQuery.getSingle();
+    final stockVal = valuationRow.read(valueExpr) ?? 0.0;
+
+    final lowStockExpr = spareParts.id.count();
+    final lowStockQuery = selectOnly(spareParts)
+      ..addColumns([lowStockExpr])
+      ..where(
+        spareParts.ownerId.equals(ownerId) &
+            spareParts.deletedAt.isNull() &
+            spareParts.cachedQuantity
+                .isSmallerOrEqual(spareParts.lowStockThreshold),
+      );
+    final lowStockRow = await lowStockQuery.getSingle();
+    final lowCount = lowStockRow.read(lowStockExpr) ?? 0;
+
+    final totalActiveExpr = spareParts.id.count();
+    final totalQuery = selectOnly(spareParts)
+      ..addColumns([totalActiveExpr])
+      ..where(
+        spareParts.ownerId.equals(ownerId) & spareParts.deletedAt.isNull(),
+      );
+    final totalRow = await totalQuery.getSingle();
+    final totalCount = totalRow.read(totalActiveExpr) ?? 0;
+
+    return InventoryValuation(
+      totalStockValue: stockVal,
+      lowStockCount: lowCount,
+      totalActiveParts: totalCount,
+    );
+  }
 }
+

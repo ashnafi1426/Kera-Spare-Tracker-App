@@ -8,6 +8,10 @@ import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
 import '../../../parts/presentation/screens/inventory_screen.dart';
+import '../../../reports/presentation/screens/reports_screen.dart';
+import '../../../sales/presentation/screens/sales_list_tab.dart';
+import '../../../stock/presentation/providers/stock_providers.dart';
+
 
 /// Main container screen with bottom navigation for Inventory, Sales, Reports, and Settings.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -26,18 +30,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final tabs = [
       const InventoryScreen(),
-      _PlaceholderTab(
-        title: l10n.navSales,
-        icon: Icons.point_of_sale_outlined,
-        emptyTitle: l10n.noSalesFound,
-        emptyDesc: l10n.noSalesDesc,
-      ),
-      _PlaceholderTab(
-        title: l10n.navReports,
-        icon: Icons.bar_chart_rounded,
-        emptyTitle: l10n.noDataTitle,
-        emptyDesc: l10n.noDataDesc,
-      ),
+      const SalesListTab(),
+      const ReportsScreen(),
       const _SettingsTab(),
     ];
 
@@ -268,6 +262,54 @@ class _SettingsTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
+
+          // Stock & Inventory Policies Card
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.warning_amber_rounded,
+                      color: Colors.orange.shade800),
+                  title: Text(l10n.lowStockListTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(l10n.lowStockListDesc),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ref.watch(lowStockPartsStreamProvider).when(
+                            data: (items) => items.isNotEmpty
+                                ? Badge(
+                                    label: Text('${items.length}'),
+                                    backgroundColor: Colors.orange.shade800,
+                                  )
+                                : const SizedBox.shrink(),
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
+                          ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.chevron_right_rounded),
+                    ],
+                  ),
+                  onTap: () => context.push('/stock/low'),
+                ),
+                const Divider(height: 1),
+                SwitchListTile(
+                  secondary: Icon(Icons.exposure_neg_1_rounded,
+                      color: colorScheme.primary),
+                  title: Text(l10n.allowNegativeStock,
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: Text(l10n.allowNegativeStockDesc),
+                  value:
+                      ref.watch(allowNegativeStockNotifierProvider).value ?? false,
+                  onChanged: (val) => ref
+                      .read(allowNegativeStockNotifierProvider.notifier)
+                      .toggle(val),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
 
           // Offline Status Card
           Card(

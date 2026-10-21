@@ -403,7 +403,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellingPrice => 'Selling Price (ETB)';
 
   @override
-  String get estimatedProfit => 'Estimated Unit Profit';
+  String get estimatedProfit => 'Estimated Profit';
 
   @override
   String get sizeSpecs => 'Size / Specifications';
@@ -569,4 +569,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearTestPartsSuccess => 'Test parts removed successfully';
+
+  @override
+  String get updateStock => 'Update Stock';
+
+  @override
+  String get addStockPurchase => 'Add Stock (Purchase)';
+
+  @override
+  String get removeStock => 'Remove Stock';
+
+  @override
+  String get adjustStockCount => 'Adjust to Counted Number';
+
+  @override
+  String get stockMovementHistory => 'Movement History';
+
+  @override
+  String get quantityToAdd => 'Quantity to Add';
+
+  @override
+  String get quantityToRemove => 'Quantity to Remove';
+
+  @override
+  String get countedQuantity => 'Counted Quantity';
+
+  @override
+  String get unitCost => 'Unit Cost (ETB)';
+
+  @override
+  String get reasonOrNote => 'Reason or Note';
+
+  @override
+  String get reasonOrNoteHint =>
+      'e.g. Supplier delivery, Damaged part, Physical count...';
+
+  @override
+  String get currentStock => 'Current Stock';
+
+  @override
+  String get difference => 'Difference';
+
+  @override
+  String get runningBalance => 'Running Balance';
+
+  @override
+  String get recalculateStock => 'Recalculate Stock';
+
+  @override
+  String get recalculateStockDesc =>
+      'Recalculates cached quantity from the ledger movements for data integrity';
+
+  @override
+  String get stockRecalculatedSuccess =>
+      'Stock quantity recalculated successfully from ledger';
+
+  @override
+  String get allowNegativeStock => 'Allow Negative Stock';
+
+  @override
+  String get allowNegativeStockDesc =>
+      'Permit stock to go below zero when removing items or recording sales';
+
+  @override
+  String get negativeStockWarningTitle => 'Negative Stock Warning';
+
+  @override
+  String negativeStockWarningMessage(String newStock) {
+    return 'Removing this quantity will result in a negative stock level ($newStock). Do you confirm?';
+  }
+
+  @override
+  String get negativeStockNotAllowed =>
+      'Stock cannot go below zero. Enable negative stock in Settings if needed.';
+
+  @override
+  String get lowStockListTitle => 'Low Stock Items';
+
+  @override
+  String get lowStockListDesc => 'Items at or below their reorder threshold';
+
+  @override
+  String get noLowStockItems =>
+      'No low stock items. All inventory levels are healthy!';
+
+  @override
+  String get movementTypeInitial => 'Initial Stock';
+
+  @override
+  String get movementTypePurchase => 'Purchase';
+
+  @override
+  String get movementTypeSale => 'Sale';
+
+  @override
+  String get movementTypeAdjustment => 'Adjustment';
+
+  @override
+  String get movementTypeReturn => 'Return';
+
+  @override
+  String get noMovementsTitle => 'No Movements Yet';
+
+  @override
+  String get noMovementsDesc =>
+      'Stock movements will appear here when stock is added, removed, or adjusted.';
+
+  @override
+  String get newSale => 'New Sale';
+
+  @override
+  String get recordSale => 'Record Sale';
+
+  @override
+  String get saleDetails => 'Sale Details';
+
+  @override
+  String get addPartsToSale => 'Add Parts';
+
+  @override
+  String get cartEmptyTitle => 'No Items in Sale';
+
+  @override
+  String get cartEmptyDesc => 'Search and add parts to record a sale';
+
+  @override
+  String get unitPrice => 'Unit Price';
+
+  @override
+  String get lineTotal => 'Total';
+
+  @override
+  String get lineProfit => 'Profit';
+
+  @override
+  String get totalProfit => 'Total Estimated Profit';
+
+  @override
+  String get customerNotes => 'Customer / Receipt Notes';
+
+  @override
+  String get customerNotesHint => 'Optional note or customer name...';
+
+  @override
+  String get totalItems => 'Total Items';
+
+  @override
+  String get totalCost => 'Total Cost';
+
+  @override
+  String get completeSale => 'Complete Sale';
+
+  @override
+  String get saleSuccessTitle => 'Sale Recorded Successfully!';
+
+  @override
+  String get receiptNumber => 'Receipt #';
+
+  @override
+  String get soldAt => 'Date & Time';
+
+  @override
+  String get noCostWarning => 'No purchase price set; profit may be overstated';
+
+  @override
+  String saleStockWarningMessage(
+    String partName,
+    String stock,
+    String newStock,
+  ) {
+    return 'Quantity for \"$partName\" exceeds current stock ($stock). Stock will become $newStock.';
+  }
+
+  @override
+  String get saleRecordedSuccess => 'Sale recorded successfully';
+
+  @override
+  String get backToHome => 'Back to Home';
+
+  @override
+  String get emptySaleError =>
+      'Cannot save an empty sale. Please add at least one part.';
+
+  @override
+  String get searchAndAddParts => 'Search & Add Parts';
+
+  @override
+  String get filterToday => 'Today';
+
+  @override
+  String get filterThisWeek => 'This Week';
+
+  @override
+  String get filterThisMonth => 'This Month';
+
+  @override
+  String get filterCustom => 'Custom';
+
+  @override
+  String get selectDateRange => 'Select Date Range';
+
+  @override
+  String get searchSalesHint => 'Search by part name or receipt...';
+
+  @override
+  String get dayTotal => 'Day Total';
+
+  @override
+  String itemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noSalesForFilter => 'No sales found for the selected filter';
+
+  @override
+  String get saleDetailsTitle => 'Sale Details';
+
+  @override
+  String get paymentMethod => 'Payment Method';
+
+  @override
+  String get lineCost => 'Cost';
+
+  @override
+  String get deleteSale => 'Delete Sale';
+
+  @override
+  String get deleteSaleConfirm => 'Are you sure you want to delete this sale?';
+
+  @override
+  String get reportsTitle => 'Reports & Analytics';
+
+  @override
+  String get reportDaily => 'Daily';
+
+  @override
+  String get reportWeekly => 'Weekly';
+
+  @override
+  String get reportMonthly => 'Monthly';
+
+  @override
+  String get salesCount => 'Number of Sales';
+
+  @override
+  String get totalRevenue => 'Total Revenue';
+
+  @override
+  String get topSellingParts => 'Top 5 Selling Parts';
+
+  @override
+  String get totalStockValue => 'Total Stock Value';
+
+  @override
+  String get lowStockCount => 'Low Stock Count';
+
+  @override
+  String unitsSold(String count) {
+    return '$count sold';
+  }
+
+  @override
+  String get salesTrend => 'Sales Trend';
+
+  @override
+  String get noSalesInPeriod => 'No sales recorded for this period';
+
+  @override
+  String get viewLowStock => 'View Low Stock';
 }
