@@ -5,6 +5,8 @@ import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/tables/enums.dart';
+import '../../domain/models/inventory_filter.dart';
+import '../../domain/models/paged_result.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/repositories/parts_repository.dart';
 
@@ -391,6 +393,185 @@ class LocalPartsRepository implements PartsRepository {
     } catch (e) {
       return Result.failure(DatabaseFailure(
         message: 'Failed to soft delete spare part: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  @override
+  Future<Result<PagedResult<PartItem>>> getPagedParts({
+    required String ownerId,
+    InventoryFilter filter = const InventoryFilter(),
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      final paged = await db.partsDao.getPagedParts(
+        ownerId: ownerId,
+        filter: filter,
+        limit: limit,
+        offset: offset,
+      );
+      return Result.success(paged);
+    } catch (e) {
+      return Result.failure(DatabaseFailure(
+        message: 'Failed to load paged parts: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  @override
+  Future<Result<int>> seedTestParts({
+    required String ownerId,
+    int count = 2000,
+  }) async {
+    try {
+      final brands = await (db.select(db.brands)
+            ..where((t) =>
+                (t.ownerId.equals(ownerId) | t.isDefault.equals(true)) &
+                t.deletedAt.isNull()))
+          .get();
+
+      final categories = await (db.select(db.categories)
+            ..where((t) => t.ownerId.equals(ownerId) & t.deletedAt.isNull()))
+          .get();
+
+      final locations = await (db.select(db.locations)
+            ..where((t) => t.ownerId.equals(ownerId) & t.deletedAt.isNull()))
+          .get();
+
+      final List<String> partNames = [
+        'Oil Filter High Efficiency',
+        'Air Filter Heavy Duty',
+        'Fuel Filter Secondary',
+        'Hydraulic Filter Return',
+        'Water Separator Element',
+        'Turbocharger Assembly',
+        'Cylinder Head Gasket',
+        'Piston Ring Set Standard',
+        'Crankshaft Main Bearing',
+        'Connecting Rod Bushing',
+        'Hydraulic Main Pump',
+        'Control Valve Spool',
+        'Boom Cylinder Seal Kit',
+        'Bucket Cylinder Seal Kit',
+        'Arm Cylinder Seal Kit',
+        'Brake Pad Heavy Duty',
+        'Brake Shoe Assembly',
+        'Brake Master Cylinder',
+        'Track Roller Single Flange',
+        'Carrier Roller Assembly',
+        'Alternator 24V 60A',
+        'Starter Motor 24V 7.5kW',
+        'Engine Stop Solenoid',
+        'Water Temperature Sensor',
+        'Oil Pressure Switch',
+        'Radiator Cooling Fan',
+        'Water Pump Heavy Duty',
+        'Thermostat 71C',
+        'Fan Belt Set',
+        'Tensioner Pulley',
+        'Fuel Injection Pump',
+        'Injector Nozzle Tip',
+        'Feed Pump Manual',
+        'Common Rail Sensor',
+        'Glow Plug 24V',
+        'Clutch Disc Assembly',
+        'Pressure Plate',
+        'Release Bearing',
+        'Universal Joint Cross',
+        'Drive Shaft Center Bearing',
+      ];
+
+      final List<String> partPrefixes = [
+        'CAT-1R',
+        'KOM-708',
+        'TOY-044',
+        'HOL-353',
+        'BOS-044',
+        'DON-P55',
+        'HIT-918',
+        'PER-U5P',
+        'CUM-328',
+        'DEN-101',
+        'ISU-897',
+        'MITS-ME',
+      ];
+
+      final now = DateTime.now();
+      final List<SparePartsCompanion> companions = [];
+
+      for (var i = 0; i < count; i++) {
+        final id = uuid.v4();
+        final nameBase = partNames[i % partNames.length];
+        final prefix = partPrefixes[i % partPrefixes.length];
+        final numberSuffix = (1000 + (i * 3) % 9000).toString();
+        final partNumber = '$prefix-$numberSuffix';
+        final name = '$nameBase #$i';
+
+        final brandId = brands.isNotEmpty ? brands[i % brands.length].id : null;
+        final categoryId =
+            categories.isNotEmpty ? categories[i % categories.length].id : null;
+        final locationId =
+            locations.isNotEmpty ? locations[i % locations.length].id : null;
+
+        // Distribute stock: 10% out of stock (0), 20% low stock (<=5), 70% in stock (>5)
+        final double qty;
+        if (i % 10 == 0) {
+          qty = 0.0;
+        } else if (i % 5 == 0) {
+          qty = ((i % 5) + 1).toDouble(); // 1 to 5
+        } else {
+          qty = (6 + (i * 7) % 65).toDouble(); // 6 to 70
+        }
+
+        final purchasePrice = (500 + (i * 17) % 15000).toDouble();
+        final sellingPrice = (purchasePrice * 1.25).roundToDouble();
+
+        companions.add(
+          SparePartsCompanion(
+            id: Value(id),
+            ownerId: Value(ownerId),
+            name: Value(name),
+            partNumber: Value(partNumber),
+            brandId: Value(brandId),
+            categoryId: Value(categoryId),
+            locationId: Value(locationId),
+            customLocation: Value('Spot ${(i % 20) + 1}'),
+            description: Value('High grade replacement component for $nameBase'),
+            unit: const Value('pcs'),
+            purchasePrice: Value(purchasePrice),
+            sellingPrice: Value(sellingPrice),
+            sizeSpecs: Value('Spec ${(i % 12) + 1}'),
+            notes: const Value('[TEST_SEED] Performance benchmark part'),
+            lowStockLevel: const Value(5.0),
+            cachedQuantity: Value(qty),
+            createdAt: Value(now.subtract(Duration(minutes: i % 10000))),
+            updatedAt: Value(now),
+            syncStatus: const Value(SyncStatus.pending),
+          ),
+        );
+      }
+
+      await db.partsDao.batchInsertParts(companions);
+      return Result.success(count);
+    } catch (e) {
+      return Result.failure(DatabaseFailure(
+        message: 'Failed to seed test parts: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  @override
+  Future<Result<int>> clearTestParts(String ownerId) async {
+    try {
+      final deleted = await db.partsDao.deleteTestParts(ownerId);
+      return Result.success(deleted);
+    } catch (e) {
+      return Result.failure(DatabaseFailure(
+        message: 'Failed to clear test parts: $e',
         cause: e,
       ));
     }

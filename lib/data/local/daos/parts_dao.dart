@@ -1,4 +1,7 @@
 import 'package:drift/drift.dart';
+import 'package:kera_spare_tracker/features/parts/domain/models/inventory_filter.dart';
+import 'package:kera_spare_tracker/features/parts/domain/models/paged_result.dart';
+import 'package:kera_spare_tracker/features/parts/domain/models/part_item.dart';
 import '../app_database.dart';
 import '../tables/enums.dart';
 import '../tables/spare_parts_table.dart';
@@ -98,5 +101,204 @@ class PartsDao extends DatabaseAccessor<AppDatabase> with _$PartsDaoMixin {
         syncStatus: const Value(SyncStatus.pending),
       ),
     );
+  }
+
+  /// Builds a combined WHERE expression for search and filtering.
+  Expression<bool> _buildFilterExpression({
+    required String ownerId,
+    String? query,
+    String? brandId,
+    String? categoryId,
+    String? locationId,
+    StockFilter stockFilter = StockFilter.all,
+  }) {
+    Expression<bool> expr =
+        spareParts.ownerId.equals(ownerId) & spareParts.deletedAt.isNull();
+
+    if (query != null && query.trim().isNotEmpty) {
+      final q = '%${query.trim().toLowerCase()}%';
+      final searchExpr = spareParts.name.lower().like(q) |
+          spareParts.partNumber.lower().like(q) |
+          spareParts.customLocation.lower().like(q) |
+          db.brands.name.lower().like(q) |
+          db.categories.name.lower().like(q) |
+          db.locations.name.lower().like(q);
+      expr = expr & searchExpr;
+    }
+
+    if (brandId != null) {
+      expr = expr & spareParts.brandId.equals(brandId);
+    }
+    if (categoryId != null) {
+      expr = expr & spareParts.categoryId.equals(categoryId);
+    }
+    if (locationId != null) {
+      expr = expr & spareParts.locationId.equals(locationId);
+    }
+
+    switch (stockFilter) {
+      case StockFilter.all:
+        break;
+      case StockFilter.inStock:
+        expr = expr &
+            spareParts.cachedQuantity.isBiggerThanValue(0.0) &
+            (spareParts.lowStockLevel.isNull() |
+                spareParts.cachedQuantity.isBiggerThan(spareParts.lowStockLevel)) &
+            spareParts.cachedQuantity.isBiggerThanValue(5.0);
+        break;
+      case StockFilter.lowStock:
+        expr = expr &
+            spareParts.cachedQuantity.isBiggerThanValue(0.0) &
+            ((spareParts.lowStockLevel.isNotNull() &
+                    spareParts.cachedQuantity.isSmallerOrEqual(spareParts.lowStockLevel)) |
+                spareParts.cachedQuantity.isSmallerOrEqualValue(5.0));
+        break;
+      case StockFilter.outOfStock:
+        expr = expr &
+            (spareParts.cachedQuantity.isNull() |
+                spareParts.cachedQuantity.isSmallerOrEqualValue(0.0));
+        break;
+    }
+
+    return expr;
+  }
+
+  /// Paged search and filtering query with joined brand, category, and location metadata.
+  Future<PagedResult<PartItem>> getPagedParts({
+    required String ownerId,
+    InventoryFilter filter = const InventoryFilter(),
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final whereExpr = _buildFilterExpression(
+      ownerId: ownerId,
+      query: filter.query,
+      brandId: filter.brandId,
+      categoryId: filter.categoryId,
+      locationId: filter.locationId,
+      stockFilter: filter.stockFilter,
+    );
+
+    // 1. Total count query
+    final countQuery = selectOnly(spareParts).join([
+      leftOuterJoin(db.brands, db.brands.id.equalsExp(spareParts.brandId)),
+      leftOuterJoin(
+          db.categories, db.categories.id.equalsExp(spareParts.categoryId)),
+      leftOuterJoin(
+          db.locations, db.locations.id.equalsExp(spareParts.locationId)),
+    ])
+      ..addColumns([countAll()])
+      ..where(whereExpr);
+
+    final countRow = await countQuery.getSingle();
+    final totalCount = countRow.read(countAll()) ?? 0;
+
+    // 2. Ordering terms
+    final List<OrderingTerm> ordering = [];
+    final mode =
+        filter.sortAscending ? OrderingMode.asc : OrderingMode.desc;
+
+    switch (filter.sortBy) {
+      case PartsSortBy.name:
+        ordering.add(OrderingTerm(
+          expression: spareParts.name.lower(),
+          mode: filter.sortAscending ? OrderingMode.asc : OrderingMode.desc,
+        ));
+        break;
+      case PartsSortBy.newest:
+        ordering.add(OrderingTerm(
+          expression: spareParts.createdAt,
+          mode: filter.sortAscending ? OrderingMode.asc : OrderingMode.desc,
+        ));
+        break;
+      case PartsSortBy.quantity:
+        ordering.add(OrderingTerm(
+          expression: spareParts.cachedQuantity,
+          mode: mode,
+        ));
+        break;
+      case PartsSortBy.price:
+        ordering.add(OrderingTerm(
+          expression: spareParts.sellingPrice,
+          mode: mode,
+        ));
+        break;
+    }
+
+    // Secondary sort tiebreaker
+    ordering.add(OrderingTerm(
+      expression: spareParts.createdAt,
+      mode: OrderingMode.desc,
+    ));
+
+    // 3. Paged data query
+    final dataQuery = select(spareParts).join([
+      leftOuterJoin(db.brands, db.brands.id.equalsExp(spareParts.brandId)),
+      leftOuterJoin(
+          db.categories, db.categories.id.equalsExp(spareParts.categoryId)),
+      leftOuterJoin(
+          db.locations, db.locations.id.equalsExp(spareParts.locationId)),
+    ])
+      ..where(whereExpr)
+      ..orderBy(ordering)
+      ..limit(limit, offset: offset);
+
+    final rows = await dataQuery.get();
+
+    final items = rows.map((row) {
+      final p = row.readTable(spareParts);
+      final b = row.readTableOrNull(db.brands);
+      final c = row.readTableOrNull(db.categories);
+      final l = row.readTableOrNull(db.locations);
+
+      return PartItem(
+        id: p.id,
+        ownerId: p.ownerId,
+        name: p.name,
+        partNumber: p.partNumber,
+        photoLocalPath: p.photoLocalPath,
+        photoUrl: p.photoUrl,
+        brandId: p.brandId,
+        brandName: b?.name,
+        categoryId: p.categoryId,
+        categoryName: c?.name,
+        locationId: p.locationId,
+        locationName: l?.name,
+        customLocation: p.customLocation,
+        description: p.description,
+        unit: p.unit,
+        purchasePrice: p.purchasePrice,
+        sellingPrice: p.sellingPrice,
+        sizeSpecs: p.sizeSpecs,
+        notes: p.notes,
+        lowStockLevel: p.lowStockLevel,
+        cachedQuantity: p.cachedQuantity ?? 0.0,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+        deletedAt: p.deletedAt,
+      );
+    }).toList();
+
+    return PagedResult<PartItem>(
+      items: items,
+      totalCount: totalCount,
+      offset: offset,
+      limit: limit,
+    );
+  }
+
+  /// Bulk inserts multiple parts efficiently in a single batch.
+  Future<void> batchInsertParts(List<SparePartsCompanion> parts) {
+    return batch((b) {
+      b.insertAll(spareParts, parts);
+    });
+  }
+
+  /// Deletes generated test parts for an owner.
+  Future<int> deleteTestParts(String ownerId) {
+    return (delete(spareParts)
+          ..where((t) =>
+              t.ownerId.equals(ownerId) & t.notes.like('%[TEST_SEED]%')))
+        .go();
   }
 }

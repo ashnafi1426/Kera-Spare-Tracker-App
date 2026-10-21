@@ -24,10 +24,6 @@ import 'tables/sync_queue_table.dart';
 export 'package:uuid/uuid.dart';
 
 part 'app_database.g.dart';
-
-/// Central Drift database for Kera Spare Tracker application.
-/// Provides offline-first local persistence, multi-tenant isolation,
-/// ledger-based stock movements, and outgoing sync queue.
 @DriftDatabase(
   tables: [
     Profiles,

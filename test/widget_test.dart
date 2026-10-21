@@ -11,6 +11,7 @@ import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_c
 import 'package:kera_spare_tracker/features/auth/presentation/screens/login_screen.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/screens/register_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
+import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/parts_providers.dart';
 import 'package:kera_spare_tracker/main.dart';
 import 'package:mocktail/mocktail.dart';
@@ -18,6 +19,19 @@ import 'package:mocktail/mocktail.dart';
 class MockLocalStorageService extends Mock implements LocalStorageService {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
+
+class _FakeInventoryListNotifier extends InventoryListNotifier {
+  @override
+  InventoryListState build() => const InventoryListState();
+  @override
+  Future<void> refresh() async {}
+  @override
+  Future<void> loadNextPage() async {}
+  @override
+  Future<bool> seedTestParts({int count = 2000}) async => true;
+  @override
+  Future<bool> clearTestParts() async => true;
+}
 
 void main() {
   late MockLocalStorageService mockStorage;
@@ -128,6 +142,7 @@ void main() {
           storageServiceProvider.overrideWithValue(mockStorage),
           authRepositoryProvider.overrideWithValue(mockAuth),
           partsStreamProvider.overrideWith((ref) => Stream.value([])),
+          inventoryListProvider.overrideWith(_FakeInventoryListNotifier.new),
         ],
         child: const KeraSpareTrackerApp(),
       ),

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/data/local/app_database.dart';
 import 'package:kera_spare_tracker/data/local/tables/enums.dart';
 import 'package:kera_spare_tracker/features/parts/data/repositories/local_parts_repository.dart';
+import 'package:kera_spare_tracker/features/parts/domain/models/inventory_filter.dart';
 
 void main() {
   late AppDatabase db;
@@ -209,6 +210,203 @@ void main() {
       // Verify sync_queue contains delete operation
       final queue = await db.syncQueueDao.getPendingBatch();
       expect(queue.any((q) => q.operation == SyncOperation.delete), isTrue);
+    });
+  });
+
+  group('PartsRepository - Paged Search, Filtering, and Seeding', () {
+    test('getPagedParts respects limit and offset for pagination', () async {
+      for (var i = 1; i <= 25; i++) {
+        await repo.createPart(
+          ownerId: ownerA,
+          name: 'Part $i',
+          sellingPrice: i * 100.0,
+        );
+      }
+
+      // Page 1: limit 10, offset 0
+      final page1Res = await repo.getPagedParts(
+        ownerId: ownerA,
+        limit: 10,
+        offset: 0,
+      );
+      expect(page1Res.isSuccess, isTrue);
+      final page1 = page1Res.valueOrNull!;
+      expect(page1.items.length, equals(10));
+      expect(page1.totalCount, equals(25));
+      expect(page1.hasMore, isTrue);
+
+      // Page 3: limit 10, offset 20
+      final page3Res = await repo.getPagedParts(
+        ownerId: ownerA,
+        limit: 10,
+        offset: 20,
+      );
+      expect(page3Res.isSuccess, isTrue);
+      final page3 = page3Res.valueOrNull!;
+      expect(page3.items.length, equals(5));
+      expect(page3.hasMore, isFalse);
+    });
+
+    test('getPagedParts searches case-insensitively across name and part number',
+        () async {
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Excavator Fuel Injector',
+        partNumber: 'INJ-9900',
+      );
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Oil Filter Standard',
+        partNumber: 'FLT-1100',
+      );
+
+      // Search by lowercase part of name
+      final searchRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(query: 'injector'),
+      );
+      expect(searchRes.isSuccess, isTrue);
+      final parts = searchRes.valueOrNull!.items;
+      expect(parts.length, equals(1));
+      expect(parts.first.name, equals('Excavator Fuel Injector'));
+
+      // Search by part number
+      final searchNumRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(query: 'flt-1100'),
+      );
+      expect(searchNumRes.isSuccess, isTrue);
+      expect(searchNumRes.valueOrNull!.items.first.name, equals('Oil Filter Standard'));
+    });
+
+    test('getPagedParts filters by stock status (inStock, lowStock, outOfStock)',
+        () async {
+      // 1. in stock (> 5)
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Ample Stock Item',
+        initialQuantity: 20,
+      );
+      // 2. low stock (1 to 5)
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Low Stock Item',
+        initialQuantity: 3,
+        lowStockLevel: 5,
+      );
+      // 3. out of stock (0)
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Zero Stock Item',
+      );
+
+      // In Stock
+      final inStockRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(stockFilter: StockFilter.inStock),
+      );
+      expect(inStockRes.valueOrNull!.items.length, equals(1));
+      expect(inStockRes.valueOrNull!.items.first.name, equals('Ample Stock Item'));
+
+      // Low Stock
+      final lowStockRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(stockFilter: StockFilter.lowStock),
+      );
+      expect(lowStockRes.valueOrNull!.items.length, equals(1));
+      expect(lowStockRes.valueOrNull!.items.first.name, equals('Low Stock Item'));
+
+      // Out of Stock
+      final outStockRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(stockFilter: StockFilter.outOfStock),
+      );
+      expect(outStockRes.valueOrNull!.items.length, equals(1));
+      expect(outStockRes.valueOrNull!.items.first.name, equals('Zero Stock Item'));
+    });
+
+    test('getPagedParts sorts by name, price, and quantity', () async {
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Brake Disc',
+        sellingPrice: 1500.0,
+        initialQuantity: 10,
+      );
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Air Filter',
+        sellingPrice: 500.0,
+        initialQuantity: 50,
+      );
+      await repo.createPart(
+        ownerId: ownerA,
+        name: 'Crankshaft',
+        sellingPrice: 12000.0,
+        initialQuantity: 2,
+      );
+
+      // Sort by Name Ascending
+      final nameSort = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(
+          sortBy: PartsSortBy.name,
+          sortAscending: true,
+        ),
+      );
+      expect(nameSort.valueOrNull!.items.first.name, equals('Air Filter'));
+
+      // Sort by Price Descending
+      final priceSort = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(
+          sortBy: PartsSortBy.price,
+          sortAscending: false,
+        ),
+      );
+      expect(priceSort.valueOrNull!.items.first.name, equals('Crankshaft'));
+
+      // Sort by Quantity Descending
+      final qtySort = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(
+          sortBy: PartsSortBy.quantity,
+          sortAscending: false,
+        ),
+      );
+      expect(qtySort.valueOrNull!.items.first.name, equals('Air Filter'));
+    });
+
+    test('seedTestParts generates 2,000 parts in batch and clearTestParts removes them',
+        () async {
+      final seedRes = await repo.seedTestParts(ownerId: ownerA, count: 2000);
+      expect(seedRes.isSuccess, isTrue);
+      expect(seedRes.valueOrNull, equals(2000));
+
+      // Instant query against the 2,000 seeded parts
+      final pagedRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        limit: 10,
+        offset: 0,
+      );
+      expect(pagedRes.isSuccess, isTrue);
+      expect(pagedRes.valueOrNull!.totalCount, equals(2000));
+      expect(pagedRes.valueOrNull!.items.length, equals(10));
+
+      // Search query across 2,000 parts
+      final searchRes = await repo.getPagedParts(
+        ownerId: ownerA,
+        filter: const InventoryFilter(query: 'turbo'),
+      );
+      expect(searchRes.isSuccess, isTrue);
+      expect(searchRes.valueOrNull!.items.isNotEmpty, isTrue);
+
+      // Clear test parts
+      final clearRes = await repo.clearTestParts(ownerA);
+      expect(clearRes.isSuccess, isTrue);
+      expect(clearRes.valueOrNull, equals(2000));
+
+      final afterClear = await repo.getPagedParts(ownerId: ownerA);
+      expect(afterClear.valueOrNull!.totalCount, equals(0));
     });
   });
 }

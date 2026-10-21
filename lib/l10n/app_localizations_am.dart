@@ -463,4 +463,90 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get outOfStock => 'ያለቀ';
+
+  @override
+  String get lowStock => 'አነስተኛ ክምችት';
+
+  @override
+  String get searchHint => 'በስም፣ በፓርት ቁጥር፣ ብራንድ፣ ምድብ፣ መደርደሪያ ፈልግ...';
+
+  @override
+  String get filters => 'ማጣሪያዎች';
+
+  @override
+  String get sortBy => 'ቅደም ተከተል';
+
+  @override
+  String get sortName => 'በስም (A - Z)';
+
+  @override
+  String get sortNewest => 'አዳዲስ መጀመሪያ';
+
+  @override
+  String get sortQuantityHigh => 'ብዛት (ከፍተኛ)';
+
+  @override
+  String get sortQuantityLow => 'ብዛት (ዝቅተኛ)';
+
+  @override
+  String get sortPriceHigh => 'ዋጋ (ከፍተኛ)';
+
+  @override
+  String get sortPriceLow => 'ዋጋ (ዝቅተኛ)';
+
+  @override
+  String get filterAll => 'ሁሉም';
+
+  @override
+  String get filterInStock => 'ክምችት ያለው';
+
+  @override
+  String get filterLowStock => 'አነስተኛ ክምችት';
+
+  @override
+  String get filterOutOfStock => 'ያለቀ';
+
+  @override
+  String get resetFilters => 'አጽዳ';
+
+  @override
+  String get applyFilters => 'ተግብር';
+
+  @override
+  String activeFiltersCount(int count) {
+    return '$count ማጣሪያዎች ተመርጠዋል';
+  }
+
+  @override
+  String totalPartsCount(int count) {
+    return '$count ዕቃዎች';
+  }
+
+  @override
+  String get noFilteredPartsTitle => 'ምንም የተገኘ ዕቃ የለም';
+
+  @override
+  String get noFilteredPartsDesc => 'እባክዎ የፍለጋ ቃልዎን ወይም ማጣሪያዎችን ይቀይሩ';
+
+  @override
+  String get seedParts => '2,000 የሙከራ ዕቃዎችን ፍጠር';
+
+  @override
+  String get seedPartsDesc =>
+      'ለፍጥነት እና አፈፃፀም መፈተሻ 2,000 የመለዋወጫ ዕቃዎችን በቅጽበት ይፈጥራል';
+
+  @override
+  String get seedingInProgress => '2,000 ዕቃዎች እየተፈጠሩ ነው...';
+
+  @override
+  String get seedSuccess => '2,000 የሙከራ ዕቃዎች በተሳካ ሁኔታ ተፈጥረዋል!';
+
+  @override
+  String get clearTestParts => 'የሙከራ ዕቃዎችን አጥፋ';
+
+  @override
+  String get clearTestPartsConfirm => 'ሁሉንም በሙከራ የተፈጠሩ ዕቃዎች ማጥፋት ይፈልጋሉ?';
+
+  @override
+  String get clearTestPartsSuccess => 'የሙከራ ዕቃዎች ተሰርዘዋል';
 }

@@ -1,4 +1,6 @@
 import '../../../../core/utils/result.dart';
+import '../models/inventory_filter.dart';
+import '../models/paged_result.dart';
 import '../models/part_item.dart';
 
 /// Abstract contract for spare parts inventory operations.
@@ -67,4 +69,21 @@ abstract class PartsRepository {
     required String ownerId,
     required String id,
   });
+
+  /// Retrieves a paginated list of parts matching the filter, search query, and sort criteria.
+  Future<Result<PagedResult<PartItem>>> getPagedParts({
+    required String ownerId,
+    InventoryFilter filter = const InventoryFilter(),
+    int limit = 50,
+    int offset = 0,
+  });
+
+  /// Seeds [count] realistic spare parts for the current owner in a single batch.
+  Future<Result<int>> seedTestParts({
+    required String ownerId,
+    int count = 2000,
+  });
+
+  /// Clears all seeded test parts for the current owner.
+  Future<Result<int>> clearTestParts(String ownerId);
 }

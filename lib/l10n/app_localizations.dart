@@ -158,7 +158,7 @@ abstract class AppLocalizations {
   /// **'እንደገና ሞክር'**
   String get retry;
 
-  /// Filter action button
+  /// Filter button
   ///
   /// In am, this message translates to:
   /// **'አጣራ'**
@@ -1003,6 +1003,168 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ያለቀ'**
   String get outOfStock;
+
+  /// Low stock badge text
+  ///
+  /// In am, this message translates to:
+  /// **'አነስተኛ ክምችት'**
+  String get lowStock;
+
+  /// Inventory search bar placeholder
+  ///
+  /// In am, this message translates to:
+  /// **'በስም፣ በፓርት ቁጥር፣ ብራንድ፣ ምድብ፣ መደርደሪያ ፈልግ...'**
+  String get searchHint;
+
+  /// Filters dialog title
+  ///
+  /// In am, this message translates to:
+  /// **'ማጣሪያዎች'**
+  String get filters;
+
+  /// Sort by label
+  ///
+  /// In am, this message translates to:
+  /// **'ቅደም ተከተል'**
+  String get sortBy;
+
+  /// Sort by name option
+  ///
+  /// In am, this message translates to:
+  /// **'በስም (A - Z)'**
+  String get sortName;
+
+  /// Sort by newest option
+  ///
+  /// In am, this message translates to:
+  /// **'አዳዲስ መጀመሪያ'**
+  String get sortNewest;
+
+  /// Sort by quantity descending
+  ///
+  /// In am, this message translates to:
+  /// **'ብዛት (ከፍተኛ)'**
+  String get sortQuantityHigh;
+
+  /// Sort by quantity ascending
+  ///
+  /// In am, this message translates to:
+  /// **'ብዛት (ዝቅተኛ)'**
+  String get sortQuantityLow;
+
+  /// Sort by price descending
+  ///
+  /// In am, this message translates to:
+  /// **'ዋጋ (ከፍተኛ)'**
+  String get sortPriceHigh;
+
+  /// Sort by price ascending
+  ///
+  /// In am, this message translates to:
+  /// **'ዋጋ (ዝቅተኛ)'**
+  String get sortPriceLow;
+
+  /// All filter option
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም'**
+  String get filterAll;
+
+  /// In stock filter chip
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት ያለው'**
+  String get filterInStock;
+
+  /// Low stock filter chip
+  ///
+  /// In am, this message translates to:
+  /// **'አነስተኛ ክምችት'**
+  String get filterLowStock;
+
+  /// Out of stock filter chip
+  ///
+  /// In am, this message translates to:
+  /// **'ያለቀ'**
+  String get filterOutOfStock;
+
+  /// Reset filters button
+  ///
+  /// In am, this message translates to:
+  /// **'አጽዳ'**
+  String get resetFilters;
+
+  /// Apply filters button
+  ///
+  /// In am, this message translates to:
+  /// **'ተግብር'**
+  String get applyFilters;
+
+  /// Active filters count badge
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ማጣሪያዎች ተመርጠዋል'**
+  String activeFiltersCount(int count);
+
+  /// Total parts count indicator
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ዕቃዎች'**
+  String totalPartsCount(int count);
+
+  /// No matching parts found title
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የተገኘ ዕቃ የለም'**
+  String get noFilteredPartsTitle;
+
+  /// No matching parts found description
+  ///
+  /// In am, this message translates to:
+  /// **'እባክዎ የፍለጋ ቃልዎን ወይም ማጣሪያዎችን ይቀይሩ'**
+  String get noFilteredPartsDesc;
+
+  /// Seed test parts title
+  ///
+  /// In am, this message translates to:
+  /// **'2,000 የሙከራ ዕቃዎችን ፍጠር'**
+  String get seedParts;
+
+  /// Seed test parts description
+  ///
+  /// In am, this message translates to:
+  /// **'ለፍጥነት እና አፈፃፀም መፈተሻ 2,000 የመለዋወጫ ዕቃዎችን በቅጽበት ይፈጥራል'**
+  String get seedPartsDesc;
+
+  /// Seeding in progress snackbar
+  ///
+  /// In am, this message translates to:
+  /// **'2,000 ዕቃዎች እየተፈጠሩ ነው...'**
+  String get seedingInProgress;
+
+  /// Seeding success message
+  ///
+  /// In am, this message translates to:
+  /// **'2,000 የሙከራ ዕቃዎች በተሳካ ሁኔታ ተፈጥረዋል!'**
+  String get seedSuccess;
+
+  /// Clear test parts title
+  ///
+  /// In am, this message translates to:
+  /// **'የሙከራ ዕቃዎችን አጥፋ'**
+  String get clearTestParts;
+
+  /// Clear test parts confirmation dialog
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉንም በሙከራ የተፈጠሩ ዕቃዎች ማጥፋት ይፈልጋሉ?'**
+  String get clearTestPartsConfirm;
+
+  /// Clear test parts success message
+  ///
+  /// In am, this message translates to:
+  /// **'የሙከራ ዕቃዎች ተሰርዘዋል'**
+  String get clearTestPartsSuccess;
 }
 
 class _AppLocalizationsDelegate

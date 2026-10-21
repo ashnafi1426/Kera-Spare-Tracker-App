@@ -469,4 +469,104 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outOfStock => 'Out of Stock';
+
+  @override
+  String get lowStock => 'Low Stock';
+
+  @override
+  String get searchHint => 'Search by name, part #, brand, category, shelf...';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortName => 'Name (A - Z)';
+
+  @override
+  String get sortNewest => 'Newest first';
+
+  @override
+  String get sortQuantityHigh => 'Quantity (Highest first)';
+
+  @override
+  String get sortQuantityLow => 'Quantity (Lowest first)';
+
+  @override
+  String get sortPriceHigh => 'Price (Highest first)';
+
+  @override
+  String get sortPriceLow => 'Price (Lowest first)';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterInStock => 'In Stock';
+
+  @override
+  String get filterLowStock => 'Low Stock';
+
+  @override
+  String get filterOutOfStock => 'Out of Stock';
+
+  @override
+  String get resetFilters => 'Reset';
+
+  @override
+  String get applyFilters => 'Apply';
+
+  @override
+  String activeFiltersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count filters applied',
+      one: '1 filter applied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String totalPartsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parts',
+      one: '1 part',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noFilteredPartsTitle => 'No matching parts found';
+
+  @override
+  String get noFilteredPartsDesc =>
+      'Try adjusting your search query or filters';
+
+  @override
+  String get seedParts => 'Generate 2,000 Test Parts';
+
+  @override
+  String get seedPartsDesc =>
+      'Instantly generates 2,000 realistic spare parts to test search speed and list performance';
+
+  @override
+  String get seedingInProgress => 'Generating 2,000 test parts...';
+
+  @override
+  String get seedSuccess => 'Successfully created 2,000 test parts!';
+
+  @override
+  String get clearTestParts => 'Clear Test Parts';
+
+  @override
+  String get clearTestPartsConfirm =>
+      'Are you sure you want to delete all generated test parts?';
+
+  @override
+  String get clearTestPartsSuccess => 'Test parts removed successfully';
 }

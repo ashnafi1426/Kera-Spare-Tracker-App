@@ -8,8 +8,11 @@ class PartItem {
   final String? photoLocalPath;
   final String? photoUrl;
   final String? brandId;
+  final String? brandName;
   final String? categoryId;
+  final String? categoryName;
   final String? locationId;
+  final String? locationName;
   final String? customLocation;
   final String? description;
   final String? unit;
@@ -31,8 +34,11 @@ class PartItem {
     this.photoLocalPath,
     this.photoUrl,
     this.brandId,
+    this.brandName,
     this.categoryId,
+    this.categoryName,
     this.locationId,
+    this.locationName,
     this.customLocation,
     this.description,
     this.unit,
@@ -49,6 +55,14 @@ class PartItem {
 
   /// True if the part is not soft-deleted.
   bool get isActive => deletedAt == null;
+
+  /// Stock status helpers.
+  bool get isOutOfStock => cachedQuantity <= 0;
+  bool get isLowStock =>
+      !isOutOfStock &&
+      ((lowStockLevel != null && cachedQuantity <= lowStockLevel!) ||
+          cachedQuantity <= 5.0);
+  bool get isInStock => !isOutOfStock && !isLowStock;
 
   /// Returns the estimated profit per unit (selling price - purchase price).
   double? get unitProfit {
@@ -77,8 +91,11 @@ class PartItem {
     String? photoLocalPath,
     String? photoUrl,
     String? brandId,
+    String? brandName,
     String? categoryId,
+    String? categoryName,
     String? locationId,
+    String? locationName,
     String? customLocation,
     String? description,
     String? unit,
@@ -100,8 +117,11 @@ class PartItem {
       photoLocalPath: photoLocalPath ?? this.photoLocalPath,
       photoUrl: photoUrl ?? this.photoUrl,
       brandId: brandId ?? this.brandId,
+      brandName: brandName ?? this.brandName,
       categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
       locationId: locationId ?? this.locationId,
+      locationName: locationName ?? this.locationName,
       customLocation: customLocation ?? this.customLocation,
       description: description ?? this.description,
       unit: unit ?? this.unit,
