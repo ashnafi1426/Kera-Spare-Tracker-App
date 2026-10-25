@@ -68,11 +68,14 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
             backgroundColor: AppTheme.successColor,
           ),
         );
-        if (widget.isForced || userResult.valueOrNull?.mustChangePassword == false) {
-          context.go('/home');
+        final user = userResult.valueOrNull ?? ref.read(authControllerProvider).value;
+        final targetRoute = (user?.isAdmin ?? false) ? '/admin' : '/home';
+        if (widget.isForced || user?.mustChangePassword == false) {
+          context.go(targetRoute);
         } else {
           context.pop();
         }
+
       }
     } else {
       final err = result.failureOrNull;

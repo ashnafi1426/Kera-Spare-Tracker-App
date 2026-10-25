@@ -391,6 +391,14 @@ class ApiAuthRepository implements AuthRepository {
         '/auth/change-password',
         data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );
+      if (_cachedUser != null) {
+        _cachedUser = _cachedUser!.copyWith(mustChangePassword: false);
+        await _storage.write(
+          key: _userSessionKey,
+          value: jsonEncode(_cachedUser!.toJson()),
+        );
+        _authStateController.add(_cachedUser);
+      }
       try {
         await _localAuthRepo.changePassword(
           currentPassword: currentPassword,
@@ -398,6 +406,7 @@ class ApiAuthRepository implements AuthRepository {
         );
       } catch (_) {}
       return const Result.success(null);
+
     } on DioException catch (e) {
       final failure = _mapDioError(e);
       if (failure is NetworkFailure) {
@@ -486,21 +495,24 @@ class ApiAuthRepository implements AuthRepository {
       value: jsonEncode(user.toJson()),
     );
 
-    // Save profile row in Drift SQLite so offline queries and local repos work immediately
-    await db
-        .into(db.profiles)
-        .insertOnConflictUpdate(
-          ProfilesCompanion.insert(
-            id: Value(user.id),
-            ownerId: user.ownerId,
-            phoneNumber: Value(user.phoneNumber),
-            businessName: Value(user.businessName),
-            role: const Value(UserRole.owner),
-            syncStatus: const Value(SyncStatus.synced),
-          ),
-        );
+    // Save profile row in Drift SQLite so offline queries and local repos work immediately (owners only)
+    if (!user.isAdmin) {
+      await db
+          .into(db.profiles)
+          .insertOnConflictUpdate(
+            ProfilesCompanion.insert(
+              id: Value(user.id),
+              ownerId: user.ownerId,
+              phoneNumber: Value(user.phoneNumber),
+              businessName: Value(user.businessName),
+              role: const Value(UserRole.owner),
+              syncStatus: const Value(SyncStatus.synced),
+            ),
+          );
+    }
 
     _authStateController.add(user);
+
   }
 
   Failure _mapDioError(DioException e) {

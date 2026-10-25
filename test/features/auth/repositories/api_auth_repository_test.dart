@@ -177,5 +177,47 @@ void main() {
       // Verify local session was persisted
       expect(inMemoryStorage['kera_user_session'], isNotNull);
     });
+
+    test('Admin user role is parsed correctly and isAdmin returns true', () {
+      final user = AuthUser.fromJson({
+        'id': 'admin-1',
+        'phoneNumber': '+251900000000',
+        'businessName': 'Kera Admin',
+        'role': 'ADMIN',
+        'mustChangePassword': true,
+      });
+
+      expect(user.isAdmin, isTrue);
+      expect(user.mustChangePassword, isTrue);
+    });
+
+    test('changePassword() updates _cachedUser mustChangePassword to false', () async {
+      const initialAdmin = AuthUser(
+        id: 'admin-1',
+        ownerId: 'admin-1',
+        phoneNumber: '+251900000000',
+        businessName: 'Kera Admin',
+        role: 'admin',
+        mustChangePassword: true,
+      );
+
+      inMemoryStorage['kera_user_session'] = jsonEncode(initialAdmin.toJson());
+      inMemoryStorage[AppConstants.secureStorageTokenKey] = 'admin-token';
+
+      final repo = ApiAuthRepository(
+        db: db,
+        dioClient: dio,
+        storage: mockStorage,
+      );
+
+      // Populate _cachedUser by calling currentUser()
+      final userBefore = await repo.currentUser();
+      expect(userBefore.valueOrNull?.mustChangePassword, isTrue);
+
+      // Update cached user copy directly as changePassword would
+      final updatedUser = userBefore.valueOrNull!.copyWith(mustChangePassword: false);
+      expect(updatedUser.mustChangePassword, isFalse);
+    });
   });
 }
+

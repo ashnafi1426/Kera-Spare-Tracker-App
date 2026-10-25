@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
+
 /// Application-wide constants for Kera Spare Tracker.
 class AppConstants {
+
   AppConstants._();
 
   /// Application name.
@@ -69,11 +72,17 @@ class AppConstants {
   static const String localePreferenceKey = 'kera_user_locale';
   static const String themeModePreferenceKey = 'kera_user_theme_mode';
 
-  /// API Configuration loaded from --dart-define
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:7000/api/v1',
-  );
+  /// API Configuration loaded from --dart-define with automatic platform detection
+  static String get apiBaseUrl {
+    const fromEnv = String.fromEnvironment('API_BASE_URL');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    if (kIsWeb) return 'http://localhost:7000/api/v1';
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:7000/api/v1';
+    }
+    return 'http://localhost:7000/api/v1';
+  }
+
 
   /// Touch targets for low-end Android mobile accessibility.
   static const double minTouchTargetSize = 48.0;

@@ -29,9 +29,11 @@ app.use(
       },
     },
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   })
 );
+
 
 // 2. CORS configuration with allowed-origins list from .env
 const allowedOrigins = [

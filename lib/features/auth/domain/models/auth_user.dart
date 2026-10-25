@@ -20,7 +20,8 @@ class AuthUser {
     this.suspendedReason,
   });
 
-  bool get isAdmin => role == 'admin';
+  bool get isAdmin => role.toLowerCase() == 'admin';
+
   bool get isSuspended => status.toUpperCase() == 'SUSPENDED';
 
   AuthUser copyWith({

@@ -66,11 +66,17 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     required String currentPassword,
     required String newPassword,
   }) async {
-    return _repo.changePassword(
+    final result = await _repo.changePassword(
       currentPassword: currentPassword,
       newPassword: newPassword,
     );
+    if (result.isSuccess) {
+      final userResult = await _repo.currentUser();
+      state = AsyncValue.data(userResult.valueOrNull);
+    }
+    return result;
   }
+
 
   /// Updates the business name and reflects it in auth state.
   Future<Result<AuthUser>> updateBusinessName(String newName) async {

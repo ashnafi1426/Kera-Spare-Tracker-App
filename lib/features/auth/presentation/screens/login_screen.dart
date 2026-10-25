@@ -47,9 +47,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final l10n = context.l10n;
     result.when(
-      onSuccess: (_) {
-        context.go('/home');
+      onSuccess: (user) {
+        if (user.mustChangePassword) {
+          context.go('/change-password');
+        } else if (user.isAdmin) {
+          context.go('/admin');
+        } else {
+          context.go('/home');
+        }
       },
+
       onFailure: (failure) {
         String msg;
         switch (failure.code) {

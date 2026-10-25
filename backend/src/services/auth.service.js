@@ -129,12 +129,14 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
 }
 
 export async function loginUser({ phoneNumber, password }) {
+  const normalizedPhone = normalizeEthiopianPhone(phoneNumber);
   const user = await prisma.user.findFirst({
     where: {
-      phoneNumber,
+      phoneNumber: normalizedPhone,
       deletedAt: null,
     },
   });
+
 
   if (!user) {
     throw new InvalidCredentialsError();
