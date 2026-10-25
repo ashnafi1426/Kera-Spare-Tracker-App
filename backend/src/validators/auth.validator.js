@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 const ETHIOPIAN_PHONE_REGEX = /^(\+251[79]\d{8}|0[79]\d{8}|251[79]\d{8})$/;
 
+export const ADMIN_PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]).{12,}$/;
+
 export function normalizeEthiopianPhone(phone) {
   let cleaned = phone.trim().replace(/[\s-]/g, '');
   if (cleaned.startsWith('09') || cleaned.startsWith('07')) {
@@ -11,6 +14,7 @@ export function normalizeEthiopianPhone(phone) {
   }
   return cleaned;
 }
+
 
 export const registerSchema = z.object({
   body: z.object({

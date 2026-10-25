@@ -112,15 +112,23 @@ MySQL does not feature native Row Level Security (RLS). Privacy is enforced at t
 - Every query in `src/services/` filters by `{ ownerId, deletedAt: null }`.
 - If an owner attempts to read, edit, or delete another owner's item, the server returns **404 Not Found** (preventing ID enumeration).
 
-### 2. Role-Based Access Control (RBAC)
-- **`OWNER`**: Can only view and manage their private spare parts, stock ledger, sales, and custom brands.
-- **`ADMIN`**: Can manage users (activate/suspend) and global brands. **Admins are strictly blocked from viewing or mutating owner inventory and sales.**
-- **Suspended Accounts**: Any request made by a user with status `SUSPENDED` is immediately rejected with `403 Forbidden`.
+### 4. Protected Administrator Provisioning CLI
+Admin accounts **cannot** be created through any public registration endpoint (public registration strictly assigns role `OWNER`). To provision new administrators securely from the terminal:
 
-### 3. Private Media Storage
-- Spare part photos are uploaded via Multer to a folder partitioned per owner: `uploads/parts/{ownerId}/{filename}`.
-- Uploads are **never served as public static files**.
-- Photos can only be accessed via `GET /api/v1/parts/:id/photo`, which verifies the requesting user owns the part before streaming the file.
+```bash
+# Interactive mode (prompts for phone, name, and strong password):
+npm run create-admin
+
+# Or non-interactive CLI flags:
+npm run create-admin -- --phone 0911223344 --name "Operations Lead" --password "AdminSecPass123!#"
+```
+
+**Admin Password Security Policy:**
+- Minimum 12 characters in length
+- Requires a mix of uppercase letters, lowercase letters, numbers, and symbols
+- Every created administrator has `mustChangePassword = true` and must change password upon first login
+- All admin creations are permanently recorded in the `audit_logs` table (`ADMIN_CREATED_CLI`)
+
 
 ---
 

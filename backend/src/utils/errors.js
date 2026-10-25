@@ -80,3 +80,10 @@ export class PhoneTakenError extends AppError {
     super(message, 409, 'PHONE_TAKEN');
   }
 }
+
+export class TooManyRequestsError extends AppError {
+  constructor(message = 'Too many requests. Please try again later.', code = 'TOO_MANY_REQUESTS') {
+    super(message, 429, code);
+  }
+}
+

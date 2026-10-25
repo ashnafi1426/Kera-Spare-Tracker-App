@@ -29,10 +29,14 @@ export async function login(req, res, next) {
 
 export async function adminLogin(req, res, next) {
   try {
-    const result = await authService.loginUser(req.body);
-    if (result.user.role !== 'ADMIN') {
-      throw new ForbiddenError('Access restricted to administrators only.');
-    }
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    const result = await authService.loginAdmin({
+      phoneNumber: req.body.phoneNumber,
+      password: req.body.password,
+      ipAddress,
+      userAgent,
+    });
     res.status(200).json({
       success: true,
       message: 'Admin authentication successful',
@@ -42,6 +46,7 @@ export async function adminLogin(req, res, next) {
     next(err);
   }
 }
+
 
 export async function refresh(req, res, next) {
   try {

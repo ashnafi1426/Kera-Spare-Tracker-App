@@ -9,8 +9,66 @@ import {
   TokenExpiredError,
   InvalidTokenError,
   NotFoundError,
+  TooManyRequestsError,
+  ValidationError,
 } from '../utils/errors.js';
+import { ADMIN_PASSWORD_REGEX, normalizeEthiopianPhone } from '../validators/auth.validator.js';
 import crypto from 'crypto';
+
+// In-memory lockout tracking for Admin Login
+// Key: 'ip:<ip>' and 'phone:<phone>'
+const adminLoginAttempts = new Map();
+const MAX_ADMIN_LOGIN_ATTEMPTS = 5;
+const ADMIN_LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+export function getAdminLoginAttempt(key) {
+  const record = adminLoginAttempts.get(key);
+  if (!record) return null;
+  const now = Date.now();
+  if (record.lockedUntil && now > record.lockedUntil) {
+    adminLoginAttempts.delete(key);
+    return null;
+  }
+  if (!record.lockedUntil && now - record.firstAttemptAt > ADMIN_LOCKOUT_DURATION_MS) {
+    adminLoginAttempts.delete(key);
+    return null;
+  }
+  return record;
+}
+
+export function recordAdminLoginFailure(ip, phone) {
+  const now = Date.now();
+  const keys = [];
+  if (ip) keys.push(`ip:${ip}`);
+  if (phone) keys.push(`phone:${phone}`);
+
+  for (const key of keys) {
+    let record = adminLoginAttempts.get(key);
+    if (
+      !record ||
+      (record.lockedUntil && now > record.lockedUntil) ||
+      (!record.lockedUntil && now - record.firstAttemptAt > ADMIN_LOCKOUT_DURATION_MS)
+    ) {
+      record = { count: 1, firstAttemptAt: now, lockedUntil: null };
+    } else {
+      record.count += 1;
+    }
+
+    if (record.count >= MAX_ADMIN_LOGIN_ATTEMPTS) {
+      record.lockedUntil = now + ADMIN_LOCKOUT_DURATION_MS;
+    }
+    adminLoginAttempts.set(key, record);
+  }
+}
+
+export function clearAdminLoginAttempts(ip, phone) {
+  if (ip) adminLoginAttempts.delete(`ip:${ip}`);
+  if (phone) adminLoginAttempts.delete(`phone:${phone}`);
+}
+
+export function resetAllAdminLoginAttempts() {
+  adminLoginAttempts.clear();
+}
 
 // Hash helper for storing refresh tokens securely in database
 function hashToken(token) {
@@ -115,6 +173,122 @@ export async function loginUser({ phoneNumber, password }) {
     where: { id: user.id },
     data: { lastLoginAt: new Date() },
   });
+
+  return {
+    user: {
+      id: user.id,
+      phoneNumber: user.phoneNumber,
+      businessName: user.businessName,
+      role: user.role,
+      status: user.status,
+      language: user.language,
+      mustChangePassword: user.mustChangePassword,
+    },
+    accessToken,
+    refreshToken,
+  };
+}
+
+export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }) {
+  const normalizedPhone = normalizeEthiopianPhone(phoneNumber);
+
+  // 1. Check for temporary lockout (per IP or per phone number)
+  const ipKey = ipAddress ? `ip:${ipAddress}` : null;
+  const phoneKey = `phone:${normalizedPhone}`;
+
+  const ipAttempt = ipKey ? getAdminLoginAttempt(ipKey) : null;
+  const phoneAttempt = getAdminLoginAttempt(phoneKey);
+
+  if (
+    (ipAttempt && ipAttempt.count >= MAX_ADMIN_LOGIN_ATTEMPTS) ||
+    (phoneAttempt && phoneAttempt.count >= MAX_ADMIN_LOGIN_ATTEMPTS)
+  ) {
+    throw new TooManyRequestsError(
+      'Too many failed login attempts. Account or IP temporarily locked for 15 minutes.'
+    );
+  }
+
+  // 2. Uniform failure helper (prevents account enumeration)
+  const failLogin = async () => {
+    recordAdminLoginFailure(ipAddress, normalizedPhone);
+    try {
+      await prisma.auditLog.create({
+        data: {
+          id: uuidv4(),
+          action: 'ADMIN_LOGIN_FAILED',
+          ipAddress: ipAddress || null,
+          userAgent: userAgent || null,
+          newValue: { phoneNumber: normalizedPhone, reason: 'INVALID_CREDENTIALS' },
+        },
+      });
+    } catch (e) {
+      // audit logging error must not mask the authentication error
+    }
+    throw new InvalidCredentialsError('Invalid phone number or password.');
+  };
+
+  const user = await prisma.user.findFirst({
+    where: {
+      phoneNumber: normalizedPhone,
+      deletedAt: null,
+    },
+  });
+
+  // Non-existent user or user is not an administrator
+  if (!user || user.role !== 'ADMIN') {
+    await failLogin();
+  }
+
+  // Password verification
+  const isPasswordValid = await comparePassword(password, user.passwordHash);
+  if (!isPasswordValid) {
+    await failLogin();
+  }
+
+  // Suspended administrator check
+  if (user.status === 'SUSPENDED') {
+    throw new AccountSuspendedError('Admin account is suspended. Please contact system administrator.');
+  }
+
+  // Successful login: clear lockout counters
+  clearAdminLoginAttempts(ipAddress, normalizedPhone);
+
+  // Generate tokens (role: 'ADMIN' gets 10m access token via jwt.js)
+  const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
+  const refreshToken = signRefreshToken({ id: user.id });
+
+  // Store hashed refresh token
+  const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.refreshToken.create({
+    data: {
+      id: uuidv4(),
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    },
+  });
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+
+  // Audit successful login
+  try {
+    await prisma.auditLog.create({
+      data: {
+        id: uuidv4(),
+        adminId: user.id,
+        targetUserId: user.id,
+        action: 'ADMIN_LOGIN_SUCCESS',
+        ipAddress: ipAddress || null,
+        userAgent: userAgent || null,
+        newValue: { phoneNumber: user.phoneNumber },
+      },
+    });
+  } catch (e) {}
 
   return {
     user: {
@@ -242,6 +416,15 @@ export async function changeUserPassword(userId, { currentPassword, newPassword 
 
   if (!user) {
     throw new NotFoundError('User not found.');
+  }
+
+  // If user is ADMIN, enforce strong 12+ character password policy
+  if (user.role === 'ADMIN') {
+    if (!ADMIN_PASSWORD_REGEX.test(newPassword)) {
+      throw new ValidationError(
+        'Admin password must be at least 12 characters long and contain a mix of uppercase letters, lowercase letters, numbers, and symbols.'
+      );
+    }
   }
 
   const isValid = await comparePassword(currentPassword, user.passwordHash);

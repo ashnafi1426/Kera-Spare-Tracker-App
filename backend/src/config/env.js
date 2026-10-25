@@ -7,10 +7,15 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL || 'mysql://root:14263208%40aA@localhost:3306/mobile',
   jwtSecret: process.env.JWT_SECRET || 'kera-spare-tracker-jwt-access-secret-2026-super-secure',
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+  jwtAdminAccessExpiresIn: process.env.JWT_ADMIN_ACCESS_EXPIRES_IN || '10m',
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'kera-spare-tracker-jwt-refresh-secret-2026-super-secure',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
   corsOrigin: (process.env.CORS_ORIGIN || '*').split(',').map((s) => s.trim()),
+  adminCorsOrigin: (process.env.ADMIN_CORS_ORIGIN || 'http://localhost:3000,http://localhost:5000,http://localhost:8080')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   adminPhone: process.env.ADMIN_PHONE || '+251900000000',
   adminPassword: process.env.ADMIN_PASSWORD || 'AdminPassword123!',
   adminBusinessName: process.env.ADMIN_BUSINESS_NAME || 'Kera System Admin',

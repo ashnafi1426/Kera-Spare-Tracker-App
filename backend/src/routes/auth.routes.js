@@ -30,9 +30,11 @@ const authLimiter = rateLimit({
 
 const adminAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5, // strict: 5 attempts per 15 min window
+  max: 5, // strict: 5 failed attempts per 15 min window
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     error: {
@@ -41,6 +43,8 @@ const adminAuthLimiter = rateLimit({
     },
   },
 });
+
+
 
 router.post('/register', authLimiter, validate(registerSchema), authController.register);
 router.post('/login', authLimiter, validate(loginSchema), authController.login);

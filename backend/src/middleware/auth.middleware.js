@@ -58,12 +58,14 @@ export async function authenticate(req, res, next) {
     // 2. Track X-App-Version header if provided
     const clientAppVersion = req.headers['x-app-version'];
     if (clientAppVersion && clientAppVersion !== user.appVersion) {
-      prisma.user
-        .update({
+      try {
+        await prisma.user.update({
           where: { id: user.id },
           data: { appVersion: String(clientAppVersion).substring(0, 50) },
-        })
-        .catch(() => {});
+        });
+      } catch (err) {
+        // Silently continue if version update fails
+      }
     }
 
     // 3. Must Change Password check: if true, only change-password, me, and logout are allowed

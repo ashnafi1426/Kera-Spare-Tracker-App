@@ -316,7 +316,7 @@ model Subscription {
 
 model AuditLog {
   id           String    @id @db.Char(36)
-  adminId      String    @db.Char(36)
+  adminId      String?   @db.Char(36)
   targetUserId String?   @db.Char(36)
   action       String    @db.VarChar(100)
   oldValue     Json?
@@ -327,8 +327,9 @@ model AuditLog {
   createdAt    DateTime  @default(now()) @db.Timestamp(6)
 
   // Relations
-  admin      User  @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Restrict)
+  admin      User? @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: SetNull)
   targetUser User? @relation("TargetUserAuditLogs", fields: [targetUserId], references: [id], onDelete: SetNull)
+
 
   @@index([targetUserId, createdAt])
   @@index([adminId, createdAt])

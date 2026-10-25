@@ -12,16 +12,39 @@ import { NotFoundError } from './utils/errors.js';
 
 const app = express();
 
+// Trust reverse proxy (e.g. Nginx, load balancers, Docker)
+app.set('trust proxy', 1);
+
+
 // 1. Security Headers with Helmet
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", ...(config.corsOrigin || []), ...(config.adminCorsOrigin || [])],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  })
+);
 
 // 2. CORS configuration with allowed-origins list from .env
+const allowedOrigins = [
+  ...(Array.isArray(config.corsOrigin) ? config.corsOrigin : [config.corsOrigin]),
+  ...(Array.isArray(config.adminCorsOrigin) ? config.adminCorsOrigin : [config.adminCorsOrigin]),
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
-      if (config.corsOrigin.includes('*') || config.corsOrigin.includes(origin)) {
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error(`Origin '${origin}' not allowed by CORS policy`), false);
@@ -30,9 +53,10 @@ app.use(
   })
 );
 
-// 3. Request body size limit
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+// 3. Request body size limit (Strict 1MB limit for payload protection)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
 
 // 4. Rate Limiting (100 requests per 15 minutes window)
 const limiter = rateLimit({
