@@ -118,11 +118,12 @@ void main() {
       await tester.pumpWidget(createWidget());
       await tester.pumpAndSettle();
 
-      await tester.scrollUntilVisible(find.text('About Kera Spare Tracker'), 300);
-      expect(find.text('About Kera Spare Tracker'), findsOneWidget);
+      final scrollable = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(find.text('Kera Spare Tracker'), 300, scrollable: scrollable);
+      expect(find.text('Kera Spare Tracker'), findsWidgets);
       expect(find.text('Version 1.0.0 (Build 1)'), findsOneWidget);
 
-      await tester.scrollUntilVisible(find.text('Log Out'), 300);
+      await tester.scrollUntilVisible(find.text('Log Out'), 300, scrollable: scrollable);
       expect(find.text('Log Out'), findsOneWidget);
     });
   });

@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/screens/admin_account_screen.dart';
+import '../../features/admin/presentation/screens/admin_audit_log_screen.dart';
+import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/admin_global_catalog_screen.dart';
+import '../../features/admin/presentation/screens/admin_owner_details_screen.dart';
+import '../../features/admin/presentation/screens/admin_owners_list_screen.dart';
+import '../../features/admin/presentation/screens/admin_settings_screen.dart';
+import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -70,7 +78,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return location == '/change-password' ? null : '/change-password';
       }
 
-      // Authenticated users trying to access login, register or splash go to /home
+      // 3. Admin user mutual guard
+      if (user.isAdmin) {
+        if (isAuthRoute || location == '/' || !location.startsWith('/admin')) {
+          if (location == '/change-password' && !user.mustChangePassword) {
+            return '/admin';
+          }
+          if (!location.startsWith('/admin')) {
+            return '/admin';
+          }
+        }
+        return null;
+      }
+
+      // 4. Non-admin (owner) mutual guard
+      if (location.startsWith('/admin')) {
+        return '/home';
+      }
+
+      // Authenticated owners trying to access login, register or splash go to /home
       if (isAuthRoute ||
           location == '/' ||
           (location == '/change-password' && !user.mustChangePassword)) {
@@ -183,7 +209,53 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'stock-low-stock',
         builder: (context, state) => const LowStockScreen(),
       ),
+
+      // Admin portal routes wrapped in responsive ShellRoute
+      ShellRoute(
+        builder: (context, state, child) => AdminScaffold(
+          currentRoute: state.matchedLocation,
+          child: child,
+        ),
+        routes: [
+          GoRoute(
+            path: '/admin',
+            name: 'admin-dashboard',
+            builder: (context, state) => const AdminDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/admin/owners',
+            name: 'admin-owners',
+            builder: (context, state) => const AdminOwnersListScreen(),
+          ),
+          GoRoute(
+            path: '/admin/owners/:id',
+            name: 'admin-owner-details',
+            builder: (context, state) => AdminOwnerDetailsScreen(
+              ownerId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: '/admin/catalog',
+            name: 'admin-catalog',
+            builder: (context, state) => const AdminGlobalCatalogScreen(),
+          ),
+          GoRoute(
+            path: '/admin/settings',
+            name: 'admin-settings',
+            builder: (context, state) => const AdminSettingsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/audit-logs',
+            name: 'admin-audit-logs',
+            builder: (context, state) => const AdminAuditLogScreen(),
+          ),
+          GoRoute(
+            path: '/admin/account',
+            name: 'admin-account',
+            builder: (context, state) => const AdminAccountScreen(),
+          ),
+        ],
+      ),
     ],
   );
 });
-

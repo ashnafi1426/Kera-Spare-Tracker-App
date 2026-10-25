@@ -110,11 +110,12 @@ void main() {
         installedVersion: '1.0.0',
       );
 
+      final notifier = FakeAppConfigNotifier(activeConfig);
       await tester.pumpWidget(
         createTestableWidget(
           child: const MaintenanceBannerWidget(),
           overrides: [
-            appConfigNotifierProvider.overrideWith(() => FakeAppConfigNotifier(activeConfig)),
+            appConfigNotifierProvider.overrideWith(() => notifier),
           ],
         ),
       );
@@ -147,15 +148,7 @@ void main() {
         installedVersion: '1.0.0',
       );
 
-      await tester.pumpWidget(
-        createTestableWidget(
-          child: const MaintenanceBannerWidget(),
-          overrides: [
-            appConfigNotifierProvider.overrideWith(() => FakeAppConfigNotifier(disabledConfig)),
-          ],
-        ),
-      );
-
+      notifier.updateConfig(disabledConfig);
       await tester.pumpAndSettle();
       expect(find.text('Scheduled system maintenance in progress'), findsNothing);
     });
