@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -15,16 +16,19 @@ import '../../features/settings/presentation/screens/brands_management_screen.da
 import '../../features/settings/presentation/screens/categories_management_screen.dart';
 import '../../features/settings/presentation/screens/locations_management_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
+import '../../features/splash/presentation/update_required_screen.dart';
 import '../../features/stock/presentation/screens/low_stock_screen.dart';
 import '../../features/stock/presentation/screens/stock_history_screen.dart';
+import '../providers/app_config_provider.dart';
 
-
-/// Helper ChangeNotifier that notifies GoRouter when Riverpod auth state changes.
+/// Helper ChangeNotifier that notifies GoRouter when Riverpod auth or config state changes.
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(Ref ref) {
     ref.listen(authControllerProvider, (_, _) => notifyListeners());
+    ref.listen(appConfigNotifierProvider, (_, _) => notifyListeners());
   }
 }
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _AuthRefreshNotifier(ref);
   ref.onDispose(refreshNotifier.dispose);
@@ -33,6 +37,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
+      final configState = ref.read(appConfigNotifierProvider);
+      final location = state.matchedLocation;
+
+      // 1. Force update takes precedence over all other routes
+      final isUpdateRequired =
+          configState.value?.config.isUpdateRequired ?? false;
+      if (isUpdateRequired) {
+        return location == '/update-required' ? null : '/update-required';
+      } else if (location == '/update-required') {
+        return '/';
+      }
+
       final authState = ref.read(authControllerProvider);
 
       // Allow splash to render during initial auth check
@@ -40,8 +56,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      final isAuthenticated = authState.value != null;
-      final location = state.matchedLocation;
+      final user = authState.value;
+      final isAuthenticated = user != null;
       final isAuthRoute = location == '/login' || location == '/register';
 
       // Unauthenticated users are redirected to /login
@@ -49,14 +65,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isAuthRoute ? null : '/login';
       }
 
+      // 2. Forced password change flow
+      if (user.mustChangePassword) {
+        return location == '/change-password' ? null : '/change-password';
+      }
+
       // Authenticated users trying to access login, register or splash go to /home
-      if (isAuthRoute || location == '/') {
+      if (isAuthRoute ||
+          location == '/' ||
+          (location == '/change-password' && !user.mustChangePassword)) {
         return '/home';
       }
 
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/update-required',
+        name: 'update-required',
+        builder: (context, state) => const UpdateRequiredScreen(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        name: 'change-password',
+        builder: (context, state) {
+          final isForced = ref.read(authControllerProvider).value?.mustChangePassword ?? false;
+          return ChangePasswordScreen(isForced: isForced);
+        },
+      ),
       GoRoute(
         path: '/',
         name: 'splash',

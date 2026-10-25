@@ -65,6 +65,9 @@ class ApiAuthRepository implements AuthRepository {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Send app version on every request
+          options.headers['X-App-Version'] = AppConstants.appVersion;
+
           // Attach Bearer access token if present
           final token = await _storage.read(
             key: AppConstants.secureStorageTokenKey,
@@ -84,9 +87,28 @@ class ApiAuthRepository implements AuthRepository {
             errorCode = responseData['error']['code']?.toString();
           }
 
-          // Handle 403 ACCOUNT_SUSPENDED
+          // Handle 403 ACCOUNT_SUSPENDED: preserve local data and update state
           if (statusCode == 403 && errorCode == 'ACCOUNT_SUSPENDED') {
-            await logout();
+            String? reason;
+            if (responseData is Map<String, dynamic> &&
+                responseData['error'] is Map) {
+              final errMap = responseData['error'] as Map;
+              if (errMap['details'] is Map) {
+                reason = errMap['details']['reason']?.toString();
+              }
+            }
+            if (_cachedUser != null) {
+              final updated = _cachedUser!.copyWith(
+                status: 'SUSPENDED',
+                suspendedReason: reason ?? _cachedUser!.suspendedReason,
+              );
+              _cachedUser = updated;
+              await _storage.write(
+                key: _userSessionKey,
+                value: jsonEncode(updated.toJson()),
+              );
+              _authStateController.add(updated);
+            }
             return handler.reject(err);
           }
 
@@ -183,13 +205,7 @@ class ApiAuthRepository implements AuthRepository {
       final accessToken = data['accessToken']?.toString();
       final refreshToken = data['refreshToken']?.toString();
 
-      final user = AuthUser(
-        id: userMap['id'],
-        ownerId: userMap['id'],
-        phoneNumber: userMap['phoneNumber'],
-        businessName: userMap['businessName'],
-        role: userMap['role']?.toString().toLowerCase() ?? 'owner',
-      );
+      final user = AuthUser.fromJson(userMap);
 
       // Persist session tokens & user profile
       await _persistSession(
@@ -247,13 +263,7 @@ class ApiAuthRepository implements AuthRepository {
       final accessToken = data['accessToken']?.toString();
       final refreshToken = data['refreshToken']?.toString();
 
-      final user = AuthUser(
-        id: userMap['id'],
-        ownerId: userMap['id'],
-        phoneNumber: userMap['phoneNumber'],
-        businessName: userMap['businessName'],
-        role: userMap['role']?.toString().toLowerCase() ?? 'owner',
-      );
+      final user = AuthUser.fromJson(userMap);
 
       await _persistSession(
         user,
@@ -357,13 +367,7 @@ class ApiAuthRepository implements AuthRepository {
         final res = await dio.get('/auth/me');
         if (res.statusCode == 200 && res.data['success'] == true) {
           final data = res.data['data'] as Map<String, dynamic>;
-          final updatedUser = AuthUser(
-            id: data['id'],
-            ownerId: data['id'],
-            phoneNumber: data['phoneNumber'],
-            businessName: data['businessName'],
-            role: data['role']?.toString().toLowerCase() ?? 'owner',
-          );
+          final updatedUser = AuthUser.fromJson(data);
           _cachedUser = updatedUser;
           await _storage.write(
             key: _userSessionKey,
@@ -517,7 +521,11 @@ class ApiAuthRepository implements AuthRepository {
         final code = errorObj['code']?.toString() ?? 'SERVER_ERROR';
         final message =
             errorObj['message']?.toString() ?? 'Authentication error';
-        return AuthFailure(message: message, code: code);
+        return AuthFailure(
+          message: message,
+          code: code,
+          cause: errorObj['details'],
+        );
       }
     }
 

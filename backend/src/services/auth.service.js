@@ -88,7 +88,10 @@ export async function loginUser({ phoneNumber, password }) {
   }
 
   if (user.status === 'SUSPENDED') {
-    throw new AccountSuspendedError();
+    throw new AccountSuspendedError(
+      'Account is suspended. Please contact system administrator.',
+      user.suspendedReason ? { reason: user.suspendedReason } : null
+    );
   }
 
   // Generate tokens
@@ -169,7 +172,10 @@ export async function refreshUserToken({ refreshToken }) {
   }
 
   if (user.status === 'SUSPENDED') {
-    throw new AccountSuspendedError();
+    throw new AccountSuspendedError(
+      'Account is suspended. Please contact system administrator.',
+      user.suspendedReason ? { reason: user.suspendedReason } : null
+    );
   }
 
   // 4. Revoke old refresh token (Token rotation)
@@ -268,6 +274,7 @@ export async function getUserProfile(userId) {
       role: true,
       status: true,
       language: true,
+      mustChangePassword: true,
       createdAt: true,
       updatedAt: true,
     },

@@ -9,6 +9,14 @@ class AppConstants {
   static const String defaultLocaleCode = 'am'; // Amharic by default
   static const String englishLocaleCode = 'en';
 
+  /// Application version
+  static const String appVersion = '1.0.0';
+  static const String appBuildNumber = '1';
+
+  /// Support contacts (fallbacks)
+  static const String fallbackSupportPhone = '+251911000000';
+  static const String fallbackSupportTelegram = '@KeraSpareSupport';
+
   /// Default configurable brands for spare parts.
   static const List<String> defaultBrands = [
     'CAT',

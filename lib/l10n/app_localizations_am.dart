@@ -943,5 +943,53 @@ class AppLocalizationsAm extends AppLocalizations {
       'የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።';
 
   @override
-  String get authServerError => 'የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።';
+  String get authServerError => 'የአገልጋይ ችግር አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።';
+
+  @override
+  String get updateRequiredTitle => 'ማዘመን ያስፈልጋል';
+
+  @override
+  String updateRequiredMessage(String version) {
+    return 'መተግበሪያውን ለመቀጠል አዲስ ስሪት ያስፈልጋል። እባክዎ ወደ ስሪት $version ወይም ከዚያ በላይ ያዘምኑ።';
+  }
+
+  @override
+  String get updateNow => 'አሁን አዘምን';
+
+  @override
+  String get maintenanceTitle => 'አገልግሎቱ በጥገና ላይ ነው';
+
+  @override
+  String get maintenanceBanner =>
+      'የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።';
+
+  @override
+  String get accountSuspendedTitle => 'መለያዎ ታግዷል';
+
+  @override
+  String get accountSuspendedMessage =>
+      'መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።';
+
+  @override
+  String suspensionReasonLabel(String reason) {
+    return 'ምክንያት፦ $reason';
+  }
+
+  @override
+  String get contactSupportLabel => 'እርዳታ ለማግኘት ያግኙን፦';
+
+  @override
+  String get callSupport => 'ይደውሉ';
+
+  @override
+  String get telegramSupport => 'ቴሌግራም';
+
+  @override
+  String get mustChangePasswordTitle => 'የይለፍ ቃል መቀየር ያስፈልጋል';
+
+  @override
+  String get mustChangePasswordPrompt => 'ለመቀጠል እባክዎ መጀመሪያ አዲስ የይለፍ ቃል ያዘጋጁ።';
+
+  @override
+  String get dismiss => 'ዝጋ';
 }

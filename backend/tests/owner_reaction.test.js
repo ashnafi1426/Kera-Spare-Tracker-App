@@ -81,6 +81,7 @@ describe('Owner Reaction & Sync Integration Tests', () => {
     expect(res.body.data).toHaveProperty('minAppVersion');
     expect(res.body.data).toHaveProperty('maintenanceMode');
     expect(res.body.data).toHaveProperty('announcement');
+    expect(res.body.data).toHaveProperty('supportContact');
   });
 
   it('2. X-App-Version header updates appVersion in user record', async () => {

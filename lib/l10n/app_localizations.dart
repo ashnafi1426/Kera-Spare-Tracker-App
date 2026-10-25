@@ -1905,8 +1905,92 @@ abstract class AppLocalizations {
   /// Server error message
   ///
   /// In am, this message translates to:
-  /// **'የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።'**
+  /// **'የአገልጋይ ችግር አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።'**
   String get authServerError;
+
+  /// Update required title
+  ///
+  /// In am, this message translates to:
+  /// **'ማዘመን ያስፈልጋል'**
+  String get updateRequiredTitle;
+
+  /// Update required description message
+  ///
+  /// In am, this message translates to:
+  /// **'መተግበሪያውን ለመቀጠል አዲስ ስሪት ያስፈልጋል። እባክዎ ወደ ስሪት {version} ወይም ከዚያ በላይ ያዘምኑ።'**
+  String updateRequiredMessage(String version);
+
+  /// Update now button
+  ///
+  /// In am, this message translates to:
+  /// **'አሁን አዘምን'**
+  String get updateNow;
+
+  /// Maintenance title
+  ///
+  /// In am, this message translates to:
+  /// **'አገልግሎቱ በጥገና ላይ ነው'**
+  String get maintenanceTitle;
+
+  /// Maintenance banner text
+  ///
+  /// In am, this message translates to:
+  /// **'የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።'**
+  String get maintenanceBanner;
+
+  /// Suspension alert title
+  ///
+  /// In am, this message translates to:
+  /// **'መለያዎ ታግዷል'**
+  String get accountSuspendedTitle;
+
+  /// Suspension alert message
+  ///
+  /// In am, this message translates to:
+  /// **'መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።'**
+  String get accountSuspendedMessage;
+
+  /// Suspension reason label
+  ///
+  /// In am, this message translates to:
+  /// **'ምክንያት፦ {reason}'**
+  String suspensionReasonLabel(String reason);
+
+  /// Contact support label
+  ///
+  /// In am, this message translates to:
+  /// **'እርዳታ ለማግኘት ያግኙን፦'**
+  String get contactSupportLabel;
+
+  /// Call support button
+  ///
+  /// In am, this message translates to:
+  /// **'ይደውሉ'**
+  String get callSupport;
+
+  /// Telegram support button
+  ///
+  /// In am, this message translates to:
+  /// **'ቴሌግራም'**
+  String get telegramSupport;
+
+  /// Must change password title
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል መቀየር ያስፈልጋል'**
+  String get mustChangePasswordTitle;
+
+  /// Must change password prompt
+  ///
+  /// In am, this message translates to:
+  /// **'ለመቀጠል እባክዎ መጀመሪያ አዲስ የይለፍ ቃል ያዘጋጁ።'**
+  String get mustChangePasswordPrompt;
+
+  /// Dismiss button
+  ///
+  /// In am, this message translates to:
+  /// **'ዝጋ'**
+  String get dismiss;
 }
 
 class _AppLocalizationsDelegate

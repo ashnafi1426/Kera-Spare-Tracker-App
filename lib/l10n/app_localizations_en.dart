@@ -981,4 +981,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authServerError =>
       'Server error occurred. Please try again later.';
+
+  @override
+  String get updateRequiredTitle => 'Update Required';
+
+  @override
+  String updateRequiredMessage(String version) {
+    return 'A new version of Kera Spare Tracker is required to continue. Please update to version $version or newer.';
+  }
+
+  @override
+  String get updateNow => 'Update Now';
+
+  @override
+  String get maintenanceTitle => 'Service Under Maintenance';
+
+  @override
+  String get maintenanceBanner =>
+      'Cloud sync is temporarily undergoing maintenance. Offline inventory and sales remain fully functional.';
+
+  @override
+  String get accountSuspendedTitle => 'Account Suspended';
+
+  @override
+  String get accountSuspendedMessage =>
+      'Your account has been suspended. Local data remains safe and readable, but cloud synchronization is halted.';
+
+  @override
+  String suspensionReasonLabel(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get contactSupportLabel => 'Contact Support:';
+
+  @override
+  String get callSupport => 'Call Support';
+
+  @override
+  String get telegramSupport => 'Telegram';
+
+  @override
+  String get mustChangePasswordTitle => 'Password Change Required';
+
+  @override
+  String get mustChangePasswordPrompt =>
+      'An immediate password update is required for your account before you can proceed.';
+
+  @override
+  String get dismiss => 'Dismiss';
 }

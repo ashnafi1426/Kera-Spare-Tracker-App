@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/announcement_banner_widget.dart';
+import '../../../../core/widgets/maintenance_banner_widget.dart';
+import '../../../../core/widgets/suspended_account_banner_widget.dart';
 import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/inventory_providers.dart';
@@ -229,6 +232,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       body: Column(
         children: [
+          const MaintenanceBannerWidget(),
+          const SuspendedAccountBannerWidget(),
+          const AnnouncementBannerWidget(),
           // 1. Search Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),

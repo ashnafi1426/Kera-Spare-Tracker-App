@@ -5,7 +5,7 @@ export async function getPublicAppConfig(req, res, next) {
     const settings = await prisma.appSetting.findMany({
       where: {
         key: {
-          in: ['minAppVersion', 'maintenanceMode', 'announcement'],
+          in: ['minAppVersion', 'maintenanceMode', 'announcement', 'supportContact'],
         },
       },
     });
@@ -16,9 +16,13 @@ export async function getPublicAppConfig(req, res, next) {
     }
 
     // Default fallbacks if not seeded
-    const minAppVersion = configMap.minAppVersion || { version: '1.0.0', enforce: false };
+    const minAppVersion = configMap.minAppVersion || { version: '1.0.0', enforce: false, downloadUrl: 'https://keraspare.et/download' };
     const maintenanceMode = configMap.maintenanceMode || { enabled: false, messageAm: '', messageEn: '' };
     let announcement = configMap.announcement || { active: false, titleAm: '', titleEn: '', bodyAm: '', bodyEn: '' };
+    const supportContact = configMap.supportContact || {
+      phone: '+251911000000',
+      telegram: '@KeraSpareSupport',
+    };
 
     // Check announcement validity window if active
     if (announcement && announcement.active) {
@@ -37,6 +41,7 @@ export async function getPublicAppConfig(req, res, next) {
         minAppVersion,
         maintenanceMode,
         announcement,
+        supportContact,
       },
     });
   } catch (err) {

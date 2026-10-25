@@ -873,8 +873,46 @@
   "@authNoInternet": { "description": "No internet connection message" },
   "authAccountSuspended": "የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።",
   "@authAccountSuspended": { "description": "Account suspended message" },
-  "authServerError": "የአገልጋይ תקላ አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
-  "@authServerError": { "description": "Server error message" }
+  "authServerError": "የአገልጋይ ችግር አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
+  "@authServerError": { "description": "Server error message" },
+  "updateRequiredTitle": "ማዘመን ያስፈልጋል",
+  "@updateRequiredTitle": { "description": "Update required title" },
+  "updateRequiredMessage": "መተግበሪያውን ለመቀጠል አዲስ ስሪት ያስፈልጋል። እባክዎ ወደ ስሪት {version} ወይም ከዚያ በላይ ያዘምኑ።",
+  "@updateRequiredMessage": {
+    "description": "Update required description message",
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  },
+  "updateNow": "አሁን አዘምን",
+  "@updateNow": { "description": "Update now button" },
+  "maintenanceTitle": "አገልግሎቱ በጥገና ላይ ነው",
+  "@maintenanceTitle": { "description": "Maintenance title" },
+  "maintenanceBanner": "የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።",
+  "@maintenanceBanner": { "description": "Maintenance banner text" },
+  "accountSuspendedTitle": "መለያዎ ታግዷል",
+  "@accountSuspendedTitle": { "description": "Suspension alert title" },
+  "accountSuspendedMessage": "መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።",
+  "@accountSuspendedMessage": { "description": "Suspension alert message" },
+  "suspensionReasonLabel": "ምክንያት፦ {reason}",
+  "@suspensionReasonLabel": {
+    "description": "Suspension reason label",
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "contactSupportLabel": "እርዳታ ለማግኘት ያግኙን፦",
+  "@contactSupportLabel": { "description": "Contact support label" },
+  "callSupport": "ይደውሉ",
+  "@callSupport": { "description": "Call support button" },
+  "telegramSupport": "ቴሌግራም",
+  "@telegramSupport": { "description": "Telegram support button" },
+  "mustChangePasswordTitle": "የይለፍ ቃል መቀየር ያስፈልጋል",
+  "@mustChangePasswordTitle": { "description": "Must change password title" },
+  "mustChangePasswordPrompt": "ለመቀጠል እባክዎ መጀመሪያ አዲስ የይለፍ ቃል ያዘጋጁ።",
+  "@mustChangePasswordPrompt": { "description": "Must change password prompt" },
+  "dismiss": "ዝጋ",
+  "@dismiss": { "description": "Dismiss button" }
 }
 
 
