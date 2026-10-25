@@ -1,7 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
@@ -12,6 +11,7 @@ import 'package:kera_spare_tracker/data/local/database_provider.dart';
 import 'package:kera_spare_tracker/features/settings/data/services/export_backup_service.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:share_plus_platform_interface/share_plus_platform_interface.dart';
 
 class MockSharePlatform extends Fake
@@ -20,14 +20,8 @@ class MockSharePlatform extends Fake
   List<XFile> sharedFiles = [];
 
   @override
-  Future<ShareResult> shareXFiles(
-    List<XFile> files, {
-    String? text,
-    String? subject,
-    Rect? sharePositionOrigin,
-    List<String>? fileNameOverrides,
-  }) async {
-    sharedFiles = files;
+  Future<ShareResult> share(ShareParams params) async {
+    sharedFiles = params.files ?? [];
     return const ShareResult('success', ShareResultStatus.success);
   }
 }
@@ -66,6 +60,9 @@ void main() {
     container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
+        exportBackupServiceProvider.overrideWith(
+          (ref) => ExportBackupService(ref, sharePlus: SharePlus.custom(mockShare)),
+        ),
       ],
     );
     service = container.read(exportBackupServiceProvider);

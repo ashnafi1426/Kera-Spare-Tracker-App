@@ -133,7 +133,31 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.inventoryTab),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(20),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(l10n.inventoryTab),
+          ],
+        ),
         actions: [
           // Filter button with badge
           Stack(

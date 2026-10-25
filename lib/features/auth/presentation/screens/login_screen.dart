@@ -103,25 +103,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Brand Header
                   Center(
                     child: Container(
-                      width: 72,
-                      height: 72,
+                      width: 88,
+                      height: 88,
                       decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(18),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
-                            color: colorScheme.primary.withAlpha(50),
-                            blurRadius: 16,
+                            color: Colors.black.withAlpha(40),
+                            blurRadius: 18,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Icon(
-                          Icons.settings_suggest_rounded,
-                          size: 40,
-                          color: colorScheme.onPrimary,
-                        ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),

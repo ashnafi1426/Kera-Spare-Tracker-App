@@ -1,3 +1,5 @@
+rootProject.name = "kera_spare_tracker_android"
+
 pluginManagement {
     val flutterSdkPath =
         run {

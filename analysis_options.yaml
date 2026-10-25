@@ -8,6 +8,7 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.drift.dart"
     - lib/l10n/app_localizations*.dart
+    - web/**
 
 linter:
   rules:

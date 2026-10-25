@@ -20,8 +20,10 @@ final exportBackupServiceProvider = Provider<ExportBackupService>((ref) {
 /// Service managing CSV data exports and SQLite database backups/restores.
 class ExportBackupService {
   final Ref _ref;
+  final SharePlus _sharePlus;
 
-  ExportBackupService(this._ref);
+  ExportBackupService(this._ref, {SharePlus? sharePlus})
+      : _sharePlus = sharePlus ?? SharePlus.instance;
 
   AppDatabase get _db => _ref.read(appDatabaseProvider);
 
@@ -123,10 +125,12 @@ class ExportBackupService {
     await exportFile.writeAsString(buffer.toString());
 
     // Share via native share sheet
-    await Share.shareXFiles(
-      [XFile(exportFile.path, mimeType: 'text/csv')],
-      subject: 'Kera Spare Tracker - Inventory Export',
-      text: 'Exported inventory list (${parts.length} parts)',
+    await _sharePlus.share(
+      ShareParams(
+        files: [XFile(exportFile.path, mimeType: 'text/csv')],
+        subject: 'Kera Spare Tracker - Inventory Export',
+        text: 'Exported inventory list (${parts.length} parts)',
+      ),
     );
 
     return exportFile;
@@ -192,10 +196,12 @@ class ExportBackupService {
     await exportFile.writeAsString(buffer.toString());
 
     // Share via native share sheet
-    await Share.shareXFiles(
-      [XFile(exportFile.path, mimeType: 'text/csv')],
-      subject: 'Kera Spare Tracker - Sales Export',
-      text: 'Exported sales history (${salesList.length} sales)',
+    await _sharePlus.share(
+      ShareParams(
+        files: [XFile(exportFile.path, mimeType: 'text/csv')],
+        subject: 'Kera Spare Tracker - Sales Export',
+        text: 'Exported sales history (${salesList.length} sales)',
+      ),
     );
 
     return exportFile;
@@ -227,10 +233,12 @@ class ExportBackupService {
     await dbFile.copy(backupFile.path);
 
     // 4. Share backup
-    await Share.shareXFiles(
-      [XFile(backupFile.path)],
-      subject: 'Kera Spare Tracker - Database Backup',
-      text: 'Local SQLite database backup taken on $timestamp',
+    await _sharePlus.share(
+      ShareParams(
+        files: [XFile(backupFile.path)],
+        subject: 'Kera Spare Tracker - Database Backup',
+        text: 'Local SQLite database backup taken on $timestamp',
+      ),
     );
 
     return backupFile;
@@ -238,16 +246,15 @@ class ExportBackupService {
 
   /// Prompts the user to pick a backup SQLite file and restores it.
   Future<bool> restoreDatabase() async {
-    final result = await FilePicker.platform.pickFiles(
+    final pickedFiles = await FilePicker.pickFiles(
       type: FileType.any,
-      allowMultiple: false,
     );
 
-    if (result == null || result.files.isEmpty) {
+    if (pickedFiles.isEmpty) {
       return false;
     }
 
-    final path = result.files.single.path;
+    final path = pickedFiles.first.path;
     if (path == null) return false;
 
     final pickedFile = File(path);

@@ -9,6 +9,9 @@ describe('Authentication & Token Lifecycle Tests', () => {
   let accessToken;
   let refreshToken;
   let userId;
+  // changePasswordPhone and its token kept for change-password tests
+  const changePasswordPhone = `0912${Math.floor(100000 + Math.random() * 900000)}`;
+  let changePasswordToken;
 
   const suspendedPhone = `0977${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -200,5 +203,69 @@ describe('Authentication & Token Lifecycle Tests', () => {
 
     expect(meRes.status).toBe(403);
     expect(meRes.body.error.code).toBe('ACCOUNT_SUSPENDED');
+  });
+
+  it('12. POST /auth/change-password succeeds with correct current password', async () => {
+    // Register a dedicated account for change-password tests
+    const regRes = await request(app)
+      .post('/api/v1/auth/register')
+      .send({
+        phoneNumber: changePasswordPhone,
+        businessName: 'Password Change Test Shop',
+        password: 'OldPassword123!',
+      });
+
+    expect(regRes.status).toBe(201);
+    changePasswordToken = regRes.body.data.accessToken;
+
+    const res = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${changePasswordToken}`)
+      .send({
+        currentPassword: 'OldPassword123!',
+        newPassword: 'NewPassword456!',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it('13. POST /auth/change-password with wrong current password returns 401 INVALID_CREDENTIALS', async () => {
+    if (!changePasswordToken) return;
+
+    // changePasswordToken was logged out after password-change (all refresh tokens revoked)
+    // So re-login with new password to get valid token
+    const loginRes = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        phoneNumber: changePasswordPhone,
+        password: 'NewPassword456!',
+      });
+    const freshToken = loginRes.body.data?.accessToken;
+    if (!freshToken) return;
+
+    const res = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${freshToken}`)
+      .send({
+        currentPassword: 'WrongOldPassword!',
+        newPassword: 'AnotherPassword789!',
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('INVALID_CREDENTIALS');
+  });
+
+  it('14. POST /auth/change-password without auth returns 401', async () => {
+    const res = await request(app)
+      .post('/api/v1/auth/change-password')
+      .send({
+        currentPassword: 'OldPassword123!',
+        newPassword: 'NewPassword456!',
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
   });
 });

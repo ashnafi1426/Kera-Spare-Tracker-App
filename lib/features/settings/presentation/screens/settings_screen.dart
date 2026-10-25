@@ -50,13 +50,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 28,
-                              backgroundColor: colorScheme.primaryContainer,
-                              child: Icon(
-                                Icons.store_rounded,
-                                size: 30,
-                                color: colorScheme.primary,
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: colorScheme.primary.withAlpha(40),
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(15),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => CircleAvatar(
+                                  backgroundColor: colorScheme.primaryContainer,
+                                  child: Icon(
+                                    Icons.store_rounded,
+                                    size: 30,
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -409,35 +432,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline_rounded,
-                              color: colorScheme.primary, size: 22),
-                          const SizedBox(width: 8),
-                          Text(
-                            l10n.aboutTitle,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(25),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.aboutDesc,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.appVersion('1.0.0 (Build 1)'),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.w700,
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.appName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.aboutDesc,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.appVersion('1.0.0 (Build 1)'),
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

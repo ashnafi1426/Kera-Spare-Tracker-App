@@ -1,89 +1,49 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
+import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/constants/constants.dart';
-import 'package:kera_spare_tracker/core/errors/failure.dart';
 import 'package:kera_spare_tracker/data/local/app_database.dart';
 import 'package:kera_spare_tracker/features/auth/data/repositories/api_auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
+import 'package:mocktail/mocktail.dart';
 
-import '../../../helpers/test_database.dart';
-
-// In-memory fake secure storage for tests
-class FakeSecureStorage implements FlutterSecureStorage {
-  final Map<String, String> _data = {};
-
-  @override
-  Future<void> write({
-    required String key,
-    required String? value,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    WebOptions? webOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-  }) async {
-    if (value != null) {
-      _data[key] = value;
-    } else {
-      _data.remove(key);
-    }
-  }
-
-  @override
-  Future<String?> read({
-    required String key,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    WebOptions? webOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-  }) async {
-    return _data[key];
-  }
-
-  @override
-  Future<void> delete({
-    required String key,
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    WebOptions? webOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-  }) async {
-    _data.remove(key);
-  }
-
-  @override
-  Future<void> deleteAll({
-    IOSOptions? iOptions,
-    AndroidOptions? aOptions,
-    LinuxOptions? lOptions,
-    WebOptions? webOptions,
-    MacOsOptions? mOptions,
-    WindowsOptions? wOptions,
-  }) async {
-    _data.clear();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
+class MockSecureStorage extends Mock implements FlutterSecureStorage {}
 
 void main() {
   late AppDatabase db;
-  late FakeSecureStorage storage;
+  late MockSecureStorage mockStorage;
+  late Map<String, String> inMemoryStorage;
   late Dio dio;
 
   setUp(() {
-    db = createTestDatabase();
-    storage = FakeSecureStorage();
+    db = AppDatabase(NativeDatabase.memory());
+    mockStorage = MockSecureStorage();
+    inMemoryStorage = <String, String>{};
     dio = Dio(BaseOptions(baseUrl: 'http://localhost:7000/api/v1'));
+
+    when(() => mockStorage.write(
+          key: any(named: 'key'),
+          value: any(named: 'value'),
+        )).thenAnswer((invocation) async {
+      final key = invocation.namedArguments[#key] as String;
+      final val = invocation.namedArguments[#value] as String?;
+      if (val != null) inMemoryStorage[key] = val;
+    });
+
+    when(() => mockStorage.read(key: any(named: 'key')))
+        .thenAnswer((invocation) async {
+      final key = invocation.namedArguments[#key] as String;
+      return inMemoryStorage[key];
+    });
+
+    when(() => mockStorage.delete(key: any(named: 'key')))
+        .thenAnswer((invocation) async {
+      final key = invocation.namedArguments[#key] as String;
+      inMemoryStorage.remove(key);
+    });
   });
 
   tearDown(() async {
@@ -101,13 +61,13 @@ void main() {
       );
 
       // Pre-seed secure storage
-      await storage.write(key: 'kera_user_session', value: jsonEncode(user.toJson()));
-      await storage.write(key: AppConstants.secureStorageTokenKey, value: 'test-access-token');
+      inMemoryStorage['kera_user_session'] = jsonEncode(user.toJson());
+      inMemoryStorage[AppConstants.secureStorageTokenKey] = 'test-access-token';
 
       final repo = ApiAuthRepository(
         db: db,
         dioClient: dio,
-        storage: storage,
+        storage: mockStorage,
       );
 
       final result = await repo.currentUser();
@@ -118,22 +78,22 @@ void main() {
     });
 
     test('logout() clears access token, refresh token, and local session', () async {
-      await storage.write(key: AppConstants.secureStorageTokenKey, value: 'test-token');
-      await storage.write(key: AppConstants.secureStorageRefreshTokenKey, value: 'test-refresh');
-      await storage.write(key: 'kera_user_session', value: '{"id":"user-1"}');
+      inMemoryStorage[AppConstants.secureStorageTokenKey] = 'test-token';
+      inMemoryStorage[AppConstants.secureStorageRefreshTokenKey] = 'test-refresh';
+      inMemoryStorage['kera_user_session'] = '{"id":"user-1"}';
 
       final repo = ApiAuthRepository(
         db: db,
         dioClient: dio,
-        storage: storage,
+        storage: mockStorage,
       );
 
       final result = await repo.logout();
       expect(result.isSuccess, true);
 
-      expect(await storage.read(key: AppConstants.secureStorageTokenKey), isNull);
-      expect(await storage.read(key: AppConstants.secureStorageRefreshTokenKey), isNull);
-      expect(await storage.read(key: 'kera_user_session'), isNull);
+      expect(inMemoryStorage[AppConstants.secureStorageTokenKey], isNull);
+      expect(inMemoryStorage[AppConstants.secureStorageRefreshTokenKey], isNull);
+      expect(inMemoryStorage['kera_user_session'], isNull);
     });
 
     test('updateBusinessName() updates Drift profile and local session', () async {
@@ -145,8 +105,8 @@ void main() {
         role: 'owner',
       );
 
-      await storage.write(key: 'kera_user_session', value: jsonEncode(initialUser.toJson()));
-      await storage.write(key: AppConstants.secureStorageTokenKey, value: 'token-abc');
+      inMemoryStorage['kera_user_session'] = jsonEncode(initialUser.toJson());
+      inMemoryStorage[AppConstants.secureStorageTokenKey] = 'token-abc';
 
       // Seed Drift profile
       await db.into(db.profiles).insert(
@@ -161,7 +121,7 @@ void main() {
       final repo = ApiAuthRepository(
         db: db,
         dioClient: dio,
-        storage: storage,
+        storage: mockStorage,
       );
 
       final updateResult = await repo.updateBusinessName('Updated Kera Motors');
@@ -173,8 +133,49 @@ void main() {
       expect(updatedProfile.businessName, 'Updated Kera Motors');
 
       // Verify local storage updated
-      final storedSession = await storage.read(key: 'kera_user_session');
+      final storedSession = inMemoryStorage['kera_user_session'];
       expect(storedSession, contains('Updated Kera Motors'));
+    });
+
+    test('Offline-First: register() falls back to local registration when API is unreachable', () async {
+      // Dio is configured with invalid host/port so network connection will fail
+      final unreachableDio = Dio(
+        BaseOptions(
+          baseUrl: 'http://127.0.0.1:59999/api/v1',
+          connectTimeout: const Duration(milliseconds: 100),
+          receiveTimeout: const Duration(milliseconds: 100),
+        ),
+      );
+
+      final repo = ApiAuthRepository(
+        db: db,
+        dioClient: unreachableDio,
+        storage: mockStorage,
+      );
+
+      final regResult = await repo.register(
+        phoneNumber: '+251911998877',
+        businessName: 'Offline Kera Motors',
+        password: 'SecurePassword123!',
+      );
+
+      expect(regResult.isSuccess, true);
+      expect(regResult.valueOrNull?.phoneNumber, '+251911998877');
+      expect(regResult.valueOrNull?.businessName, 'Offline Kera Motors');
+
+      // Verify Drift DB profile was inserted
+      final profile = await (db.select(db.profiles)
+            ..where((t) => t.phoneNumber.equals('+251911998877')))
+          .getSingleOrNull();
+      expect(profile, isNotNull);
+      expect(profile?.businessName, 'Offline Kera Motors');
+
+      // Verify sync mutation was enqueued
+      final queueItems = await db.select(db.syncQueue).get();
+      expect(queueItems.any((item) => item.tableTarget == 'profiles'), isTrue);
+
+      // Verify local session was persisted
+      expect(inMemoryStorage['kera_user_session'], isNotNull);
     });
   });
 }

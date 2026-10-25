@@ -107,6 +107,7 @@ void main() {
     // Tap "Don't have an account? Register"
     final registerLink = find.text('አዲስ ነዎት? ይመዝገቡ');
     expect(registerLink, findsOneWidget);
+    await tester.ensureVisible(registerLink);
     await tester.tap(registerLink);
     await tester.pumpAndSettle();
 

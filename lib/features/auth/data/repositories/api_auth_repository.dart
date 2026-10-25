@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/utils/password_hasher.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/tables/enums.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import 'local_auth_repository.dart';
 
 const String _userSessionKey = 'kera_user_session';
 
@@ -25,6 +28,7 @@ class ApiAuthRepository implements AuthRepository {
   final Dio dio;
   final AppDatabase db;
   final FlutterSecureStorage _storage;
+  final LocalAuthRepository _localAuthRepo;
   final String baseUrl;
   final _authStateController = StreamController<AuthUser?>.broadcast();
   AuthUser? _cachedUser;
@@ -35,21 +39,25 @@ class ApiAuthRepository implements AuthRepository {
     Dio? dioClient,
     FlutterSecureStorage? storage,
     String? baseUrl,
-  })  : _storage = storage ?? const FlutterSecureStorage(),
-        baseUrl = baseUrl ?? AppConstants.apiBaseUrl,
-        dio = dioClient ??
-            Dio(
-              BaseOptions(
-                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
-                connectTimeout: const Duration(seconds: 10),
-                receiveTimeout: const Duration(seconds: 10),
-                sendTimeout: const Duration(seconds: 10),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-              ),
-            ) {
+    LocalAuthRepository? localAuthRepo,
+  }) : _storage = storage ?? const FlutterSecureStorage(),
+       baseUrl = baseUrl ?? AppConstants.apiBaseUrl,
+       _localAuthRepo =
+           localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
+       dio =
+           dioClient ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
+               connectTimeout: const Duration(seconds: 4),
+               receiveTimeout: const Duration(seconds: 4),
+               sendTimeout: const Duration(seconds: 4),
+               headers: {
+                 'Content-Type': 'application/json',
+                 'Accept': 'application/json',
+               },
+             ),
+           ) {
     _setupInterceptors();
   }
 
@@ -58,7 +66,9 @@ class ApiAuthRepository implements AuthRepository {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Attach Bearer access token if present
-          final token = await _storage.read(key: AppConstants.secureStorageTokenKey);
+          final token = await _storage.read(
+            key: AppConstants.secureStorageTokenKey,
+          );
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
@@ -69,7 +79,8 @@ class ApiAuthRepository implements AuthRepository {
           final responseData = err.response?.data;
           String? errorCode;
 
-          if (responseData is Map<String, dynamic> && responseData['error'] is Map) {
+          if (responseData is Map<String, dynamic> &&
+              responseData['error'] is Map) {
             errorCode = responseData['error']['code']?.toString();
           }
 
@@ -80,12 +91,14 @@ class ApiAuthRepository implements AuthRepository {
           }
 
           // Handle 401 TOKEN_EXPIRED: attempt token refresh once
-          if (statusCode == 401 && (errorCode == 'TOKEN_EXPIRED' || errorCode == 'INVALID_TOKEN')) {
+          if (statusCode == 401 &&
+              (errorCode == 'TOKEN_EXPIRED' || errorCode == 'INVALID_TOKEN')) {
             if (!_isRefreshing) {
               _isRefreshing = true;
               try {
-                final refreshToken =
-                    await _storage.read(key: AppConstants.secureStorageRefreshTokenKey);
+                final refreshToken = await _storage.read(
+                  key: AppConstants.secureStorageRefreshTokenKey,
+                );
 
                 if (refreshToken != null && refreshToken.isNotEmpty) {
                   // Use a separate Dio instance without interceptors to avoid loops
@@ -102,8 +115,10 @@ class ApiAuthRepository implements AuthRepository {
                     data: {'refreshToken': refreshToken},
                   );
 
-                  if (refreshRes.statusCode == 200 && refreshRes.data['success'] == true) {
-                    final data = refreshRes.data['data'] as Map<String, dynamic>;
+                  if (refreshRes.statusCode == 200 &&
+                      refreshRes.data['success'] == true) {
+                    final data =
+                        refreshRes.data['data'] as Map<String, dynamic>;
                     final newAccessToken = data['accessToken']?.toString();
                     final newRefreshToken = data['refreshToken']?.toString();
 
@@ -123,7 +138,8 @@ class ApiAuthRepository implements AuthRepository {
                     _isRefreshing = false;
 
                     // Retry original request with new access token
-                    err.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+                    err.requestOptions.headers['Authorization'] =
+                        'Bearer $newAccessToken';
                     final retryResponse = await dio.fetch(err.requestOptions);
                     return handler.resolve(retryResponse);
                   }
@@ -176,11 +192,38 @@ class ApiAuthRepository implements AuthRepository {
       );
 
       // Persist session tokens & user profile
-      await _persistSession(user, accessToken: accessToken, refreshToken: refreshToken);
+      await _persistSession(
+        user,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+
+      // Save local password hash for offline continuity
+      try {
+        final hash = await PasswordHasher().hashPassword(password);
+        await _storage.write(
+          key: 'kera_passhash_${user.phoneNumber}',
+          value: hash,
+        );
+      } catch (_) {}
 
       return Result.success(user);
     } on DioException catch (e) {
-      return Result.failure(_mapDioError(e));
+      final failure = _mapDioError(e);
+      // Seamless offline fallback: register locally in Drift SQLite and queue for sync
+      if (failure is NetworkFailure) {
+        final localResult = await _localAuthRepo.register(
+          phoneNumber: phoneNumber,
+          businessName: businessName,
+          password: password,
+        );
+        if (localResult.isSuccess && localResult.valueOrNull != null) {
+          _cachedUser = localResult.valueOrNull;
+          _authStateController.add(_cachedUser);
+        }
+        return localResult;
+      }
+      return Result.failure(failure);
     } catch (e) {
       return Result.failure(
         AuthFailure(message: 'Registration failed: ${e.toString()}', cause: e),
@@ -196,10 +239,7 @@ class ApiAuthRepository implements AuthRepository {
     try {
       final response = await dio.post(
         '/auth/login',
-        data: {
-          'phoneNumber': phoneNumber,
-          'password': password,
-        },
+        data: {'phoneNumber': phoneNumber, 'password': password},
       );
 
       final data = response.data['data'] as Map<String, dynamic>;
@@ -215,10 +255,37 @@ class ApiAuthRepository implements AuthRepository {
         role: userMap['role']?.toString().toLowerCase() ?? 'owner',
       );
 
-      await _persistSession(user, accessToken: accessToken, refreshToken: refreshToken);
+      await _persistSession(
+        user,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      );
+
+      // Save local password hash for offline continuity
+      try {
+        final hash = await PasswordHasher().hashPassword(password);
+        await _storage.write(
+          key: 'kera_passhash_${user.phoneNumber}',
+          value: hash,
+        );
+      } catch (_) {}
+
       return Result.success(user);
     } on DioException catch (e) {
-      return Result.failure(_mapDioError(e));
+      final failure = _mapDioError(e);
+      // Seamless offline fallback: authenticate against local SQLite & secure hash
+      if (failure is NetworkFailure) {
+        final localResult = await _localAuthRepo.login(
+          phoneNumber: phoneNumber,
+          password: password,
+        );
+        if (localResult.isSuccess && localResult.valueOrNull != null) {
+          _cachedUser = localResult.valueOrNull;
+          _authStateController.add(_cachedUser);
+        }
+        return localResult;
+      }
+      return Result.failure(failure);
     } catch (e) {
       return Result.failure(
         AuthFailure(message: 'Login failed: ${e.toString()}', cause: e),
@@ -229,7 +296,9 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<Result<void>> logout() async {
     try {
-      final refreshToken = await _storage.read(key: AppConstants.secureStorageRefreshTokenKey);
+      final refreshToken = await _storage.read(
+        key: AppConstants.secureStorageRefreshTokenKey,
+      );
       if (refreshToken != null) {
         // Attempt server-side revocation (ignore network errors if offline)
         try {
@@ -296,7 +365,10 @@ class ApiAuthRepository implements AuthRepository {
             role: data['role']?.toString().toLowerCase() ?? 'owner',
           );
           _cachedUser = updatedUser;
-          await _storage.write(key: _userSessionKey, value: jsonEncode(updatedUser.toJson()));
+          await _storage.write(
+            key: _userSessionKey,
+            value: jsonEncode(updatedUser.toJson()),
+          );
           _authStateController.add(updatedUser);
         }
       } catch (_) {
@@ -313,17 +385,30 @@ class ApiAuthRepository implements AuthRepository {
     try {
       await dio.post(
         '/auth/change-password',
-        data: {
-          'currentPassword': currentPassword,
-          'newPassword': newPassword,
-        },
+        data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );
+      try {
+        await _localAuthRepo.changePassword(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        );
+      } catch (_) {}
       return const Result.success(null);
     } on DioException catch (e) {
-      return Result.failure(_mapDioError(e));
+      final failure = _mapDioError(e);
+      if (failure is NetworkFailure) {
+        return _localAuthRepo.changePassword(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        );
+      }
+      return Result.failure(failure);
     } catch (e) {
       return Result.failure(
-        AuthFailure(message: 'Change password failed: ${e.toString()}', cause: e),
+        AuthFailure(
+          message: 'Change password failed: ${e.toString()}',
+          cause: e,
+        ),
       );
     }
   }
@@ -334,7 +419,9 @@ class ApiAuthRepository implements AuthRepository {
       final userResult = await currentUser();
       final user = userResult.valueOrNull;
       if (user == null) {
-        return const Result.failure(AuthFailure(message: 'User is not logged in'));
+        return const Result.failure(
+          AuthFailure(message: 'User is not logged in'),
+        );
       }
 
       final now = DateTime.now();
@@ -347,14 +434,20 @@ class ApiAuthRepository implements AuthRepository {
       );
 
       final updatedUser = user.copyWith(businessName: newBusinessName);
-      await _storage.write(key: _userSessionKey, value: jsonEncode(updatedUser.toJson()));
+      await _storage.write(
+        key: _userSessionKey,
+        value: jsonEncode(updatedUser.toJson()),
+      );
       _cachedUser = updatedUser;
       _authStateController.add(updatedUser);
 
       return Result.success(updatedUser);
     } catch (e) {
       return Result.failure(
-        AuthFailure(message: 'Update business name failed: ${e.toString()}', cause: e),
+        AuthFailure(
+          message: 'Update business name failed: ${e.toString()}',
+          cause: e,
+        ),
       );
     }
   }
@@ -390,16 +483,18 @@ class ApiAuthRepository implements AuthRepository {
     );
 
     // Save profile row in Drift SQLite so offline queries and local repos work immediately
-    await db.into(db.profiles).insertOnConflictUpdate(
-      ProfilesCompanion.insert(
-        id: Value(user.id),
-        ownerId: user.ownerId,
-        phoneNumber: Value(user.phoneNumber),
-        businessName: Value(user.businessName),
-        role: const Value(UserRole.owner),
-        syncStatus: const Value(SyncStatus.synced),
-      ),
-    );
+    await db
+        .into(db.profiles)
+        .insertOnConflictUpdate(
+          ProfilesCompanion.insert(
+            id: Value(user.id),
+            ownerId: user.ownerId,
+            phoneNumber: Value(user.phoneNumber),
+            businessName: Value(user.businessName),
+            role: const Value(UserRole.owner),
+            syncStatus: const Value(SyncStatus.synced),
+          ),
+        );
 
     _authStateController.add(user);
   }
@@ -420,7 +515,8 @@ class ApiAuthRepository implements AuthRepository {
       final errorObj = response.data['error'];
       if (errorObj is Map<String, dynamic>) {
         final code = errorObj['code']?.toString() ?? 'SERVER_ERROR';
-        final message = errorObj['message']?.toString() ?? 'Authentication error';
+        final message =
+            errorObj['message']?.toString() ?? 'Authentication error';
         return AuthFailure(message: message, code: code);
       }
     }
@@ -434,5 +530,6 @@ class ApiAuthRepository implements AuthRepository {
 
   void dispose() {
     _authStateController.close();
+    _localAuthRepo.dispose();
   }
 }

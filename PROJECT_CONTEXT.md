@@ -33,6 +33,37 @@ Offline-first, multi-tenant (SaaS) mobile application for spare parts business o
 - **Records**: Sales history, sales details, search and filter by date and item, daily / weekly / monthly summaries.
 - **Offline Support**: Fully functional offline; synchronizes once internet is available.
 
+## ADMIN MODULE
+Who: the admin runs the service (Yonas or his company). The admin is NOT a shop owner. Role is stored in the user record (OWNER or ADMIN).
+
+Requirement duties (from the client):
+1. Manage and monitor registered spare parts owners.
+2. View and manage user accounts.
+3. Manage the overall application and its settings.
+
+Duty 1, monitor owners: list of owners with business name, phone, registration date, status (ACTIVE or SUSPENDED), last sync time, and subscription plan and expiry (future). Search by phone or business name. Filters: active, suspended, inactive for 30 days. Dashboard numbers: total owners, new owners this week, active owners, total parts count and total sales count of the whole system (COUNTS ONLY, never contents), owners with sync problems (no sync for a long time, or many failed syncs), app versions in use (proposed).
+
+Duty 2, manage accounts: view account details, suspend (a suspended owner cannot sync and sees a clear message), reactivate, reset password (proposed), edit basic details such as business name and phone (proposed), disable or delete an account with confirmation (proposed, soft delete only). EVERY admin action must be written to an audit log: who, which account, action, old and new values, reason, time, IP.
+
+Duty 3, app settings: global brand list (CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY and more; owners may also add their own private brands), global categories and units (proposed), minimum required app version (proposed), announcement or maintenance message (proposed), subscription plans and prices (future, only a placeholder now).
+
+WHAT THE ADMIN MUST NEVER DO (very important):
+- Never read an owner's parts, prices, stock, sales, or profit.
+- Never edit or delete an owner's inventory or sales.
+- Never record sales for an owner.
+Admin code may use COUNT aggregates on inventory tables for statistics only. No admin endpoint may return rows of spare_parts, stock_movements, sales, or sale_items.
+
+SECURITY RULES: the admin role is checked on the server in middleware (never only hidden in the app). The first admin is created by a seed script (never by public registration). Admin routes are under /api/v1/admin and return 403 for normal owners. Admin login is rate limited. Admin passwords need a strong policy. All admin actions go to the audit log inside the same database transaction as the change.
+
+ADMIN DATABASE SCHEMA & TABLES:
+- `users`: Extended with `lastLoginAt`, `lastSyncAt`, `failedSyncCount`, `appVersion`, `mustChangePassword`, `disabledAt`, `suspendedReason`, `suspendedAt`.
+- `audit_logs`: Append-only audit trail (`id`, `adminId`, `targetUserId`, `action`, `oldValue`, `newValue`, `reason`, `ipAddress`, `userAgent`, `createdAt`). Indexed on `(targetUserId, createdAt)`, `(adminId, createdAt)`, and `(action, createdAt)`.
+- `app_settings`: System settings key-value store (`key`, `value` JSON, `updatedBy`, `updatedAt`).
+- `units`: Standardized units (`id`, `ownerId`, `name`, `isGlobal`, `isActive`). Default global: piece, set, liter, meter, kg.
+- `categories`: Standardized categories (`id`, `ownerId`, `name`, `isGlobal`, `isActive`). Default global: Filters, Seals, Engine, Undercarriage, Ground tools, Electrical.
+- `brands`: Brand catalog (`id`, `ownerId`, `name`, `isGlobal`, `isActive`). Default global: CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY.
+- `subscription_plans`: Placeholder catalog (`id`, `name`, `price`, `durationDays`, `isActive`). Existing `subscriptions` table maintained.
+
 ## TECH STACK (Do not change without explicit approval)
 - **Frontend / Framework**: Flutter (Dart)
 - **State Management**: Riverpod

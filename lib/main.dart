@@ -12,7 +12,6 @@ import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // Global Flutter error boundary - prevents crashes and logs gracefully
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);

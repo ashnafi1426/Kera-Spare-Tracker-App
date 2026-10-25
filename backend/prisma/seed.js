@@ -17,10 +17,27 @@ const DEFAULT_GLOBAL_BRANDS = [
   'SANY',
 ];
 
+const DEFAULT_GLOBAL_CATEGORIES = [
+  'Filters',
+  'Seals',
+  'Engine',
+  'Undercarriage',
+  'Ground tools',
+  'Electrical',
+];
+
+const DEFAULT_GLOBAL_UNITS = [
+  'piece',
+  'set',
+  'liter',
+  'meter',
+  'kg',
+];
+
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // 1. Seed Default Admin User
+  // 1. Seed / Update Default Admin User
   const adminPhone = process.env.ADMIN_PHONE || '+251900000000';
   const adminPassword = process.env.ADMIN_PASSWORD || 'AdminPassword123!';
   const adminBusinessName = process.env.ADMIN_BUSINESS_NAME || 'Kera System Admin';
@@ -29,6 +46,7 @@ async function main() {
     where: { phoneNumber: adminPhone },
   });
 
+  let adminUserId;
   if (!existingAdmin) {
     const passwordHash = await bcrypt.hash(adminPassword, 10);
     const adminUser = await prisma.user.create({
@@ -40,11 +58,22 @@ async function main() {
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         language: UserLanguage.AMHARIC,
+        mustChangePassword: true,
       },
     });
-    console.log(`✅ Created Admin user: ${adminUser.phoneNumber} (${adminUser.id})`);
+    adminUserId = adminUser.id;
+    console.log(`✅ Created Admin user: ${adminUser.phoneNumber} (${adminUser.id}) [mustChangePassword=true]`);
   } else {
-    console.log(`ℹ️ Admin user already exists: ${existingAdmin.phoneNumber}`);
+    adminUserId = existingAdmin.id;
+    await prisma.user.update({
+      where: { id: existingAdmin.id },
+      data: {
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
+        mustChangePassword: true,
+      },
+    });
+    console.log(`ℹ️ Admin user already exists and updated: ${existingAdmin.phoneNumber} [mustChangePassword=true]`);
   }
 
   // 2. Seed Default Global Brands
@@ -64,11 +93,108 @@ async function main() {
           ownerId: null,
           name: brandName,
           isGlobal: true,
+          isActive: true,
         },
       });
       console.log(`✅ Seeded global brand: ${brand.name}`);
     } else {
       console.log(`ℹ️ Global brand already exists: ${brandName}`);
+    }
+  }
+
+  // 3. Seed Default Global Categories
+  for (const categoryName of DEFAULT_GLOBAL_CATEGORIES) {
+    const existingCategory = await prisma.category.findFirst({
+      where: {
+        name: categoryName,
+        isGlobal: true,
+        deletedAt: null,
+      },
+    });
+
+    if (!existingCategory) {
+      const category = await prisma.category.create({
+        data: {
+          id: uuidv4(),
+          ownerId: null,
+          name: categoryName,
+          isGlobal: true,
+          isActive: true,
+        },
+      });
+      console.log(`✅ Seeded global category: ${category.name}`);
+    } else {
+      console.log(`ℹ️ Global category already exists: ${categoryName}`);
+    }
+  }
+
+  // 4. Seed Default Global Units
+  for (const unitName of DEFAULT_GLOBAL_UNITS) {
+    const existingUnit = await prisma.unit.findFirst({
+      where: {
+        name: unitName,
+        isGlobal: true,
+        deletedAt: null,
+      },
+    });
+
+    if (!existingUnit) {
+      const unit = await prisma.unit.create({
+        data: {
+          id: uuidv4(),
+          ownerId: null,
+          name: unitName,
+          isGlobal: true,
+          isActive: true,
+        },
+      });
+      console.log(`✅ Seeded global unit: ${unit.name}`);
+    } else {
+      console.log(`ℹ️ Global unit already exists: ${unitName}`);
+    }
+  }
+
+  // 5. Seed Default App Settings
+  const defaultSettings = [
+    {
+      key: 'minAppVersion',
+      value: { version: '1.0.0', enforce: false },
+    },
+    {
+      key: 'maintenanceMode',
+      value: { enabled: false, messageAm: '', messageEn: '' },
+    },
+    {
+      key: 'announcement',
+      value: {
+        active: false,
+        titleAm: '',
+        titleEn: '',
+        bodyAm: '',
+        bodyEn: '',
+        startTime: null,
+        endTime: null,
+      },
+    },
+  ];
+
+  for (const setting of defaultSettings) {
+    const existingSetting = await prisma.appSetting.findUnique({
+      where: { key: setting.key },
+    });
+
+    if (!existingSetting) {
+      await prisma.appSetting.create({
+        data: {
+          id: uuidv4(),
+          key: setting.key,
+          value: setting.value,
+          updatedBy: adminUserId,
+        },
+      });
+      console.log(`✅ Seeded default app setting: ${setting.key}`);
+    } else {
+      console.log(`ℹ️ App setting already exists: ${setting.key}`);
     }
   }
 

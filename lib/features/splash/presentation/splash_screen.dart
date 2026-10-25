@@ -33,22 +33,20 @@ class SplashScreen extends StatelessWidget {
                 width: 104,
                 height: 104,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.primary.withAlpha(60),
-                      blurRadius: 20,
+                      color: Colors.black.withAlpha(50),
+                      blurRadius: 22,
                       offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.settings_suggest_rounded,
-                    size: 56,
-                    color: colorScheme.onPrimary,
-                  ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 28),
