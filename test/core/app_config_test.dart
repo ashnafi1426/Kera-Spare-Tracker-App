@@ -14,25 +14,25 @@ void main() {
     });
 
     test('isUpdateRequired is true only when enforce is true and version is older', () {
-      final configBlocked = AppConfig(
-        minAppVersion: const MinAppVersionConfig(
+      const configBlocked = AppConfig(
+        minAppVersion: MinAppVersionConfig(
           version: '2.0.0',
           enforce: true,
           downloadUrl: 'https://keraspare.et/download',
         ),
-        maintenanceMode: const MaintenanceModeConfig(
+        maintenanceMode: MaintenanceModeConfig(
           enabled: false,
           messageAm: '',
           messageEn: '',
         ),
-        announcement: const AnnouncementConfig(
+        announcement: AnnouncementConfig(
           active: false,
           titleAm: '',
           titleEn: '',
           bodyAm: '',
           bodyEn: '',
         ),
-        supportContact: const SupportContactConfig(
+        supportContact: SupportContactConfig(
           phone: '+251911000000',
           telegram: '@KeraSpareSupport',
         ),
@@ -41,25 +41,25 @@ void main() {
 
       expect(configBlocked.isUpdateRequired, isTrue);
 
-      final configNotEnforced = AppConfig(
-        minAppVersion: const MinAppVersionConfig(
+      const configNotEnforced = AppConfig(
+        minAppVersion: MinAppVersionConfig(
           version: '2.0.0',
           enforce: false,
           downloadUrl: 'https://keraspare.et/download',
         ),
-        maintenanceMode: const MaintenanceModeConfig(
+        maintenanceMode: MaintenanceModeConfig(
           enabled: false,
           messageAm: '',
           messageEn: '',
         ),
-        announcement: const AnnouncementConfig(
+        announcement: AnnouncementConfig(
           active: false,
           titleAm: '',
           titleEn: '',
           bodyAm: '',
           bodyEn: '',
         ),
-        supportContact: const SupportContactConfig(
+        supportContact: SupportContactConfig(
           phone: '+251911000000',
           telegram: '@KeraSpareSupport',
         ),
@@ -68,25 +68,25 @@ void main() {
 
       expect(configNotEnforced.isUpdateRequired, isFalse);
 
-      final configUpdated = AppConfig(
-        minAppVersion: const MinAppVersionConfig(
+      const configUpdated = AppConfig(
+        minAppVersion: MinAppVersionConfig(
           version: '1.0.0',
           enforce: true,
           downloadUrl: 'https://keraspare.et/download',
         ),
-        maintenanceMode: const MaintenanceModeConfig(
+        maintenanceMode: MaintenanceModeConfig(
           enabled: false,
           messageAm: '',
           messageEn: '',
         ),
-        announcement: const AnnouncementConfig(
+        announcement: AnnouncementConfig(
           active: false,
           titleAm: '',
           titleEn: '',
           bodyAm: '',
           bodyEn: '',
         ),
-        supportContact: const SupportContactConfig(
+        supportContact: SupportContactConfig(
           phone: '+251911000000',
           telegram: '@KeraSpareSupport',
         ),
