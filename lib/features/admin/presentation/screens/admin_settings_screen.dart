@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/app_card.dart';
-import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -118,7 +116,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         ],
       ),
       body: settingsState.isLoading
-          ? const Center(child: AppLoadingIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
                 _initialized = false;
@@ -154,7 +152,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     ThemeData theme,
     AdminSettingsState state,
   ) {
-    return AppCard(
+    return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -225,7 +223,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     ThemeData theme,
     AdminSettingsState state,
   ) {
-    return AppCard(
+    return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -322,7 +320,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     ThemeData theme,
     AdminSettingsState state,
   ) {
-    return AppCard(
+    return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

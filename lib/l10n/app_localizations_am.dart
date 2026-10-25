@@ -992,4 +992,402 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get dismiss => 'ዝጋ';
+
+  @override
+  String get adminAccount => 'የአድሚን መለያ';
+
+  @override
+  String get adminAccountDisabledSuccess => 'የተጠቃሚው አካውንት በተሳካ ሁኔታ ተዘግቷል';
+
+  @override
+  String get adminAccountTitle => 'የአድሚን መለያ አስተዳደር';
+
+  @override
+  String get adminActionsHeader => 'የአስተዳዳሪ እርምጃዎች';
+
+  @override
+  String get adminActiveOwners => 'ንቁ ባለቤቶች (30 ቀናት)';
+
+  @override
+  String get adminActor => 'ፈጻሚ አድሚን';
+
+  @override
+  String get adminAddBrand => 'አዲስ ዓለም አቀፍ ብራንድ አክል';
+
+  @override
+  String get adminAddCategory => 'አዲስ ዓለም አቀፍ ምድብ አክል';
+
+  @override
+  String get adminAddUnit => 'አዲስ ዓለም አቀፍ መለኪያ አክል';
+
+  @override
+  String get adminAnnouncementActive => 'ማስታወቂያው ይሰራጭ';
+
+  @override
+  String get adminAnnouncementActiveDesc =>
+      'ሲበራ ይሄ ማስታወቂያ ለሁሉም የመተግበሪያው ተጠቃሚዎች ይታያል';
+
+  @override
+  String get adminAnnouncementBodyAm => 'የማስታወቂያ ዝርዝር (በአማርኛ)';
+
+  @override
+  String get adminAnnouncementBodyEn => 'የማስታወቂያ ዝርዝር (በእንግሊዝኛ)';
+
+  @override
+  String get adminAnnouncementDesc => 'ለመተግበሪያ ተጠቃሚዎች ማስታወቂያ ወይም ማንቂያ ማስተላለፊያ';
+
+  @override
+  String get adminAnnouncementSettings => 'አጠቃላይ ማስታወቂያ';
+
+  @override
+  String get adminAnnouncementTitleAm => 'የማስታወቂያ ርዕስ (በአማርኛ)';
+
+  @override
+  String get adminAnnouncementTitleEn => 'የማስታወቂያ ርዕስ (በእንግሊዝኛ)';
+
+  @override
+  String get adminAppSettingsTitle => 'የመተግበሪያ ቅንብሮች';
+
+  @override
+  String get adminAppVersion => 'የመተግበሪያ ስሪት';
+
+  @override
+  String get adminAppVersionsInUse => 'በስራ ላይ ያሉ የመተግበሪያ ስሪቶች';
+
+  @override
+  String get adminAuditDetailTitle => 'የኦዲት መዝገብ ዝርዝር';
+
+  @override
+  String get adminAuditHistoryForUser => 'የዚህ ተጠቃሚ የኦዲት ታሪክ';
+
+  @override
+  String get adminAuditLogs => 'የኦዲት መዝገቦች';
+
+  @override
+  String get adminAuditLogsEmpty => 'ምንም የኦዲት መዝገብ አልተገኘም';
+
+  @override
+  String get adminAuditLogsTitle => 'የስርዓቱ ኦዲት መዝገብ';
+
+  @override
+  String get adminCatalog => 'አጠቃላይ ዝርዝሮች';
+
+  @override
+  String get adminCatalogTitle => 'አጠቃላይ የካታሎግ አስተዳደር';
+
+  @override
+  String get adminConfirmPhoneLabel => 'ስልክ ቁጥሩን በትክክል ያስገቡ';
+
+  @override
+  String get adminDashboard => 'ዳሽቦርድ';
+
+  @override
+  String get adminDashboardTitle => 'የአስተዳዳሪ ዳሽቦርድ';
+
+  @override
+  String get adminDate => 'ቀን እና ሰዓት';
+
+  @override
+  String get adminDisableAccount => 'አካውንት ዝጋ';
+
+  @override
+  String get adminDisableAccountTitle => 'የባለቤቱን አካውንት ሙሉ ለሙሉ መዝጋት';
+
+  @override
+  String get adminDisableConfirm => 'ተረድቻለሁ፣ አካውንቱ ይዘጋ';
+
+  @override
+  String adminDisableWarningPrompt(String phone) {
+    return 'አካውንቱን ሙሉ ለሙሉ መዝጋት ለማረጋገጥ፣ የባለቤቱን ስልክ ቁጥር ($phone) በትክክል ያስገቡ:';
+  }
+
+  @override
+  String get adminEditOwnerTitle => 'የባለቤቱን መረጃ አሻሽል';
+
+  @override
+  String get adminEnforceMinVersion => 'ዝቅተኛ ስሪት አስገድድ';
+
+  @override
+  String get adminEnforceMinVersionDesc =>
+      'ከዚህ ስሪት በታች የሚጠቀሙ ተጠቃሚዎች መተግበሪያውን እንዳይጠቀሙ ያግዳል';
+
+  @override
+  String get adminFailedSyncCount => 'ያልተሳካ ማመሳሰል ብዛት';
+
+  @override
+  String get adminFilterActive => 'ንቁ';
+
+  @override
+  String get adminFilterAll => 'ሁሉም';
+
+  @override
+  String get adminFilterInactive30d => 'የቆሙ (>30 ቀናት)';
+
+  @override
+  String get adminFilterSuspended => 'የታገዱ';
+
+  @override
+  String get adminIpAddress => 'የአይፒ አድራሻ';
+
+  @override
+  String get adminLastSync => 'የመጨረሻ ማመሳሰል';
+
+  @override
+  String get adminMaintenanceActive => 'የጥገና ሁነታ ይብራ';
+
+  @override
+  String get adminMaintenanceActiveDesc =>
+      'የደመና ማመሳሰልን ያቆማል እንዲሁም በመተግበሪያዎች ላይ የጥገና መልዕክት ያሳያል';
+
+  @override
+  String get adminMaintenanceDesc => 'የደመና ማመሳሰል የጥገና ሁነታ ቁጥጥር';
+
+  @override
+  String get adminMaintenanceMessageAm => 'የጥገና መልዕክት (በአማርኛ)';
+
+  @override
+  String get adminMaintenanceMessageEn => 'የጥገና መልዕክት (በእንግሊዝኛ)';
+
+  @override
+  String get adminMaintenanceMode => 'የጥገና ሁነታ';
+
+  @override
+  String get adminMinAppVersion => 'ዝቅተኛ የመተግበሪያ ስሪት';
+
+  @override
+  String get adminMinAppVersionDesc => 'በሲስተሙ የሚፈቀደው ዝቅተኛውን የመተግበሪያ ስሪት ያስቀምጡ';
+
+  @override
+  String get adminMore => 'ተጨማሪ';
+
+  @override
+  String get adminNewThisWeek => 'በዚህ ሳምንት አዲስ';
+
+  @override
+  String get adminNewValue => 'አዲሱ እሴት';
+
+  @override
+  String get adminNoAuditLogs => 'ምንም የኦዲት መዝገብ አልተገኘም';
+
+  @override
+  String get adminNoOwnersFound => 'ምንም የተመዘገቡ የሱቅ ባለቤቶች አልተገኙም';
+
+  @override
+  String get adminNoVersionsRecorded => 'ምንም የመተግበሪያ ስሪት መረጃ አልተመዘገበም';
+
+  @override
+  String get adminOldValue => 'የነበረው እሴት';
+
+  @override
+  String get adminOwnerDetailsTitle => 'የባለቤቱ ዝርዝር መረጃ';
+
+  @override
+  String get adminOwnerReactivatedSuccess => 'የተጠቃሚው እገዳ በተሳካ ሁኔታ ተነስቷል';
+
+  @override
+  String get adminOwnerSuspendedSuccess => 'የተጠቃሚው አካውንት በተሳካ ሁኔታ ታግዷል';
+
+  @override
+  String get adminOwnerUpdatedSuccess => 'የተጠቃሚው መረጃ በተሳካ ሁኔታ ተሻሽሏል';
+
+  @override
+  String get adminOwners => 'የሱቅ ባለቤቶች';
+
+  @override
+  String get adminOwnersTitle => 'የሱቅ ባለቤቶች ማውጫ';
+
+  @override
+  String get adminPasswordChangedSuccess => 'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል';
+
+  @override
+  String get adminPhoneConfirmationMismatch =>
+      'ያስገቡት ስልክ ቁጥር ከባለቤቱ ስልክ ቁጥር ጋር አይመሳሰልም';
+
+  @override
+  String get adminPortalTitle => 'የአስተዳዳሪ ፖርታል';
+
+  @override
+  String get adminReactivate => 'እገዳ አንሳ';
+
+  @override
+  String get adminReactivateConfirm => 'እገዳ አንሳ';
+
+  @override
+  String get adminReactivateOwnerTitle => 'የተጠቃሚ እገዳ ማንሳት';
+
+  @override
+  String get adminReactivatePrompt =>
+      'ይህን ተጠቃሚ እገዳ ማንሳት ይፈልጋሉ? ባለቤቱ ወዲያውኑ አገልግሎቱን ማግኘት ይችላል።';
+
+  @override
+  String get adminReason => 'ምክንያት';
+
+  @override
+  String get adminReasonRequired => 'እባክዎ ምክንያት ይግለጹ';
+
+  @override
+  String get adminRegisteredDate => 'የተመዘገበበት ቀን';
+
+  @override
+  String get adminRenameItem => 'ስም ቀይር';
+
+  @override
+  String get adminResetPassword => 'የይለፍ ቃል ቀይር';
+
+  @override
+  String get adminResetPasswordConfirm => 'ጊዜያዊ የይለፍ ቃል ፍጠር';
+
+  @override
+  String get adminResetPasswordPrompt =>
+      'ይህ እርምጃ አሁን ያለውን የይለፍ ቃል ይሰርዛል፤ በሚቀጥለው ግባ ጊዜ የሚቀየር ጊዜያዊ የይለፍ ቃል ይሰጣል።';
+
+  @override
+  String get adminResetPasswordTitle => 'የባለቤቱን የይለፍ ቃል መቀየር';
+
+  @override
+  String get adminSearchOwnersHint => 'በስልክ ቁጥር ወይም በንግድ ስም ይፈልጉ...';
+
+  @override
+  String get adminSettings => 'ቅንብሮች';
+
+  @override
+  String get adminStatusActive => 'ንቁ';
+
+  @override
+  String get adminStatusSuspended => 'የታገደ';
+
+  @override
+  String get adminSuspend => 'አካውንት አግድ';
+
+  @override
+  String get adminSuspendConfirm => 'አካውንቱን አግድ';
+
+  @override
+  String get adminSuspendOwnerTitle => 'የሱቅ ባለቤቱን ማገድ';
+
+  @override
+  String get adminSuspendPrompt =>
+      'ተጠቃሚውን ማገድ ወዲያውኑ መግባትና ማመሳሰልን ያግዳል፤ እባክዎ ምክንያቱን ያስገቡ:';
+
+  @override
+  String get adminSuspendedOwners => 'የታገዱ ባለቤቶች';
+
+  @override
+  String get adminSuspensionReasonHint => 'ለምሳሌ፦ ክፍያ አልተፈጸመም ወይም የተሳሳተ አጠቃቀም';
+
+  @override
+  String get adminSuspensionReasonLabel => 'የእገዳ ምክንያት';
+
+  @override
+  String adminSyncDaysAgo(String days) {
+    return 'ከ$days ቀናት በፊት';
+  }
+
+  @override
+  String get adminSyncHealth => 'የማመሳሰል ጤንነት';
+
+  @override
+  String get adminSyncHealthyMessage => 'ሁሉም የማመሳሰል ሂደቶች ጤናማ ናቸው';
+
+  @override
+  String adminSyncHoursAgo(String hours) {
+    return 'ከ$hours ሰዓታት በፊት';
+  }
+
+  @override
+  String get adminSyncJustNow => 'አሁን';
+
+  @override
+  String adminSyncMinutesAgo(String minutes) {
+    return 'ከ$minutes ደቂቃ በፊት';
+  }
+
+  @override
+  String adminSyncMonthsAgo(String months) {
+    return 'ከ$months ወራት በፊት';
+  }
+
+  @override
+  String get adminSyncNever => 'እስካሁን አልተመሳሰለም';
+
+  @override
+  String adminSyncProblemsCount(String count) {
+    return '$count ባለቤቶች ላይ የማመሳሰል መዘግየት ወይም ችግር አለ';
+  }
+
+  @override
+  String get adminSystemStatistics => 'አጠቃላይ የስርዓቱ አሃዛዊ መረጃዎች';
+
+  @override
+  String get adminTabBrands => 'ብራንዶች';
+
+  @override
+  String get adminTabCategories => 'ምድቦች';
+
+  @override
+  String get adminTabUnits => 'መለኪያዎች';
+
+  @override
+  String get adminTargetOwner => 'ተጠቃሚ';
+
+  @override
+  String get adminTempPasswordTitle => 'ጊዜያዊ የይለፍ ቃል ተፈጥሯል';
+
+  @override
+  String get adminTempPasswordWarning =>
+      'ይህንን የይለፍ ቃል በጥንቃቄ ለባለቤቱ ያጋሩ። ደግሞ አይታይም!';
+
+  @override
+  String get adminTenantCountsOnly => 'የስርዓቱ ጠቅላላ ድምር (የተጠቃሚ ዳታ አይታይም)';
+
+  @override
+  String get adminTenantOverview => 'የተጠቃሚዎች አጠቃላይ እይታ';
+
+  @override
+  String get adminTotalOwners => 'ጠቅላላ ባለቤቶች';
+
+  @override
+  String get adminTotalPartsCount => 'ጠቅላላ ዕቃዎች (ድምር)';
+
+  @override
+  String get adminTotalSalesCount => 'ጠቅላላ ሽያጭ (ድምር)';
+
+  @override
+  String get adminVersionStringLabel => 'የስሪት መለያ ቁጥር (ምሳሌ 1.0.0)';
+
+  @override
+  String get copiedToClipboard => 'ኮፒ ተደርጓል';
+
+  @override
+  String get copy => 'ኮፒ አድርግ';
+
+  @override
+  String get error => 'ስህተት';
+
+  @override
+  String get logoutConfirmation => 'ከአስተዳዳሪ መለያዎ መውጣት እርግጠኛ ነዎት?';
+
+  @override
+  String get name => 'ስም';
+
+  @override
+  String get next => 'ቀጣይ';
+
+  @override
+  String get noResultsFound => 'ምንም አልተገኘም';
+
+  @override
+  String get page => 'ገጽ';
+
+  @override
+  String get previous => 'ቀዳሚ';
+
+  @override
+  String get required => 'አስፈላጊ';
+
+  @override
+  String get success => 'ተሳክቷል';
+
+  @override
+  String get totalEntries => 'ጠቅላላ መዝገቦች';
 }

@@ -1,5 +1,6 @@
 /// Domain models representing Admin API entities and statistics.
 /// These models are ONLINE ONLY and represent system-level management.
+library;
 
 class AdminDashboardStats {
   final int totalOwners;

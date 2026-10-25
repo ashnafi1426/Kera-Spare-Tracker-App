@@ -1,11 +1,9 @@
 {
   "@@locale": "en",
-
   "appName": "Kera Spare Tracker",
   "appSubtitle": "Spare Parts & Sales Management",
   "splashLoading": "Loading your inventory...",
   "offlineBadge": "Offline-First",
-
   "save": "Save",
   "cancel": "Cancel",
   "delete": "Delete",
@@ -19,14 +17,12 @@
   "confirm": "Confirm",
   "refresh": "Refresh",
   "done": "Done",
-
   "navParts": "Parts",
   "navSales": "Sales",
   "navStock": "Stock",
   "navReports": "Reports",
   "navSettings": "Settings",
   "navAdmin": "Admin",
-
   "phoneRequired": "Phone number is required",
   "phoneInvalid": "Enter a valid Ethiopian phone number (e.g. 09... or 07...)",
   "passwordRequired": "Password is required",
@@ -36,7 +32,6 @@
   "quantityPositive": "Quantity must be greater than 0",
   "priceRequired": "Price is required",
   "priceInvalid": "Price must be 0 or greater",
-
   "noDataTitle": "No Data Found",
   "noDataDesc": "There is no recorded data yet",
   "noPartsFound": "No Parts Found",
@@ -44,13 +39,11 @@
   "noSalesFound": "No Sales Found",
   "noSalesDesc": "No sales transactions have been recorded yet",
   "noStockMovements": "No Stock Movements Found",
-
   "language": "Language",
   "selectLanguage": "Select Language",
   "amharic": "አማርኛ (Amharic)",
   "english": "English",
   "languageChangedNotice": "Language switched to English",
-
   "login": "Log In",
   "register": "Register",
   "logout": "Log Out",
@@ -79,7 +72,6 @@
   "settingsTab": "Settings",
   "businessProfile": "Business Profile",
   "offlineStatusNotice": "All data is securely saved on your device.",
-
   "brandsTitle": "Brands",
   "categoriesTitle": "Categories",
   "locationsTitle": "Storage Locations",
@@ -118,7 +110,6 @@
   "searchCategories": "Search categories...",
   "searchLocations": "Search locations...",
   "quickAddNew": "Add New",
-
   "addPart": "Add Spare Part",
   "editPart": "Edit Spare Part",
   "partDetails": "Part Details",
@@ -138,7 +129,7 @@
   "quantityInStock": "Quantity in Stock",
   "purchasePrice": "Purchase Price (ETB)",
   "sellingPrice": "Selling Price (ETB)",
-  "estimatedProfit": "Estimated Unit Profit",
+  "estimatedProfit": "Estimated Profit",
   "sizeSpecs": "Size / Specifications",
   "sizeSpecsHint": "e.g. 10mm, 24V, Standard...",
   "notes": "Internal Notes",
@@ -163,7 +154,6 @@
   "lowStock": "Low Stock",
   "searchHint": "Search by name, part #, brand, category, shelf...",
   "filters": "Filters",
-  "filter": "Filter",
   "sortBy": "Sort by",
   "sortName": "Name (A - Z)",
   "sortNewest": "Newest first",
@@ -212,7 +202,9 @@
   "@negativeStockWarningMessage": {
     "description": "Warning when stock drops below 0",
     "placeholders": {
-      "newStock": { "type": "String" }
+      "newStock": {
+        "type": "String"
+      }
     }
   },
   "negativeStockNotAllowed": "Stock cannot go below zero. Enable negative stock in Settings if needed.",
@@ -249,9 +241,15 @@
   "@saleStockWarningMessage": {
     "description": "Warning when a sale item exceeds stock",
     "placeholders": {
-      "partName": { "type": "String" },
-      "stock": { "type": "String" },
-      "newStock": { "type": "String" }
+      "partName": {
+        "type": "String"
+      },
+      "stock": {
+        "type": "String"
+      },
+      "newStock": {
+        "type": "String"
+      }
     }
   },
   "saleRecordedSuccess": "Sale recorded successfully",
@@ -269,7 +267,9 @@
   "@itemsCount": {
     "description": "Item count badge",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noSalesForFilter": "No sales found for the selected filter",
@@ -284,7 +284,6 @@
   "reportMonthly": "Monthly",
   "salesCount": "Number of Sales",
   "totalRevenue": "Total Revenue",
-  "estimatedProfit": "Estimated Profit",
   "topSellingParts": "Top 5 Selling Parts",
   "totalStockValue": "Total Stock Value",
   "lowStockCount": "Low Stock Count",
@@ -292,7 +291,9 @@
   "@unitsSold": {
     "description": "Quantity of parts sold",
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "salesTrend": "Sales Trend",
@@ -307,7 +308,6 @@
   "passwordChangedSuccess": "Password changed successfully",
   "invalidCurrentPassword": "Incorrect current password",
   "passwordMismatch": "Passwords do not match",
-  "passwordTooShort": "Password must be at least 6 characters",
   "currencyLabel": "System Currency",
   "currencyDesc": "All financial figures and reports are calculated in Ethiopian Birr (ETB).",
   "aboutTitle": "About Kera Spare Tracker",
@@ -316,7 +316,9 @@
   "@appVersion": {
     "description": "App version label",
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "themeMode": "App Theme",
@@ -340,14 +342,18 @@
   "@exportSuccess": {
     "description": "Export file success",
     "placeholders": {
-      "filename": { "type": "String" }
+      "filename": {
+        "type": "String"
+      }
     }
   },
   "exportError": "Failed to export data: {error}",
   "@exportError": {
     "description": "Export error message",
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "saveToStorage": "Save to Storage",
@@ -362,7 +368,9 @@
   "@updateRequiredMessage": {
     "description": "Update required description message",
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "updateNow": "Update Now",
@@ -374,7 +382,9 @@
   "@suspensionReasonLabel": {
     "description": "Suspension reason label",
     "placeholders": {
-      "reason": { "type": "String" }
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "contactSupportLabel": "Contact Support:",
@@ -382,7 +392,179 @@
   "telegramSupport": "Telegram",
   "mustChangePasswordTitle": "Password Change Required",
   "mustChangePasswordPrompt": "An immediate password update is required for your account before you can proceed.",
-  "dismiss": "Dismiss"
+  "dismiss": "Dismiss",
+  "adminAccount": "Admin Account",
+  "adminAccountDisabledSuccess": "Owner account disabled successfully",
+  "adminAccountTitle": "Administrator Account",
+  "adminActionsHeader": "Administrative Actions",
+  "adminActiveOwners": "Active Owners (30d)",
+  "adminActor": "Performed By",
+  "adminAddBrand": "Add Global Brand",
+  "adminAddCategory": "Add Global Category",
+  "adminAddUnit": "Add Global Unit",
+  "adminAnnouncementActive": "Announcement Active",
+  "adminAnnouncementActiveDesc": "When active, this banner is displayed to all app users",
+  "adminAnnouncementBodyAm": "Announcement Body (Amharic)",
+  "adminAnnouncementBodyEn": "Announcement Body (English)",
+  "adminAnnouncementDesc": "Broadcast announcements or alerts to all connected app instances",
+  "adminAnnouncementSettings": "Global Announcement",
+  "adminAnnouncementTitleAm": "Announcement Title (Amharic)",
+  "adminAnnouncementTitleEn": "Announcement Title (English)",
+  "adminAppSettingsTitle": "Application Settings",
+  "adminAppVersion": "App Version",
+  "adminAppVersionsInUse": "Client App Versions in Use",
+  "adminAuditDetailTitle": "Audit Log Detail",
+  "adminAuditHistoryForUser": "Audit History for this Owner",
+  "adminAuditLogs": "Audit Logs",
+  "adminAuditLogsEmpty": "No audit records found matching criteria",
+  "adminAuditLogsTitle": "System Audit Log",
+  "adminCatalog": "Global Catalog",
+  "adminCatalogTitle": "Global Catalog Management",
+  "adminConfirmPhoneLabel": "Confirm Phone Number",
+  "adminDashboard": "Dashboard",
+  "adminDashboardTitle": "Admin Dashboard",
+  "adminDate": "Date & Time",
+  "adminDisableAccount": "Disable Account",
+  "adminDisableAccountTitle": "Permanently Disable Owner Account",
+  "adminDisableConfirm": "I understand, disable this account",
+  "adminDisableWarningPrompt": "To confirm soft-disabling this account, type the owner's phone number ({phone}) exactly:",
+  "@adminDisableWarningPrompt": {
+    "description": "Confirmation prompt when disabling account",
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "adminEditOwnerTitle": "Edit Owner Details",
+  "adminEnforceMinVersion": "Enforce Minimum Version",
+  "adminEnforceMinVersionDesc": "Block app access for clients running versions below this threshold",
+  "adminFailedSyncCount": "Failed Sync Count",
+  "adminFilterActive": "Active",
+  "adminFilterAll": "All",
+  "adminFilterInactive30d": "Inactive (>30d)",
+  "adminFilterSuspended": "Suspended",
+  "adminIpAddress": "IP Address",
+  "adminLastSync": "Last Synced",
+  "adminMaintenanceActive": "Maintenance Mode Enabled",
+  "adminMaintenanceActiveDesc": "Halt cloud sync and display maintenance banner across client apps",
+  "adminMaintenanceDesc": "Control scheduled maintenance mode for cloud synchronization",
+  "adminMaintenanceMessageAm": "Maintenance Message (Amharic)",
+  "adminMaintenanceMessageEn": "Maintenance Message (English)",
+  "adminMaintenanceMode": "Maintenance Mode",
+  "adminMinAppVersion": "Minimum App Version",
+  "adminMinAppVersionDesc": "Set the minimum required client version supported by the backend",
+  "adminMore": "More",
+  "adminNewThisWeek": "New This Week",
+  "adminNewValue": "New Value",
+  "adminNoAuditLogs": "No audit records found",
+  "adminNoOwnersFound": "No business owners found",
+  "adminNoVersionsRecorded": "No client version data recorded yet",
+  "adminOldValue": "Previous Value",
+  "adminOwnerDetailsTitle": "Owner Details",
+  "adminOwnerReactivatedSuccess": "Owner account successfully reactivated",
+  "adminOwnerSuspendedSuccess": "Owner account successfully suspended",
+  "adminOwnerUpdatedSuccess": "Owner details updated successfully",
+  "adminOwners": "Owners",
+  "adminOwnersTitle": "Business Owners Directory",
+  "adminPasswordChangedSuccess": "Password changed successfully",
+  "adminPhoneConfirmationMismatch": "Phone number does not match confirmation",
+  "adminPortalTitle": "Admin Portal",
+  "adminReactivate": "Reactivate Account",
+  "adminReactivateConfirm": "Reactivate",
+  "adminReactivateOwnerTitle": "Reactivate Business Owner",
+  "adminReactivatePrompt": "Are you sure you want to reactivate this account? The owner will regain immediate access.",
+  "adminReason": "Reason",
+  "adminReasonRequired": "Please specify a reason",
+  "adminRegisteredDate": "Registered Date",
+  "adminRenameItem": "Rename Item",
+  "adminResetPassword": "Reset Password",
+  "adminResetPasswordConfirm": "Generate Temporary Password",
+  "adminResetPasswordPrompt": "This will invalidate the current password and generate a temporary password that must be changed on next login.",
+  "adminResetPasswordTitle": "Reset Owner Password",
+  "adminSearchOwnersHint": "Search by phone or business name...",
+  "adminSettings": "App Settings",
+  "adminStatusActive": "Active",
+  "adminStatusSuspended": "Suspended",
+  "adminSuspend": "Suspend Account",
+  "adminSuspendConfirm": "Suspend Owner",
+  "adminSuspendOwnerTitle": "Suspend Business Owner",
+  "adminSuspendPrompt": "Suspending this owner will block login and sync access immediately. Enter a clear reason below:",
+  "adminSuspendedOwners": "Suspended Owners",
+  "adminSuspensionReasonHint": "e.g. Inactive business or account misuse",
+  "adminSuspensionReasonLabel": "Suspension Reason",
+  "adminSyncDaysAgo": "{days} days ago",
+  "@adminSyncDaysAgo": {
+    "description": "Relative sync time in days",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncHealth": "Sync Status Health",
+  "adminSyncHealthyMessage": "All business sync queues are healthy",
+  "adminSyncHoursAgo": "{hours} hours ago",
+  "@adminSyncHoursAgo": {
+    "description": "Relative sync time in hours",
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncJustNow": "Just now",
+  "adminSyncMinutesAgo": "{minutes} min ago",
+  "@adminSyncMinutesAgo": {
+    "description": "Relative sync time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncMonthsAgo": "{months} months ago",
+  "@adminSyncMonthsAgo": {
+    "description": "Relative sync time in months",
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncNever": "Never synced",
+  "adminSyncProblemsCount": "{count} owner(s) have sync delays or failures",
+  "@adminSyncProblemsCount": {
+    "description": "Count of owners with sync problems",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSystemStatistics": "System-Wide Statistics",
+  "adminTabBrands": "Brands",
+  "adminTabCategories": "Categories",
+  "adminTabUnits": "Units",
+  "adminTargetOwner": "Target Owner",
+  "adminTempPasswordTitle": "Temporary Password Generated",
+  "adminTempPasswordWarning": "Share this password securely with the owner. It will NOT be shown again.",
+  "adminTenantCountsOnly": "System Aggregate Counts (Zero Row Exposure)",
+  "adminTenantOverview": "Tenant Overview",
+  "adminTotalOwners": "Total Owners",
+  "adminTotalPartsCount": "Total Parts (Count)",
+  "adminTotalSalesCount": "Total Sales (Count)",
+  "adminVersionStringLabel": "Version String (e.g. 1.0.0)",
+  "copiedToClipboard": "Copied to clipboard",
+  "copy": "Copy",
+  "error": "Error",
+  "logoutConfirmation": "Are you sure you want to log out of your administrator account?",
+  "name": "Name",
+  "next": "Next",
+  "noResultsFound": "No results found",
+  "page": "Page",
+  "previous": "Previous",
+  "required": "Required",
+  "success": "Success",
+  "totalEntries": "total entries"
 }
-
-

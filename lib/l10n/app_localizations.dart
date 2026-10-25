@@ -1991,6 +1991,762 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ዝጋ'**
   String get dismiss;
+
+  /// No description provided for @adminAccount.
+  ///
+  /// In am, this message translates to:
+  /// **'የአድሚን መለያ'**
+  String get adminAccount;
+
+  /// No description provided for @adminAccountDisabledSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚው አካውንት በተሳካ ሁኔታ ተዘግቷል'**
+  String get adminAccountDisabledSuccess;
+
+  /// No description provided for @adminAccountTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የአድሚን መለያ አስተዳደር'**
+  String get adminAccountTitle;
+
+  /// No description provided for @adminActionsHeader.
+  ///
+  /// In am, this message translates to:
+  /// **'የአስተዳዳሪ እርምጃዎች'**
+  String get adminActionsHeader;
+
+  /// No description provided for @adminActiveOwners.
+  ///
+  /// In am, this message translates to:
+  /// **'ንቁ ባለቤቶች (30 ቀናት)'**
+  String get adminActiveOwners;
+
+  /// No description provided for @adminActor.
+  ///
+  /// In am, this message translates to:
+  /// **'ፈጻሚ አድሚን'**
+  String get adminActor;
+
+  /// No description provided for @adminAddBrand.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ዓለም አቀፍ ብራንድ አክል'**
+  String get adminAddBrand;
+
+  /// No description provided for @adminAddCategory.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ዓለም አቀፍ ምድብ አክል'**
+  String get adminAddCategory;
+
+  /// No description provided for @adminAddUnit.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ ዓለም አቀፍ መለኪያ አክል'**
+  String get adminAddUnit;
+
+  /// No description provided for @adminAnnouncementActive.
+  ///
+  /// In am, this message translates to:
+  /// **'ማስታወቂያው ይሰራጭ'**
+  String get adminAnnouncementActive;
+
+  /// No description provided for @adminAnnouncementActiveDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ሲበራ ይሄ ማስታወቂያ ለሁሉም የመተግበሪያው ተጠቃሚዎች ይታያል'**
+  String get adminAnnouncementActiveDesc;
+
+  /// No description provided for @adminAnnouncementBodyAm.
+  ///
+  /// In am, this message translates to:
+  /// **'የማስታወቂያ ዝርዝር (በአማርኛ)'**
+  String get adminAnnouncementBodyAm;
+
+  /// No description provided for @adminAnnouncementBodyEn.
+  ///
+  /// In am, this message translates to:
+  /// **'የማስታወቂያ ዝርዝር (በእንግሊዝኛ)'**
+  String get adminAnnouncementBodyEn;
+
+  /// No description provided for @adminAnnouncementDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ለመተግበሪያ ተጠቃሚዎች ማስታወቂያ ወይም ማንቂያ ማስተላለፊያ'**
+  String get adminAnnouncementDesc;
+
+  /// No description provided for @adminAnnouncementSettings.
+  ///
+  /// In am, this message translates to:
+  /// **'አጠቃላይ ማስታወቂያ'**
+  String get adminAnnouncementSettings;
+
+  /// No description provided for @adminAnnouncementTitleAm.
+  ///
+  /// In am, this message translates to:
+  /// **'የማስታወቂያ ርዕስ (በአማርኛ)'**
+  String get adminAnnouncementTitleAm;
+
+  /// No description provided for @adminAnnouncementTitleEn.
+  ///
+  /// In am, this message translates to:
+  /// **'የማስታወቂያ ርዕስ (በእንግሊዝኛ)'**
+  String get adminAnnouncementTitleEn;
+
+  /// No description provided for @adminAppSettingsTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ቅንብሮች'**
+  String get adminAppSettingsTitle;
+
+  /// No description provided for @adminAppVersion.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ስሪት'**
+  String get adminAppVersion;
+
+  /// No description provided for @adminAppVersionsInUse.
+  ///
+  /// In am, this message translates to:
+  /// **'በስራ ላይ ያሉ የመተግበሪያ ስሪቶች'**
+  String get adminAppVersionsInUse;
+
+  /// No description provided for @adminAuditDetailTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የኦዲት መዝገብ ዝርዝር'**
+  String get adminAuditDetailTitle;
+
+  /// No description provided for @adminAuditHistoryForUser.
+  ///
+  /// In am, this message translates to:
+  /// **'የዚህ ተጠቃሚ የኦዲት ታሪክ'**
+  String get adminAuditHistoryForUser;
+
+  /// No description provided for @adminAuditLogs.
+  ///
+  /// In am, this message translates to:
+  /// **'የኦዲት መዝገቦች'**
+  String get adminAuditLogs;
+
+  /// No description provided for @adminAuditLogsEmpty.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የኦዲት መዝገብ አልተገኘም'**
+  String get adminAuditLogsEmpty;
+
+  /// No description provided for @adminAuditLogsTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የስርዓቱ ኦዲት መዝገብ'**
+  String get adminAuditLogsTitle;
+
+  /// No description provided for @adminCatalog.
+  ///
+  /// In am, this message translates to:
+  /// **'አጠቃላይ ዝርዝሮች'**
+  String get adminCatalog;
+
+  /// No description provided for @adminCatalogTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'አጠቃላይ የካታሎግ አስተዳደር'**
+  String get adminCatalogTitle;
+
+  /// No description provided for @adminConfirmPhoneLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'ስልክ ቁጥሩን በትክክል ያስገቡ'**
+  String get adminConfirmPhoneLabel;
+
+  /// No description provided for @adminDashboard.
+  ///
+  /// In am, this message translates to:
+  /// **'ዳሽቦርድ'**
+  String get adminDashboard;
+
+  /// No description provided for @adminDashboardTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የአስተዳዳሪ ዳሽቦርድ'**
+  String get adminDashboardTitle;
+
+  /// No description provided for @adminDate.
+  ///
+  /// In am, this message translates to:
+  /// **'ቀን እና ሰዓት'**
+  String get adminDate;
+
+  /// No description provided for @adminDisableAccount.
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንት ዝጋ'**
+  String get adminDisableAccount;
+
+  /// No description provided for @adminDisableAccountTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የባለቤቱን አካውንት ሙሉ ለሙሉ መዝጋት'**
+  String get adminDisableAccountTitle;
+
+  /// No description provided for @adminDisableConfirm.
+  ///
+  /// In am, this message translates to:
+  /// **'ተረድቻለሁ፣ አካውንቱ ይዘጋ'**
+  String get adminDisableConfirm;
+
+  /// Confirmation prompt when disabling account
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንቱን ሙሉ ለሙሉ መዝጋት ለማረጋገጥ፣ የባለቤቱን ስልክ ቁጥር ({phone}) በትክክል ያስገቡ:'**
+  String adminDisableWarningPrompt(String phone);
+
+  /// No description provided for @adminEditOwnerTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የባለቤቱን መረጃ አሻሽል'**
+  String get adminEditOwnerTitle;
+
+  /// No description provided for @adminEnforceMinVersion.
+  ///
+  /// In am, this message translates to:
+  /// **'ዝቅተኛ ስሪት አስገድድ'**
+  String get adminEnforceMinVersion;
+
+  /// No description provided for @adminEnforceMinVersionDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ከዚህ ስሪት በታች የሚጠቀሙ ተጠቃሚዎች መተግበሪያውን እንዳይጠቀሙ ያግዳል'**
+  String get adminEnforceMinVersionDesc;
+
+  /// No description provided for @adminFailedSyncCount.
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተሳካ ማመሳሰል ብዛት'**
+  String get adminFailedSyncCount;
+
+  /// No description provided for @adminFilterActive.
+  ///
+  /// In am, this message translates to:
+  /// **'ንቁ'**
+  String get adminFilterActive;
+
+  /// No description provided for @adminFilterAll.
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም'**
+  String get adminFilterAll;
+
+  /// No description provided for @adminFilterInactive30d.
+  ///
+  /// In am, this message translates to:
+  /// **'የቆሙ (>30 ቀናት)'**
+  String get adminFilterInactive30d;
+
+  /// No description provided for @adminFilterSuspended.
+  ///
+  /// In am, this message translates to:
+  /// **'የታገዱ'**
+  String get adminFilterSuspended;
+
+  /// No description provided for @adminIpAddress.
+  ///
+  /// In am, this message translates to:
+  /// **'የአይፒ አድራሻ'**
+  String get adminIpAddress;
+
+  /// No description provided for @adminLastSync.
+  ///
+  /// In am, this message translates to:
+  /// **'የመጨረሻ ማመሳሰል'**
+  String get adminLastSync;
+
+  /// No description provided for @adminMaintenanceActive.
+  ///
+  /// In am, this message translates to:
+  /// **'የጥገና ሁነታ ይብራ'**
+  String get adminMaintenanceActive;
+
+  /// No description provided for @adminMaintenanceActiveDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'የደመና ማመሳሰልን ያቆማል እንዲሁም በመተግበሪያዎች ላይ የጥገና መልዕክት ያሳያል'**
+  String get adminMaintenanceActiveDesc;
+
+  /// No description provided for @adminMaintenanceDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'የደመና ማመሳሰል የጥገና ሁነታ ቁጥጥር'**
+  String get adminMaintenanceDesc;
+
+  /// No description provided for @adminMaintenanceMessageAm.
+  ///
+  /// In am, this message translates to:
+  /// **'የጥገና መልዕክት (በአማርኛ)'**
+  String get adminMaintenanceMessageAm;
+
+  /// No description provided for @adminMaintenanceMessageEn.
+  ///
+  /// In am, this message translates to:
+  /// **'የጥገና መልዕክት (በእንግሊዝኛ)'**
+  String get adminMaintenanceMessageEn;
+
+  /// No description provided for @adminMaintenanceMode.
+  ///
+  /// In am, this message translates to:
+  /// **'የጥገና ሁነታ'**
+  String get adminMaintenanceMode;
+
+  /// No description provided for @adminMinAppVersion.
+  ///
+  /// In am, this message translates to:
+  /// **'ዝቅተኛ የመተግበሪያ ስሪት'**
+  String get adminMinAppVersion;
+
+  /// No description provided for @adminMinAppVersionDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'በሲስተሙ የሚፈቀደው ዝቅተኛውን የመተግበሪያ ስሪት ያስቀምጡ'**
+  String get adminMinAppVersionDesc;
+
+  /// No description provided for @adminMore.
+  ///
+  /// In am, this message translates to:
+  /// **'ተጨማሪ'**
+  String get adminMore;
+
+  /// No description provided for @adminNewThisWeek.
+  ///
+  /// In am, this message translates to:
+  /// **'በዚህ ሳምንት አዲስ'**
+  String get adminNewThisWeek;
+
+  /// No description provided for @adminNewValue.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲሱ እሴት'**
+  String get adminNewValue;
+
+  /// No description provided for @adminNoAuditLogs.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የኦዲት መዝገብ አልተገኘም'**
+  String get adminNoAuditLogs;
+
+  /// No description provided for @adminNoOwnersFound.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የተመዘገቡ የሱቅ ባለቤቶች አልተገኙም'**
+  String get adminNoOwnersFound;
+
+  /// No description provided for @adminNoVersionsRecorded.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የመተግበሪያ ስሪት መረጃ አልተመዘገበም'**
+  String get adminNoVersionsRecorded;
+
+  /// No description provided for @adminOldValue.
+  ///
+  /// In am, this message translates to:
+  /// **'የነበረው እሴት'**
+  String get adminOldValue;
+
+  /// No description provided for @adminOwnerDetailsTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የባለቤቱ ዝርዝር መረጃ'**
+  String get adminOwnerDetailsTitle;
+
+  /// No description provided for @adminOwnerReactivatedSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚው እገዳ በተሳካ ሁኔታ ተነስቷል'**
+  String get adminOwnerReactivatedSuccess;
+
+  /// No description provided for @adminOwnerSuspendedSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚው አካውንት በተሳካ ሁኔታ ታግዷል'**
+  String get adminOwnerSuspendedSuccess;
+
+  /// No description provided for @adminOwnerUpdatedSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚው መረጃ በተሳካ ሁኔታ ተሻሽሏል'**
+  String get adminOwnerUpdatedSuccess;
+
+  /// No description provided for @adminOwners.
+  ///
+  /// In am, this message translates to:
+  /// **'የሱቅ ባለቤቶች'**
+  String get adminOwners;
+
+  /// No description provided for @adminOwnersTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የሱቅ ባለቤቶች ማውጫ'**
+  String get adminOwnersTitle;
+
+  /// No description provided for @adminPasswordChangedSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል'**
+  String get adminPasswordChangedSuccess;
+
+  /// No description provided for @adminPhoneConfirmationMismatch.
+  ///
+  /// In am, this message translates to:
+  /// **'ያስገቡት ስልክ ቁጥር ከባለቤቱ ስልክ ቁጥር ጋር አይመሳሰልም'**
+  String get adminPhoneConfirmationMismatch;
+
+  /// No description provided for @adminPortalTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የአስተዳዳሪ ፖርታል'**
+  String get adminPortalTitle;
+
+  /// No description provided for @adminReactivate.
+  ///
+  /// In am, this message translates to:
+  /// **'እገዳ አንሳ'**
+  String get adminReactivate;
+
+  /// No description provided for @adminReactivateConfirm.
+  ///
+  /// In am, this message translates to:
+  /// **'እገዳ አንሳ'**
+  String get adminReactivateConfirm;
+
+  /// No description provided for @adminReactivateOwnerTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚ እገዳ ማንሳት'**
+  String get adminReactivateOwnerTitle;
+
+  /// No description provided for @adminReactivatePrompt.
+  ///
+  /// In am, this message translates to:
+  /// **'ይህን ተጠቃሚ እገዳ ማንሳት ይፈልጋሉ? ባለቤቱ ወዲያውኑ አገልግሎቱን ማግኘት ይችላል።'**
+  String get adminReactivatePrompt;
+
+  /// No description provided for @adminReason.
+  ///
+  /// In am, this message translates to:
+  /// **'ምክንያት'**
+  String get adminReason;
+
+  /// No description provided for @adminReasonRequired.
+  ///
+  /// In am, this message translates to:
+  /// **'እባክዎ ምክንያት ይግለጹ'**
+  String get adminReasonRequired;
+
+  /// No description provided for @adminRegisteredDate.
+  ///
+  /// In am, this message translates to:
+  /// **'የተመዘገበበት ቀን'**
+  String get adminRegisteredDate;
+
+  /// No description provided for @adminRenameItem.
+  ///
+  /// In am, this message translates to:
+  /// **'ስም ቀይር'**
+  String get adminRenameItem;
+
+  /// No description provided for @adminResetPassword.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ቀይር'**
+  String get adminResetPassword;
+
+  /// No description provided for @adminResetPasswordConfirm.
+  ///
+  /// In am, this message translates to:
+  /// **'ጊዜያዊ የይለፍ ቃል ፍጠር'**
+  String get adminResetPasswordConfirm;
+
+  /// No description provided for @adminResetPasswordPrompt.
+  ///
+  /// In am, this message translates to:
+  /// **'ይህ እርምጃ አሁን ያለውን የይለፍ ቃል ይሰርዛል፤ በሚቀጥለው ግባ ጊዜ የሚቀየር ጊዜያዊ የይለፍ ቃል ይሰጣል።'**
+  String get adminResetPasswordPrompt;
+
+  /// No description provided for @adminResetPasswordTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የባለቤቱን የይለፍ ቃል መቀየር'**
+  String get adminResetPasswordTitle;
+
+  /// No description provided for @adminSearchOwnersHint.
+  ///
+  /// In am, this message translates to:
+  /// **'በስልክ ቁጥር ወይም በንግድ ስም ይፈልጉ...'**
+  String get adminSearchOwnersHint;
+
+  /// No description provided for @adminSettings.
+  ///
+  /// In am, this message translates to:
+  /// **'ቅንብሮች'**
+  String get adminSettings;
+
+  /// No description provided for @adminStatusActive.
+  ///
+  /// In am, this message translates to:
+  /// **'ንቁ'**
+  String get adminStatusActive;
+
+  /// No description provided for @adminStatusSuspended.
+  ///
+  /// In am, this message translates to:
+  /// **'የታገደ'**
+  String get adminStatusSuspended;
+
+  /// No description provided for @adminSuspend.
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንት አግድ'**
+  String get adminSuspend;
+
+  /// No description provided for @adminSuspendConfirm.
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንቱን አግድ'**
+  String get adminSuspendConfirm;
+
+  /// No description provided for @adminSuspendOwnerTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የሱቅ ባለቤቱን ማገድ'**
+  String get adminSuspendOwnerTitle;
+
+  /// No description provided for @adminSuspendPrompt.
+  ///
+  /// In am, this message translates to:
+  /// **'ተጠቃሚውን ማገድ ወዲያውኑ መግባትና ማመሳሰልን ያግዳል፤ እባክዎ ምክንያቱን ያስገቡ:'**
+  String get adminSuspendPrompt;
+
+  /// No description provided for @adminSuspendedOwners.
+  ///
+  /// In am, this message translates to:
+  /// **'የታገዱ ባለቤቶች'**
+  String get adminSuspendedOwners;
+
+  /// No description provided for @adminSuspensionReasonHint.
+  ///
+  /// In am, this message translates to:
+  /// **'ለምሳሌ፦ ክፍያ አልተፈጸመም ወይም የተሳሳተ አጠቃቀም'**
+  String get adminSuspensionReasonHint;
+
+  /// No description provided for @adminSuspensionReasonLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'የእገዳ ምክንያት'**
+  String get adminSuspensionReasonLabel;
+
+  /// Relative sync time in days
+  ///
+  /// In am, this message translates to:
+  /// **'ከ{days} ቀናት በፊት'**
+  String adminSyncDaysAgo(String days);
+
+  /// No description provided for @adminSyncHealth.
+  ///
+  /// In am, this message translates to:
+  /// **'የማመሳሰል ጤንነት'**
+  String get adminSyncHealth;
+
+  /// No description provided for @adminSyncHealthyMessage.
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም የማመሳሰል ሂደቶች ጤናማ ናቸው'**
+  String get adminSyncHealthyMessage;
+
+  /// Relative sync time in hours
+  ///
+  /// In am, this message translates to:
+  /// **'ከ{hours} ሰዓታት በፊት'**
+  String adminSyncHoursAgo(String hours);
+
+  /// No description provided for @adminSyncJustNow.
+  ///
+  /// In am, this message translates to:
+  /// **'አሁን'**
+  String get adminSyncJustNow;
+
+  /// Relative sync time in minutes
+  ///
+  /// In am, this message translates to:
+  /// **'ከ{minutes} ደቂቃ በፊት'**
+  String adminSyncMinutesAgo(String minutes);
+
+  /// Relative sync time in months
+  ///
+  /// In am, this message translates to:
+  /// **'ከ{months} ወራት በፊት'**
+  String adminSyncMonthsAgo(String months);
+
+  /// No description provided for @adminSyncNever.
+  ///
+  /// In am, this message translates to:
+  /// **'እስካሁን አልተመሳሰለም'**
+  String get adminSyncNever;
+
+  /// Count of owners with sync problems
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ባለቤቶች ላይ የማመሳሰል መዘግየት ወይም ችግር አለ'**
+  String adminSyncProblemsCount(String count);
+
+  /// No description provided for @adminSystemStatistics.
+  ///
+  /// In am, this message translates to:
+  /// **'አጠቃላይ የስርዓቱ አሃዛዊ መረጃዎች'**
+  String get adminSystemStatistics;
+
+  /// No description provided for @adminTabBrands.
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንዶች'**
+  String get adminTabBrands;
+
+  /// No description provided for @adminTabCategories.
+  ///
+  /// In am, this message translates to:
+  /// **'ምድቦች'**
+  String get adminTabCategories;
+
+  /// No description provided for @adminTabUnits.
+  ///
+  /// In am, this message translates to:
+  /// **'መለኪያዎች'**
+  String get adminTabUnits;
+
+  /// No description provided for @adminTargetOwner.
+  ///
+  /// In am, this message translates to:
+  /// **'ተጠቃሚ'**
+  String get adminTargetOwner;
+
+  /// No description provided for @adminTempPasswordTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ጊዜያዊ የይለፍ ቃል ተፈጥሯል'**
+  String get adminTempPasswordTitle;
+
+  /// No description provided for @adminTempPasswordWarning.
+  ///
+  /// In am, this message translates to:
+  /// **'ይህንን የይለፍ ቃል በጥንቃቄ ለባለቤቱ ያጋሩ። ደግሞ አይታይም!'**
+  String get adminTempPasswordWarning;
+
+  /// No description provided for @adminTenantCountsOnly.
+  ///
+  /// In am, this message translates to:
+  /// **'የስርዓቱ ጠቅላላ ድምር (የተጠቃሚ ዳታ አይታይም)'**
+  String get adminTenantCountsOnly;
+
+  /// No description provided for @adminTenantOverview.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚዎች አጠቃላይ እይታ'**
+  String get adminTenantOverview;
+
+  /// No description provided for @adminTotalOwners.
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ባለቤቶች'**
+  String get adminTotalOwners;
+
+  /// No description provided for @adminTotalPartsCount.
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ዕቃዎች (ድምር)'**
+  String get adminTotalPartsCount;
+
+  /// No description provided for @adminTotalSalesCount.
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ሽያጭ (ድምር)'**
+  String get adminTotalSalesCount;
+
+  /// No description provided for @adminVersionStringLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'የስሪት መለያ ቁጥር (ምሳሌ 1.0.0)'**
+  String get adminVersionStringLabel;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In am, this message translates to:
+  /// **'ኮፒ ተደርጓል'**
+  String get copiedToClipboard;
+
+  /// No description provided for @copy.
+  ///
+  /// In am, this message translates to:
+  /// **'ኮፒ አድርግ'**
+  String get copy;
+
+  /// No description provided for @error.
+  ///
+  /// In am, this message translates to:
+  /// **'ስህተት'**
+  String get error;
+
+  /// No description provided for @logoutConfirmation.
+  ///
+  /// In am, this message translates to:
+  /// **'ከአስተዳዳሪ መለያዎ መውጣት እርግጠኛ ነዎት?'**
+  String get logoutConfirmation;
+
+  /// No description provided for @name.
+  ///
+  /// In am, this message translates to:
+  /// **'ስም'**
+  String get name;
+
+  /// No description provided for @next.
+  ///
+  /// In am, this message translates to:
+  /// **'ቀጣይ'**
+  String get next;
+
+  /// No description provided for @noResultsFound.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም አልተገኘም'**
+  String get noResultsFound;
+
+  /// No description provided for @page.
+  ///
+  /// In am, this message translates to:
+  /// **'ገጽ'**
+  String get page;
+
+  /// No description provided for @previous.
+  ///
+  /// In am, this message translates to:
+  /// **'ቀዳሚ'**
+  String get previous;
+
+  /// No description provided for @required.
+  ///
+  /// In am, this message translates to:
+  /// **'አስፈላጊ'**
+  String get required;
+
+  /// No description provided for @success.
+  ///
+  /// In am, this message translates to:
+  /// **'ተሳክቷል'**
+  String get success;
+
+  /// No description provided for @totalEntries.
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ መዝገቦች'**
+  String get totalEntries;
 }
 
 class _AppLocalizationsDelegate

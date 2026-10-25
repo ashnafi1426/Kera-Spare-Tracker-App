@@ -121,7 +121,7 @@ class AdminScaffold extends ConsumerWidget {
                         color: AppTheme.secondaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
+                      child: const Text(
                         'ADMIN',
                         style: TextStyle(
                           fontSize: 10,

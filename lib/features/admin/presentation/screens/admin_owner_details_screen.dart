@@ -27,7 +27,7 @@ class _AdminOwnerDetailsScreenState
     extends ConsumerState<AdminOwnerDetailsScreen> {
   final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
-  Future<void> _handleSuspend(BuildContext context, String currentReason) async {
+  Future<void> _handleSuspend(String currentReason) async {
     final l10n = AppLocalizations.of(context)!;
     final reasonController = TextEditingController(text: currentReason);
     final formKey = GlobalKey<FormState>();
@@ -97,8 +97,8 @@ class _AdminOwnerDetailsScreenState
             backgroundColor: AppTheme.successColor,
           ),
         );
-        ref.refresh(adminOwnerDetailsProvider(widget.ownerId));
-        ref.read(adminOwnersProvider.notifier).loadOwners();
+        ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
+        await ref.read(adminOwnersProvider.notifier).loadOwners();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -110,7 +110,7 @@ class _AdminOwnerDetailsScreenState
     }
   }
 
-  Future<void> _handleReactivate(BuildContext context) async {
+  Future<void> _handleReactivate() async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -146,8 +146,8 @@ class _AdminOwnerDetailsScreenState
             backgroundColor: AppTheme.successColor,
           ),
         );
-        ref.refresh(adminOwnerDetailsProvider(widget.ownerId));
-        ref.read(adminOwnersProvider.notifier).loadOwners();
+        ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
+        await ref.read(adminOwnersProvider.notifier).loadOwners();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -159,7 +159,7 @@ class _AdminOwnerDetailsScreenState
     }
   }
 
-  Future<void> _handleResetPassword(BuildContext context) async {
+  Future<void> _handleResetPassword() async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -202,9 +202,9 @@ class _AdminOwnerDetailsScreenState
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Theme.of(context).colorScheme.outline),
+                    border: Border.all(color: Theme.of(ctx).colorScheme.outline),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -222,7 +222,7 @@ class _AdminOwnerDetailsScreenState
                         tooltip: l10n.copy,
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: tempPassword));
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          ScaffoldMessenger.of(ctx).showSnackBar(
                             SnackBar(
                               content: Text(l10n.copiedToClipboard),
                               duration: const Duration(seconds: 2),
@@ -243,7 +243,7 @@ class _AdminOwnerDetailsScreenState
             ],
           ),
         );
-        ref.refresh(adminOwnerDetailsProvider(widget.ownerId));
+        ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -255,7 +255,7 @@ class _AdminOwnerDetailsScreenState
     }
   }
 
-  Future<void> _handleEditDetails(BuildContext context, String currentName, String currentPhone) async {
+  Future<void> _handleEditDetails(String currentName, String currentPhone) async {
     final l10n = AppLocalizations.of(context)!;
     final nameController = TextEditingController(text: currentName);
     final phoneController = TextEditingController(text: currentPhone);
@@ -323,8 +323,8 @@ class _AdminOwnerDetailsScreenState
             backgroundColor: AppTheme.successColor,
           ),
         );
-        ref.refresh(adminOwnerDetailsProvider(widget.ownerId));
-        ref.read(adminOwnersProvider.notifier).loadOwners();
+        ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
+        await ref.read(adminOwnersProvider.notifier).loadOwners();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -336,7 +336,7 @@ class _AdminOwnerDetailsScreenState
     }
   }
 
-  Future<void> _handleDisable(BuildContext context, String expectedPhone) async {
+  Future<void> _handleDisable(String expectedPhone) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmController = TextEditingController();
     final formKey = GlobalKey<FormState>();
@@ -408,8 +408,10 @@ class _AdminOwnerDetailsScreenState
             backgroundColor: AppTheme.successColor,
           ),
         );
-        ref.read(adminOwnersProvider.notifier).loadOwners();
-        context.pop();
+        await ref.read(adminOwnersProvider.notifier).loadOwners();
+        if (mounted) {
+          context.pop();
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -603,7 +605,7 @@ class _AdminOwnerDetailsScreenState
                           backgroundColor: AppTheme.errorColor,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () => _handleSuspend(context, owner.suspendedReason ?? ''),
+                        onPressed: () => _handleSuspend(owner.suspendedReason ?? ''),
                         icon: const Icon(Icons.block_rounded, size: 18),
                         label: Text(l10n.adminSuspend),
                       )
@@ -613,17 +615,17 @@ class _AdminOwnerDetailsScreenState
                           backgroundColor: AppTheme.successColor,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: () => _handleReactivate(context),
+                        onPressed: _handleReactivate,
                         icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
                         label: Text(l10n.adminReactivate),
                       ),
                     OutlinedButton.icon(
-                      onPressed: () => _handleResetPassword(context),
+                      onPressed: _handleResetPassword,
                       icon: const Icon(Icons.lock_reset_rounded, size: 18),
                       label: Text(l10n.adminResetPassword),
                     ),
                     OutlinedButton.icon(
-                      onPressed: () => _handleEditDetails(context, owner.businessName, owner.phoneNumber),
+                      onPressed: () => _handleEditDetails(owner.businessName, owner.phoneNumber),
                       icon: const Icon(Icons.edit_rounded, size: 18),
                       label: Text(l10n.editProfile),
                     ),
@@ -632,7 +634,7 @@ class _AdminOwnerDetailsScreenState
                         foregroundColor: AppTheme.errorColor,
                         side: const BorderSide(color: AppTheme.errorColor),
                       ),
-                      onPressed: () => _handleDisable(context, owner.phoneNumber),
+                      onPressed: () => _handleDisable(owner.phoneNumber),
                       icon: const Icon(Icons.delete_forever_rounded, size: 18),
                       label: Text(l10n.adminDisableAccount),
                     ),
@@ -659,7 +661,7 @@ class _AdminOwnerDetailsScreenState
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: details.auditLogs.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (ctx, i) {
                         final log = details.auditLogs[i];
                         return ListTile(

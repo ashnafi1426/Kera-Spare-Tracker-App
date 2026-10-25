@@ -33,7 +33,6 @@ class _AdminGlobalCatalogScreenState
   }
 
   Future<void> _showAddDialog({
-    required BuildContext context,
     required String title,
     required Future<bool> Function(String name) onAdd,
   }) async {
@@ -88,7 +87,6 @@ class _AdminGlobalCatalogScreenState
   }
 
   Future<void> _showRenameDialog({
-    required BuildContext context,
     required String currentName,
     required Future<bool> Function(String newName) onRename,
   }) async {
@@ -169,14 +167,12 @@ class _AdminGlobalCatalogScreenState
                 _CatalogListView(
                   items: catalogState.brands,
                   onAdd: () => _showAddDialog(
-                    context: context,
                     title: l10n.adminAddBrand,
                     onAdd: notifier.addBrand,
                   ),
                   onToggleActive: (item, val) =>
                       notifier.updateBrand(item.id, isActive: val),
                   onRename: (item) => _showRenameDialog(
-                    context: context,
                     currentName: item.name,
                     onRename: (newName) =>
                         notifier.updateBrand(item.id, name: newName),
@@ -187,14 +183,12 @@ class _AdminGlobalCatalogScreenState
                 _CatalogListView(
                   items: catalogState.categories,
                   onAdd: () => _showAddDialog(
-                    context: context,
                     title: l10n.adminAddCategory,
                     onAdd: notifier.addCategory,
                   ),
                   onToggleActive: (item, val) =>
                       notifier.updateCategory(item.id, isActive: val),
                   onRename: (item) => _showRenameDialog(
-                    context: context,
                     currentName: item.name,
                     onRename: (newName) =>
                         notifier.updateCategory(item.id, name: newName),
@@ -205,14 +199,12 @@ class _AdminGlobalCatalogScreenState
                 _CatalogListView(
                   items: catalogState.units,
                   onAdd: () => _showAddDialog(
-                    context: context,
                     title: l10n.adminAddUnit,
                     onAdd: notifier.addUnit,
                   ),
                   onToggleActive: (item, val) =>
                       notifier.updateUnit(item.id, isActive: val),
                   onRename: (item) => _showRenameDialog(
-                    context: context,
                     currentName: item.name,
                     onRename: (newName) =>
                         notifier.updateUnit(item.id, name: newName),
@@ -270,7 +262,7 @@ class _CatalogListView extends StatelessWidget {
               : ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 6),
+                  separatorBuilder: (_, _) => const SizedBox(height: 6),
                   itemBuilder: (ctx, index) {
                     final item = items[index];
                     return Card(

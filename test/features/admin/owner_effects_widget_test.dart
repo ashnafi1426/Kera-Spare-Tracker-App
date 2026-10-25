@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/providers/app_config_provider.dart';
+import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 import 'package:kera_spare_tracker/core/services/app_config_service.dart';
 import 'package:kera_spare_tracker/core/widgets/announcement_banner_widget.dart';
 import 'package:kera_spare_tracker/core/widgets/maintenance_banner_widget.dart';
@@ -12,8 +13,6 @@ import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_c
 import 'package:kera_spare_tracker/features/auth/presentation/screens/change_password_screen.dart';
 import 'package:kera_spare_tracker/features/splash/presentation/update_required_screen.dart';
 import 'package:kera_spare_tracker/l10n/app_localizations.dart';
-
-import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 
 Widget createTestableWidget({
   required Widget child,

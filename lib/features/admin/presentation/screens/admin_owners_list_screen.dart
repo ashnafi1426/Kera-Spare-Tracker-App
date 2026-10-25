@@ -165,7 +165,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                             child: ListView.separated(
                               padding: const EdgeInsets.all(16),
                               itemCount: state.owners.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 10),
+                              separatorBuilder: (_, _) => const SizedBox(height: 10),
                               itemBuilder: (ctx, index) {
                                 final owner = state.owners[index];
                                 return _OwnerCard(

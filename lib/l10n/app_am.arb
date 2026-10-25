@@ -1,918 +1,1498 @@
 {
   "@@locale": "am",
-
   "appName": "የቄራ መለዋወጫ መከታተያ",
   "@appName": {
     "description": "Application display name"
   },
-
   "appSubtitle": "የመለዋወጫ ዕቃዎች እና የሽያጭ አስተዳደር",
   "@appSubtitle": {
     "description": "Application tagline/subtitle"
   },
-
   "splashLoading": "ዕቃዎችን በመጫን ላይ...",
   "@splashLoading": {
     "description": "Splash loading message"
   },
-
   "offlineBadge": "ኦፍላይን ይሰራል",
   "@offlineBadge": {
     "description": "Offline-first capability badge"
   },
-
   "save": "አስቀምጥ",
   "@save": {
     "description": "Save action button"
   },
-
   "cancel": "ሰርዝ",
   "@cancel": {
     "description": "Cancel action button"
   },
-
   "delete": "አጥፋ",
   "@delete": {
     "description": "Delete action button"
   },
-
   "edit": "አስተካክል",
   "@edit": {
     "description": "Edit action button"
   },
-
   "search": "ፈልግ",
   "@search": {
     "description": "Search action button or placeholder"
   },
-
   "retry": "እንደገና ሞክር",
   "@retry": {
     "description": "Retry action button"
   },
-
   "filter": "አጣራ",
   "@filter": {
-    "description": "Filter action button"
+    "description": "Filter button"
   },
-
   "add": "አዲስ ጨምር",
   "@add": {
     "description": "Add new item action button"
   },
-
   "back": "ተመለስ",
   "@back": {
     "description": "Back navigation button"
   },
-
   "close": "ዝጋ",
   "@close": {
     "description": "Close modal or screen button"
   },
-
   "confirm": "አረጋግጥ",
   "@confirm": {
     "description": "Confirm action button"
   },
-
   "refresh": "አድስ",
   "@refresh": {
     "description": "Refresh data action button"
   },
-
   "done": "ተጠናቋል",
   "@done": {
     "description": "Done action button"
   },
-
   "navParts": "መለዋወጫዎች",
   "@navParts": {
     "description": "Navigation label for parts inventory"
   },
-
   "navSales": "ሽያጮች",
   "@navSales": {
     "description": "Navigation label for sales"
   },
-
   "navStock": "ስቶክ",
   "@navStock": {
     "description": "Navigation label for stock"
   },
-
   "navReports": "ሪፖርቶች",
   "@navReports": {
     "description": "Navigation label for reports"
   },
-
   "navSettings": "ቅንብሮች",
   "@navSettings": {
     "description": "Navigation label for settings"
   },
-
   "navAdmin": "አድሚን",
   "@navAdmin": {
     "description": "Navigation label for admin"
   },
-
   "phoneRequired": "ስልክ ቁጥር ማስገባት ግዴታ ነው",
   "@phoneRequired": {
     "description": "Validation error when phone is empty"
   },
-
   "phoneInvalid": "ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ 09... ወይም 07...)",
   "@phoneInvalid": {
     "description": "Validation error for invalid Ethiopian phone number"
   },
-
   "passwordRequired": "የይለፍ ቃል ማስገባት ግዴታ ነው",
   "@passwordRequired": {
     "description": "Validation error when password is empty"
   },
-
-  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ፊደላት/ቁጥሮች መሆን አለበት",
+  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት",
   "@passwordTooShort": {
-    "description": "Validation error when password is under 6 characters"
+    "description": "Password too short error"
   },
-
   "fieldRequired": "ይህ ቦታ መሞላት አለበት",
   "@fieldRequired": {
     "description": "Generic required field validation error"
   },
-
   "quantityRequired": "ብዛት ማስገባት ግዴታ ነው",
   "@quantityRequired": {
     "description": "Validation error when quantity is empty"
   },
-
   "quantityPositive": "ብዛት ከ 0 በላይ መሆን አለበት",
   "@quantityPositive": {
     "description": "Validation error when quantity is zero or negative"
   },
-
   "priceRequired": "ዋጋ ማስገባት ግዴታ ነው",
   "@priceRequired": {
     "description": "Validation error when price is empty"
   },
-
   "priceInvalid": "ዋጋ 0 ወይም ከዚያ በላይ መሆን አለበት",
   "@priceInvalid": {
     "description": "Validation error when price is negative"
   },
-
   "noDataTitle": "ምንም መረጃ አልተገኘም",
   "@noDataTitle": {
     "description": "Empty state title when list is empty"
   },
-
   "noDataDesc": "እስካሁን የተመዘገበ መረጃ የለም",
   "@noDataDesc": {
     "description": "Empty state description"
   },
-
   "noPartsFound": "ምንም የተመዘገበ መለዋወጫ የለም",
   "@noPartsFound": {
     "description": "Empty state title for parts catalog"
   },
-
   "noPartsDesc": "አዲስ መለዋወጫ ዕቃ ለማስገባት '+' ይጫኑ",
   "@noPartsDesc": {
     "description": "Empty state instruction for adding first part"
   },
-
   "noSalesFound": "ምንም የሽያጭ መረጃ የለም",
   "@noSalesFound": {
     "description": "Empty state title for sales list"
   },
-
   "noSalesDesc": "እስካሁን የተከናወነ ሽያጭ አልተመዘገበም",
   "@noSalesDesc": {
     "description": "Empty state description for sales"
   },
-
   "noStockMovements": "ምንም የስቶክ እንቅስቃሴ አልተገኘም",
   "@noStockMovements": {
     "description": "Empty state title for stock ledger"
   },
-
   "language": "ቋንቋ",
   "@language": {
     "description": "Language label"
   },
-
   "selectLanguage": "ቋንቋ ይምረጡ",
   "@selectLanguage": {
     "description": "Prompt to select application language"
   },
-
   "amharic": "አማርኛ",
   "@amharic": {
     "description": "Amharic language name"
   },
-
   "english": "English",
   "@english": {
     "description": "English language name"
   },
-
   "languageChangedNotice": "ቋንቋ ወደ አማርኛ ተቀይሯል",
   "@languageChangedNotice": {
     "description": "Notice shown when language changes"
   },
-
   "login": "ግባ",
   "@login": {
     "description": "Log In button"
   },
-
   "register": "ይመዝገቡ",
   "@register": {
     "description": "Register button"
   },
-
   "logout": "ውጣ",
   "@logout": {
     "description": "Log Out button"
   },
-
   "logoutConfirmTitle": "ከመተግበሪያው መውጣት ይፈልጋሉ?",
   "@logoutConfirmTitle": {
     "description": "Logout confirmation title"
   },
-
   "logoutConfirmMessage": "እንደገና ለመግባት ስልክ ቁጥርዎን እና የይለፍ ቃልዎን ማስገባት ያስፈልግዎታል::",
   "@logoutConfirmMessage": {
     "description": "Logout confirmation message"
   },
-
   "phoneNumber": "ስልክ ቁጥር",
   "@phoneNumber": {
     "description": "Phone number label"
   },
-
   "phoneNumberHint": "09XXXXXXXX ወይም 07XXXXXXXX",
   "@phoneNumberHint": {
     "description": "Phone number hint"
   },
-
   "businessName": "የንግድ ስም",
   "@businessName": {
     "description": "Business name label"
   },
-
   "businessNameHint": "ለምሳሌ ቄራ መለዋወጫ መደብር",
   "@businessNameHint": {
     "description": "Business name hint"
   },
-
   "businessNameRequired": "የንግድ ስም ማስገባት ግዴታ ነው",
   "@businessNameRequired": {
     "description": "Business name validation error"
   },
-
   "password": "የይለፍ ቃል",
   "@password": {
     "description": "Password label"
   },
-
   "passwordHint": "ቢያንስ 6 ፊደላት ወይም ቁጥሮች",
   "@passwordHint": {
     "description": "Password hint"
   },
-
   "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
   "@confirmPassword": {
     "description": "Confirm password label"
   },
-
   "passwordsDoNotMatch": "የይለፍ ቃሎች አይመሳሰሉም",
   "@passwordsDoNotMatch": {
     "description": "Passwords mismatch validation error"
   },
-
   "alreadyHaveAccount": "ቀደም ሲል መለያ አለዎት? ይግቡ",
   "@alreadyHaveAccount": {
     "description": "Prompt for users with existing accounts"
   },
-
   "dontHaveAccount": "አዲስ ነዎት? ይመዝገቡ",
   "@dontHaveAccount": {
     "description": "Prompt for new users to register"
   },
-
   "loginTitle": "ወደ መለያዎ ይግቡ",
   "@loginTitle": {
     "description": "Login screen title"
   },
-
   "loginSubtitle": "የመለዋወጫ ዕቃዎችዎን እና ሽያጭዎን ለማስተዳደር ይግቡ",
   "@loginSubtitle": {
     "description": "Login screen subtitle"
   },
-
   "registerTitle": "አዲስ የንግድ መለያ ይክፈቱ",
   "@registerTitle": {
     "description": "Register screen title"
   },
-
   "registerSubtitle": "በቀላሉ እና ያለ ኢንተርኔት ዕቃዎን ይከታተሉ",
   "@registerSubtitle": {
     "description": "Register screen subtitle"
   },
-
   "homeTitle": "ዋና ገጽ",
   "@homeTitle": {
     "description": "Home title"
   },
-
   "welcomeUser": "እንኳን ደህና መጡ",
   "@welcomeUser": {
     "description": "Welcome message"
   },
-
   "inventoryTab": "ዕቃዎች",
   "@inventoryTab": {
     "description": "Bottom nav inventory tab"
   },
-
   "salesTab": "ሽያጭ",
   "@salesTab": {
     "description": "Bottom nav sales tab"
   },
-
   "reportsTab": "ሪፖርት",
   "@reportsTab": {
     "description": "Bottom nav reports tab"
   },
-
   "settingsTab": "ቅንብሮች",
   "@settingsTab": {
     "description": "Bottom nav settings tab"
   },
-
   "businessProfile": "የንግድ መገለጫ",
   "@businessProfile": {
     "description": "Business profile section header"
   },
-
   "offlineStatusNotice": "ሁሉም መረጃዎች በስልክዎ ላይ ተቀምጠዋል::",
   "@offlineStatusNotice": {
     "description": "Offline data indicator notice"
   },
-
   "brandsTitle": "ብራንዶች",
-  "@brandsTitle": { "description": "Brands management title" },
+  "@brandsTitle": {
+    "description": "Brands management title"
+  },
   "categoriesTitle": "ምድቦች",
-  "@categoriesTitle": { "description": "Categories management title" },
+  "@categoriesTitle": {
+    "description": "Categories management title"
+  },
   "locationsTitle": "የማስቀመጫ ቦታዎች",
-  "@locationsTitle": { "description": "Storage locations management title" },
+  "@locationsTitle": {
+    "description": "Storage locations management title"
+  },
   "manageBrandsDesc": "መደበኛ እና የራስዎን የዕቃ ብራንዶች ያስተዳድሩ",
-  "@manageBrandsDesc": { "description": "Description for brands settings tile" },
+  "@manageBrandsDesc": {
+    "description": "Description for brands settings tile"
+  },
   "manageCategoriesDesc": "ዕቃዎችን በተለያዩ ምድቦች ያደራጁ",
-  "@manageCategoriesDesc": { "description": "Description for categories settings tile" },
+  "@manageCategoriesDesc": {
+    "description": "Description for categories settings tile"
+  },
   "manageLocationsDesc": "መደርደሪያዎች እና የተለዩ የማስቀመጫ ቦታዎች",
-  "@manageLocationsDesc": { "description": "Description for locations settings tile" },
+  "@manageLocationsDesc": {
+    "description": "Description for locations settings tile"
+  },
   "globalDefaultBadge": "መደበኛ",
-  "@globalDefaultBadge": { "description": "Badge for global default system items" },
+  "@globalDefaultBadge": {
+    "description": "Badge for global default system items"
+  },
   "customBadge": "የራስዎ",
-  "@customBadge": { "description": "Badge for owner-created items" },
+  "@customBadge": {
+    "description": "Badge for owner-created items"
+  },
   "addBrand": "አዲስ ብራንድ ጨምር",
-  "@addBrand": { "description": "Add brand button label" },
+  "@addBrand": {
+    "description": "Add brand button label"
+  },
   "editBrand": "ብራንድ አስተካክል",
-  "@editBrand": { "description": "Edit brand title" },
+  "@editBrand": {
+    "description": "Edit brand title"
+  },
   "deactivateBrand": "ብራንድ አቦዝን",
-  "@deactivateBrand": { "description": "Deactivate brand action" },
+  "@deactivateBrand": {
+    "description": "Deactivate brand action"
+  },
   "deactivateConfirmTitle": "ዕቃውን ማቦዘን ይፈልጋሉ?",
-  "@deactivateConfirmTitle": { "description": "Deactivate confirmation dialog title" },
+  "@deactivateConfirmTitle": {
+    "description": "Deactivate confirmation dialog title"
+  },
   "deactivateConfirmMessage": "ይህ ዕቃ ከዚህ በኋላ በምርጫ ዝርዝር ውስጥ አይታይም።",
-  "@deactivateConfirmMessage": { "description": "Deactivate confirmation dialog message" },
+  "@deactivateConfirmMessage": {
+    "description": "Deactivate confirmation dialog message"
+  },
   "deactivate": "አቦዝን",
-  "@deactivate": { "description": "Deactivate button text" },
+  "@deactivate": {
+    "description": "Deactivate button text"
+  },
   "brandName": "የብራንድ ስም",
-  "@brandName": { "description": "Brand name field label" },
+  "@brandName": {
+    "description": "Brand name field label"
+  },
   "brandNameHint": "ለምሳሌ፦ ቶዮታ፣ ካት፣ ፐርኪንስ...",
-  "@brandNameHint": { "description": "Brand name input hint" },
+  "@brandNameHint": {
+    "description": "Brand name input hint"
+  },
   "addCategory": "አዲስ ምድብ ጨምር",
-  "@addCategory": { "description": "Add category button label" },
+  "@addCategory": {
+    "description": "Add category button label"
+  },
   "editCategory": "ምድብ አስተካክል",
-  "@editCategory": { "description": "Edit category title" },
+  "@editCategory": {
+    "description": "Edit category title"
+  },
   "deactivateCategory": "ምድብ አቦዝን",
-  "@deactivateCategory": { "description": "Deactivate category action" },
+  "@deactivateCategory": {
+    "description": "Deactivate category action"
+  },
   "categoryName": "የምድብ ስም",
-  "@categoryName": { "description": "Category name field label" },
+  "@categoryName": {
+    "description": "Category name field label"
+  },
   "categoryNameHint": "ለምሳሌ፦ ሞተር፣ ሃይድሮሊክ፣ ትራንስሚሽን...",
-  "@categoryNameHint": { "description": "Category name input hint" },
+  "@categoryNameHint": {
+    "description": "Category name input hint"
+  },
   "addLocation": "አዲስ ቦታ ጨምር",
-  "@addLocation": { "description": "Add location button label" },
+  "@addLocation": {
+    "description": "Add location button label"
+  },
   "editLocation": "የማስቀመጫ ቦታ አስተካክል",
-  "@editLocation": { "description": "Edit location title" },
+  "@editLocation": {
+    "description": "Edit location title"
+  },
   "deactivateLocation": "የማስቀመጫ ቦታ አቦዝን",
-  "@deactivateLocation": { "description": "Deactivate location action" },
+  "@deactivateLocation": {
+    "description": "Deactivate location action"
+  },
   "locationName": "የመደርደሪያ ወይም የቦታ ስም",
-  "@locationName": { "description": "Location name field label" },
+  "@locationName": {
+    "description": "Location name field label"
+  },
   "locationNameHint": "ለምሳሌ፦ መደርደሪያ 6፣ ሳጥን ሀ...",
-  "@locationNameHint": { "description": "Location name input hint" },
+  "@locationNameHint": {
+    "description": "Location name input hint"
+  },
   "duplicateNameError": "በዚህ ስም አስቀድሞ የተመዘገበ ዕቃ አለ",
-  "@duplicateNameError": { "description": "Error when name already exists" },
+  "@duplicateNameError": {
+    "description": "Error when name already exists"
+  },
   "cannotModifyDefault": "መደበኛ ዕቃዎችን ማስተካከል ወይም ማቦዘን አይቻልም",
-  "@cannotModifyDefault": { "description": "Error message when attempting to modify default items" },
+  "@cannotModifyDefault": {
+    "description": "Error message when attempting to modify default items"
+  },
   "selectBrand": "ብራንድ ይምረጡ",
-  "@selectBrand": { "description": "Select brand picker title" },
+  "@selectBrand": {
+    "description": "Select brand picker title"
+  },
   "selectCategory": "ምድብ ይምረጡ",
-  "@selectCategory": { "description": "Select category picker title" },
+  "@selectCategory": {
+    "description": "Select category picker title"
+  },
   "selectLocation": "የማስቀመጫ ቦታ ይምረጡ",
-  "@selectLocation": { "description": "Select location picker title" },
+  "@selectLocation": {
+    "description": "Select location picker title"
+  },
   "noBrandsFound": "ምንም ብራንድ አልተገኘም",
-  "@noBrandsFound": { "description": "Empty state text for brands" },
+  "@noBrandsFound": {
+    "description": "Empty state text for brands"
+  },
   "noCategoriesFound": "ምንም ምድብ አልተገኘም",
-  "@noCategoriesFound": { "description": "Empty state text for categories" },
+  "@noCategoriesFound": {
+    "description": "Empty state text for categories"
+  },
   "noLocationsFound": "ምንም የማስቀመጫ ቦታ አልተገኘም",
-  "@noLocationsFound": { "description": "Empty state text for locations" },
+  "@noLocationsFound": {
+    "description": "Empty state text for locations"
+  },
   "searchBrands": "ብራንድ ይፈልጉ...",
-  "@searchBrands": { "description": "Search brands field hint" },
+  "@searchBrands": {
+    "description": "Search brands field hint"
+  },
   "searchCategories": "ምድብ ይፈልጉ...",
-  "@searchCategories": { "description": "Search categories field hint" },
+  "@searchCategories": {
+    "description": "Search categories field hint"
+  },
   "searchLocations": "የማስቀመጫ ቦታ ይፈልጉ...",
-  "@searchLocations": { "description": "Search locations field hint" },
+  "@searchLocations": {
+    "description": "Search locations field hint"
+  },
   "quickAddNew": "አዲስ ጨምር",
-  "@quickAddNew": { "description": "Quick add new button in picker" },
-
+  "@quickAddNew": {
+    "description": "Quick add new button in picker"
+  },
   "addPart": "አዲስ የመለዋወጫ ዕቃ መዝግብ",
-  "@addPart": { "description": "Add spare part screen title and button" },
+  "@addPart": {
+    "description": "Add spare part screen title and button"
+  },
   "editPart": "የመለዋወጫ ዕቃውን አስተካክል",
-  "@editPart": { "description": "Edit spare part screen title" },
+  "@editPart": {
+    "description": "Edit spare part screen title"
+  },
   "partDetails": "የዕቃው ዝርዝር መረጃ",
-  "@partDetails": { "description": "Part details screen title" },
+  "@partDetails": {
+    "description": "Part details screen title"
+  },
   "partName": "የዕቃው ስም",
-  "@partName": { "description": "Part name field label" },
+  "@partName": {
+    "description": "Part name field label"
+  },
   "partNameHint": "ለምሳሌ፦ ሃይድሮሊክ ፓምፕ፣ የዘይት ፊልተር...",
-  "@partNameHint": { "description": "Part name input hint" },
+  "@partNameHint": {
+    "description": "Part name input hint"
+  },
   "partNumber": "የዕቃ መለያ ቁጥር (Part No)",
-  "@partNumber": { "description": "Part number field label" },
+  "@partNumber": {
+    "description": "Part number field label"
+  },
   "partNumberHint": "ለምሳሌ፦ 1R-0716፣ 9T-0988...",
-  "@partNumberHint": { "description": "Part number input hint" },
+  "@partNumberHint": {
+    "description": "Part number input hint"
+  },
   "brand": "ብራንድ",
-  "@brand": { "description": "Brand label" },
+  "@brand": {
+    "description": "Brand label"
+  },
   "category": "ምድብ",
-  "@category": { "description": "Category label" },
+  "@category": {
+    "description": "Category label"
+  },
   "storageLocation": "የማስቀመጫ መደርደሪያ / ቦታ",
-  "@storageLocation": { "description": "Storage location label" },
+  "@storageLocation": {
+    "description": "Storage location label"
+  },
   "customLocation": "የተለየ የማስቀመጫ ቦታ",
-  "@customLocation": { "description": "Custom spot label" },
+  "@customLocation": {
+    "description": "Custom spot label"
+  },
   "customLocationHint": "ለምሳሌ፦ የላይኛው ሳጥን፣ ጥግ ላይ...",
-  "@customLocationHint": { "description": "Custom spot input hint" },
+  "@customLocationHint": {
+    "description": "Custom spot input hint"
+  },
   "description": "ተጨማሪ ማብራሪያ",
-  "@description": { "description": "Description field label" },
+  "@description": {
+    "description": "Description field label"
+  },
   "descriptionHint": "ስለ ዕቃው አጭር መግለጫ...",
-  "@descriptionHint": { "description": "Description input hint" },
+  "@descriptionHint": {
+    "description": "Description input hint"
+  },
   "unit": "መለኪያ",
-  "@unit": { "description": "Unit field label" },
+  "@unit": {
+    "description": "Unit field label"
+  },
   "unitHint": "ለምሳሌ፦ ፍሬ፣ ሴት፣ ሜትር፣ ሊትር...",
-  "@unitHint": { "description": "Unit input hint" },
+  "@unitHint": {
+    "description": "Unit input hint"
+  },
   "quantityInStock": "በክምችት ያለ ብዛት",
-  "@quantityInStock": { "description": "Quantity field label" },
+  "@quantityInStock": {
+    "description": "Quantity field label"
+  },
   "purchasePrice": "የግዢ ዋጋ (ብር)",
-  "@purchasePrice": { "description": "Purchase price field label" },
+  "@purchasePrice": {
+    "description": "Purchase price field label"
+  },
   "sellingPrice": "የመሸጫ ዋጋ (ብር)",
-  "@sellingPrice": { "description": "Selling price field label" },
-  "estimatedProfit": "በነጠላ የሚገኝ ትርፍ",
-  "@estimatedProfit": { "description": "Estimated profit label" },
+  "@sellingPrice": {
+    "description": "Selling price field label"
+  },
+  "estimatedProfit": "የተገመተ ትርፍ",
+  "@estimatedProfit": {
+    "description": "Estimated profit metric"
+  },
   "sizeSpecs": "መጠን ወይም ዝርዝር መረጃ",
-  "@sizeSpecs": { "description": "Size and specs label" },
+  "@sizeSpecs": {
+    "description": "Size and specs label"
+  },
   "sizeSpecsHint": "ለምሳሌ፦ 10 ሚሜ፣ 24 ቮልት...",
-  "@sizeSpecsHint": { "description": "Size and specs input hint" },
+  "@sizeSpecsHint": {
+    "description": "Size and specs input hint"
+  },
   "notes": "የግል ማስታወሻ",
-  "@notes": { "description": "Internal notes label" },
+  "@notes": {
+    "description": "Internal notes label"
+  },
   "notesHint": "ተጨማሪ የግል ማስታወሻ...",
-  "@notesHint": { "description": "Internal notes input hint" },
+  "@notesHint": {
+    "description": "Internal notes input hint"
+  },
   "takePhoto": "ፎቶ አንሳ",
-  "@takePhoto": { "description": "Take photo action" },
+  "@takePhoto": {
+    "description": "Take photo action"
+  },
   "chooseFromGallery": "ከጋለሪ ምረጥ",
-  "@chooseFromGallery": { "description": "Choose from gallery action" },
+  "@chooseFromGallery": {
+    "description": "Choose from gallery action"
+  },
   "removePhoto": "ፎቶውን አስወግድ",
-  "@removePhoto": { "description": "Remove photo action" },
+  "@removePhoto": {
+    "description": "Remove photo action"
+  },
   "unsavedChangesTitle": "ያልተቀመጡ ለውጦች",
-  "@unsavedChangesTitle": { "description": "Unsaved changes dialog title" },
+  "@unsavedChangesTitle": {
+    "description": "Unsaved changes dialog title"
+  },
   "unsavedChangesMessage": "ያልተቀመጡ ለውጦች አሉ። ገጹን መተው ይፈልጋሉ?",
-  "@unsavedChangesMessage": { "description": "Unsaved changes dialog message" },
+  "@unsavedChangesMessage": {
+    "description": "Unsaved changes dialog message"
+  },
   "discard": "ተወው",
-  "@discard": { "description": "Discard changes button" },
+  "@discard": {
+    "description": "Discard changes button"
+  },
   "keepEditing": "ማረም ቀጥል",
-  "@keepEditing": { "description": "Keep editing button" },
+  "@keepEditing": {
+    "description": "Keep editing button"
+  },
   "deletePart": "ዕቃውን አጥፋ",
-  "@deletePart": { "description": "Delete part action" },
+  "@deletePart": {
+    "description": "Delete part action"
+  },
   "deletePartConfirmTitle": "ይህንን ዕቃ መሰረዝ ይፈልጋሉ?",
-  "@deletePartConfirmTitle": { "description": "Delete part confirmation title" },
+  "@deletePartConfirmTitle": {
+    "description": "Delete part confirmation title"
+  },
   "deletePartConfirmMessage": "ዕቃው ከክምችት ይሰረዛል። ከዚህ በፊት የተመዘገቡ የሽያጭ መረጃዎች አይነኩም።",
-  "@deletePartConfirmMessage": { "description": "Delete part confirmation message" },
+  "@deletePartConfirmMessage": {
+    "description": "Delete part confirmation message"
+  },
   "partSavedSuccess": "የመለዋወጫ ዕቃው በተሳካ ሁኔታ ተቀምጧል",
-  "@partSavedSuccess": { "description": "Part saved success message" },
+  "@partSavedSuccess": {
+    "description": "Part saved success message"
+  },
   "partDeletedSuccess": "የመለዋወጫ ዕቃው ተሰርዟል",
-  "@partDeletedSuccess": { "description": "Part deleted success message" },
+  "@partDeletedSuccess": {
+    "description": "Part deleted success message"
+  },
   "negativeNumberError": "ዋጋው ወይም ብዛቱ ከዜሮ በታች ሊሆን አይችልም",
-  "@negativeNumberError": { "description": "Negative number validation error" },
+  "@negativeNumberError": {
+    "description": "Negative number validation error"
+  },
   "noPhoto": "ፎቶ የለም",
-  "@noPhoto": { "description": "No photo placeholder label" },
+  "@noPhoto": {
+    "description": "No photo placeholder label"
+  },
   "stockStatus": "የክምችት ሁኔታ",
-  "@stockStatus": { "description": "Stock status label" },
+  "@stockStatus": {
+    "description": "Stock status label"
+  },
   "inStock": "ክምችት አለ",
-  "@inStock": { "description": "In stock badge text" },
+  "@inStock": {
+    "description": "In stock badge text"
+  },
   "outOfStock": "ያለቀ",
-  "@outOfStock": { "description": "Out of stock badge text" },
+  "@outOfStock": {
+    "description": "Out of stock badge text"
+  },
   "lowStock": "አነስተኛ ክምችት",
-  "@lowStock": { "description": "Low stock badge text" },
+  "@lowStock": {
+    "description": "Low stock badge text"
+  },
   "searchHint": "በስም፣ በፓርት ቁጥር፣ ብራንድ፣ ምድብ፣ መደርደሪያ ፈልግ...",
-  "@searchHint": { "description": "Inventory search bar placeholder" },
+  "@searchHint": {
+    "description": "Inventory search bar placeholder"
+  },
   "filters": "ማጣሪያዎች",
-  "@filters": { "description": "Filters dialog title" },
-  "filter": "አጣራ",
-  "@filter": { "description": "Filter button" },
+  "@filters": {
+    "description": "Filters dialog title"
+  },
   "sortBy": "ቅደም ተከተል",
-  "@sortBy": { "description": "Sort by label" },
+  "@sortBy": {
+    "description": "Sort by label"
+  },
   "sortName": "በስም (A - Z)",
-  "@sortName": { "description": "Sort by name option" },
+  "@sortName": {
+    "description": "Sort by name option"
+  },
   "sortNewest": "አዳዲስ መጀመሪያ",
-  "@sortNewest": { "description": "Sort by newest option" },
+  "@sortNewest": {
+    "description": "Sort by newest option"
+  },
   "sortQuantityHigh": "ብዛት (ከፍተኛ)",
-  "@sortQuantityHigh": { "description": "Sort by quantity descending" },
+  "@sortQuantityHigh": {
+    "description": "Sort by quantity descending"
+  },
   "sortQuantityLow": "ብዛት (ዝቅተኛ)",
-  "@sortQuantityLow": { "description": "Sort by quantity ascending" },
+  "@sortQuantityLow": {
+    "description": "Sort by quantity ascending"
+  },
   "sortPriceHigh": "ዋጋ (ከፍተኛ)",
-  "@sortPriceHigh": { "description": "Sort by price descending" },
+  "@sortPriceHigh": {
+    "description": "Sort by price descending"
+  },
   "sortPriceLow": "ዋጋ (ዝቅተኛ)",
-  "@sortPriceLow": { "description": "Sort by price ascending" },
+  "@sortPriceLow": {
+    "description": "Sort by price ascending"
+  },
   "filterAll": "ሁሉም",
-  "@filterAll": { "description": "All filter option" },
+  "@filterAll": {
+    "description": "All filter option"
+  },
   "filterInStock": "ክምችት ያለው",
-  "@filterInStock": { "description": "In stock filter chip" },
+  "@filterInStock": {
+    "description": "In stock filter chip"
+  },
   "filterLowStock": "አነስተኛ ክምችት",
-  "@filterLowStock": { "description": "Low stock filter chip" },
+  "@filterLowStock": {
+    "description": "Low stock filter chip"
+  },
   "filterOutOfStock": "ያለቀ",
-  "@filterOutOfStock": { "description": "Out of stock filter chip" },
+  "@filterOutOfStock": {
+    "description": "Out of stock filter chip"
+  },
   "resetFilters": "አጽዳ",
-  "@resetFilters": { "description": "Reset filters button" },
+  "@resetFilters": {
+    "description": "Reset filters button"
+  },
   "applyFilters": "ተግብር",
-  "@applyFilters": { "description": "Apply filters button" },
+  "@applyFilters": {
+    "description": "Apply filters button"
+  },
   "activeFiltersCount": "{count} ማጣሪያዎች ተመርጠዋል",
   "@activeFiltersCount": {
     "description": "Active filters count badge",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "totalPartsCount": "{count} ዕቃዎች",
   "@totalPartsCount": {
     "description": "Total parts count indicator",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noFilteredPartsTitle": "ምንም የተገኘ ዕቃ የለም",
-  "@noFilteredPartsTitle": { "description": "No matching parts found title" },
+  "@noFilteredPartsTitle": {
+    "description": "No matching parts found title"
+  },
   "noFilteredPartsDesc": "እባክዎ የፍለጋ ቃልዎን ወይም ማጣሪያዎችን ይቀይሩ",
-  "@noFilteredPartsDesc": { "description": "No matching parts found description" },
+  "@noFilteredPartsDesc": {
+    "description": "No matching parts found description"
+  },
   "seedParts": "2,000 የሙከራ ዕቃዎችን ፍጠር",
-  "@seedParts": { "description": "Seed test parts title" },
+  "@seedParts": {
+    "description": "Seed test parts title"
+  },
   "seedPartsDesc": "ለፍጥነት እና አፈፃፀም መፈተሻ 2,000 የመለዋወጫ ዕቃዎችን በቅጽበት ይፈጥራል",
-  "@seedPartsDesc": { "description": "Seed test parts description" },
+  "@seedPartsDesc": {
+    "description": "Seed test parts description"
+  },
   "seedingInProgress": "2,000 ዕቃዎች እየተፈጠሩ ነው...",
-  "@seedingInProgress": { "description": "Seeding in progress snackbar" },
+  "@seedingInProgress": {
+    "description": "Seeding in progress snackbar"
+  },
   "seedSuccess": "2,000 የሙከራ ዕቃዎች በተሳካ ሁኔታ ተፈጥረዋል!",
-  "@seedSuccess": { "description": "Seeding success message" },
+  "@seedSuccess": {
+    "description": "Seeding success message"
+  },
   "clearTestParts": "የሙከራ ዕቃዎችን አጥፋ",
-  "@clearTestParts": { "description": "Clear test parts title" },
+  "@clearTestParts": {
+    "description": "Clear test parts title"
+  },
   "clearTestPartsConfirm": "ሁሉንም በሙከራ የተፈጠሩ ዕቃዎች ማጥፋት ይፈልጋሉ?",
-  "@clearTestPartsConfirm": { "description": "Clear test parts confirmation dialog" },
+  "@clearTestPartsConfirm": {
+    "description": "Clear test parts confirmation dialog"
+  },
   "clearTestPartsSuccess": "የሙከራ ዕቃዎች ተሰርዘዋል",
-  "@clearTestPartsSuccess": { "description": "Clear test parts success message" },
-
+  "@clearTestPartsSuccess": {
+    "description": "Clear test parts success message"
+  },
   "updateStock": "ክምችት አስተካክል",
-  "@updateStock": { "description": "Update stock action title" },
+  "@updateStock": {
+    "description": "Update stock action title"
+  },
   "addStockPurchase": "ክምችት ጨምር (ግዢ)",
-  "@addStockPurchase": { "description": "Add stock purchase action" },
+  "@addStockPurchase": {
+    "description": "Add stock purchase action"
+  },
   "removeStock": "ክምችት ቀንስ",
-  "@removeStock": { "description": "Remove stock action" },
+  "@removeStock": {
+    "description": "Remove stock action"
+  },
   "adjustStockCount": "የተቆጠረውን ትክክለኛ ብዛት መዝግብ",
-  "@adjustStockCount": { "description": "Adjust stock to physical count" },
+  "@adjustStockCount": {
+    "description": "Adjust stock to physical count"
+  },
   "stockMovementHistory": "የእንቅስቃሴ ታሪክ",
-  "@stockMovementHistory": { "description": "Stock movement history title" },
+  "@stockMovementHistory": {
+    "description": "Stock movement history title"
+  },
   "quantityToAdd": "የሚጨመረው ብዛት",
-  "@quantityToAdd": { "description": "Quantity to add input label" },
+  "@quantityToAdd": {
+    "description": "Quantity to add input label"
+  },
   "quantityToRemove": "የሚቀነሰው ብዛት",
-  "@quantityToRemove": { "description": "Quantity to remove input label" },
+  "@quantityToRemove": {
+    "description": "Quantity to remove input label"
+  },
   "countedQuantity": "የተቆጠረው ብዛት",
-  "@countedQuantity": { "description": "Counted quantity input label" },
+  "@countedQuantity": {
+    "description": "Counted quantity input label"
+  },
   "unitCost": "የአንዱ ዋጋ (ብር)",
-  "@unitCost": { "description": "Unit cost input label" },
+  "@unitCost": {
+    "description": "Unit cost input label"
+  },
   "reasonOrNote": "ምክንያት ወይም ማስታወሻ",
-  "@reasonOrNote": { "description": "Reason or note input label" },
+  "@reasonOrNote": {
+    "description": "Reason or note input label"
+  },
   "reasonOrNoteHint": "ለምሳሌ፦ ከአቅራቢ የገባ፣ የተበላሸ፣ ቆጠራ የተደረገ...",
-  "@reasonOrNoteHint": { "description": "Reason or note input hint" },
+  "@reasonOrNoteHint": {
+    "description": "Reason or note input hint"
+  },
   "currentStock": "የአሁን ክምችት",
-  "@currentStock": { "description": "Current stock label" },
+  "@currentStock": {
+    "description": "Current stock label"
+  },
   "difference": "ልዩነት",
-  "@difference": { "description": "Difference label" },
+  "@difference": {
+    "description": "Difference label"
+  },
   "runningBalance": "የቀረው ክምችት",
-  "@runningBalance": { "description": "Running balance label" },
+  "@runningBalance": {
+    "description": "Running balance label"
+  },
   "recalculateStock": "ክምችት እንደገና አስላ",
-  "@recalculateStock": { "description": "Recalculate stock action" },
+  "@recalculateStock": {
+    "description": "Recalculate stock action"
+  },
   "recalculateStockDesc": "የክምችት ትክክለኛነትን ለማረጋገጥ ከእንቅስቃሴ መዝገቡ ላይ እንደገና ያሰላል",
-  "@recalculateStockDesc": { "description": "Recalculate stock description" },
+  "@recalculateStockDesc": {
+    "description": "Recalculate stock description"
+  },
   "stockRecalculatedSuccess": "የክምችት ብዛት ከመዝገቡ ላይ በተሳካ ሁኔታ ተሰልቷል",
-  "@stockRecalculatedSuccess": { "description": "Stock recalculated success message" },
+  "@stockRecalculatedSuccess": {
+    "description": "Stock recalculated success message"
+  },
   "allowNegativeStock": "ከዜሮ በታች እንዲሆን ፍቀድ",
-  "@allowNegativeStock": { "description": "Allow negative stock setting title" },
+  "@allowNegativeStock": {
+    "description": "Allow negative stock setting title"
+  },
   "allowNegativeStockDesc": "ዕቃዎችን ሲቀንሱ ወይም ሲሸጡ ክምችቱ ከዜሮ በታች እንዲወርድ ይፈቅዳል",
-  "@allowNegativeStockDesc": { "description": "Allow negative stock setting description" },
+  "@allowNegativeStockDesc": {
+    "description": "Allow negative stock setting description"
+  },
   "negativeStockWarningTitle": "የክምችት እጥረት ማስጠንቀቂያ",
-  "@negativeStockWarningTitle": { "description": "Negative stock warning dialog title" },
+  "@negativeStockWarningTitle": {
+    "description": "Negative stock warning dialog title"
+  },
   "negativeStockWarningMessage": "ይህንን ብዛት መቀነስ ክምችቱን ከዜሮ በታች ({newStock}) ያደርገዋል። እርግጠኛ ነዎት?",
   "@negativeStockWarningMessage": {
     "description": "Negative stock warning confirmation message",
     "placeholders": {
-      "newStock": { "type": "String" }
+      "newStock": {
+        "type": "String"
+      }
     }
   },
   "negativeStockNotAllowed": "ክምችት ከዜሮ በታች ሊሆን አይችልም። አስፈላጊ ከሆነ በቅንብሮች ውስጥ ይፍቀዱ።",
-  "@negativeStockNotAllowed": { "description": "Negative stock disallowed message" },
+  "@negativeStockNotAllowed": {
+    "description": "Negative stock disallowed message"
+  },
   "lowStockListTitle": "አነስተኛ ክምችት ያላቸው ዕቃዎች",
-  "@lowStockListTitle": { "description": "Low stock items screen title" },
+  "@lowStockListTitle": {
+    "description": "Low stock items screen title"
+  },
   "lowStockListDesc": "ከዝቅተኛው የመጠን ገደብ በታች የሆኑ ዕቃዎች",
-  "@lowStockListDesc": { "description": "Low stock items screen subtitle" },
+  "@lowStockListDesc": {
+    "description": "Low stock items screen subtitle"
+  },
   "noLowStockItems": "ምንም አነስተኛ ክምችት ያለው ዕቃ የለም። ሁሉም በቂ ክምችት አላቸው!",
-  "@noLowStockItems": { "description": "Empty state for low stock screen" },
+  "@noLowStockItems": {
+    "description": "Empty state for low stock screen"
+  },
   "movementTypeInitial": "የመጀመሪያ ክምችት",
-  "@movementTypeInitial": { "description": "Initial stock movement type" },
+  "@movementTypeInitial": {
+    "description": "Initial stock movement type"
+  },
   "movementTypePurchase": "ግዢ",
-  "@movementTypePurchase": { "description": "Purchase movement type" },
+  "@movementTypePurchase": {
+    "description": "Purchase movement type"
+  },
   "movementTypeSale": "ሽያጭ",
-  "@movementTypeSale": { "description": "Sale movement type" },
+  "@movementTypeSale": {
+    "description": "Sale movement type"
+  },
   "movementTypeAdjustment": "ማስተካከያ",
-  "@movementTypeAdjustment": { "description": "Adjustment movement type" },
+  "@movementTypeAdjustment": {
+    "description": "Adjustment movement type"
+  },
   "movementTypeReturn": "ተመላሽ",
-  "@movementTypeReturn": { "description": "Return movement type" },
+  "@movementTypeReturn": {
+    "description": "Return movement type"
+  },
   "noMovementsTitle": "ምንም የክምችት እንቅስቃሴ የለም",
-  "@noMovementsTitle": { "description": "No movements empty state title" },
+  "@noMovementsTitle": {
+    "description": "No movements empty state title"
+  },
   "noMovementsDesc": "ክምችት ሲጨመር፣ ሲቀነስ ወይም ሲስተካከል እንቅስቃሴዎች እዚህ ይታያሉ።",
-  "@noMovementsDesc": { "description": "No movements empty state description" },
-
+  "@noMovementsDesc": {
+    "description": "No movements empty state description"
+  },
   "newSale": "አዲስ ሽያጭ",
-  "@newSale": { "description": "New sale button and title" },
+  "@newSale": {
+    "description": "New sale button and title"
+  },
   "recordSale": "ሽያጭ መዝግብ",
-  "@recordSale": { "description": "Record sale title" },
+  "@recordSale": {
+    "description": "Record sale title"
+  },
   "saleDetails": "የሽያጭ ዝርዝር",
-  "@saleDetails": { "description": "Sale details title" },
+  "@saleDetails": {
+    "description": "Sale details title"
+  },
   "addPartsToSale": "ዕቃዎችን ጨምር",
-  "@addPartsToSale": { "description": "Add parts to sale button" },
+  "@addPartsToSale": {
+    "description": "Add parts to sale button"
+  },
   "cartEmptyTitle": "ምንም ዕቃ አልተመረጠም",
-  "@cartEmptyTitle": { "description": "Empty sale cart title" },
+  "@cartEmptyTitle": {
+    "description": "Empty sale cart title"
+  },
   "cartEmptyDesc": "ሽያጩን ለመመዝገብ ዕቃዎችን ይፈልጉ እና ይጨምሩ",
-  "@cartEmptyDesc": { "description": "Empty sale cart description" },
+  "@cartEmptyDesc": {
+    "description": "Empty sale cart description"
+  },
   "unitPrice": "የነጠላ መሸጫ ዋጋ",
-  "@unitPrice": { "description": "Unit price label" },
+  "@unitPrice": {
+    "description": "Unit price label"
+  },
   "lineTotal": "ጠቅላላ ዋጋ",
-  "@lineTotal": { "description": "Line total label" },
+  "@lineTotal": {
+    "description": "Line total label"
+  },
   "lineProfit": "ትርፍ",
-  "@lineProfit": { "description": "Line profit label" },
+  "@lineProfit": {
+    "description": "Line profit label"
+  },
   "totalProfit": "ጠቅላላ የሚገኝ ትርፍ",
-  "@totalProfit": { "description": "Total estimated profit label" },
+  "@totalProfit": {
+    "description": "Total estimated profit label"
+  },
   "customerNotes": "የደንበኛ ወይም የደረሰኝ ማስታወሻ",
-  "@customerNotes": { "description": "Customer notes label" },
+  "@customerNotes": {
+    "description": "Customer notes label"
+  },
   "customerNotesHint": "አማራጭ ማስታወሻ ወይም የደንበኛ ስም...",
-  "@customerNotesHint": { "description": "Customer notes hint" },
+  "@customerNotesHint": {
+    "description": "Customer notes hint"
+  },
   "totalItems": "ጠቅላላ ዕቃዎች",
-  "@totalItems": { "description": "Total items count label" },
+  "@totalItems": {
+    "description": "Total items count label"
+  },
   "totalCost": "ጠቅላላ ወጪ",
-  "@totalCost": { "description": "Total cost label" },
+  "@totalCost": {
+    "description": "Total cost label"
+  },
   "completeSale": "ሽያጩን ጨርስ",
-  "@completeSale": { "description": "Complete sale button" },
+  "@completeSale": {
+    "description": "Complete sale button"
+  },
   "saleSuccessTitle": "ሽያጩ በተሳካ ሁኔታ ተመዝግቧል!",
-  "@saleSuccessTitle": { "description": "Sale success screen title" },
+  "@saleSuccessTitle": {
+    "description": "Sale success screen title"
+  },
   "receiptNumber": "የደረሰኝ ቁጥር",
-  "@receiptNumber": { "description": "Receipt number label" },
+  "@receiptNumber": {
+    "description": "Receipt number label"
+  },
   "soldAt": "የተሸጠበት ቀን እና ሰዓት",
-  "@soldAt": { "description": "Sale date and time label" },
+  "@soldAt": {
+    "description": "Sale date and time label"
+  },
   "noCostWarning": "የግዢ ዋጋ አልተመዘገበም፤ ትርፉ ከተጨባጩ በላይ ሊታይ ይችላል",
-  "@noCostWarning": { "description": "Warning when part has no purchase price" },
+  "@noCostWarning": {
+    "description": "Warning when part has no purchase price"
+  },
   "saleStockWarningMessage": "የ\"{partName}\" ብዛት ከአሁን ክምችት ({stock}) ይበልጣል። ቀሪው ክምችት {newStock} ይሆናል።",
   "@saleStockWarningMessage": {
     "description": "Warning when a sale item exceeds stock",
     "placeholders": {
-      "partName": { "type": "String" },
-      "stock": { "type": "String" },
-      "newStock": { "type": "String" }
+      "partName": {
+        "type": "String"
+      },
+      "stock": {
+        "type": "String"
+      },
+      "newStock": {
+        "type": "String"
+      }
     }
   },
   "saleRecordedSuccess": "ሽያጩ በተሳካ ሁኔታ ተመዝግቧል",
-  "@saleRecordedSuccess": { "description": "Sale recorded success message" },
+  "@saleRecordedSuccess": {
+    "description": "Sale recorded success message"
+  },
   "backToHome": "ወደ ዋና ገጽ ተመለስ",
-  "@backToHome": { "description": "Back to home button" },
+  "@backToHome": {
+    "description": "Back to home button"
+  },
   "emptySaleError": "ባዶ ሽያጭ ማስቀመጥ አይቻልም። እባክዎ ቢያንስ አንድ ዕቃ ይጨምሩ።",
-  "@emptySaleError": { "description": "Empty sale validation error" },
+  "@emptySaleError": {
+    "description": "Empty sale validation error"
+  },
   "searchAndAddParts": "ዕቃዎችን ፈልግ እና ጨምር",
-  "@searchAndAddParts": { "description": "Search and add parts button" },
+  "@searchAndAddParts": {
+    "description": "Search and add parts button"
+  },
   "filterToday": "ዛሬ",
-  "@filterToday": { "description": "Filter today" },
+  "@filterToday": {
+    "description": "Filter today"
+  },
   "filterThisWeek": "በዚህ ሳምንት",
-  "@filterThisWeek": { "description": "Filter this week" },
+  "@filterThisWeek": {
+    "description": "Filter this week"
+  },
   "filterThisMonth": "በዚህ ወር",
-  "@filterThisMonth": { "description": "Filter this month" },
+  "@filterThisMonth": {
+    "description": "Filter this month"
+  },
   "filterCustom": "ብጁ",
-  "@filterCustom": { "description": "Filter custom date range" },
+  "@filterCustom": {
+    "description": "Filter custom date range"
+  },
   "selectDateRange": "የቀን ክልል ይምረጡ",
-  "@selectDateRange": { "description": "Select date range dialog title" },
+  "@selectDateRange": {
+    "description": "Select date range dialog title"
+  },
   "searchSalesHint": "በዕቃ ስም ወይም ደረሰኝ ቁጥር ፈልግ...",
-  "@searchSalesHint": { "description": "Search sales input hint" },
+  "@searchSalesHint": {
+    "description": "Search sales input hint"
+  },
   "dayTotal": "የቀኑ ድምር",
-  "@dayTotal": { "description": "Total sales for the day" },
+  "@dayTotal": {
+    "description": "Total sales for the day"
+  },
   "itemsCount": "{count} ዕቃዎች",
   "@itemsCount": {
     "description": "Item count badge",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "noSalesForFilter": "ለተመረጠው ማጣሪያ ምንም ሽያጭ አልተገኘም",
-  "@noSalesForFilter": { "description": "Empty sales list for filter" },
+  "@noSalesForFilter": {
+    "description": "Empty sales list for filter"
+  },
   "saleDetailsTitle": "የሽያጭ ዝርዝር",
-  "@saleDetailsTitle": { "description": "Sale details screen title" },
+  "@saleDetailsTitle": {
+    "description": "Sale details screen title"
+  },
   "paymentMethod": "የክፍያ ዘዴ",
-  "@paymentMethod": { "description": "Payment method label" },
+  "@paymentMethod": {
+    "description": "Payment method label"
+  },
   "lineCost": "ወጪ",
-  "@lineCost": { "description": "Line cost label" },
+  "@lineCost": {
+    "description": "Line cost label"
+  },
   "deleteSale": "ሽያጭ ሰርዝ",
-  "@deleteSale": { "description": "Delete sale button" },
+  "@deleteSale": {
+    "description": "Delete sale button"
+  },
   "deleteSaleConfirm": "ይህን ሽያጭ መሰረዝ እርግጠኛ ነዎት?",
-  "@deleteSaleConfirm": { "description": "Delete sale confirmation dialog" },
+  "@deleteSaleConfirm": {
+    "description": "Delete sale confirmation dialog"
+  },
   "reportsTitle": "ሪፖርት እና ትንታኔ",
-  "@reportsTitle": { "description": "Reports screen title" },
+  "@reportsTitle": {
+    "description": "Reports screen title"
+  },
   "reportDaily": "ዕለታዊ",
-  "@reportDaily": { "description": "Daily report tab" },
+  "@reportDaily": {
+    "description": "Daily report tab"
+  },
   "reportWeekly": "ሳምንታዊ",
-  "@reportWeekly": { "description": "Weekly report tab" },
+  "@reportWeekly": {
+    "description": "Weekly report tab"
+  },
   "reportMonthly": "ወርሃዊ",
-  "@reportMonthly": { "description": "Monthly report tab" },
+  "@reportMonthly": {
+    "description": "Monthly report tab"
+  },
   "salesCount": "የሽያጭ ብዛት",
-  "@salesCount": { "description": "Sales count metric" },
+  "@salesCount": {
+    "description": "Sales count metric"
+  },
   "totalRevenue": "ጠቅላላ ገቢ",
-  "@totalRevenue": { "description": "Total revenue metric" },
-  "estimatedProfit": "የተገመተ ትርፍ",
-  "@estimatedProfit": { "description": "Estimated profit metric" },
+  "@totalRevenue": {
+    "description": "Total revenue metric"
+  },
   "topSellingParts": "ከፍተኛ ሽያጭ ያላቸው 5 ዕቃዎች",
-  "@topSellingParts": { "description": "Top 5 selling parts card title" },
+  "@topSellingParts": {
+    "description": "Top 5 selling parts card title"
+  },
   "totalStockValue": "ጠቅላላ የክምችት ዋጋ",
-  "@totalStockValue": { "description": "Total inventory stock value" },
+  "@totalStockValue": {
+    "description": "Total inventory stock value"
+  },
   "lowStockCount": "ዝቅተኛ ክምችት ብዛት",
-  "@lowStockCount": { "description": "Low stock alert count" },
+  "@lowStockCount": {
+    "description": "Low stock alert count"
+  },
   "unitsSold": "{count} ተሽጧል",
   "@unitsSold": {
     "description": "Quantity of parts sold",
     "placeholders": {
-      "count": { "type": "String" }
+      "count": {
+        "type": "String"
+      }
     }
   },
   "salesTrend": "የሽያጭ ሂደት",
-  "@salesTrend": { "description": "Sales chart title" },
+  "@salesTrend": {
+    "description": "Sales chart title"
+  },
   "noSalesInPeriod": "በዚህ ጊዜ ውስጥ ምንም ሽያጭ አልተመዘገበም",
-  "@noSalesInPeriod": { "description": "Empty sales report state" },
+  "@noSalesInPeriod": {
+    "description": "Empty sales report state"
+  },
   "viewLowStock": "ዝቅተኛ ክምችቶችን ይመልከቱ",
-  "@viewLowStock": { "description": "View low stock button" },
+  "@viewLowStock": {
+    "description": "View low stock button"
+  },
   "accountDetails": "የመለያ ዝርዝሮች",
-  "@accountDetails": { "description": "Account details header" },
+  "@accountDetails": {
+    "description": "Account details header"
+  },
   "editProfile": "መገለጫ አርትዕ",
-  "@editProfile": { "description": "Edit profile dialog button" },
+  "@editProfile": {
+    "description": "Edit profile dialog button"
+  },
   "changePassword": "የይለፍ ቃል ቀይር",
-  "@changePassword": { "description": "Change password button" },
+  "@changePassword": {
+    "description": "Change password button"
+  },
   "currentPassword": "የአሁኑ የይለፍ ቃል",
-  "@currentPassword": { "description": "Current password field" },
+  "@currentPassword": {
+    "description": "Current password field"
+  },
   "newPassword": "አዲስ የይለፍ ቃል",
-  "@newPassword": { "description": "New password field" },
+  "@newPassword": {
+    "description": "New password field"
+  },
   "confirmNewPassword": "አዲሱን የይለፍ ቃል ያረጋግጡ",
-  "@confirmNewPassword": { "description": "Confirm new password field" },
+  "@confirmNewPassword": {
+    "description": "Confirm new password field"
+  },
   "passwordChangedSuccess": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
-  "@passwordChangedSuccess": { "description": "Password changed success snackbar" },
+  "@passwordChangedSuccess": {
+    "description": "Password changed success snackbar"
+  },
   "invalidCurrentPassword": "የተሳሳተ የአሁኑ የይለፍ ቃል",
-  "@invalidCurrentPassword": { "description": "Incorrect current password error" },
+  "@invalidCurrentPassword": {
+    "description": "Incorrect current password error"
+  },
   "passwordMismatch": "የይለፍ ቃሎች አይዛመዱም",
-  "@passwordMismatch": { "description": "Passwords do not match error" },
-  "passwordTooShort": "የይለፍ ቃል ቢያንስ 6 ቁምፊዎች መሆን አለበት",
-  "@passwordTooShort": { "description": "Password too short error" },
+  "@passwordMismatch": {
+    "description": "Passwords do not match error"
+  },
   "currencyLabel": "የስርዓቱ ገንዘብ",
-  "@currencyLabel": { "description": "Currency label" },
+  "@currencyLabel": {
+    "description": "Currency label"
+  },
   "currencyDesc": "ሁሉም የፋይናንስ አሃዞች እና ሪፖርቶች በኢትዮጵያ ብር (ETB) ይሰላሉ።",
-  "@currencyDesc": { "description": "Currency explanation description" },
+  "@currencyDesc": {
+    "description": "Currency explanation description"
+  },
   "aboutTitle": "ስለ ቄራ ስፔር ትራከር",
-  "@aboutTitle": { "description": "About app title" },
+  "@aboutTitle": {
+    "description": "About app title"
+  },
   "aboutDesc": "በቄራ አዲስ አበባ ለሚገኙ የመለዋወጫ ንግዶች ከመስመር ውጭ የሚሰራ የእቃ ዝርዝር እና የሽያጭ አስተዳደር።",
-  "@aboutDesc": { "description": "About app description" },
+  "@aboutDesc": {
+    "description": "About app description"
+  },
   "appVersion": "ስሪት {version}",
   "@appVersion": {
     "description": "App version label",
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "themeMode": "የመተግበሪያ ገጽታ",
-  "@themeMode": { "description": "Theme selector title" },
+  "@themeMode": {
+    "description": "Theme selector title"
+  },
   "themeSystem": "የስርዓቱ ነባሪ",
-  "@themeSystem": { "description": "System theme choice" },
+  "@themeSystem": {
+    "description": "System theme choice"
+  },
   "themeLight": "ብሩህ ገጽታ",
-  "@themeLight": { "description": "Light theme choice" },
+  "@themeLight": {
+    "description": "Light theme choice"
+  },
   "themeDark": "ጨለማ ገጽታ",
-  "@themeDark": { "description": "Dark theme choice" },
+  "@themeDark": {
+    "description": "Dark theme choice"
+  },
   "dataManagement": "የውሂብ አስተዳደር እና ኤክስፖርት",
-  "@dataManagement": { "description": "Data management section header" },
+  "@dataManagement": {
+    "description": "Data management section header"
+  },
   "exportInventoryCsv": "የእቃ ዝርዝር ኤክስፖርት (CSV)",
-  "@exportInventoryCsv": { "description": "Export inventory CSV button" },
+  "@exportInventoryCsv": {
+    "description": "Export inventory CSV button"
+  },
   "exportInventoryDesc": "የሁሉም መለዋወጫዎች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ",
-  "@exportInventoryDesc": { "description": "Export inventory CSV description" },
+  "@exportInventoryDesc": {
+    "description": "Export inventory CSV description"
+  },
   "exportSalesCsv": "የሽያጭ ታሪክ ኤክስፖርት (CSV)",
-  "@exportSalesCsv": { "description": "Export sales CSV button" },
+  "@exportSalesCsv": {
+    "description": "Export sales CSV button"
+  },
   "exportSalesDesc": "የሽያጭ መዝገቦች የ CSV ሰንጠረዥ ያመንጩ እና ያጋሩ",
-  "@exportSalesDesc": { "description": "Export sales CSV description" },
+  "@exportSalesDesc": {
+    "description": "Export sales CSV description"
+  },
   "backupDatabase": "የአካባቢ ዳታቤዝ ቅጂ (Backup)",
-  "@backupDatabase": { "description": "Backup database button" },
+  "@backupDatabase": {
+    "description": "Backup database button"
+  },
   "backupDatabaseDesc": "የዳታቤዝ ፋይልን ለማጋራት ወይም በደህና ለማስቀመጥ ኤክስፖርት ያድርጉ",
-  "@backupDatabaseDesc": { "description": "Backup database description" },
+  "@backupDatabaseDesc": {
+    "description": "Backup database description"
+  },
   "restoreDatabase": "ዳታቤዝ ከመጠባበቂያ ፋይል ይመልሱ",
-  "@restoreDatabase": { "description": "Restore database button" },
+  "@restoreDatabase": {
+    "description": "Restore database button"
+  },
   "restoreDatabaseDesc": "ሁሉንም የአካባቢ ውሂብ ከመጠባበቂያ የ SQLite ፋይል ይመልሱ",
-  "@restoreDatabaseDesc": { "description": "Restore database description" },
+  "@restoreDatabaseDesc": {
+    "description": "Restore database description"
+  },
   "restoreConfirmTitle": "ዳታቤዙን መመለስ ይፈልጋሉ?",
-  "@restoreConfirmTitle": { "description": "Restore confirmation title" },
+  "@restoreConfirmTitle": {
+    "description": "Restore confirmation title"
+  },
   "restoreConfirmMessage": "ማስጠንቀቂያ፡ ወደነበረበት መመለስ አሁን ያለውን ሁሉንም የእቃ ዝርዝር፣ የክምችት መዝገብ እና የሽያጭ መረጃዎች በመጠባበቂያ ፋይሉ ውሂብ ይተካዋል። ይህ እርምጃ ሊቀለበስ አይችልም። መቀጠል ይፈልጋሉ?",
-  "@restoreConfirmMessage": { "description": "Restore confirmation warning message" },
+  "@restoreConfirmMessage": {
+    "description": "Restore confirmation warning message"
+  },
   "restoreSuccess": "ዳታቤዙ በተሳካ ሁኔታ ተመልሷል። እንደገና በመጫን ላይ...",
-  "@restoreSuccess": { "description": "Restore success message" },
+  "@restoreSuccess": {
+    "description": "Restore success message"
+  },
   "restoreError": "ከተመረጠው ፋይል ዳታቤዙን መመለስ አልተቻለም",
-  "@restoreError": { "description": "Restore error message" },
+  "@restoreError": {
+    "description": "Restore error message"
+  },
   "exportSuccess": "የኤክስፖርት ፋይል ተፈጥሯል፡ {filename}",
   "@exportSuccess": {
     "description": "Export file success",
     "placeholders": {
-      "filename": { "type": "String" }
+      "filename": {
+        "type": "String"
+      }
     }
   },
   "exportError": "ውሂብ ኤክስፖርት ማድረግ አልተቻለም፡ {error}",
   "@exportError": {
     "description": "Export error message",
     "placeholders": {
-      "error": { "type": "String" }
+      "error": {
+        "type": "String"
+      }
     }
   },
   "saveToStorage": "ወደ ማከማቻ አስቀምጥ",
-  "@saveToStorage": { "description": "Save to storage label" },
+  "@saveToStorage": {
+    "description": "Save to storage label"
+  },
   "authRequiresInternetNotice": "ለመመዝገብ እና ለመጀመሪያ ጊዜ ለመግባት የበይነመረብ (ኢንተርኔት) ግንኙነት ያስፈልጋል። አንዴ ከገቡ በኋላ መተግበሪያው ሙሉ በሙሉ ከመስመር ውጭ (ኦፍላይን) ይሰራል።",
-  "@authRequiresInternetNotice": { "description": "Notice that internet is required for first login" },
+  "@authRequiresInternetNotice": {
+    "description": "Notice that internet is required for first login"
+  },
   "authWrongPassword": "የተሳሳተ ስልክ ቁጥር ወይም የይለፍ ቃል",
-  "@authWrongPassword": { "description": "Wrong password error message" },
+  "@authWrongPassword": {
+    "description": "Wrong password error message"
+  },
   "authPhoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ ተመዝግቧል",
-  "@authPhoneTaken": { "description": "Phone already registered message" },
+  "@authPhoneTaken": {
+    "description": "Phone already registered message"
+  },
   "authNoInternet": "የበይነመረብ ግንኙነት የለም። እባክዎ ለመግባት ከበይነመረብ ጋር ይገናኙ።",
-  "@authNoInternet": { "description": "No internet connection message" },
+  "@authNoInternet": {
+    "description": "No internet connection message"
+  },
   "authAccountSuspended": "የንግድ መለያዎ ታግዷል። እባክዎን የስርዓት አስተዳዳሪውን ያነጋግሩ።",
-  "@authAccountSuspended": { "description": "Account suspended message" },
+  "@authAccountSuspended": {
+    "description": "Account suspended message"
+  },
   "authServerError": "የአገልጋይ ችግር አጋጥሟል። እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።",
-  "@authServerError": { "description": "Server error message" },
+  "@authServerError": {
+    "description": "Server error message"
+  },
   "updateRequiredTitle": "ማዘመን ያስፈልጋል",
-  "@updateRequiredTitle": { "description": "Update required title" },
+  "@updateRequiredTitle": {
+    "description": "Update required title"
+  },
   "updateRequiredMessage": "መተግበሪያውን ለመቀጠል አዲስ ስሪት ያስፈልጋል። እባክዎ ወደ ስሪት {version} ወይም ከዚያ በላይ ያዘምኑ።",
   "@updateRequiredMessage": {
     "description": "Update required description message",
     "placeholders": {
-      "version": { "type": "String" }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "updateNow": "አሁን አዘምን",
-  "@updateNow": { "description": "Update now button" },
+  "@updateNow": {
+    "description": "Update now button"
+  },
   "maintenanceTitle": "አገልግሎቱ በጥገና ላይ ነው",
-  "@maintenanceTitle": { "description": "Maintenance title" },
+  "@maintenanceTitle": {
+    "description": "Maintenance title"
+  },
   "maintenanceBanner": "የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።",
-  "@maintenanceBanner": { "description": "Maintenance banner text" },
+  "@maintenanceBanner": {
+    "description": "Maintenance banner text"
+  },
   "accountSuspendedTitle": "መለያዎ ታግዷል",
-  "@accountSuspendedTitle": { "description": "Suspension alert title" },
+  "@accountSuspendedTitle": {
+    "description": "Suspension alert title"
+  },
   "accountSuspendedMessage": "መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።",
-  "@accountSuspendedMessage": { "description": "Suspension alert message" },
+  "@accountSuspendedMessage": {
+    "description": "Suspension alert message"
+  },
   "suspensionReasonLabel": "ምክንያት፦ {reason}",
   "@suspensionReasonLabel": {
     "description": "Suspension reason label",
     "placeholders": {
-      "reason": { "type": "String" }
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "contactSupportLabel": "እርዳታ ለማግኘት ያግኙን፦",
-  "@contactSupportLabel": { "description": "Contact support label" },
+  "@contactSupportLabel": {
+    "description": "Contact support label"
+  },
   "callSupport": "ይደውሉ",
-  "@callSupport": { "description": "Call support button" },
+  "@callSupport": {
+    "description": "Call support button"
+  },
   "telegramSupport": "ቴሌግራም",
-  "@telegramSupport": { "description": "Telegram support button" },
+  "@telegramSupport": {
+    "description": "Telegram support button"
+  },
   "mustChangePasswordTitle": "የይለፍ ቃል መቀየር ያስፈልጋል",
-  "@mustChangePasswordTitle": { "description": "Must change password title" },
+  "@mustChangePasswordTitle": {
+    "description": "Must change password title"
+  },
   "mustChangePasswordPrompt": "ለመቀጠል እባክዎ መጀመሪያ አዲስ የይለፍ ቃል ያዘጋጁ።",
-  "@mustChangePasswordPrompt": { "description": "Must change password prompt" },
+  "@mustChangePasswordPrompt": {
+    "description": "Must change password prompt"
+  },
   "dismiss": "ዝጋ",
-  "@dismiss": { "description": "Dismiss button" }
+  "@dismiss": {
+    "description": "Dismiss button"
+  },
+  "adminAccount": "የአድሚን መለያ",
+  "adminAccountDisabledSuccess": "የተጠቃሚው አካውንት በተሳካ ሁኔታ ተዘግቷል",
+  "adminAccountTitle": "የአድሚን መለያ አስተዳደር",
+  "adminActionsHeader": "የአስተዳዳሪ እርምጃዎች",
+  "adminActiveOwners": "ንቁ ባለቤቶች (30 ቀናት)",
+  "adminActor": "ፈጻሚ አድሚን",
+  "adminAddBrand": "አዲስ ዓለም አቀፍ ብራንድ አክል",
+  "adminAddCategory": "አዲስ ዓለም አቀፍ ምድብ አክል",
+  "adminAddUnit": "አዲስ ዓለም አቀፍ መለኪያ አክል",
+  "adminAnnouncementActive": "ማስታወቂያው ይሰራጭ",
+  "adminAnnouncementActiveDesc": "ሲበራ ይሄ ማስታወቂያ ለሁሉም የመተግበሪያው ተጠቃሚዎች ይታያል",
+  "adminAnnouncementBodyAm": "የማስታወቂያ ዝርዝር (በአማርኛ)",
+  "adminAnnouncementBodyEn": "የማስታወቂያ ዝርዝር (በእንግሊዝኛ)",
+  "adminAnnouncementDesc": "ለመተግበሪያ ተጠቃሚዎች ማስታወቂያ ወይም ማንቂያ ማስተላለፊያ",
+  "adminAnnouncementSettings": "አጠቃላይ ማስታወቂያ",
+  "adminAnnouncementTitleAm": "የማስታወቂያ ርዕስ (በአማርኛ)",
+  "adminAnnouncementTitleEn": "የማስታወቂያ ርዕስ (በእንግሊዝኛ)",
+  "adminAppSettingsTitle": "የመተግበሪያ ቅንብሮች",
+  "adminAppVersion": "የመተግበሪያ ስሪት",
+  "adminAppVersionsInUse": "በስራ ላይ ያሉ የመተግበሪያ ስሪቶች",
+  "adminAuditDetailTitle": "የኦዲት መዝገብ ዝርዝር",
+  "adminAuditHistoryForUser": "የዚህ ተጠቃሚ የኦዲት ታሪክ",
+  "adminAuditLogs": "የኦዲት መዝገቦች",
+  "adminAuditLogsEmpty": "ምንም የኦዲት መዝገብ አልተገኘም",
+  "adminAuditLogsTitle": "የስርዓቱ ኦዲት መዝገብ",
+  "adminCatalog": "አጠቃላይ ዝርዝሮች",
+  "adminCatalogTitle": "አጠቃላይ የካታሎግ አስተዳደር",
+  "adminConfirmPhoneLabel": "ስልክ ቁጥሩን በትክክል ያስገቡ",
+  "adminDashboard": "ዳሽቦርድ",
+  "adminDashboardTitle": "የአስተዳዳሪ ዳሽቦርድ",
+  "adminDate": "ቀን እና ሰዓት",
+  "adminDisableAccount": "አካውንት ዝጋ",
+  "adminDisableAccountTitle": "የባለቤቱን አካውንት ሙሉ ለሙሉ መዝጋት",
+  "adminDisableConfirm": "ተረድቻለሁ፣ አካውንቱ ይዘጋ",
+  "adminDisableWarningPrompt": "አካውንቱን ሙሉ ለሙሉ መዝጋት ለማረጋገጥ፣ የባለቤቱን ስልክ ቁጥር ({phone}) በትክክል ያስገቡ:",
+  "@adminDisableWarningPrompt": {
+    "description": "Confirmation prompt when disabling account",
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "adminEditOwnerTitle": "የባለቤቱን መረጃ አሻሽል",
+  "adminEnforceMinVersion": "ዝቅተኛ ስሪት አስገድድ",
+  "adminEnforceMinVersionDesc": "ከዚህ ስሪት በታች የሚጠቀሙ ተጠቃሚዎች መተግበሪያውን እንዳይጠቀሙ ያግዳል",
+  "adminFailedSyncCount": "ያልተሳካ ማመሳሰል ብዛት",
+  "adminFilterActive": "ንቁ",
+  "adminFilterAll": "ሁሉም",
+  "adminFilterInactive30d": "የቆሙ (>30 ቀናት)",
+  "adminFilterSuspended": "የታገዱ",
+  "adminIpAddress": "የአይፒ አድራሻ",
+  "adminLastSync": "የመጨረሻ ማመሳሰል",
+  "adminMaintenanceActive": "የጥገና ሁነታ ይብራ",
+  "adminMaintenanceActiveDesc": "የደመና ማመሳሰልን ያቆማል እንዲሁም በመተግበሪያዎች ላይ የጥገና መልዕክት ያሳያል",
+  "adminMaintenanceDesc": "የደመና ማመሳሰል የጥገና ሁነታ ቁጥጥር",
+  "adminMaintenanceMessageAm": "የጥገና መልዕክት (በአማርኛ)",
+  "adminMaintenanceMessageEn": "የጥገና መልዕክት (በእንግሊዝኛ)",
+  "adminMaintenanceMode": "የጥገና ሁነታ",
+  "adminMinAppVersion": "ዝቅተኛ የመተግበሪያ ስሪት",
+  "adminMinAppVersionDesc": "በሲስተሙ የሚፈቀደው ዝቅተኛውን የመተግበሪያ ስሪት ያስቀምጡ",
+  "adminMore": "ተጨማሪ",
+  "adminNewThisWeek": "በዚህ ሳምንት አዲስ",
+  "adminNewValue": "አዲሱ እሴት",
+  "adminNoAuditLogs": "ምንም የኦዲት መዝገብ አልተገኘም",
+  "adminNoOwnersFound": "ምንም የተመዘገቡ የሱቅ ባለቤቶች አልተገኙም",
+  "adminNoVersionsRecorded": "ምንም የመተግበሪያ ስሪት መረጃ አልተመዘገበም",
+  "adminOldValue": "የነበረው እሴት",
+  "adminOwnerDetailsTitle": "የባለቤቱ ዝርዝር መረጃ",
+  "adminOwnerReactivatedSuccess": "የተጠቃሚው እገዳ በተሳካ ሁኔታ ተነስቷል",
+  "adminOwnerSuspendedSuccess": "የተጠቃሚው አካውንት በተሳካ ሁኔታ ታግዷል",
+  "adminOwnerUpdatedSuccess": "የተጠቃሚው መረጃ በተሳካ ሁኔታ ተሻሽሏል",
+  "adminOwners": "የሱቅ ባለቤቶች",
+  "adminOwnersTitle": "የሱቅ ባለቤቶች ማውጫ",
+  "adminPasswordChangedSuccess": "የይለፍ ቃል በተሳካ ሁኔታ ተቀይሯል",
+  "adminPhoneConfirmationMismatch": "ያስገቡት ስልክ ቁጥር ከባለቤቱ ስልክ ቁጥር ጋር አይመሳሰልም",
+  "adminPortalTitle": "የአስተዳዳሪ ፖርታል",
+  "adminReactivate": "እገዳ አንሳ",
+  "adminReactivateConfirm": "እገዳ አንሳ",
+  "adminReactivateOwnerTitle": "የተጠቃሚ እገዳ ማንሳት",
+  "adminReactivatePrompt": "ይህን ተጠቃሚ እገዳ ማንሳት ይፈልጋሉ? ባለቤቱ ወዲያውኑ አገልግሎቱን ማግኘት ይችላል።",
+  "adminReason": "ምክንያት",
+  "adminReasonRequired": "እባክዎ ምክንያት ይግለጹ",
+  "adminRegisteredDate": "የተመዘገበበት ቀን",
+  "adminRenameItem": "ስም ቀይር",
+  "adminResetPassword": "የይለፍ ቃል ቀይር",
+  "adminResetPasswordConfirm": "ጊዜያዊ የይለፍ ቃል ፍጠር",
+  "adminResetPasswordPrompt": "ይህ እርምጃ አሁን ያለውን የይለፍ ቃል ይሰርዛል፤ በሚቀጥለው ግባ ጊዜ የሚቀየር ጊዜያዊ የይለፍ ቃል ይሰጣል።",
+  "adminResetPasswordTitle": "የባለቤቱን የይለፍ ቃል መቀየር",
+  "adminSearchOwnersHint": "በስልክ ቁጥር ወይም በንግድ ስም ይፈልጉ...",
+  "adminSettings": "ቅንብሮች",
+  "adminStatusActive": "ንቁ",
+  "adminStatusSuspended": "የታገደ",
+  "adminSuspend": "አካውንት አግድ",
+  "adminSuspendConfirm": "አካውንቱን አግድ",
+  "adminSuspendOwnerTitle": "የሱቅ ባለቤቱን ማገድ",
+  "adminSuspendPrompt": "ተጠቃሚውን ማገድ ወዲያውኑ መግባትና ማመሳሰልን ያግዳል፤ እባክዎ ምክንያቱን ያስገቡ:",
+  "adminSuspendedOwners": "የታገዱ ባለቤቶች",
+  "adminSuspensionReasonHint": "ለምሳሌ፦ ክፍያ አልተፈጸመም ወይም የተሳሳተ አጠቃቀም",
+  "adminSuspensionReasonLabel": "የእገዳ ምክንያት",
+  "adminSyncDaysAgo": "ከ{days} ቀናት በፊት",
+  "@adminSyncDaysAgo": {
+    "description": "Relative sync time in days",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncHealth": "የማመሳሰል ጤንነት",
+  "adminSyncHealthyMessage": "ሁሉም የማመሳሰል ሂደቶች ጤናማ ናቸው",
+  "adminSyncHoursAgo": "ከ{hours} ሰዓታት በፊት",
+  "@adminSyncHoursAgo": {
+    "description": "Relative sync time in hours",
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncJustNow": "አሁን",
+  "adminSyncMinutesAgo": "ከ{minutes} ደቂቃ በፊት",
+  "@adminSyncMinutesAgo": {
+    "description": "Relative sync time in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncMonthsAgo": "ከ{months} ወራት በፊት",
+  "@adminSyncMonthsAgo": {
+    "description": "Relative sync time in months",
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSyncNever": "እስካሁን አልተመሳሰለም",
+  "adminSyncProblemsCount": "{count} ባለቤቶች ላይ የማመሳሰል መዘግየት ወይም ችግር አለ",
+  "@adminSyncProblemsCount": {
+    "description": "Count of owners with sync problems",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSystemStatistics": "አጠቃላይ የስርዓቱ አሃዛዊ መረጃዎች",
+  "adminTabBrands": "ብራንዶች",
+  "adminTabCategories": "ምድቦች",
+  "adminTabUnits": "መለኪያዎች",
+  "adminTargetOwner": "ተጠቃሚ",
+  "adminTempPasswordTitle": "ጊዜያዊ የይለፍ ቃል ተፈጥሯል",
+  "adminTempPasswordWarning": "ይህንን የይለፍ ቃል በጥንቃቄ ለባለቤቱ ያጋሩ። ደግሞ አይታይም!",
+  "adminTenantCountsOnly": "የስርዓቱ ጠቅላላ ድምር (የተጠቃሚ ዳታ አይታይም)",
+  "adminTenantOverview": "የተጠቃሚዎች አጠቃላይ እይታ",
+  "adminTotalOwners": "ጠቅላላ ባለቤቶች",
+  "adminTotalPartsCount": "ጠቅላላ ዕቃዎች (ድምር)",
+  "adminTotalSalesCount": "ጠቅላላ ሽያጭ (ድምር)",
+  "adminVersionStringLabel": "የስሪት መለያ ቁጥር (ምሳሌ 1.0.0)",
+  "copiedToClipboard": "ኮፒ ተደርጓል",
+  "copy": "ኮፒ አድርግ",
+  "error": "ስህተት",
+  "logoutConfirmation": "ከአስተዳዳሪ መለያዎ መውጣት እርግጠኛ ነዎት?",
+  "name": "ስም",
+  "next": "ቀጣይ",
+  "noResultsFound": "ምንም አልተገኘም",
+  "page": "ገጽ",
+  "previous": "ቀዳሚ",
+  "required": "አስፈላጊ",
+  "success": "ተሳክቷል",
+  "totalEntries": "ጠቅላላ መዝገቦች"
 }
-
-

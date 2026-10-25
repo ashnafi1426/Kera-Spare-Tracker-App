@@ -1030,4 +1030,411 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dismiss => 'Dismiss';
+
+  @override
+  String get adminAccount => 'Admin Account';
+
+  @override
+  String get adminAccountDisabledSuccess =>
+      'Owner account disabled successfully';
+
+  @override
+  String get adminAccountTitle => 'Administrator Account';
+
+  @override
+  String get adminActionsHeader => 'Administrative Actions';
+
+  @override
+  String get adminActiveOwners => 'Active Owners (30d)';
+
+  @override
+  String get adminActor => 'Performed By';
+
+  @override
+  String get adminAddBrand => 'Add Global Brand';
+
+  @override
+  String get adminAddCategory => 'Add Global Category';
+
+  @override
+  String get adminAddUnit => 'Add Global Unit';
+
+  @override
+  String get adminAnnouncementActive => 'Announcement Active';
+
+  @override
+  String get adminAnnouncementActiveDesc =>
+      'When active, this banner is displayed to all app users';
+
+  @override
+  String get adminAnnouncementBodyAm => 'Announcement Body (Amharic)';
+
+  @override
+  String get adminAnnouncementBodyEn => 'Announcement Body (English)';
+
+  @override
+  String get adminAnnouncementDesc =>
+      'Broadcast announcements or alerts to all connected app instances';
+
+  @override
+  String get adminAnnouncementSettings => 'Global Announcement';
+
+  @override
+  String get adminAnnouncementTitleAm => 'Announcement Title (Amharic)';
+
+  @override
+  String get adminAnnouncementTitleEn => 'Announcement Title (English)';
+
+  @override
+  String get adminAppSettingsTitle => 'Application Settings';
+
+  @override
+  String get adminAppVersion => 'App Version';
+
+  @override
+  String get adminAppVersionsInUse => 'Client App Versions in Use';
+
+  @override
+  String get adminAuditDetailTitle => 'Audit Log Detail';
+
+  @override
+  String get adminAuditHistoryForUser => 'Audit History for this Owner';
+
+  @override
+  String get adminAuditLogs => 'Audit Logs';
+
+  @override
+  String get adminAuditLogsEmpty => 'No audit records found matching criteria';
+
+  @override
+  String get adminAuditLogsTitle => 'System Audit Log';
+
+  @override
+  String get adminCatalog => 'Global Catalog';
+
+  @override
+  String get adminCatalogTitle => 'Global Catalog Management';
+
+  @override
+  String get adminConfirmPhoneLabel => 'Confirm Phone Number';
+
+  @override
+  String get adminDashboard => 'Dashboard';
+
+  @override
+  String get adminDashboardTitle => 'Admin Dashboard';
+
+  @override
+  String get adminDate => 'Date & Time';
+
+  @override
+  String get adminDisableAccount => 'Disable Account';
+
+  @override
+  String get adminDisableAccountTitle => 'Permanently Disable Owner Account';
+
+  @override
+  String get adminDisableConfirm => 'I understand, disable this account';
+
+  @override
+  String adminDisableWarningPrompt(String phone) {
+    return 'To confirm soft-disabling this account, type the owner\'s phone number ($phone) exactly:';
+  }
+
+  @override
+  String get adminEditOwnerTitle => 'Edit Owner Details';
+
+  @override
+  String get adminEnforceMinVersion => 'Enforce Minimum Version';
+
+  @override
+  String get adminEnforceMinVersionDesc =>
+      'Block app access for clients running versions below this threshold';
+
+  @override
+  String get adminFailedSyncCount => 'Failed Sync Count';
+
+  @override
+  String get adminFilterActive => 'Active';
+
+  @override
+  String get adminFilterAll => 'All';
+
+  @override
+  String get adminFilterInactive30d => 'Inactive (>30d)';
+
+  @override
+  String get adminFilterSuspended => 'Suspended';
+
+  @override
+  String get adminIpAddress => 'IP Address';
+
+  @override
+  String get adminLastSync => 'Last Synced';
+
+  @override
+  String get adminMaintenanceActive => 'Maintenance Mode Enabled';
+
+  @override
+  String get adminMaintenanceActiveDesc =>
+      'Halt cloud sync and display maintenance banner across client apps';
+
+  @override
+  String get adminMaintenanceDesc =>
+      'Control scheduled maintenance mode for cloud synchronization';
+
+  @override
+  String get adminMaintenanceMessageAm => 'Maintenance Message (Amharic)';
+
+  @override
+  String get adminMaintenanceMessageEn => 'Maintenance Message (English)';
+
+  @override
+  String get adminMaintenanceMode => 'Maintenance Mode';
+
+  @override
+  String get adminMinAppVersion => 'Minimum App Version';
+
+  @override
+  String get adminMinAppVersionDesc =>
+      'Set the minimum required client version supported by the backend';
+
+  @override
+  String get adminMore => 'More';
+
+  @override
+  String get adminNewThisWeek => 'New This Week';
+
+  @override
+  String get adminNewValue => 'New Value';
+
+  @override
+  String get adminNoAuditLogs => 'No audit records found';
+
+  @override
+  String get adminNoOwnersFound => 'No business owners found';
+
+  @override
+  String get adminNoVersionsRecorded => 'No client version data recorded yet';
+
+  @override
+  String get adminOldValue => 'Previous Value';
+
+  @override
+  String get adminOwnerDetailsTitle => 'Owner Details';
+
+  @override
+  String get adminOwnerReactivatedSuccess =>
+      'Owner account successfully reactivated';
+
+  @override
+  String get adminOwnerSuspendedSuccess =>
+      'Owner account successfully suspended';
+
+  @override
+  String get adminOwnerUpdatedSuccess => 'Owner details updated successfully';
+
+  @override
+  String get adminOwners => 'Owners';
+
+  @override
+  String get adminOwnersTitle => 'Business Owners Directory';
+
+  @override
+  String get adminPasswordChangedSuccess => 'Password changed successfully';
+
+  @override
+  String get adminPhoneConfirmationMismatch =>
+      'Phone number does not match confirmation';
+
+  @override
+  String get adminPortalTitle => 'Admin Portal';
+
+  @override
+  String get adminReactivate => 'Reactivate Account';
+
+  @override
+  String get adminReactivateConfirm => 'Reactivate';
+
+  @override
+  String get adminReactivateOwnerTitle => 'Reactivate Business Owner';
+
+  @override
+  String get adminReactivatePrompt =>
+      'Are you sure you want to reactivate this account? The owner will regain immediate access.';
+
+  @override
+  String get adminReason => 'Reason';
+
+  @override
+  String get adminReasonRequired => 'Please specify a reason';
+
+  @override
+  String get adminRegisteredDate => 'Registered Date';
+
+  @override
+  String get adminRenameItem => 'Rename Item';
+
+  @override
+  String get adminResetPassword => 'Reset Password';
+
+  @override
+  String get adminResetPasswordConfirm => 'Generate Temporary Password';
+
+  @override
+  String get adminResetPasswordPrompt =>
+      'This will invalidate the current password and generate a temporary password that must be changed on next login.';
+
+  @override
+  String get adminResetPasswordTitle => 'Reset Owner Password';
+
+  @override
+  String get adminSearchOwnersHint => 'Search by phone or business name...';
+
+  @override
+  String get adminSettings => 'App Settings';
+
+  @override
+  String get adminStatusActive => 'Active';
+
+  @override
+  String get adminStatusSuspended => 'Suspended';
+
+  @override
+  String get adminSuspend => 'Suspend Account';
+
+  @override
+  String get adminSuspendConfirm => 'Suspend Owner';
+
+  @override
+  String get adminSuspendOwnerTitle => 'Suspend Business Owner';
+
+  @override
+  String get adminSuspendPrompt =>
+      'Suspending this owner will block login and sync access immediately. Enter a clear reason below:';
+
+  @override
+  String get adminSuspendedOwners => 'Suspended Owners';
+
+  @override
+  String get adminSuspensionReasonHint =>
+      'e.g. Inactive business or account misuse';
+
+  @override
+  String get adminSuspensionReasonLabel => 'Suspension Reason';
+
+  @override
+  String adminSyncDaysAgo(String days) {
+    return '$days days ago';
+  }
+
+  @override
+  String get adminSyncHealth => 'Sync Status Health';
+
+  @override
+  String get adminSyncHealthyMessage => 'All business sync queues are healthy';
+
+  @override
+  String adminSyncHoursAgo(String hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String get adminSyncJustNow => 'Just now';
+
+  @override
+  String adminSyncMinutesAgo(String minutes) {
+    return '$minutes min ago';
+  }
+
+  @override
+  String adminSyncMonthsAgo(String months) {
+    return '$months months ago';
+  }
+
+  @override
+  String get adminSyncNever => 'Never synced';
+
+  @override
+  String adminSyncProblemsCount(String count) {
+    return '$count owner(s) have sync delays or failures';
+  }
+
+  @override
+  String get adminSystemStatistics => 'System-Wide Statistics';
+
+  @override
+  String get adminTabBrands => 'Brands';
+
+  @override
+  String get adminTabCategories => 'Categories';
+
+  @override
+  String get adminTabUnits => 'Units';
+
+  @override
+  String get adminTargetOwner => 'Target Owner';
+
+  @override
+  String get adminTempPasswordTitle => 'Temporary Password Generated';
+
+  @override
+  String get adminTempPasswordWarning =>
+      'Share this password securely with the owner. It will NOT be shown again.';
+
+  @override
+  String get adminTenantCountsOnly =>
+      'System Aggregate Counts (Zero Row Exposure)';
+
+  @override
+  String get adminTenantOverview => 'Tenant Overview';
+
+  @override
+  String get adminTotalOwners => 'Total Owners';
+
+  @override
+  String get adminTotalPartsCount => 'Total Parts (Count)';
+
+  @override
+  String get adminTotalSalesCount => 'Total Sales (Count)';
+
+  @override
+  String get adminVersionStringLabel => 'Version String (e.g. 1.0.0)';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get copy => 'Copy';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get logoutConfirmation =>
+      'Are you sure you want to log out of your administrator account?';
+
+  @override
+  String get name => 'Name';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get page => 'Page';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get totalEntries => 'total entries';
 }

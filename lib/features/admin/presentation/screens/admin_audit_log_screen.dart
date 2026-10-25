@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/app_card.dart';
-import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -91,7 +89,7 @@ class AdminAuditLogScreen extends ConsumerWidget {
             child: Builder(
               builder: (context) {
                 if (auditState.isLoading) {
-                  return const Center(child: AppLoadingIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (auditState.errorMessage != null) {
@@ -142,7 +140,7 @@ class AdminAuditLogScreen extends ConsumerWidget {
                   child: ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: auditState.logs.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final log = auditState.logs[index];
                       return _buildAuditLogTile(context, log, l10n, theme);
@@ -180,7 +178,7 @@ class AdminAuditLogScreen extends ConsumerWidget {
 
     final targetInfo = log.targetBusinessName ?? log.targetPhone ?? log.targetUserId;
 
-    return AppCard(
+    return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(

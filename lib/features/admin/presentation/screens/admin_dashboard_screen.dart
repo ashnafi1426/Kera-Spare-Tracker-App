@@ -216,7 +216,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: stats.appVersionDistribution.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      separatorBuilder: (_, _) => const Divider(height: 1),
                       itemBuilder: (ctx, i) {
                         final entry =
                             stats.appVersionDistribution.entries.elementAt(i);

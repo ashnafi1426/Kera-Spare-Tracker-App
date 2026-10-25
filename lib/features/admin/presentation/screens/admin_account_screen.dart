@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/presentation/widgets/app_card.dart';
-import '../../../../core/presentation/widgets/app_loading_indicator.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -109,7 +107,7 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final authState = ref.watch(authControllerProvider);
-    final user = authState.valueOrNull;
+    final user = authState.value;
     final currentLocale = ref.watch(localeControllerProvider);
 
     return Scaffold(
@@ -125,7 +123,7 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Profile Card
-                AppCard(
+                Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -176,7 +174,7 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
                 const SizedBox(height: 16),
 
                 // Language Preferences Card
-                AppCard(
+                Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -189,29 +187,26 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        RadioListTile<String>(
-                          title: const Text('አማርኛ (Amharic)'),
-                          value: 'am',
-                          groupValue: currentLocale.languageCode,
-                          onChanged: (val) {
-                            if (val != null) {
+                        SizedBox(
+                          width: double.infinity,
+                          child: SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'am',
+                                label: Text('አማርኛ (Amharic)'),
+                              ),
+                              ButtonSegment(
+                                value: 'en',
+                                label: Text('English'),
+                              ),
+                            ],
+                            selected: {currentLocale.languageCode},
+                            onSelectionChanged: (selection) {
                               ref
                                   .read(localeControllerProvider.notifier)
-                                  .setLocale(Locale(val));
-                            }
-                          },
-                        ),
-                        RadioListTile<String>(
-                          title: const Text('English'),
-                          value: 'en',
-                          groupValue: currentLocale.languageCode,
-                          onChanged: (val) {
-                            if (val != null) {
-                              ref
-                                  .read(localeControllerProvider.notifier)
-                                  .setLocale(Locale(val));
-                            }
-                          },
+                                  .setLocale(Locale(selection.first));
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -220,7 +215,7 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
                 const SizedBox(height: 16),
 
                 // Change Password Card
-                AppCard(
+                Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Form(
@@ -315,7 +310,7 @@ class _AdminAccountScreenState extends ConsumerState<AdminAccountScreen> {
                                   ? const SizedBox(
                                       width: 16,
                                       height: 16,
-                                      child: AppLoadingIndicator(size: 16),
+                                      child: CircularProgressIndicator(strokeWidth: 2),
                                     )
                                   : const Icon(Icons.check),
                               label: Text(l10n.save),
