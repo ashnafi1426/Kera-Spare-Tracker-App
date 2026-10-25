@@ -52,8 +52,14 @@ export class ForbiddenError extends AppError {
 }
 
 export class AccountSuspendedError extends AppError {
-  constructor(message = 'Account is suspended. Please contact system administrator.') {
-    super(message, 403, 'ACCOUNT_SUSPENDED');
+  constructor(message = 'Account is suspended. Please contact system administrator.', details = null) {
+    super(message, 403, 'ACCOUNT_SUSPENDED', details);
+  }
+}
+
+export class PasswordChangeRequiredError extends AppError {
+  constructor(message = 'Password change is required before accessing other resources.') {
+    super(message, 403, 'PASSWORD_CHANGE_REQUIRED');
   }
 }
 

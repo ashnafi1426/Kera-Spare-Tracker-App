@@ -28,7 +28,7 @@ describe('Admin Module API Endpoints & RBAC Security Tests', () => {
         passwordHash: adminPassHash,
         role: 'ADMIN',
         status: 'ACTIVE',
-        mustChangePassword: true,
+        mustChangePassword: false,
       },
     });
     adminToken = signJwt({ id: adminUser.id, role: 'ADMIN', status: 'ACTIVE' });

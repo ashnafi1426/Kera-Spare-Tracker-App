@@ -7,9 +7,13 @@ import brandsRoutes from './brands.routes.js';
 import categoriesRoutes from './categories.routes.js';
 import locationsRoutes from './locations.routes.js';
 import adminRoutes from './admin.routes.js';
+import configRoutes from './config.routes.js';
+import syncRoutes from './sync.routes.js';
 
 const router = Router();
 
+router.use('/', configRoutes);
+router.use('/sync', syncRoutes);
 router.use('/auth', authRoutes);
 router.use('/parts', partsRoutes);
 router.use('/stock', stockRoutes);
