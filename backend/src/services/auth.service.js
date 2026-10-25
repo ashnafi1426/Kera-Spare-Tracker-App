@@ -108,6 +108,11 @@ export async function loginUser({ phoneNumber, password }) {
     },
   });
 
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginAt: new Date() },
+  });
+
   return {
     user: {
       id: user.id,
@@ -116,6 +121,7 @@ export async function loginUser({ phoneNumber, password }) {
       role: user.role,
       status: user.status,
       language: user.language,
+      mustChangePassword: user.mustChangePassword,
     },
     accessToken,
     refreshToken,
@@ -240,7 +246,7 @@ export async function changeUserPassword(userId, { currentPassword, newPassword 
   const newHash = await hashPassword(newPassword);
   await prisma.user.update({
     where: { id: userId },
-    data: { passwordHash: newHash },
+    data: { passwordHash: newHash, mustChangePassword: false },
   });
 
   // Revoke all refresh tokens on password change for security

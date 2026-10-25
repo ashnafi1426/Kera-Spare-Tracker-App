@@ -1,4 +1,5 @@
 import * as authService from '../services/auth.service.js';
+import { ForbiddenError } from '../utils/errors.js';
 
 export async function register(req, res, next) {
   try {
@@ -19,6 +20,22 @@ export async function login(req, res, next) {
     res.status(200).json({
       success: true,
       message: 'Authentication successful',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function adminLogin(req, res, next) {
+  try {
+    const result = await authService.loginUser(req.body);
+    if (result.user.role !== 'ADMIN') {
+      throw new ForbiddenError('Access restricted to administrators only.');
+    }
+    res.status(200).json({
+      success: true,
+      message: 'Admin authentication successful',
       data: result,
     });
   } catch (err) {

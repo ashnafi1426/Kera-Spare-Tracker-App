@@ -28,8 +28,23 @@ const authLimiter = rateLimit({
   },
 });
 
+const adminAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // strict: 5 attempts per 15 min window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Too many admin authentication attempts. Please try again in 15 minutes.',
+    },
+  },
+});
+
 router.post('/register', authLimiter, validate(registerSchema), authController.register);
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
+router.post('/admin/login', adminAuthLimiter, validate(loginSchema), authController.adminLogin);
 router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, requireActive, authController.getMe);
