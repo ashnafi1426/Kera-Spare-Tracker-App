@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -65,6 +66,11 @@ class ApiAuthRepository implements AuthRepository {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (dio.options.baseUrl != AppConstants.apiBaseUrl) {
+            dio.options.baseUrl = AppConstants.apiBaseUrl;
+            options.baseUrl = AppConstants.apiBaseUrl;
+          }
+
           // Send app version on every request
           options.headers['X-App-Version'] = AppConstants.appVersion;
 
@@ -282,6 +288,59 @@ class ApiAuthRepository implements AuthRepository {
 
       return Result.success(user);
     } on DioException catch (e) {
+      if (!kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android &&
+          (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.connectionError)) {
+        for (final candidate in AppConstants.candidateAndroidBaseUrls) {
+          if (candidate == dio.options.baseUrl) continue;
+          try {
+            final testDio = Dio(
+              BaseOptions(
+                baseUrl: candidate,
+                connectTimeout: const Duration(seconds: 2),
+                receiveTimeout: const Duration(seconds: 3),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'X-App-Version': AppConstants.appVersion,
+                },
+              ),
+            );
+            final response = await testDio.post(
+              '/auth/login',
+              data: {'phoneNumber': phoneNumber, 'password': password},
+            );
+            if (response.statusCode == 200 && response.data['success'] == true) {
+              AppConstants.setApiBaseUrl(candidate);
+              dio.options.baseUrl = candidate;
+
+              final data = response.data['data'] as Map<String, dynamic>;
+              final userMap = data['user'] as Map<String, dynamic>;
+              final accessToken = data['accessToken']?.toString();
+              final refreshToken = data['refreshToken']?.toString();
+
+              final user = AuthUser.fromJson(userMap);
+              await _persistSession(
+                user,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+              );
+              try {
+                final hash = await PasswordHasher().hashPassword(password);
+                await _storage.write(
+                  key: 'kera_passhash_${user.phoneNumber}',
+                  value: hash,
+                );
+              } catch (_) {}
+              return Result.success(user);
+            }
+          } catch (_) {
+            // Keep testing candidates
+          }
+        }
+      }
+
       final failure = _mapDioError(e);
       // Seamless offline fallback: authenticate against local SQLite & secure hash
       if (failure is NetworkFailure) {
@@ -387,10 +446,28 @@ class ApiAuthRepository implements AuthRepository {
     required String newPassword,
   }) async {
     try {
-      await dio.post(
+      final response = await dio.post(
         '/auth/change-password',
         data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );
+      if (response.data is Map<String, dynamic> &&
+          response.data['data'] is Map<String, dynamic>) {
+        final data = response.data['data'] as Map<String, dynamic>;
+        final newAccessToken = data['accessToken']?.toString();
+        final newRefreshToken = data['refreshToken']?.toString();
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
+          await _storage.write(
+            key: AppConstants.secureStorageTokenKey,
+            value: newAccessToken,
+          );
+        }
+        if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
+          await _storage.write(
+            key: AppConstants.secureStorageRefreshTokenKey,
+            value: newRefreshToken,
+          );
+        }
+      }
       if (_cachedUser != null) {
         _cachedUser = _cachedUser!.copyWith(mustChangePassword: false);
         await _storage.write(

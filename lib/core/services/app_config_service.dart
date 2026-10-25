@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../constants/constants.dart';
@@ -254,6 +255,33 @@ class AppConfigService {
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['data'] as Map<String, dynamic>;
         return AppConfig.fromJson(data, installedVersion: currentVersion);
+      }
+    } on DioException catch (e) {
+      if (!kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android &&
+          (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.connectionError)) {
+        for (final candidate in AppConstants.candidateAndroidBaseUrls) {
+          if (candidate == _dio.options.baseUrl) continue;
+          try {
+            final candidateDio = Dio(
+              BaseOptions(
+                baseUrl: candidate,
+                connectTimeout: const Duration(seconds: 2),
+                receiveTimeout: const Duration(seconds: 2),
+              ),
+            );
+            final res = await candidateDio.get('/app-config');
+            if (res.statusCode == 200 && res.data['success'] == true) {
+              AppConstants.setApiBaseUrl(candidate);
+              _dio.options.baseUrl = candidate;
+              final data = res.data['data'] as Map<String, dynamic>;
+              return AppConfig.fromJson(data, installedVersion: currentVersion);
+            }
+          } catch (_) {
+            // Continue testing candidates
+          }
+        }
       }
     } catch (_) {
       // Return defaults on network error

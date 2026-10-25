@@ -38,6 +38,11 @@ class ApiAdminRepository implements AdminRepository {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          final expectedBase = '${AppConstants.apiBaseUrl}/admin';
+          if (_dio.options.baseUrl != expectedBase) {
+            _dio.options.baseUrl = expectedBase;
+            options.baseUrl = expectedBase;
+          }
           final token = await _storage.read(
             key: AppConstants.secureStorageTokenKey,
           );

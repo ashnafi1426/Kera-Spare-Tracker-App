@@ -72,8 +72,28 @@ class AppConstants {
   static const String localePreferenceKey = 'kera_user_locale';
   static const String themeModePreferenceKey = 'kera_user_theme_mode';
 
-  /// API Configuration loaded from --dart-define with automatic platform detection
+  static String? _resolvedApiBaseUrl;
+
+  /// Sets the dynamic working API base URL discovered at runtime.
+  static void setApiBaseUrl(String url) {
+    _resolvedApiBaseUrl = url;
+  }
+
+  /// Candidates for Android host connection:
+  /// - 127.0.0.1 / localhost: works with `adb reverse tcp:7000 tcp:7000` over USB
+  /// - 10.0.2.2: works on official Android Studio QEMU emulator
+  /// - 192.168.137.43: works over local Wi-Fi / hotspot
+  static List<String> get candidateAndroidBaseUrls => const [
+        'http://127.0.0.1:7000/api/v1',
+        'http://10.0.2.2:7000/api/v1',
+        'http://192.168.137.43:7000/api/v1',
+      ];
+
+  /// API Configuration loaded from runtime detection or --dart-define
   static String get apiBaseUrl {
+    if (_resolvedApiBaseUrl != null && _resolvedApiBaseUrl!.isNotEmpty) {
+      return _resolvedApiBaseUrl!;
+    }
     const fromEnv = String.fromEnvironment('API_BASE_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
     if (kIsWeb) return 'http://localhost:7000/api/v1';

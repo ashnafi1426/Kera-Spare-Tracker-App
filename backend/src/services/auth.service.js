@@ -440,13 +440,41 @@ export async function changeUserPassword(userId, { currentPassword, newPassword 
     data: { passwordHash: newHash, mustChangePassword: false },
   });
 
-  // Revoke all refresh tokens on password change for security
+  // Revoke existing refresh tokens on password change
   await prisma.refreshToken.updateMany({
     where: { userId, revokedAt: null },
     data: { revokedAt: new Date() },
   });
 
-  return { message: 'Password updated successfully. Please log in with new password.' };
+  // Issue new access & refresh tokens for the active session
+  const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
+  const refreshToken = signRefreshToken({ id: user.id });
+  const tokenHash = hashToken(refreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  await prisma.refreshToken.create({
+    data: {
+      id: uuidv4(),
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    },
+  });
+
+  return {
+    message: 'Password updated successfully.',
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      phoneNumber: user.phoneNumber,
+      businessName: user.businessName,
+      role: user.role,
+      status: user.status,
+      language: user.language,
+      mustChangePassword: false,
+    },
+  };
 }
 
 export async function getUserProfile(userId) {
