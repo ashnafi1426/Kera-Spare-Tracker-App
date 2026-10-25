@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,13 +13,34 @@ import '../../../l10n/app_localizations.dart';
 class UpdateRequiredScreen extends ConsumerWidget {
   const UpdateRequiredScreen({super.key});
 
-  Future<void> _launchUpdateUrl(String url) async {
+  Future<void> _launchUpdateUrl(BuildContext context, String url) async {
     try {
       final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        final fallbackLaunched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+        if (!fallbackLaunched && context.mounted) {
+          _showCopyFallback(context, url);
+        }
       }
-    } catch (_) {}
+    } catch (_) {
+      if (context.mounted) {
+        _showCopyFallback(context, url);
+      }
+    }
+  }
+
+  void _showCopyFallback(BuildContext context, String url) {
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Update link copied: $url'),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override
@@ -85,7 +107,7 @@ class UpdateRequiredScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 36),
                   ElevatedButton.icon(
-                    onPressed: () => _launchUpdateUrl(downloadUrl),
+                    onPressed: () => _launchUpdateUrl(context, downloadUrl),
                     icon: const Icon(Icons.download_rounded),
                     label: Text(l10n.updateNow),
                     style: ElevatedButton.styleFrom(
