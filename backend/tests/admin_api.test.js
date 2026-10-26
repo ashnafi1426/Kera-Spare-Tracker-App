@@ -385,4 +385,21 @@ describe('Admin Module API Endpoints & RBAC Security Tests', () => {
     expect(entry).toHaveProperty('action');
     expect(entry).toHaveProperty('adminId');
   });
+
+  afterAll(async () => {
+    // Reset system settings so test runs don't leave dev database in locked state
+    try {
+      await prisma.appSetting.updateMany({
+        where: { key: 'minAppVersion' },
+        data: { value: { version: '1.0.0', enforce: false, downloadUrl: 'https://keraspare.et/download' } },
+      });
+      await prisma.appSetting.updateMany({
+        where: { key: 'maintenanceMode' },
+        data: { value: { enabled: false, messageAm: '', messageEn: '' } },
+      });
+      if (adminUser?.id) await prisma.user.delete({ where: { id: adminUser.id } }).catch(() => {});
+      if (regularOwner?.id) await prisma.user.delete({ where: { id: regularOwner.id } }).catch(() => {});
+      if (testTargetOwner?.id) await prisma.user.delete({ where: { id: testTargetOwner.id } }).catch(() => {});
+    } catch (_) {}
+  });
 });

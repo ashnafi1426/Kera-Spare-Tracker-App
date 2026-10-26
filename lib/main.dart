@@ -22,7 +22,6 @@ Future<void> main() async {
     debugPrint('Uncaught Platform Error: $error\n$stack');
     return true; // Prevents process termination
   };
-
   // User-friendly custom ErrorWidget for widget tree errors
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Material(

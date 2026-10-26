@@ -317,4 +317,11 @@ describe('Admin Security Hardening & Isolation Tests', () => {
     }
   });
 
+  afterAll(async () => {
+    try {
+      if (adminUser?.id) await prisma.user.delete({ where: { id: adminUser.id } }).catch(() => {});
+      if (ownerUser?.id) await prisma.user.delete({ where: { id: ownerUser.id } }).catch(() => {});
+      if (seededAdminUser?.id) await prisma.user.delete({ where: { id: seededAdminUser.id } }).catch(() => {});
+    } catch (_) {}
+  });
 });

@@ -175,4 +175,12 @@ describe('Owner Reaction & Sync Integration Tests', () => {
     });
     expect(refreshed.mustChangePassword).toBe(false);
   });
+
+  afterAll(async () => {
+    try {
+      if (ownerUser?.id) await prisma.user.delete({ where: { id: ownerUser.id } }).catch(() => {});
+      if (suspendedUser?.id) await prisma.user.delete({ where: { id: suspendedUser.id } }).catch(() => {});
+      if (mustChangePasswordUser?.id) await prisma.user.delete({ where: { id: mustChangePasswordUser.id } }).catch(() => {});
+    } catch (_) {}
+  });
 });

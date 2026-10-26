@@ -65,15 +65,17 @@ async function main() {
     console.log(`✅ Created Admin user: ${adminUser.phoneNumber} (${adminUser.id}) [mustChangePassword=true]`);
   } else {
     adminUserId = existingAdmin.id;
+    const passwordHash = await bcrypt.hash(adminPassword, 10);
     await prisma.user.update({
       where: { id: existingAdmin.id },
       data: {
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
-        mustChangePassword: true,
+        passwordHash,
+        mustChangePassword: false,
       },
     });
-    console.log(`ℹ️ Admin user already exists and updated: ${existingAdmin.phoneNumber} [mustChangePassword=true]`);
+    console.log(`ℹ️ Admin user already exists and updated: ${existingAdmin.phoneNumber} (password synced)`);
   }
 
   // 2. Seed Default Global Brands
