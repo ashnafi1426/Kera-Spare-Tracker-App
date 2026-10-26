@@ -2,6 +2,7 @@ import app from './app.js';
 import { config } from './config/env.js';
 import { logger } from './config/logger.js';
 import prisma from './config/db.js';
+import { startTokenCleanupScheduler } from './jobs/cleanupTokens.job.js';
 
 const PORT = config.port;
 
@@ -9,6 +10,7 @@ const server = app.listen(PORT, () => {
   logger.info(` Kera Spare Tracker API running on port ${PORT} [${config.nodeEnv}]`);
   logger.info(` Swagger Documentation: http://localhost:${PORT}/api-docs`);
   logger.info(` Health Check: http://localhost:${PORT}/health`);
+  startTokenCleanupScheduler();
 });
 
 // Graceful shutdown

@@ -11,7 +11,13 @@ import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
+  final totalStartupStopwatch = Stopwatch()..start();
+  final stepStopwatch = Stopwatch()..start();
+
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('[STARTUP] WidgetsFlutterBinding.ensureInitialized: ${stepStopwatch.elapsedMilliseconds}ms');
+
+  stepStopwatch.reset();
   // Global Flutter error boundary - prevents crashes and logs gracefully
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
@@ -52,12 +58,16 @@ Future<void> main() async {
       ),
     );
   };
+  debugPrint('[STARTUP] Error boundaries configured: ${stepStopwatch.elapsedMilliseconds}ms');
 
   // Load persisted user preferences (locale & theme mode)
+  stepStopwatch.reset();
   const storage = LocalStorageService();
   final savedLocaleCode = await storage.getSavedLocaleCode();
   final savedThemeModeString = await storage.getSavedThemeMode();
+  debugPrint('[STARTUP] LocalStorageService read preferences: ${stepStopwatch.elapsedMilliseconds}ms');
 
+  stepStopwatch.reset();
   final initialThemeMode = switch (savedThemeModeString) {
     'light' => ThemeMode.light,
     'dark' => ThemeMode.dark,
@@ -74,6 +84,11 @@ Future<void> main() async {
       child: const KeraSpareTrackerApp(),
     ),
   );
+  debugPrint('[STARTUP] runApp() called: ${stepStopwatch.elapsedMilliseconds}ms (Total before runApp: ${totalStartupStopwatch.elapsedMilliseconds}ms)');
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    debugPrint('[STARTUP] First frame rendered (PostFrameCallback): ${totalStartupStopwatch.elapsedMilliseconds}ms');
+  });
 }
 
 /// Root widget for Kera Spare Tracker application.
@@ -82,9 +97,11 @@ class KeraSpareTrackerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final buildStopwatch = Stopwatch()..start();
     final router = ref.watch(appRouterProvider);
     final locale = ref.watch(localeControllerProvider);
     final themeMode = ref.watch(themeModeControllerProvider);
+    debugPrint('[STARTUP] KeraSpareTrackerApp build & watched providers: ${buildStopwatch.elapsedMilliseconds}ms');
 
     return MaterialApp.router(
       title: 'Kera Spare Tracker',

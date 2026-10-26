@@ -53,12 +53,16 @@ export const loginSchema = z.object({
       )
       .transform(normalizeEthiopianPhone),
     password: z.string().min(1, 'Password is required'),
+    deviceId: z.string().trim().max(100).optional(),
+    deviceName: z.string().trim().max(100).optional(),
   }),
 });
 
 export const refreshTokenSchema = z.object({
   body: z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
+    deviceId: z.string().trim().max(100).optional(),
+    deviceName: z.string().trim().max(100).optional(),
   }),
 });
 

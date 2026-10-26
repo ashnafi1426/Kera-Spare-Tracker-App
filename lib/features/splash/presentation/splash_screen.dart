@@ -13,6 +13,10 @@ class SplashScreen extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final l10n = context.l10n;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('[STARTUP] SplashScreen first frame rendered');
+    });
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(

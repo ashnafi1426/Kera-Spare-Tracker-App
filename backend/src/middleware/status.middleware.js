@@ -5,7 +5,7 @@ export function requireActive(req, res, next) {
     return next(new UnauthorizedError('Authentication required'));
   }
 
-  if (req.user.status === 'SUSPENDED') {
+  if (req.user.status === 'SUSPENDED' || req.user.disabledAt) {
     return next(new AccountSuspendedError());
   }
 

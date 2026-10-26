@@ -16,7 +16,11 @@ export async function register(req, res, next) {
 
 export async function login(req, res, next) {
   try {
-    const result = await authService.loginUser(req.body);
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const result = await authService.loginUser({
+      ...req.body,
+      ipAddress,
+    });
     res.status(200).json({
       success: true,
       message: 'Authentication successful',
@@ -50,8 +54,14 @@ export async function adminLogin(req, res, next) {
 
 export async function refresh(req, res, next) {
   try {
-    const { refreshToken } = req.body;
-    const result = await authService.refreshUserToken({ refreshToken });
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const { refreshToken, deviceId, deviceName } = req.body;
+    const result = await authService.refreshUserToken({
+      refreshToken,
+      deviceId,
+      deviceName,
+      ipAddress,
+    });
     res.status(200).json({
       success: true,
       message: 'Token refreshed successfully',
@@ -65,7 +75,19 @@ export async function refresh(req, res, next) {
 export async function logout(req, res, next) {
   try {
     const { refreshToken } = req.body;
-    const result = await authService.logoutUser(req.user.id, refreshToken);
+    const result = await authService.logoutUser(req.user?.id, refreshToken);
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function logoutAll(req, res, next) {
+  try {
+    const result = await authService.logoutAllDevices(req.user.id);
     res.status(200).json({
       success: true,
       message: result.message,

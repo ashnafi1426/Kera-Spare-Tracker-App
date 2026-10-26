@@ -49,8 +49,9 @@ const adminAuthLimiter = rateLimit({
 router.post('/register', authLimiter, validate(registerSchema), authController.register);
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
 router.post('/admin/login', adminAuthLimiter, validate(loginSchema), authController.adminLogin);
-router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
+router.post('/refresh', authLimiter, validate(refreshTokenSchema), authController.refresh);
 router.post('/logout', authenticate, authController.logout);
+router.post('/logout-all', authenticate, authController.logoutAll);
 router.get('/me', authenticate, requireActive, authController.getMe);
 router.get('/profile', authenticate, requireActive, authController.getMe);
 router.post(

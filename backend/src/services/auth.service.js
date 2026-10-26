@@ -1,5 +1,6 @@
 import prisma from '../config/db.js';
 import { v4 as uuidv4 } from 'uuid';
+import { config } from '../config/env.js';
 import { hashPassword, comparePassword } from '../utils/password.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import {
@@ -7,6 +8,7 @@ import {
   InvalidCredentialsError,
   AccountSuspendedError,
   TokenExpiredError,
+  TokenReusedError,
   InvalidTokenError,
   NotFoundError,
   TooManyRequestsError,
@@ -112,9 +114,9 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
   const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
   const refreshToken = signRefreshToken({ id: user.id });
 
-  // Store hashed refresh token in database (valid for 30 days)
+  // Store hashed refresh token in database (using REFRESH_TOKEN_DAYS)
   const tokenHash = hashToken(refreshToken);
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + config.refreshTokenDays * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
     data: {
@@ -125,10 +127,18 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
     },
   });
 
-  return { user, accessToken, refreshToken };
+  return {
+    user,
+    accessToken,
+    accessTokenExpiresAt: new Date(Date.now() + config.accessTokenMinutes * 60 * 1000).toISOString(),
+    refreshToken,
+    refreshTokenExpiresAt: expiresAt.toISOString(),
+    offlineMaxDays: config.offlineMaxDays,
+    mustChangePassword: false,
+  };
 }
 
-export async function loginUser({ phoneNumber, password }) {
+export async function loginUser({ phoneNumber, password, deviceId, deviceName, ipAddress }) {
   const normalizedPhone = normalizeEthiopianPhone(phoneNumber);
   const user = await prisma.user.findFirst({
     where: {
@@ -136,7 +146,6 @@ export async function loginUser({ phoneNumber, password }) {
       deletedAt: null,
     },
   });
-
 
   if (!user) {
     throw new InvalidCredentialsError();
@@ -150,7 +159,7 @@ export async function loginUser({ phoneNumber, password }) {
     throw new InvalidCredentialsError();
   }
 
-  if (user.status === 'SUSPENDED') {
+  if (user.status === 'SUSPENDED' || user.disabledAt !== null) {
     throw new AccountSuspendedError(
       'Account is suspended. Please contact system administrator.',
       user.suspendedReason ? { reason: user.suspendedReason } : null
@@ -161,15 +170,18 @@ export async function loginUser({ phoneNumber, password }) {
   const accessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
   const refreshToken = signRefreshToken({ id: user.id });
 
-  // Store hashed refresh token
+  // Store hashed refresh token with device metadata
   const tokenHash = hashToken(refreshToken);
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + config.refreshTokenDays * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
     data: {
       id: uuidv4(),
       userId: user.id,
       tokenHash,
+      deviceId: deviceId || null,
+      deviceName: deviceName || null,
+      ipAddress: ipAddress || null,
       expiresAt,
     },
   });
@@ -190,7 +202,11 @@ export async function loginUser({ phoneNumber, password }) {
       mustChangePassword: user.mustChangePassword,
     },
     accessToken,
+    accessTokenExpiresAt: new Date(Date.now() + config.accessTokenMinutes * 60 * 1000).toISOString(),
     refreshToken,
+    refreshTokenExpiresAt: expiresAt.toISOString(),
+    offlineMaxDays: config.offlineMaxDays,
+    mustChangePassword: user.mustChangePassword,
   };
 }
 
@@ -267,13 +283,14 @@ export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }
 
   // Store hashed refresh token
   const tokenHash = hashToken(refreshToken);
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + config.refreshTokenDays * 24 * 60 * 60 * 1000);
 
   await prisma.refreshToken.create({
     data: {
       id: uuidv4(),
       userId: user.id,
       tokenHash,
+      ipAddress: ipAddress || null,
       expiresAt,
     },
   });
@@ -309,82 +326,123 @@ export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }
       mustChangePassword: user.mustChangePassword,
     },
     accessToken,
+    accessTokenExpiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
     refreshToken,
+    refreshTokenExpiresAt: expiresAt.toISOString(),
+    offlineMaxDays: config.offlineMaxDays,
+    mustChangePassword: user.mustChangePassword,
   };
 }
 
-export async function refreshUserToken({ refreshToken }) {
+export async function refreshUserToken({ refreshToken, deviceId, deviceName, ipAddress }) {
   if (!refreshToken) {
     throw new InvalidTokenError('Refresh token required');
   }
 
-  // 1. Verify token signature
-  const verifyResult = verifyRefreshToken(refreshToken);
-  if (!verifyResult.valid) {
-    if (verifyResult.expired) {
-      throw new TokenExpiredError('Refresh token has expired. Please log in again.');
-    }
-    throw new InvalidTokenError('Invalid refresh token.');
-  }
-
-  const userId = verifyResult.decoded.id;
   const tokenHash = hashToken(refreshToken);
 
-  // 2. Check token in database
+  // 1. Look up token in database by hash
   const storedToken = await prisma.refreshToken.findFirst({
-    where: {
-      userId,
-      tokenHash,
-      revokedAt: null,
-      expiresAt: { gt: new Date() },
-    },
+    where: { tokenHash },
   });
 
+  // If token is not in DB at all, reject as expired/invalid
   if (!storedToken) {
-    throw new InvalidTokenError('Refresh token revoked or not found');
+    throw new TokenExpiredError('Refresh token not found or invalid.');
   }
 
-  // 3. Verify user is still active
+  // 2. TOKEN THEFT / REUSE DETECTION:
+  // If an already revoked or replaced token is submitted again, compromise has occurred.
+  if (storedToken.revokedAt !== null || storedToken.replacedByTokenId !== null) {
+    // Revoke all active refresh tokens for this user / device family
+    await prisma.refreshToken.updateMany({
+      where: {
+        userId: storedToken.userId,
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
+
+    try {
+      await prisma.auditLog.create({
+        data: {
+          id: uuidv4(),
+          action: 'TOKEN_REUSE_DETECTED',
+          targetUserId: storedToken.userId,
+          ipAddress: ipAddress || null,
+          reason: 'Attempted reuse of already-revoked refresh token. Token family revoked.',
+        },
+      });
+    } catch (_) {}
+
+    throw new TokenReusedError('Refresh token already used. Possible theft detected. Session terminated.');
+  }
+
+  // 3. Check expiration (via DB expiresAt and JWT validity)
+  const verifyResult = verifyRefreshToken(refreshToken);
+  if (!verifyResult.valid || storedToken.expiresAt < new Date()) {
+    throw new TokenExpiredError('Refresh token has expired. Please log in again.');
+  }
+
+  // 4. Verify user exists and is active
   const user = await prisma.user.findFirst({
-    where: { id: userId, deletedAt: null },
+    where: { id: storedToken.userId, deletedAt: null },
   });
 
   if (!user) {
-    throw new InvalidTokenError('User not found');
+    throw new TokenExpiredError('User not found');
   }
 
-  if (user.status === 'SUSPENDED') {
+  if (user.status === 'SUSPENDED' || user.disabledAt !== null) {
+    // Revoke this token immediately
+    await prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revokedAt: new Date() },
+    });
     throw new AccountSuspendedError(
       'Account is suspended. Please contact system administrator.',
       user.suspendedReason ? { reason: user.suspendedReason } : null
     );
   }
 
-  // 4. Revoke old refresh token (Token rotation)
-  await prisma.refreshToken.update({
-    where: { id: storedToken.id },
-    data: { revokedAt: new Date() },
-  });
-
-  // 5. Issue new access token and rotated refresh token
+  // 5. Rotate: Issue new access token and rotated refresh token
   const newAccessToken = signAccessToken({ id: user.id, role: user.role, status: user.status });
   const newRefreshToken = signRefreshToken({ id: user.id });
 
   const newTokenHash = hashToken(newRefreshToken);
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const newTokenId = uuidv4();
+  const newExpiresAt = new Date(Date.now() + config.refreshTokenDays * 24 * 60 * 60 * 1000);
+  const now = new Date();
 
-  await prisma.refreshToken.create({
-    data: {
-      id: uuidv4(),
-      userId: user.id,
-      tokenHash: newTokenHash,
-      expiresAt,
-    },
-  });
+  // Atomically revoke old token and insert new rotated token
+  await prisma.$transaction([
+    prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: {
+        revokedAt: now,
+        lastUsedAt: now,
+        replacedByTokenId: newTokenId,
+      },
+    }),
+    prisma.refreshToken.create({
+      data: {
+        id: newTokenId,
+        userId: user.id,
+        tokenHash: newTokenHash,
+        deviceId: deviceId || storedToken.deviceId || null,
+        deviceName: deviceName || storedToken.deviceName || null,
+        ipAddress: ipAddress || null,
+        expiresAt: newExpiresAt,
+      },
+    }),
+  ]);
 
   return {
     accessToken: newAccessToken,
+    accessTokenExpiresAt: new Date(Date.now() + config.accessTokenMinutes * 60 * 1000).toISOString(),
     refreshToken: newRefreshToken,
+    refreshTokenExpiresAt: newExpiresAt.toISOString(),
+    offlineMaxDays: config.offlineMaxDays,
   };
 }
 
@@ -393,7 +451,6 @@ export async function logoutUser(userId, refreshToken) {
     const tokenHash = hashToken(refreshToken);
     await prisma.refreshToken.updateMany({
       where: {
-        userId,
         tokenHash,
         revokedAt: null,
       },
@@ -401,8 +458,8 @@ export async function logoutUser(userId, refreshToken) {
         revokedAt: new Date(),
       },
     });
-  } else {
-    // Revoke all active tokens for this user
+  } else if (userId) {
+    // If no specific refreshToken provided, revoke all active tokens for this user
     await prisma.refreshToken.updateMany({
       where: {
         userId,
@@ -415,6 +472,20 @@ export async function logoutUser(userId, refreshToken) {
   }
 
   return { message: 'Logged out successfully' };
+}
+
+export async function logoutAllDevices(userId) {
+  await prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
+
+  return { message: 'All device sessions terminated successfully' };
 }
 
 export async function changeUserPassword(userId, { currentPassword, newPassword }) {

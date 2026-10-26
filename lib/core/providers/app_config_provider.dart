@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -53,10 +54,15 @@ class AppConfigNotifier extends AsyncNotifier<AppConfigState> {
 
   @override
   Future<AppConfigState> build() async {
+    final sw = Stopwatch()..start();
     final service = ref.read(appConfigServiceProvider);
 
     final dismissedHash = await _storage.read(key: _dismissedKey);
+    final storageMs = sw.elapsedMilliseconds;
+    sw.reset();
     final config = await service.fetchAppConfig();
+    final fetchMs = sw.elapsedMilliseconds;
+    debugPrint('[STARTUP] AppConfigNotifier.build(): secureStorage.read=${storageMs}ms, fetchAppConfig()=${fetchMs}ms');
 
     await _connSub?.cancel();
     _connSub = service.onConnectivityChanged.listen((results) {

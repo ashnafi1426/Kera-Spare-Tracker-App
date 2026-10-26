@@ -45,6 +45,12 @@ export class InvalidTokenError extends AppError {
   }
 }
 
+export class TokenReusedError extends AppError {
+  constructor(message = 'Refresh token already used. Session compromised.') {
+    super(message, 401, 'TOKEN_REUSED');
+  }
+}
+
 export class ForbiddenError extends AppError {
   constructor(message = 'Forbidden', code = 'FORBIDDEN') {
     super(message, 403, code);

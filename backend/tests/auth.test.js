@@ -140,30 +140,37 @@ describe('Authentication & Token Lifecycle Tests', () => {
     refreshToken = res.body.data.refreshToken;
     accessToken = res.body.data.accessToken;
 
-    // 9. Old refresh token should now be revoked
+    // 9. Old refresh token should now be detected as reused/revoked
     const oldRes = await request(app)
       .post('/api/v1/auth/refresh')
       .send({ refreshToken: oldRefreshToken });
 
     expect(oldRes.status).toBe(401);
-    expect(oldRes.body.error.code).toBe('INVALID_TOKEN');
+    expect(oldRes.body.error.code).toBe('TOKEN_REUSED');
   });
 
   it('10. POST /auth/logout revokes the refresh token', async () => {
+    // Re-login to get a clean active token
+    const loginRes = await request(app)
+      .post('/api/v1/auth/login')
+      .send({ phoneNumber: testPhone, password: 'Password123!' });
+    const activeRefreshToken = loginRes.body.data.refreshToken;
+    const activeAccessToken = loginRes.body.data.accessToken;
+
     const logoutRes = await request(app)
       .post('/api/v1/auth/logout')
-      .set('Authorization', `Bearer ${accessToken}`)
-      .send({ refreshToken });
+      .set('Authorization', `Bearer ${activeAccessToken}`)
+      .send({ refreshToken: activeRefreshToken });
 
     expect(logoutRes.status).toBe(200);
 
     // Refreshing with logged out token should fail
     const refreshRes = await request(app)
       .post('/api/v1/auth/refresh')
-      .send({ refreshToken });
+      .send({ refreshToken: activeRefreshToken });
 
     expect(refreshRes.status).toBe(401);
-    expect(refreshRes.body.error.code).toBe('INVALID_TOKEN');
+    expect(refreshRes.body.error.code).toBe('TOKEN_REUSED');
   });
 
   it('11. Suspended account gets 403 ACCOUNT_SUSPENDED', async () => {

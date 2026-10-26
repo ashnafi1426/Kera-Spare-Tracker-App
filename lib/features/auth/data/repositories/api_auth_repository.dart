@@ -392,6 +392,7 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<Result<AuthUser?>> currentUser() async {
+    final sw = Stopwatch()..start();
     try {
       // 1. In-memory cache
       if (_cachedUser != null) {
@@ -400,6 +401,7 @@ class ApiAuthRepository implements AuthRepository {
 
       // 2. Offline-First: Read securely stored session without blocking on the network
       final sessionJson = await _storage.read(key: _userSessionKey);
+      debugPrint('[STARTUP] ApiAuthRepository currentUser() secureStorage.read: ${sw.elapsedMilliseconds}ms');
       if (sessionJson == null || sessionJson.isEmpty) {
         _authStateController.add(null);
         return const Result.success(null);

@@ -42,6 +42,7 @@ export async function authenticate(req, res, next) {
         appVersion: true,
         mustChangePassword: true,
         suspendedReason: true,
+        disabledAt: true,
       },
     });
 
@@ -49,8 +50,8 @@ export async function authenticate(req, res, next) {
       throw new UnauthorizedError('User account not found or deactivated', 'INVALID_TOKEN');
     }
 
-    // 1. Account suspension check: reject immediately with 403 ACCOUNT_SUSPENDED
-    if (user.status === 'SUSPENDED') {
+    // 1. Account suspension/disabled check: reject immediately with 403 ACCOUNT_SUSPENDED
+    if (user.status === 'SUSPENDED' || user.disabledAt !== null) {
       const reasonDetails = user.suspendedReason ? { reason: user.suspendedReason } : null;
       throw new AccountSuspendedError('Account is suspended. Please contact system administrator.', reasonDetails);
     }

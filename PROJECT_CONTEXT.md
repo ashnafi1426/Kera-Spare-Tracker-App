@@ -97,3 +97,17 @@ ADMIN DATABASE SCHEMA & TABLES:
 - Write clean, well-commented, and well-structured code. Add unit tests for calculations and database logic.
 - Do not add packages that are not explicitly in the tech stack without asking the user.
 - At the end of every task, summarize all changes made and specify clear manual verification / testing steps.
+
+## SESSION AND OFFLINE RULES
+1. Registration, first login, and login on a new or empty phone REQUIRE internet. Show a clear localized message (Amharic and English) when offline: Internet is required to register or log in.
+2. After a successful login the app stores: access token and refresh token in flutter_secure_storage (never in plain files or shared preferences), and the owner profile in the local Drift database.
+3. On startup the app decides locally, without calling the server: if a stored session and a local profile exist, open the inventory screen immediately, online or offline. All screens read and write only the local database.
+4. Tokens are used only for server calls (sync, change password, config). Offline use never depends on a valid access token.
+5. Token policy from .env: ACCESS_TOKEN_MINUTES=15, REFRESH_TOKEN_DAYS=90, OFFLINE_MAX_DAYS=90. Refresh tokens rotate on every use and are stored hashed on the server so they can be revoked.
+6. NEVER delete local data automatically when a token expires, a refresh fails, or the account is suspended. Unsynced changes are the owner's real work.
+7. If the refresh token is expired or revoked, the app keeps working locally, marks sync as needing login, and asks the owner to log in again when internet is available. Pending changes are kept and sent after the new login for the SAME owner id only.
+8. Logout rules: if there are pending (unsynced) changes, logout is blocked or requires a strong warning; the local data is wiped on logout only when nothing is pending. If the phone is offline, explain that logging in again will need internet.
+9. Suspended account: the server returns 403 ACCOUNT_SUSPENDED; sync stops, a localized message shows, local data stays readable.
+10. Optional app lock (PIN or fingerprint) is a local screen lock only; it does not replace server login.
+11. The server remains the final judge: every API call re-checks the token, account status, and owner id.
+
