@@ -261,7 +261,7 @@ class ApiAuthRepository implements AuthRepository {
     try {
       final response = await dio.post(
         '/auth/login',
-        data: {'phoneNumber': phoneNumber.trim(), 'password': password},
+        data: {'phoneNumber': phoneNumber.trim(), 'password': password.trim()},
       );
 
       final data = response.data['data'] as Map<String, dynamic>;
@@ -309,7 +309,7 @@ class ApiAuthRepository implements AuthRepository {
             );
             final response = await testDio.post(
               '/auth/login',
-              data: {'phoneNumber': phoneNumber, 'password': password},
+              data: {'phoneNumber': phoneNumber.trim(), 'password': password.trim()},
             );
             if (response.statusCode == 200 && response.data['success'] == true) {
               AppConstants.setApiBaseUrl(candidate);

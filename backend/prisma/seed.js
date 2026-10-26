@@ -58,11 +58,11 @@ async function main() {
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         language: UserLanguage.AMHARIC,
-        mustChangePassword: true,
+        mustChangePassword: false,
       },
     });
     adminUserId = adminUser.id;
-    console.log(`✅ Created Admin user: ${adminUser.phoneNumber} (${adminUser.id}) [mustChangePassword=true]`);
+    console.log(`✅ Created Admin user: ${adminUser.phoneNumber} (${adminUser.id}) [mustChangePassword=false]`);
   } else {
     adminUserId = existingAdmin.id;
     const passwordHash = await bcrypt.hash(adminPassword, 10);

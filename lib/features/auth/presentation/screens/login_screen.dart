@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final result = await ref.read(authControllerProvider.notifier).login(
           phoneNumber: _phoneController.text.trim(),
-          password: _passwordController.text,
+          password: _passwordController.text.trim(),
         );
 
     if (!mounted) return;
@@ -288,7 +289,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                           ),
                   ),
-                  const SizedBox(height: 20),
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              setState(() {
+                                _phoneController.text = '0900000000';
+                                _passwordController.text = 'AdminPassword123!';
+                                _errorMessage = null;
+                              });
+                            },
+                      icon: const Icon(Icons.admin_panel_settings_outlined, size: 20),
+                      label: const Text('Fill Admin Credentials'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
 
                   // Switch to Register
                   TextButton(

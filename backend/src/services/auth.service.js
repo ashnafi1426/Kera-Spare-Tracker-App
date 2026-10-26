@@ -142,7 +142,10 @@ export async function loginUser({ phoneNumber, password }) {
     throw new InvalidCredentialsError();
   }
 
-  const isPasswordValid = await comparePassword(password, user.passwordHash);
+  let isPasswordValid = await comparePassword(password, user.passwordHash);
+  if (!isPasswordValid && typeof password === 'string' && password.trim() !== password) {
+    isPasswordValid = await comparePassword(password.trim(), user.passwordHash);
+  }
   if (!isPasswordValid) {
     throw new InvalidCredentialsError();
   }
@@ -242,7 +245,10 @@ export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }
   }
 
   // Password verification
-  const isPasswordValid = await comparePassword(password, user.passwordHash);
+  let isPasswordValid = await comparePassword(password, user.passwordHash);
+  if (!isPasswordValid && typeof password === 'string' && password.trim() !== password) {
+    isPasswordValid = await comparePassword(password.trim(), user.passwordHash);
+  }
   if (!isPasswordValid) {
     await failLogin();
   }
