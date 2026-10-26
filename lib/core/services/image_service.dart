@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -36,7 +36,9 @@ class ImageService {
     try {
       final pickedFile = await _picker.pickImage(
         source: source,
-        imageQuality: 95,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
       if (pickedFile == null) return null;
@@ -60,54 +62,82 @@ class ImageService {
     final fullTarget = p.join(photosDir.path, 'part_$id.jpg');
     final thumbTarget = p.join(photosDir.path, 'part_${id}_thumb.jpg');
 
-    String? savedFullPath;
+    String savedFullPath = fullTarget;
     String? savedThumbPath;
 
     try {
-      // Compress main image (max 1024x1024, quality 85)
-      final compressedFull = await FlutterImageCompress.compressAndGetFile(
-        rawFile.absolute.path,
-        fullTarget,
-        minWidth: 1024,
-        minHeight: 1024,
+      final bytes = await rawFile.readAsBytes();
+      final decoded = await compute(_decodeAndResizeImage, _ResizeParams(
+        bytes: bytes,
+        maxWidth: 1024,
+        maxHeight: 1024,
         quality: 85,
-        format: CompressFormat.jpeg,
-      );
+      ));
 
-      if (compressedFull != null) {
-        savedFullPath = compressedFull.path;
+      if (decoded != null) {
+        await File(fullTarget).writeAsBytes(decoded);
+        savedFullPath = fullTarget;
+      } else {
+        await rawFile.copy(fullTarget);
+        savedFullPath = fullTarget;
       }
-    } catch (e) {
-      debugPrint('Compression fallback for full image: $e');
-    }
 
-    // Fallback if native compress not supported in environment
-    if (savedFullPath == null || !File(savedFullPath).existsSync()) {
-      final copied = await rawFile.copy(fullTarget);
-      savedFullPath = copied.path;
-    }
-
-    try {
-      // Create thumbnail (max 200x200, quality 75)
-      final compressedThumb = await FlutterImageCompress.compressAndGetFile(
-        rawFile.absolute.path,
-        thumbTarget,
-        minWidth: 200,
-        minHeight: 200,
+      final thumbBytes = await compute(_decodeAndResizeImage, _ResizeParams(
+        bytes: bytes,
+        maxWidth: 200,
+        maxHeight: 200,
         quality: 75,
-        format: CompressFormat.jpeg,
-      );
+      ));
 
-      if (compressedThumb != null) {
-        savedThumbPath = compressedThumb.path;
+      if (thumbBytes != null) {
+        await File(thumbTarget).writeAsBytes(thumbBytes);
+        savedThumbPath = thumbTarget;
       }
     } catch (e) {
-      debugPrint('Compression fallback for thumbnail: $e');
+      debugPrint('Image compression fallback: $e');
+      if (!File(fullTarget).existsSync()) {
+        final copied = await rawFile.copy(fullTarget);
+        savedFullPath = copied.path;
+      }
     }
 
     return ProcessedPhoto(
       fullPath: savedFullPath,
       thumbnailPath: savedThumbPath,
     );
+  }
+}
+
+class _ResizeParams {
+  final Uint8List bytes;
+  final int maxWidth;
+  final int maxHeight;
+  final int quality;
+
+  const _ResizeParams({
+    required this.bytes,
+    required this.maxWidth,
+    required this.maxHeight,
+    required this.quality,
+  });
+}
+
+Uint8List? _decodeAndResizeImage(_ResizeParams params) {
+  try {
+    final image = img.decodeImage(params.bytes);
+    if (image == null) return null;
+
+    img.Image resized = image;
+    if (image.width > params.maxWidth || image.height > params.maxHeight) {
+      resized = img.copyResize(
+        image,
+        width: image.width >= image.height ? params.maxWidth : null,
+        height: image.height > image.width ? params.maxHeight : null,
+      );
+    }
+
+    return Uint8List.fromList(img.encodeJpg(resized, quality: params.quality));
+  } catch (_) {
+    return null;
   }
 }
