@@ -26,8 +26,21 @@ class AdminDashboardStats {
   });
 
   factory AdminDashboardStats.fromJson(Map<String, dynamic> json) {
-    final rawDist = json['appVersionDistribution'] as Map<String, dynamic>? ?? {};
-    final dist = rawDist.map((k, v) => MapEntry(k, (v as num).toInt()));
+    final Map<String, int> dist = {};
+    final rawDist = json['appVersionDistribution'];
+    if (rawDist is List) {
+      for (final item in rawDist) {
+        if (item is Map) {
+          final ver = item['version']?.toString() ?? 'unknown';
+          final count = (item['count'] as num?)?.toInt() ?? 0;
+          dist[ver] = count;
+        }
+      }
+    } else if (rawDist is Map) {
+      rawDist.forEach((k, v) {
+        dist[k.toString()] = (v as num?)?.toInt() ?? 0;
+      });
+    }
 
     return AdminDashboardStats(
       totalOwners: (json['totalOwners'] as num?)?.toInt() ?? 0,
