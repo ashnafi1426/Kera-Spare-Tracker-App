@@ -261,7 +261,7 @@ class ApiAuthRepository implements AuthRepository {
     try {
       final response = await dio.post(
         '/auth/login',
-        data: {'phoneNumber': phoneNumber, 'password': password},
+        data: {'phoneNumber': phoneNumber.trim(), 'password': password},
       );
 
       final data = response.data['data'] as Map<String, dynamic>;

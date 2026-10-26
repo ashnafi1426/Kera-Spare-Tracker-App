@@ -38,7 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
 
     final result = await ref.read(authControllerProvider.notifier).login(
-          phoneNumber: _phoneController.text,
+          phoneNumber: _phoneController.text.trim(),
           password: _passwordController.text,
         );
 

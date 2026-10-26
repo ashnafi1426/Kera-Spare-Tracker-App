@@ -6,9 +6,9 @@ import prisma from './config/db.js';
 const PORT = config.port;
 
 const server = app.listen(PORT, () => {
-  logger.info(`🚀 Kera Spare Tracker API running on port ${PORT} [${config.nodeEnv}]`);
-  logger.info(`📋 Swagger Documentation: http://localhost:${PORT}/api-docs`);
-  logger.info(`💓 Health Check: http://localhost:${PORT}/health`);
+  logger.info(` Kera Spare Tracker API running on port ${PORT} [${config.nodeEnv}]`);
+  logger.info(` Swagger Documentation: http://localhost:${PORT}/api-docs`);
+  logger.info(` Health Check: http://localhost:${PORT}/health`);
 });
 
 // Graceful shutdown

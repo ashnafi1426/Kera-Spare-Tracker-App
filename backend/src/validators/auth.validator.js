@@ -20,6 +20,7 @@ export const registerSchema = z.object({
   body: z.object({
     phoneNumber: z
       .string()
+      .trim()
       .min(1, 'Phone number is required')
       .regex(
         ETHIOPIAN_PHONE_REGEX,
@@ -42,6 +43,7 @@ export const loginSchema = z.object({
   body: z.object({
     phoneNumber: z
       .string()
+      .trim()
       .min(1, 'Phone number is required')
       .regex(
         ETHIOPIAN_PHONE_REGEX,
