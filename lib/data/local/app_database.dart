@@ -93,4 +93,17 @@ class AppDatabase extends _$AppDatabase {
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'kera_spare_tracker');
   }
+
+  /// Wipes all tenant-specific data when a user confirms switching to another owner
+  /// or discarding unsynced changes.
+  Future<void> clearAllOwnerData() async {
+    await transaction(() async {
+      await delete(syncQueue).go();
+      await delete(saleItems).go();
+      await delete(sales).go();
+      await delete(stockMovements).go();
+      await delete(spareParts).go();
+      await delete(profiles).go();
+    });
+  }
 }

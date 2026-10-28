@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/password_hasher.dart';
 import '../../../../core/utils/result.dart';
@@ -15,6 +16,7 @@ import '../../domain/repositories/auth_repository.dart';
 
 const String _userSessionKey = 'kera_user_session';
 const String _passHashPrefix = 'kera_passhash_';
+const String _userProfilePrefix = 'kera_userprofile_';
 
 /// Local offline-first implementation of AuthRepository using Drift and FlutterSecureStorage.
 class LocalAuthRepository implements AuthRepository {
@@ -28,7 +30,7 @@ class LocalAuthRepository implements AuthRepository {
     required this.db,
     FlutterSecureStorage? storage,
     PasswordHasher? hasher,
-  })  : _storage = storage ?? const FlutterSecureStorage(),
+  })  : _storage = storage ?? defaultSecureStorage,
         _hasher = hasher ?? PasswordHasher();
 
   @override
@@ -100,6 +102,18 @@ class LocalAuthRepository implements AuthRepository {
         value: passwordHash,
       );
 
+      // Store profile json for offline mock restoration across logouts
+      await _storage.write(
+        key: '$_userProfilePrefix$normalizedPhone',
+        value: jsonEncode({
+          'id': userId,
+          'owner_id': userId,
+          'phone_number': normalizedPhone,
+          'business_name': trimmedBusiness,
+          'role': 'owner',
+        }),
+      );
+
       final user = AuthUser(
         id: userId,
         ownerId: userId,
@@ -121,15 +135,39 @@ class LocalAuthRepository implements AuthRepository {
   Future<Result<AuthUser>> login({
     required String phoneNumber,
     required String password,
+    bool forceDiscardUnsynced = false,
   }) async {
     try {
       final normalizedPhone = Validators.normalizeEthiopianPhone(phoneNumber);
 
       // Fetch user profile from SQLite
-      final profile = await (db.select(db.profiles)
+      var profile = await (db.select(db.profiles)
             ..where((t) =>
                 t.phoneNumber.equals(normalizedPhone) & t.deletedAt.isNull()))
           .getSingleOrNull();
+
+      if (profile == null) {
+        // If local database was wiped on logout, restore mock profile from secure storage
+        final storedProfileJson = await _storage.read(
+          key: '$_userProfilePrefix$normalizedPhone',
+        );
+        if (storedProfileJson != null) {
+          final map = jsonDecode(storedProfileJson) as Map<String, dynamic>;
+          await db.into(db.profiles).insert(
+            ProfilesCompanion.insert(
+              id: Value(map['id'] as String),
+              ownerId: map['owner_id'] as String,
+              phoneNumber: Value(map['phone_number'] as String?),
+              businessName: Value(map['business_name'] as String?),
+              role: const Value(UserRole.owner),
+            ),
+          );
+          profile = await (db.select(db.profiles)
+                ..where((t) =>
+                    t.phoneNumber.equals(normalizedPhone) & t.deletedAt.isNull()))
+              .getSingleOrNull();
+        }
+      }
 
       if (profile == null) {
         return const Result.failure(
@@ -178,11 +216,30 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<LogoutPrecheck> precheckLogout() async {
+    final pendingCount = await db.syncQueueDao.countPending();
+    return LogoutPrecheck(pendingCount: pendingCount, isOnline: false);
+  }
+
+  @override
+  Future<Result<void>> performSyncAndLogout() async {
+    await db.clearAllOwnerData();
+    return logout();
+  }
+
+  @override
+  Future<Result<void>> forceDiscardAndLogout() async {
+    await db.clearAllOwnerData();
+    return logout();
+  }
+
+  @override
   Future<Result<void>> logout() async {
     try {
       await _storage.delete(key: AppConstants.secureStorageTokenKey);
       await _storage.delete(key: AppConstants.secureStorageOwnerIdKey);
       await _storage.delete(key: _userSessionKey);
+      await db.clearAllOwnerData();
 
       _cachedUser = null;
       _authStateController.add(null);

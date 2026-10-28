@@ -67,6 +67,31 @@ class AuthFailure extends Failure {
   });
 }
 
+/// Represents an attempt to register or login while offline.
+class OfflineInternetRequiredFailure extends Failure {
+  const OfflineInternetRequiredFailure({
+    super.message = 'Internet is required to register or log in.',
+    super.code = 'NO_INTERNET',
+    super.cause,
+  });
+}
+
+/// Represents an account conflict when a different owner tries to log in
+/// while unsynced local mutations exist on this device.
+class DifferentOwnerConflictFailure extends Failure {
+  final String previousOwnerId;
+  final String previousOwnerName;
+
+  const DifferentOwnerConflictFailure({
+    required this.previousOwnerId,
+    required this.previousOwnerName,
+    super.message =
+        'Another account has unsynced changes on this phone. Sync or discard them first.',
+    super.code = 'DIFFERENT_OWNER_CONFLICT',
+    super.cause,
+  });
+}
+
 /// Represents data validation failures (e.g. invalid phone, negative price).
 class ValidationFailure extends Failure {
   const ValidationFailure({
@@ -92,6 +117,15 @@ class NegativeStockFailure extends Failure {
   const NegativeStockFailure({
     required super.message,
     required this.projectedStock,
+    super.code,
+    super.cause,
+  });
+}
+
+/// Represents synchronization errors during batch push or catalog pull.
+class SyncFailure extends Failure {
+  const SyncFailure({
+    required super.message,
     super.code,
     super.cause,
   });

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -100,9 +101,8 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isWide = MediaQuery.of(context).size.width >= 720;
+    final isWide = MediaQuery.of(context).size.width >= AdminSpacing.tabletBreakpoint;
     final selectedIndex = _getSelectedIndex();
-
 
     final destinations = [
       NavigationRailDestination(
@@ -146,15 +146,15 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                   onDestinationSelected: (idx) => _onDestinationSelected(context, idx),
                   labelType: NavigationRailLabelType.all,
                   leading: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    padding: const EdgeInsets.symmetric(vertical: AdminSpacing.lg),
                     child: Column(
                       children: [
                         Container(
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            color: AdminColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: Image.asset(
@@ -162,11 +162,11 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                             fit: BoxFit.cover,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AdminSpacing.sm),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppTheme.secondaryColor.withValues(alpha: 0.15),
+                            color: AdminColors.infoTint,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
@@ -174,7 +174,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.secondaryColor,
+                              color: AdminColors.primary,
                               letterSpacing: 1.1,
                             ),
                           ),
@@ -186,7 +186,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: 20.0),
+                        padding: EdgeInsets.only(bottom: AdminSpacing.lg),
                         child: LanguageSegmentedSwitch(),
                       ),
                     ),
@@ -194,7 +194,14 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                   destinations: destinations,
                 ),
                 const VerticalDivider(thickness: 1, width: 1),
-                Expanded(child: widget.child),
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: AdminSpacing.maxContentWidth),
+                      child: widget.child,
+                    ),
+                  ),
+                ),
               ],
             ),
           )

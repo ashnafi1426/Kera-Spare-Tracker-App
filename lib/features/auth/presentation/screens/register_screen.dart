@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
@@ -24,6 +25,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isOfflineError = false;
   String? _errorMessage;
 
   @override
@@ -36,8 +38,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    setState(() => _errorMessage = null);
+    setState(() {
+      _errorMessage = null;
+      _isOfflineError = false;
+    });
     if (!_formKey.currentState!.validate()) return;
+
+    final l10n = context.l10n;
+
 
     setState(() => _isLoading = true);
 
@@ -50,12 +58,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    final l10n = context.l10n;
     result.when(
       onSuccess: (_) {
         context.go('/home');
       },
       onFailure: (failure) {
+        if (failure is OfflineInternetRequiredFailure ||
+            failure.code == 'NO_INTERNET') {
+          setState(() {
+            _isOfflineError = true;
+            _errorMessage = l10n.authOfflineInternetRequired;
+          });
+          return;
+        }
+
         String msg;
         switch (failure.code) {
           case 'PHONE_TAKEN':
@@ -63,9 +79,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             break;
           case 'ACCOUNT_SUSPENDED':
             msg = l10n.authAccountSuspended;
-            break;
-          case 'NO_INTERNET':
-            msg = l10n.authNoInternet;
             break;
           case 'SERVER_ERROR':
             msg = l10n.authServerError;
@@ -171,6 +184,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                           ),
+                          if (_isOfflineError) ...[
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              style: TextButton.styleFrom(
+                                backgroundColor: colorScheme.error,
+                                foregroundColor: colorScheme.onError,
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                              ),
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
+                              label: Text(l10n.retry),
+                              onPressed: _handleRegister,
+                            ),
+                          ],
                         ],
                       ),
                     ),

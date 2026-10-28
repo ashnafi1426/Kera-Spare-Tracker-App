@@ -156,28 +156,57 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorColor: const Color(0x2E4C8DF6),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF4C8DF6),
+            );
+          }
+          return const TextStyle(
+            fontSize: 12,
+            color: onSurfaceVariant,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: Color(0xFF4C8DF6));
+          }
+          return const IconThemeData(color: onSurfaceVariant);
+        }),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: surfaceColor,
+        selectedColor: const Color(0x2E4C8DF6),
+        side: const BorderSide(color: outlineColor, width: 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        labelStyle: const TextStyle(fontSize: 12),
+      ),
     );
   }
 
   /// Dark theme for the application.
   static ThemeData get darkTheme {
-    const darkPrimary = Color(0xFF60A5FA); // Light blue for contrast
-    const darkOnPrimary = Color(0xFF0F172A);
-    const darkPrimaryContainer = Color(0xFF1E3A8A);
-    const darkOnPrimaryContainer = Color(0xFFDBEAFE);
+    const darkPrimary = Color(0xFF4C8DF6); // Primary brand blue
+    const darkOnPrimary = Colors.white;
+    const darkPrimaryContainer = Color(0x2E4C8DF6);
+    const darkOnPrimaryContainer = Color(0xFFEAF0F7);
 
-    const darkSecondary = Color(0xFFFBBF24); // Warm Amber
-    const darkOnSecondary = Color(0xFF451A03);
-    const darkSecondaryContainer = Color(0xFF78350F);
-    const darkOnSecondaryContainer = Color(0xFFFEF3C7);
+    const darkSecondary = Color(0xFFF5A524); // Warning / Amber accent
+    const darkOnSecondary = Color(0xFF0E1621);
+    const darkSecondaryContainer = Color(0x2E4C8DF6); // Blue tint indicator (not brown!)
+    const darkOnSecondaryContainer = Color(0xFFEAF0F7);
 
-    const darkSurface = Color(0xFF0F172A); // Slate 900
-    const darkCard = Color(0xFF1E293B); // Slate 800
-    const darkOnSurface = Color(0xFFF8FAFC);
-    const darkOnSurfaceVariant = Color(0xFF94A3B8);
+    const darkSurface = Color(0xFF0E1621); // Dark background
+    const darkCard = Color(0xFF152233); // Dark surface card
+    const darkOnSurface = Color(0xFFEAF0F7);
+    const darkOnSurfaceVariant = Color(0xFF9FB0C3);
 
-    const darkOutline = Color(0xFF334155);
-    const darkError = Color(0xFFF87171);
+    const darkOutline = Color(0xFF2A3B52); // Subtle 1px border, never white
+    const darkError = Color(0xFFF0616D);
 
     const colorScheme = ColorScheme(
       brightness: Brightness.dark,
@@ -304,6 +333,51 @@ class AppTheme {
         color: darkOutline,
         thickness: 1,
         space: 1,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: darkSurface,
+        indicatorColor: const Color(0x2E4C8DF6),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF4C8DF6),
+            );
+          }
+          return const TextStyle(
+            fontSize: 12,
+            color: darkOnSurfaceVariant,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: Color(0xFF4C8DF6));
+          }
+          return const IconThemeData(color: darkOnSurfaceVariant);
+        }),
+      ),
+      navigationRailTheme: const NavigationRailThemeData(
+        backgroundColor: darkSurface,
+        indicatorColor: Color(0x2E4C8DF6),
+        selectedIconTheme: IconThemeData(color: Color(0xFF4C8DF6)),
+        unselectedIconTheme: IconThemeData(color: darkOnSurfaceVariant),
+        selectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF4C8DF6),
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          fontSize: 12,
+          color: darkOnSurfaceVariant,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: darkSurface,
+        selectedColor: const Color(0x2E4C8DF6),
+        side: const BorderSide(color: darkOutline, width: 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        labelStyle: const TextStyle(fontSize: 12, color: darkOnSurface),
       ),
     );
   }

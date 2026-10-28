@@ -7,8 +7,11 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
+import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../../stock/presentation/providers/stock_providers.dart';
+import '../../../sync/data/services/sync_push_service.dart';
 import '../../data/services/export_backup_service.dart';
 
 /// Comprehensive Settings and Preferences screen for Kera Spare Tracker.
@@ -41,6 +44,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             children: [
+              // 0. Session Banners if tokens revoked or offline limit exceeded
+              const NeedsLoginBanner(),
+              const OfflineMaxDaysBanner(),
+              const AccountSuspendedBanner(),
+              const PasswordChangedBanner(),
+              const SizedBox(height: 8),
+
               // 1. Account Details Card
               if (user != null) ...[
                 Card(
@@ -158,6 +168,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 14),
               ],
 
+              // 1b. Sync & Cloud Connectivity Card
+              _buildSyncStatusCard(context, l10n, colorScheme, theme),
+              const SizedBox(height: 14),
+
               // 2. Preferences: Language & Theme
               Card(
                 child: Column(
@@ -214,6 +228,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 14),
+
+              // 2.5 App Lock & Local Security
+              const AppLockSettingsCard(),
               const SizedBox(height: 14),
 
               // 3. Inventory & Policies Section
@@ -902,16 +920,269 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Widget _buildSyncStatusCard(
+    BuildContext context,
+    dynamic l10n,
+    ColorScheme colorScheme,
+    ThemeData theme,
+  ) {
+    final pendingCount = ref.watch(pendingSyncCountProvider).value ?? 0;
+    final lastOnlineAsync = ref.watch(lastOnlineTimestampProvider);
+    final lastOnline = lastOnlineAsync.value;
+
+    String lastOnlineText;
+    if (lastOnline == null) {
+      lastOnlineText = l10n.adminSyncNever;
+    } else {
+      final diff = DateTime.now().difference(lastOnline);
+      if (diff.inMinutes < 1) {
+        lastOnlineText = l10n.adminSyncJustNow;
+      } else if (diff.inHours < 1) {
+        lastOnlineText = l10n.adminSyncMinutesAgo(diff.inMinutes.toString());
+      } else if (diff.inDays < 1) {
+        lastOnlineText = l10n.adminSyncHoursAgo(diff.inHours.toString());
+      } else {
+        lastOnlineText = l10n.adminSyncMonthsAgo((diff.inDays ~/ 30).toString());
+      }
+    }
+
+    final isSynced = pendingCount == 0;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.cloud_sync_outlined,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.syncStatusTitle,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                isSynced ? Icons.check_circle_outline_rounded : Icons.sync_rounded,
+                color: isSynced ? Colors.green.shade700 : Colors.amber.shade800,
+              ),
+              title: Text(
+                l10n.syncStatusTitle,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                isSynced
+                    ? l10n.syncStatusUpToDate
+                    : l10n.syncStatusPending(pendingCount),
+              ),
+              trailing: isSynced
+                  ? null
+                  : SizedBox(
+                      width: 105,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                        ),
+                        onPressed: () async {
+                          context.showSnackBar(l10n.syncStatusSyncing);
+                          final pushResult =
+                              await ref.read(syncPushServiceProvider).pushPendingQueue();
+                          if (context.mounted) {
+                            if (pushResult.isSuccess) {
+                              context.showSnackBar(l10n.syncStatusUpToDate);
+                            } else {
+                              context.showSnackBar(
+                                pushResult.failureOrNull?.message ?? 'Sync failed',
+                                isError: true,
+                              );
+                            }
+                          }
+                        },
+                        child: Text(
+                          l10n.syncNowAndLogout.split('&').first.trim(),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                Icons.history_rounded,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              title: Text(
+                l10n.lastOnlineTitle,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              trailing: Text(
+                lastOnlineText,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(
+                Icons.pending_actions_rounded,
+                color: isSynced ? Colors.grey : Colors.amber.shade800,
+              ),
+              title: Text(
+                l10n.pendingChangesCount,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSynced
+                      ? Colors.grey.shade100
+                      : Colors.amber.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSynced
+                        ? Colors.grey.shade300
+                        : Colors.amber.shade400,
+                  ),
+                ),
+                child: Text(
+                  pendingCount.toString(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isSynced
+                        ? Colors.grey.shade700
+                        : Colors.amber.shade900,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmLogout(BuildContext context) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    final authState = ref.read(authControllerProvider);
+    final user = authState.value;
+
+    final precheck = await ref.read(authControllerProvider.notifier).precheckLogout();
+    if (!context.mounted) return;
+
+    // CASE 1: No pending changes (count == 0)
+    if (!precheck.hasPending) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.logoutConfirmTitle),
+          content: Text(l10n.logoutConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.colorScheme.error,
+                foregroundColor: context.colorScheme.onError,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.logout),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && context.mounted) {
+        await ref.read(authControllerProvider.notifier).logout();
+      }
+      return;
+    }
+
+    // CASE 2: Has pending changes and phone is ONLINE
+    if (precheck.isOnline) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.logoutPendingOnlineTitle),
+          content: Text(l10n.logoutPendingOnlineMessage(precheck.pendingCount)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.sync_rounded),
+              label: Text(l10n.syncNowAndLogout),
+              onPressed: () => Navigator.pop(ctx, true),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && context.mounted) {
+        context.showSnackBar(l10n.syncStatusSyncing);
+        final result = await ref
+            .read(authControllerProvider.notifier)
+            .performSyncAndLogout();
+
+        if (context.mounted && result.isFailure) {
+          context.showSnackBar(
+            l10n.syncFailedLogoutCancelled(
+              result.failureOrNull?.message ?? 'Sync failed',
+            ),
+            isError: true,
+          );
+        }
+      }
+      return;
+    }
+
+    // CASE 3: Has pending changes and phone is OFFLINE
+    await showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.logoutConfirmTitle),
-        content: Text(l10n.logoutConfirmMessage),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: context.colorScheme.error),
+            const SizedBox(width: 8),
+            Expanded(child: Text(l10n.logoutBlockedOfflineTitle)),
+          ],
+        ),
+        content: Text(
+          l10n.logoutBlockedOfflineMessage(precheck.pendingCount),
+        ),
         actions: [
+          OutlinedButton.icon(
+            icon: const Icon(Icons.download_rounded, size: 18),
+            label: Text(l10n.exportDataAction),
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (user != null) {
+                _handleExportInventory(context, user.ownerId);
+              }
+            },
+          ),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.cancel),
           ),
           ElevatedButton(
@@ -919,15 +1190,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               backgroundColor: context.colorScheme.error,
               foregroundColor: context.colorScheme.onError,
             ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.logout),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showDiscardDoubleConfirmationDialog(context);
+            },
+            child: Text(l10n.logoutDiscardButton),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _showDiscardDoubleConfirmationDialog(BuildContext context) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            final isValid = controller.text.trim() == 'DISCARD';
+            return AlertDialog(
+              title: Text(l10n.logoutDiscardButton),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.logoutDiscardPrompt),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      hintText: 'DISCARD',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(l10n.cancel),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colorScheme.error,
+                    foregroundColor: context.colorScheme.onError,
+                  ),
+                  onPressed: isValid ? () => Navigator.pop(ctx, true) : null,
+                  child: Text(l10n.logoutDiscardButton),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
 
     if (confirmed == true && context.mounted) {
-      await ref.read(authControllerProvider.notifier).logout();
+      await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
     }
   }
 }

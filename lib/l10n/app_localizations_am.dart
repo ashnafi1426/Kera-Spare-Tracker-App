@@ -964,11 +964,11 @@ class AppLocalizationsAm extends AppLocalizations {
       'የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።';
 
   @override
-  String get accountSuspendedTitle => 'መለያዎ ታግዷል';
+  String get accountSuspendedTitle => 'መለያው ታግዷል';
 
   @override
   String get accountSuspendedMessage =>
-      'መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።';
+      'መለያዎ ታግዷል። ማመሳሰል ቆሟል፤ ነገር ግን የአካባቢዎ መረጃዎች ክፍት ሆነው ይቆያሉ እና መረጃ ማውጣት ይችላሉ።';
 
   @override
   String suspensionReasonLabel(String reason) {
@@ -1070,7 +1070,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get adminAuditLogsTitle => 'የስርዓቱ ኦዲት መዝገብ';
 
   @override
-  String get adminCatalog => 'አጠቃላይ ዝርዝሮች';
+  String get adminCatalog => 'ካታሎግ';
 
   @override
   String get adminCatalogTitle => 'አጠቃላይ የካታሎግ አስተዳደር';
@@ -1390,4 +1390,317 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get totalEntries => 'ጠቅላላ መዝገቦች';
+
+  @override
+  String get authNeedsLoginBanner => 'ማመሳሰልን ለመቀጠል እባክዎ እንደገና ይግቡ';
+
+  @override
+  String get authNeedsLoginAction => 'ግባ';
+
+  @override
+  String get authOfflineInternetRequired =>
+      'ለመመዝገብ ወይም ለመግባት የበይነመረብ ግንኙነት ያስፈልጋል።';
+
+  @override
+  String get authDifferentOwnerConflictTitle => 'ያልተመሳሰለ የመለያ ውሂብ';
+
+  @override
+  String authDifferentOwnerConflictMessage(String ownerName) {
+    return 'ይህ ስልክ ካልተመሳሰለ ሌላ መለያ ($ownerName) ውሂብ ይዟል። ለማመሳሰል እባክዎ በቀዳሚው መለያ ይግቡ ወይም ለመቀጠል ያልተመሳሰለውን ውሂብ ያጥፉ።';
+  }
+
+  @override
+  String get authDiscardUnsyncedAndLogin => 'ውሂቡን አጥፋና ግባ';
+
+  @override
+  String authOfflineMaxDaysWarning(int days) {
+    return 'መተግበሪያው ከመስመር ውጭ ከ$days ቀናት በላይ ቆይቷል። መለያዎን ለማረጋገጥ እባክዎ ከበይነመረብ ጋር ይገናኙ።';
+  }
+
+  @override
+  String get initialSyncTitle => 'የእርስዎን እቃዎች በማዘጋጀት ላይ...';
+
+  @override
+  String get initialSyncSubtitle => 'የእርስዎን የእቃዎች ዝርዝር ከአገልጋይ በማውረድ ላይ';
+
+  @override
+  String get logoutBlockedOfflineTitle => 'መውጣት አልተቻለም (ኢንተርኔት የለም)';
+
+  @override
+  String logoutBlockedOfflineMessage(int count) {
+    return 'ያልተመሳሰሉ $count ለውጦች አሉ። ከመስመር ውጭ ሆነው ከወጡ ለውጦችዎ ወደ አገልጋዩ ስለማይላኩ ስራዎ በቋሚነት ይጠፋል።';
+  }
+
+  @override
+  String get exportDataAction => 'መረጃን አውጣ (CSV)';
+
+  @override
+  String get logoutDiscardPrompt =>
+      'ያልተመሳሰሉ ለውጦችን አጥፍተው ለመውጣት ከታች DISCARD ብለው ይጻፉ:';
+
+  @override
+  String get logoutDiscardButton => 'አጥፍተህ ውጣ';
+
+  @override
+  String get logoutPendingOnlineTitle => 'ያልተመሳሰሉ ለውጦች አሉ';
+
+  @override
+  String logoutPendingOnlineMessage(int count) {
+    return 'ወደ አገልጋዩ ያልተላኩ $count ያልተመሳሰሉ ለውጦች አሉ።';
+  }
+
+  @override
+  String get syncNowAndLogout => 'አሁን አመሳስልና ውጣ';
+
+  @override
+  String syncFailedLogoutCancelled(String reason) {
+    return 'ማመሳሰል አልተሳካም: $reason። ለውጦችዎ እንዳይጠፉ አልወጡም።';
+  }
+
+  @override
+  String get syncStatusTitle => 'የማመሳሰል ሁኔታ';
+
+  @override
+  String get syncStatusUpToDate => 'ሁሉም ለውጦች ተመሳስለዋል';
+
+  @override
+  String syncStatusPending(int count) {
+    return '$count ያልተመሳሰሉ ለውጦች';
+  }
+
+  @override
+  String get syncStatusSyncing => 'ለውጦች በመመሳሰል ላይ ናቸው...';
+
+  @override
+  String get lastOnlineTitle => 'ለመጨረሻ ጊዜ የተገናኘበት';
+
+  @override
+  String get pendingChangesCount => 'ያልተላኩ ለውጦች';
+
+  @override
+  String get passwordChangedRemotelyTitle => 'የይለፍ ቃል በሌላ ቦታ ተቀይሯል';
+
+  @override
+  String get passwordChangedRemotelyMessage =>
+      'የይለፍ ቃልዎ በሌላ ስልክ ተቀይሯል። ማመሳሰልን ለማስቀጠል በአዲሱ የይለፍ ቃል ይግቡ። የአካባቢ መረጃዎ ደህንነቱ የተጠበቀ ነው።';
+
+  @override
+  String get appLockTitle => 'መተግበሪያ ቆልፍ';
+
+  @override
+  String get appLockSubtitle => 'መተግበሪያውን በፒን ወይም በባዮሜትሪክስ ይጠብቁ';
+
+  @override
+  String get appLockEnabled => 'የመተግበሪያ መቆለፊያ ነቅቷል';
+
+  @override
+  String get appLockDisabled => 'የመተግበሪያ መቆለፊያ ጠፍቷል';
+
+  @override
+  String get appLockBiometrics => 'ባዮሜትሪክስ መክፈቻ';
+
+  @override
+  String get appLockBiometricsDesc => 'ለመክፈት የጣት አሻራ ወይም የፊት ገጽታ ይጠቀሙ';
+
+  @override
+  String get appLockTimeout => 'ራስ-ሰር የመቆለፊያ ጊዜ';
+
+  @override
+  String get appLockTimeoutImmediately => 'ወዲያውኑ';
+
+  @override
+  String get appLockTimeout1Min => 'ከ1 ደቂቃ በኋላ';
+
+  @override
+  String get appLockTimeout5Min => 'ከ5 ደቂቃ በኋላ';
+
+  @override
+  String get changePin => 'ፒን ይቀይሩ';
+
+  @override
+  String get setPinTitle => 'የመተግበሪያ ፒን ያዘጋጁ';
+
+  @override
+  String get enterNewPin => 'ከ4 እስከ 6 አሃዝ ፒን ያስገቡ';
+
+  @override
+  String get confirmPinTitle => 'የመተግበሪያ ፒን ያረጋግጡ';
+
+  @override
+  String get reenterPin => 'ፒንዎን በድጋሚ ያስገቡ';
+
+  @override
+  String get pinsDoNotMatch => 'ፒኖቹ አይመሳሰሉም። እባክዎ እንደገና ይሞክሩ።';
+
+  @override
+  String get pinLengthError => 'ፒኑ ከ4 እስከ 6 አሃዝ መሆን አለበት።';
+
+  @override
+  String get pinSetSuccess => 'የመተግበሪያ ፒን በተሳካ ሁኔታ ተቀይሯል።';
+
+  @override
+  String get enterPinToUnlock => 'ለመክፈት ፒን ያስገቡ';
+
+  @override
+  String wrongPin(int remaining) {
+    return 'የተሳሳተ ፒን ነው። $remaining ሙከራዎች ቀርተዋል።';
+  }
+
+  @override
+  String lockoutCooldown(int seconds) {
+    return 'ብዙ የተሳሳቱ ሙከራዎች። ከ$seconds ሰከንድ በኋላ እንደገና ይሞክሩ።';
+  }
+
+  @override
+  String get lockoutMaxReached =>
+      'ከፍተኛ የተሳሳቱ ሙከራዎች ተደርገዋል። በመስመር ላይ መግባት ያስፈልጋል።';
+
+  @override
+  String get forgotPin => 'ፒን ረሱ?';
+
+  @override
+  String get forgotPinTitle => 'የመተግበሪያ ፒን ዳግም ያስጀምሩ';
+
+  @override
+  String get forgotPinDesc =>
+      'ፒንዎን ዳግም ለማስጀመር በስልክ ቁጥርዎ እና በይለፍ ቃልዎ ይግቡ። የአካባቢዎ መረጃ ይጠበቃል።';
+
+  @override
+  String get biometricPromptReason =>
+      'ኬራ ስፔር ትራከርን ለመክፈት የጣት አሻራዎን ወይም ፊትዎን ያረጋግጡ';
+
+  @override
+  String get unlockWithBiometrics => 'በባዮሜትሪክስ ይክፈቱ';
+
+  @override
+  String get loginToResetPin => 'ያረጋግጡ እና ፒን ዳግም ያስጀምሩ';
+
+  @override
+  String get adminAuditActionUserSuspended => 'ተጠቃሚ ታግዷል';
+
+  @override
+  String get adminAuditActionUserReactivated => 'እገዳ ተነስቷል';
+
+  @override
+  String get adminAuditActionPasswordReset => 'የይለፍ ቃል ተቀይሯል';
+
+  @override
+  String get adminAuditActionUserDeleted => 'አካውንት ተዘግቷል';
+
+  @override
+  String get adminAuditActionBrandCreated => 'ብራንድ ተፈጠረ';
+
+  @override
+  String get adminAuditActionBrandUpdated => 'ብራንድ ተሻሻለ';
+
+  @override
+  String get adminAuditActionCategoryCreated => 'ምድብ ተፈጠረ';
+
+  @override
+  String get adminAuditActionCategoryUpdated => 'ምድብ ተሻሻለ';
+
+  @override
+  String get adminAuditActionUnitCreated => 'መለኪያ ተፈጠረ';
+
+  @override
+  String get adminAuditActionUnitUpdated => 'መለኪያ ተሻሻለ';
+
+  @override
+  String get adminAuditActionSettingsUpdated => 'ቅንብሮች ተሻሻሉ';
+
+  @override
+  String get adminAuditDetailsTitle => 'የኦዲት መዝገብ ዝርዝር';
+
+  @override
+  String get adminAuditActor => 'ፈፃሚ';
+
+  @override
+  String get adminAuditTarget => 'ዒላማ';
+
+  @override
+  String get adminAuditNoChanges => 'ምንም የተቀየረ እሴት የለም';
+
+  @override
+  String get adminAuditToday => 'ዛሬ';
+
+  @override
+  String get adminAuditYesterday => 'ትናንት';
+
+  @override
+  String get adminSyncHealthy => 'ጥሩ ሁኔታ';
+
+  @override
+  String get adminSyncNeverStarted => 'ገና አልተመሳሰለም';
+
+  @override
+  String get adminSyncNeedsAttention => 'ክትትል ያስፈልገዋል';
+
+  @override
+  String get adminAppVersionsTitle => 'የተጠቃሚ መተግበሪያ ስሪቶች';
+
+  @override
+  String get adminLastUpdated => 'የመጨረሻ ማሻሻያ';
+
+  @override
+  String get adminNoMoreOwners => 'ሁሉም ባለቤቶች ተጭነዋል';
+
+  @override
+  String get adminSortBy => 'አስተካክል በ';
+
+  @override
+  String get adminSortNewest => 'አዳዲሶች መጀመሪያ';
+
+  @override
+  String get adminSortBusinessName => 'የንግድ ስም';
+
+  @override
+  String get adminSortLastSync => 'የመጨረሻ ማመሳሰል';
+
+  @override
+  String get adminNeverSynced => 'አልተመሳሰለም';
+
+  @override
+  String adminCatalogItemsCount(int count) {
+    return '$count ዝርዝሮች';
+  }
+
+  @override
+  String adminCatalogActiveCount(int active, int total) {
+    return '$active ከ $total ንቁ';
+  }
+
+  @override
+  String get adminActiveLabel => 'ንቁ';
+
+  @override
+  String get adminInactiveLabel => 'ቦዝኗል';
+
+  @override
+  String get adminConfirmDeactivateTitle => 'ዝርዝሩን አቦዝን';
+
+  @override
+  String adminConfirmDeactivateMessage(String name) {
+    return '$nameን ማቦዘን ይፈልጋሉ? ከባለቤቶች ካታሎግ ውስጥ አይታይም።';
+  }
+
+  @override
+  String get adminSortAtoZ => 'ከሀ - ፐ';
+
+  @override
+  String get adminLivePreview => 'የቅድመ እይታ ማሳያ';
+
+  @override
+  String get adminUnsavedChangesTitle => 'ያልተቀመጡ ለውጦች';
+
+  @override
+  String get adminUnsavedChangesMessage => 'ያልተቀመጡ ለውጦች አሉ። ይቅር ይባሉ?';
+
+  @override
+  String get adminDiscard => 'ይቅር';
+
+  @override
+  String get adminSaveSuccess => 'ቅንብሮቹ በተሳካ ሁኔታ ተቀምጠዋል';
+
+  @override
+  String get adminVersionHelper => 'አስገዳጅ የሆነው ዝቅተኛ የመተግበሪያ ስሪት (ለምሳሌ 1.0.0)';
 }

@@ -418,7 +418,7 @@
   "adminAuditLogs": "Audit Logs",
   "adminAuditLogsEmpty": "No audit records found matching criteria",
   "adminAuditLogsTitle": "System Audit Log",
-  "adminCatalog": "Global Catalog",
+  "adminCatalog": "Catalog",
   "adminCatalogTitle": "Global Catalog Management",
   "adminConfirmPhoneLabel": "Confirm Phone Number",
   "adminDashboard": "Dashboard",
@@ -483,7 +483,7 @@
   "adminResetPasswordPrompt": "This will invalidate the current password and generate a temporary password that must be changed on next login.",
   "adminResetPasswordTitle": "Reset Owner Password",
   "adminSearchOwnersHint": "Search by phone or business name...",
-  "adminSettings": "App Settings",
+  "adminSettings": "Settings",
   "adminStatusActive": "Active",
   "adminStatusSuspended": "Suspended",
   "adminSuspend": "Suspend Account",
@@ -566,5 +566,182 @@
   "previous": "Previous",
   "required": "Required",
   "success": "Success",
-  "totalEntries": "total entries"
+  "totalEntries": "total entries",
+  "authNeedsLoginBanner": "Please log in again to continue syncing",
+  "authNeedsLoginAction": "Log In",
+  "authOfflineInternetRequired": "Internet is required to register or log in.",
+  "authDifferentOwnerConflictTitle": "Unsynced Account Data",
+  "authDifferentOwnerConflictMessage": "This phone has unsynced data from another account ({ownerName}). Please log in as the original account to sync, or discard the unsynced data to continue.",
+  "@authDifferentOwnerConflictMessage": {
+    "placeholders": {
+      "ownerName": {
+        "type": "String"
+      }
+    }
+  },
+  "authDiscardUnsyncedAndLogin": "Discard & Log In",
+  "authOfflineMaxDaysWarning": "The app has been offline for more than {days} days. Please connect to the internet to verify your account.",
+  "@authOfflineMaxDaysWarning": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "initialSyncTitle": "Setting up your inventory...",
+  "initialSyncSubtitle": "Downloading your parts catalog from the server",
+  "logoutBlockedOfflineTitle": "Logout Blocked (Offline)",
+  "logoutBlockedOfflineMessage": "You have {count} unsynced change(s). Logging out while offline would permanently lose your work because changes cannot be saved to the server.",
+  "@logoutBlockedOfflineMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportDataAction": "Export Data (CSV)",
+  "logoutDiscardPrompt": "To permanently discard unsynced changes and log out, type DISCARD below:",
+  "logoutDiscardButton": "Log Out & Discard",
+  "logoutPendingOnlineTitle": "Unsynced Changes Pending",
+  "logoutPendingOnlineMessage": "You have {count} pending change(s) not yet synced with the server.",
+  "@logoutPendingOnlineMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNowAndLogout": "Sync Now & Log Out",
+  "syncFailedLogoutCancelled": "Sync failed: {reason}. You remain logged in to protect your changes.",
+  "@syncFailedLogoutCancelled": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStatusTitle": "Sync Status",
+  "syncStatusUpToDate": "All changes saved to server",
+  "syncStatusPending": "{count} changes pending sync",
+  "@syncStatusPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusSyncing": "Syncing changes...",
+  "lastOnlineTitle": "Last Online",
+  "pendingChangesCount": "Pending Changes",
+  "accountSuspendedTitle": "Account Suspended",
+  "accountSuspendedMessage": "Your account has been suspended. Sync is paused, but your local records remain accessible and can be exported.",
+  "passwordChangedRemotelyTitle": "Password Changed Elsewhere",
+  "passwordChangedRemotelyMessage": "Your password was updated on another device. Please log in with your new password to resume syncing. Local records remain safe.",
+  "appLockTitle": "App Lock",
+  "appLockSubtitle": "Protect access with a PIN or biometrics",
+  "appLockEnabled": "App Lock is enabled",
+  "appLockDisabled": "App Lock is disabled",
+  "appLockBiometrics": "Biometric Unlock",
+  "appLockBiometricsDesc": "Use fingerprint or face recognition to unlock",
+  "appLockTimeout": "Auto-lock Timeout",
+  "appLockTimeoutImmediately": "Immediately",
+  "appLockTimeout1Min": "After 1 minute",
+  "appLockTimeout5Min": "After 5 minutes",
+  "changePin": "Change PIN",
+  "setPinTitle": "Set App Lock PIN",
+  "enterNewPin": "Enter 4 to 6 digit PIN",
+  "confirmPinTitle": "Confirm App Lock PIN",
+  "reenterPin": "Re-enter your PIN",
+  "pinsDoNotMatch": "PINs do not match. Please try again.",
+  "pinLengthError": "PIN must be between 4 and 6 digits.",
+  "pinSetSuccess": "App Lock PIN updated successfully.",
+  "enterPinToUnlock": "Enter PIN to unlock",
+  "wrongPin": "Incorrect PIN. {remaining} attempt(s) remaining.",
+  "@wrongPin": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "lockoutCooldown": "Too many attempts. Try again in {seconds}s.",
+  "@lockoutCooldown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "lockoutMaxReached": "Too many failed attempts. Online login required.",
+  "forgotPin": "Forgot PIN?",
+  "forgotPinTitle": "Reset App PIN",
+  "forgotPinDesc": "Verify with your phone number and password to reset your PIN. Your local data will remain safe.",
+  "biometricPromptReason": "Scan fingerprint or face to unlock Kera Spare Tracker",
+  "unlockWithBiometrics": "Unlock with Biometrics",
+  "loginToResetPin": "Log In to Reset PIN",
+  "adminAuditActionUserSuspended": "User Suspended",
+  "adminAuditActionUserReactivated": "User Reactivated",
+  "adminAuditActionPasswordReset": "Password Reset",
+  "adminAuditActionUserDeleted": "Account Disabled",
+  "adminAuditActionBrandCreated": "Brand Created",
+  "adminAuditActionBrandUpdated": "Brand Updated",
+  "adminAuditActionCategoryCreated": "Category Created",
+  "adminAuditActionCategoryUpdated": "Category Updated",
+  "adminAuditActionUnitCreated": "Unit Created",
+  "adminAuditActionUnitUpdated": "Unit Updated",
+  "adminAuditActionSettingsUpdated": "Settings Updated",
+  "adminAuditDetailsTitle": "Audit Record Details",
+  "adminAuditActor": "Actor",
+  "adminAuditTarget": "Target",
+  "adminAuditNoChanges": "No recorded value diff",
+  "adminAuditToday": "Today",
+  "adminAuditYesterday": "Yesterday",
+  "adminSyncHealthy": "Healthy",
+  "adminSyncNeverStarted": "Never synced",
+  "adminSyncNeedsAttention": "Needs attention",
+  "adminAppVersionsTitle": "Client App Versions",
+  "adminLastUpdated": "Last updated",
+  "adminNoMoreOwners": "All owners loaded",
+  "adminSortBy": "Sort by",
+  "adminSortNewest": "Newest first",
+  "adminSortBusinessName": "Business Name",
+  "adminSortLastSync": "Last Synced",
+  "adminNeverSynced": "Never synced",
+  "adminCatalogItemsCount": "{count} items",
+  "@adminCatalogItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminCatalogActiveCount": "{active} of {total} active",
+  "@adminCatalogActiveCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "adminActiveLabel": "Active",
+  "adminInactiveLabel": "Inactive",
+  "adminConfirmDeactivateTitle": "Deactivate Item",
+  "adminConfirmDeactivateMessage": "Are you sure you want to deactivate {name}? It will no longer appear in owner catalogs.",
+  "@adminConfirmDeactivateMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSortAtoZ": "A - Z",
+  "adminLivePreview": "Live Preview",
+  "adminUnsavedChangesTitle": "Unsaved Changes",
+  "adminUnsavedChangesMessage": "You have unsaved configuration changes. Discard them?",
+  "adminDiscard": "Discard",
+  "adminSaveSuccess": "Settings saved successfully",
+  "adminVersionHelper": "Current minimum required semver version (e.g. 1.0.0)"
 }

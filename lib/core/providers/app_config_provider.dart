@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../services/app_config_service.dart';
+import '../services/storage_service.dart';
 
 final appConfigServiceProvider = Provider<AppConfigService>((ref) {
   return AppConfigService();
@@ -49,7 +50,7 @@ class AppConfigState {
 
 class AppConfigNotifier extends AsyncNotifier<AppConfigState> {
   static const _dismissedKey = 'kera_dismissed_announcement_hash';
-  final _storage = const FlutterSecureStorage();
+  final _storage = defaultSecureStorage;
   StreamSubscription? _connSub;
 
   @override

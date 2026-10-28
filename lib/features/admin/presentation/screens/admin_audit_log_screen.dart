@@ -2,6 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/presentation/audit_action_presentation.dart';
+import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/design/tokens/admin_typography.dart';
+import '../../../../core/design/widgets/empty_state.dart';
+import '../../../../core/design/widgets/error_state.dart';
+import '../../../../core/design/widgets/list_card.dart';
+import '../../../../core/design/widgets/relative_time_text.dart';
+import '../../../../core/design/widgets/skeleton_loader.dart';
+import '../../../../core/design/widgets/status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -15,14 +25,14 @@ class AdminAuditLogScreen extends ConsumerWidget {
     'USER_REACTIVATED',
     'USER_UPDATED',
     'PASSWORD_RESET',
-    'USER_DISABLED',
+    'USER_DELETED',
     'BRAND_CREATED',
     'BRAND_UPDATED',
     'CATEGORY_CREATED',
     'CATEGORY_UPDATED',
     'UNIT_CREATED',
     'UNIT_UPDATED',
-    'SETTING_UPDATED',
+    'SETTINGS_UPDATED',
     'ANNOUNCEMENT_UPDATED',
     'MAINTENANCE_UPDATED',
   ];
@@ -30,15 +40,15 @@ class AdminAuditLogScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final auditState = ref.watch(adminAuditLogsProvider);
 
     return Scaffold(
+      backgroundColor: AdminColors.background,
       appBar: AppBar(
         title: Text(l10n.adminAuditLogsTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             tooltip: l10n.refresh,
             onPressed: () => ref.read(adminAuditLogsProvider.notifier).loadLogs(),
           ),
@@ -46,29 +56,29 @@ class AdminAuditLogScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          // Filter Row
+          // Filter Chips Row
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: theme.colorScheme.surface,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AdminSpacing.lg,
+              vertical: AdminSpacing.sm,
+            ),
+            color: AdminColors.surface,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Text(
-                    '${l10n.filter}: ',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
                   ..._actions.map((act) {
                     final isSelected =
                         (auditState.filter.action == null && act == 'ALL') ||
                         auditState.filter.action == act;
+                    final String label = act == 'ALL'
+                        ? l10n.adminFilterAll
+                        : AuditActionPresentation.resolve(act, l10n).label;
+
                     return Padding(
-                      padding: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.only(right: AdminSpacing.sm),
                       child: FilterChip(
-                        label: Text(act),
+                        label: Text(label),
                         selected: isSelected,
                         onSelected: (_) {
                           ref
@@ -82,68 +92,76 @@ class AdminAuditLogScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, color: AdminColors.border),
 
           // Content
           Expanded(
             child: Builder(
               builder: (context) {
                 if (auditState.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Padding(
+                    padding: EdgeInsets.all(AdminSpacing.lg),
+                    child: SkeletonListLoader(count: 6),
+                  );
                 }
 
                 if (auditState.errorMessage != null) {
                   return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          auditState.errorMessage!,
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () =>
-                              ref.read(adminAuditLogsProvider.notifier).loadLogs(),
-                          child: Text(l10n.retry),
-                        ),
-                      ],
+                    child: ErrorState(
+                      message: auditState.errorMessage!,
+                      onRetry: () =>
+                          ref.read(adminAuditLogsProvider.notifier).loadLogs(),
                     ),
                   );
                 }
 
                 if (auditState.logs.isEmpty) {
                   return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.history_toggle_off,
-                          size: 64,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.adminAuditLogsEmpty,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
+                    child: EmptyState(
+                      icon: Icons.history_toggle_off_rounded,
+                      title: l10n.adminAuditLogsEmpty,
+                      onAction: () =>
+                          ref.read(adminAuditLogsProvider.notifier).loadLogs(),
+                      actionLabel: l10n.refresh,
                     ),
                   );
                 }
 
+                // Group logs by day
+                final grouped = _groupLogsByDay(auditState.logs);
+
                 return RefreshIndicator(
+                  color: AdminColors.primary,
                   onRefresh: () =>
                       ref.read(adminAuditLogsProvider.notifier).loadLogs(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: auditState.logs.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AdminSpacing.lg,
+                      vertical: AdminSpacing.md,
+                    ),
+                    itemCount: grouped.length,
                     itemBuilder: (context, index) {
-                      final log = auditState.logs[index];
-                      return _buildAuditLogTile(context, log, l10n, theme);
+                      final item = grouped[index];
+                      if (item is String) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            top: AdminSpacing.md,
+                            bottom: AdminSpacing.sm,
+                          ),
+                          child: Text(
+                            item,
+                            style: AdminTypography.caption.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AdminColors.textSecondary,
+                            ),
+                          ),
+                        );
+                      }
+                      final log = item as AdminAuditLogEntry;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AdminSpacing.sm),
+                        child: _buildLogCard(context, log, l10n),
+                      );
                     },
                   ),
                 );
@@ -153,216 +171,345 @@ class AdminAuditLogScreen extends ConsumerWidget {
 
           // Pagination bar
           if (auditState.pagination.isNotEmpty)
-            _buildPaginationBar(context, ref, auditState, l10n, theme),
+            _buildPaginationBar(context, ref, auditState, l10n),
         ],
       ),
     );
   }
 
-  Widget _buildAuditLogTile(
+  List<dynamic> _groupLogsByDay(List<AdminAuditLogEntry> logs) {
+    final list = <dynamic>[];
+    String? currentDayKey;
+
+    for (final log in logs) {
+      final dayKey =
+          '${log.createdAt.year}-${log.createdAt.month}-${log.createdAt.day}';
+      if (dayKey != currentDayKey) {
+        currentDayKey = dayKey;
+        list.add(_dayLabel(log.createdAt));
+      }
+      list.add(log);
+    }
+    return list;
+  }
+
+  String _dayLabel(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(dt.year, dt.month, dt.day);
+    final diffDays = today.difference(target).inDays;
+
+    if (diffDays == 0) return 'Today';
+    if (diffDays == 1) return 'Yesterday';
+    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildLogCard(
     BuildContext context,
     AdminAuditLogEntry log,
     AppLocalizations l10n,
-    ThemeData theme,
   ) {
-    Color badgeColor;
-    if (log.action.contains('SUSPEND') || log.action.contains('DISABLE')) {
-      badgeColor = Colors.red;
-    } else if (log.action.contains('RESET')) {
-      badgeColor = Colors.orange;
-    } else if (log.action.contains('CREATE')) {
-      badgeColor = Colors.green;
-    } else {
-      badgeColor = theme.colorScheme.primary;
-    }
+    final pres = AuditActionPresentation.resolve(log.action, l10n);
+    final cleanIp = AuditActionPresentation.cleanIp(log.ipAddress);
+    final targetText = log.targetBusinessName ?? log.targetPhone ?? log.targetUserId;
 
-    final targetInfo = log.targetBusinessName ?? log.targetPhone ?? log.targetUserId;
-
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: badgeColor.withAlpha(25),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.security, color: badgeColor, size: 24),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: badgeColor.withAlpha(30),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                log.action,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: badgeColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Spacer(),
-            Text(
-              _formatDate(log.createdAt),
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return ListCard(
+      onTap: () => _showLogDetails(context, log, pres, cleanIp, l10n),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Row 1: Action chip (flexible) + Relative time
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if (targetInfo != null)
-                Text(
-                  '${l10n.adminTargetOwner}: $targetInfo',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              Flexible(
+                child: StatusChip(
+                  label: pres.label,
+                  icon: pres.icon,
+                  color: pres.color,
+                  backgroundColor: pres.tintColor,
                 ),
-              if (log.reason != null && log.reason!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '${l10n.adminReason}: ${log.reason}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              if (log.ipAddress != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    'IP: ${log.ipAddress}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-                  ),
-                ),
+              ),
+              const SizedBox(width: AdminSpacing.sm),
+              RelativeTimeText(
+                dateTime: log.createdAt,
+                style: AdminTypography.caption,
+              ),
             ],
           ),
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => _showLogDetailsDialog(context, log, l10n, theme),
+          const SizedBox(height: AdminSpacing.sm),
+
+          // Row 2: Actor and target info
+          Row(
+            children: [
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    text: '${l10n.adminAuditActor}: ',
+                    style: AdminTypography.caption.copyWith(
+                      color: AdminColors.textSecondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: log.adminPhone ?? log.adminId,
+                        style: AdminTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AdminColors.textPrimary,
+                        ),
+                      ),
+                      if (targetText != null) ...[
+                        TextSpan(
+                          text: '  •  ${l10n.adminAuditTarget}: ',
+                          style: AdminTypography.caption.copyWith(
+                            color: AdminColors.textSecondary,
+                          ),
+                        ),
+                        TextSpan(
+                          text: targetText,
+                          style: AdminTypography.bodyMedium.copyWith(
+                            color: AdminColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+
+          // Optional reason or clean IP
+          if ((log.reason != null && log.reason!.isNotEmpty) || cleanIp != '-')
+            Padding(
+              padding: const EdgeInsets.only(top: AdminSpacing.xs),
+              child: Row(
+                children: [
+                  if (log.reason != null && log.reason!.isNotEmpty)
+                    Expanded(
+                      child: Text(
+                        '${l10n.adminReason}: "${log.reason}"',
+                        style: AdminTypography.caption.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: AdminColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  if (cleanIp != '-') ...[
+                    const SizedBox(width: AdminSpacing.sm),
+                    Text(
+                      cleanIp,
+                      style: AdminTypography.caption.copyWith(
+                        color: AdminColors.textSecondary,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  void _showLogDetailsDialog(
+  void _showLogDetails(
     BuildContext context,
     AdminAuditLogEntry log,
+    AuditActionPresentation pres,
+    String cleanIp,
     AppLocalizations l10n,
-    ThemeData theme,
   ) {
     const encoder = JsonEncoder.withIndent('  ');
     final oldJson = log.oldValue != null ? encoder.convert(log.oldValue) : null;
     final newJson = log.newValue != null ? encoder.convert(log.newValue) : null;
 
-    showDialog(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('${l10n.adminAuditDetailTitle}: ${log.action}'),
-        content: SizedBox(
-          width: 600,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _detailRow('ID', log.id),
-                _detailRow(l10n.adminDate, log.createdAt.toIso8601String()),
-                if (log.adminPhone != null || log.adminId.isNotEmpty)
-                  _detailRow(
-                    l10n.adminActor,
-                    log.adminPhone != null
-                        ? '${log.adminPhone} (${log.adminId})'
-                        : log.adminId,
-                  ),
-                if (log.targetUserId != null)
-                  _detailRow(
-                    l10n.adminTargetOwner,
-                    log.targetBusinessName != null
-                        ? '${log.targetBusinessName} (${log.targetUserId})'
-                        : log.targetUserId!,
-                  ),
-                if (log.ipAddress != null)
-                  _detailRow(l10n.adminIpAddress, log.ipAddress!),
-                if (log.reason != null)
-                  _detailRow(l10n.adminReason, log.reason!),
-                const Divider(height: 24),
-                if (oldJson != null) ...[
-                  Text(
-                    l10n.adminOldValue,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: SelectableText(
-                      oldJson,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                if (newJson != null) ...[
-                  Text(
-                    l10n.adminNewValue,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: SelectableText(
-                      newJson,
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.close),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: AdminColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AdminSpacing.radiusCard)),
       ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.65,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AdminSpacing.lg,
+                vertical: AdminSpacing.md,
+              ),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AdminColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AdminSpacing.md),
+                  Row(
+                    children: [
+                      StatusChip(
+                        label: pres.label,
+                        icon: pres.icon,
+                        color: pres.color,
+                        backgroundColor: pres.tintColor,
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AdminSpacing.md),
+
+                  // Metadata Card
+                  Container(
+                    padding: const EdgeInsets.all(AdminSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AdminColors.raised,
+                      borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+                      border: Border.all(color: AdminColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        _detailRow(l10n.adminDate, log.createdAt.toLocal().toString().split('.').first),
+                        _detailRow(
+                          l10n.adminAuditActor,
+                          log.adminPhone != null
+                              ? '${log.adminPhone} (${log.adminId})'
+                              : log.adminId,
+                        ),
+                        if (log.targetUserId != null || log.targetBusinessName != null)
+                          _detailRow(
+                            l10n.adminAuditTarget,
+                            log.targetBusinessName != null
+                                ? '${log.targetBusinessName} (${log.targetPhone ?? log.targetUserId})'
+                                : (log.targetPhone ?? log.targetUserId!),
+                          ),
+                        _detailRow(l10n.adminIpAddress, cleanIp),
+                        if (log.reason != null && log.reason!.isNotEmpty)
+                          _detailRow(l10n.adminReason, log.reason!),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: AdminSpacing.lg),
+
+                  // Value Diff
+                  if (oldJson == null && newJson == null)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: AdminSpacing.md),
+                        child: Text(
+                          l10n.adminAuditNoChanges,
+                          style: AdminTypography.caption,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    if (oldJson != null) ...[
+                      Text(
+                        l10n.adminOldValue,
+                        style: AdminTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AdminColors.danger,
+                        ),
+                      ),
+                      const SizedBox(height: AdminSpacing.xs),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AdminSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AdminColors.dangerTint,
+                          borderRadius: BorderRadius.circular(AdminSpacing.radiusField),
+                          border: Border.all(color: AdminColors.danger.withValues(alpha: 0.3)),
+                        ),
+                        child: SelectableText(
+                          oldJson,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            color: AdminColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AdminSpacing.md),
+                    ],
+                    if (newJson != null) ...[
+                      Text(
+                        l10n.adminNewValue,
+                        style: AdminTypography.bodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AdminColors.success,
+                        ),
+                      ),
+                      const SizedBox(height: AdminSpacing.xs),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AdminSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AdminColors.successTint,
+                          borderRadius: BorderRadius.circular(AdminSpacing.radiusField),
+                          border: Border.all(color: AdminColors.success.withValues(alpha: 0.3)),
+                        ),
+                        child: SelectableText(
+                          newJson,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            color: AdminColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _detailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: AdminSpacing.xs),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 110,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              style: AdminTypography.caption.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AdminColors.textSecondary,
+              ),
             ),
           ),
           Expanded(
             child: SelectableText(
               value,
-              style: const TextStyle(fontSize: 12),
+              style: AdminTypography.caption.copyWith(
+                color: AdminColors.textPrimary,
+              ),
             ),
           ),
         ],
@@ -375,29 +522,36 @@ class AdminAuditLogScreen extends ConsumerWidget {
     WidgetRef ref,
     AdminAuditLogsState state,
     AppLocalizations l10n,
-    ThemeData theme,
   ) {
     final page = (state.pagination['page'] as num?)?.toInt() ?? 1;
     final totalPages = (state.pagination['totalPages'] as num?)?.toInt() ?? 1;
     final total = (state.pagination['total'] as num?)?.toInt() ?? state.logs.length;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(top: BorderSide(color: theme.dividerColor)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AdminSpacing.lg,
+        vertical: AdminSpacing.sm,
+      ),
+      decoration: const BoxDecoration(
+        color: AdminColors.surface,
+        border: Border(top: BorderSide(color: AdminColors.border)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '${l10n.page} $page / $totalPages ($total ${l10n.totalEntries})',
-            style: theme.textTheme.bodySmall,
+          Expanded(
+            child: Text(
+              '${l10n.page} $page / $totalPages ($total ${l10n.totalEntries})',
+              style: AdminTypography.caption,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const SizedBox(width: AdminSpacing.sm),
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.chevron_left),
+                icon: const Icon(Icons.chevron_left_rounded),
                 tooltip: l10n.previous,
                 onPressed: page > 1
                     ? () => ref
@@ -406,7 +560,7 @@ class AdminAuditLogScreen extends ConsumerWidget {
                     : null,
               ),
               IconButton(
-                icon: const Icon(Icons.chevron_right),
+                icon: const Icon(Icons.chevron_right_rounded),
                 tooltip: l10n.next,
                 onPressed: page < totalPages
                     ? () => ref
@@ -419,9 +573,5 @@ class AdminAuditLogScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }

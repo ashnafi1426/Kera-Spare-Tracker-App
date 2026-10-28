@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/constants/constants.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/services/session_store.dart';
 import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/security/presentation/widgets/app_lock_lifecycle_wrapper.dart';
 import 'l10n/app_localizations.dart';
 
 Future<void> main() async {
   final totalStartupStopwatch = Stopwatch()..start();
   final stepStopwatch = Stopwatch()..start();
-
+  
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('[STARTUP] WidgetsFlutterBinding.ensureInitialized: ${stepStopwatch.elapsedMilliseconds}ms');
 
@@ -62,9 +65,19 @@ Future<void> main() async {
 
   // Load persisted user preferences (locale & theme mode)
   stepStopwatch.reset();
-  const storage = LocalStorageService();
-  final savedLocaleCode = await storage.getSavedLocaleCode();
-  final savedThemeModeString = await storage.getSavedThemeMode();
+  String? savedLocaleCode;
+  String? savedThemeModeString;
+  try {
+    const storage = LocalStorageService();
+    final results = await Future.wait([
+      storage.getSavedLocaleCode(),
+      storage.getSavedThemeMode(),
+    ]).timeout(const Duration(milliseconds: 300), onTimeout: () => [null, null]);
+    savedLocaleCode = results[0];
+    savedThemeModeString = results[1];
+  } catch (e) {
+    debugPrint('[STARTUP] LocalStorageService fallback: $e');
+  }
   debugPrint('[STARTUP] LocalStorageService read preferences: ${stepStopwatch.elapsedMilliseconds}ms');
 
   stepStopwatch.reset();
@@ -86,8 +99,14 @@ Future<void> main() async {
   );
   debugPrint('[STARTUP] runApp() called: ${stepStopwatch.elapsedMilliseconds}ms (Total before runApp: ${totalStartupStopwatch.elapsedMilliseconds}ms)');
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     debugPrint('[STARTUP] First frame rendered (PostFrameCallback): ${totalStartupStopwatch.elapsedMilliseconds}ms');
+    try {
+      final savedUrl = await SessionStore().getSavedApiBaseUrl();
+      if (savedUrl != null && savedUrl.isNotEmpty) {
+        AppConstants.setApiBaseUrl(savedUrl);
+      }
+    } catch (_) {}
   });
 }
 
@@ -118,6 +137,11 @@ class KeraSpareTrackerApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) {
+        return AppLockLifecycleWrapper(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

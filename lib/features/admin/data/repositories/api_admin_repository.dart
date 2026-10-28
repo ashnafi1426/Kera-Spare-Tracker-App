@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/models/admin_models.dart';
@@ -16,7 +17,7 @@ class ApiAdminRepository implements AdminRepository {
   ApiAdminRepository({
     Dio? dioClient,
     FlutterSecureStorage? storage,
-  })  : _storage = storage ?? const FlutterSecureStorage(),
+  })  : _storage = storage ?? defaultSecureStorage,
         _dio = dioClient ??
             Dio(
               BaseOptions(

@@ -51,6 +51,9 @@ void main() {
     // Default mock: unauthenticated
     when(() => mockAuth.currentUser()).thenAnswer((_) async => const Result.success(null));
     when(() => mockAuth.watchCurrentUser()).thenAnswer((_) => Stream.value(null));
+    when(() => mockAuth.precheckLogout()).thenAnswer(
+        (_) async => const LogoutPrecheck(pendingCount: 0, isOnline: true));
+    when(() => mockAuth.logout()).thenAnswer((_) async => const Result.success(null));
   });
 
   testWidgets('Unauthenticated user is redirected to LoginScreen with Amharic by default',
@@ -177,7 +180,9 @@ void main() {
 
     // Scroll to and tap Logout button
     final logoutBtn = find.widgetWithText(OutlinedButton, 'ውጣ');
-    await tester.scrollUntilVisible(logoutBtn, 200);
+    await tester.scrollUntilVisible(logoutBtn, 500);
+    await tester.ensureVisible(logoutBtn);
+    await tester.pumpAndSettle();
     expect(logoutBtn, findsOneWidget);
     await tester.tap(logoutBtn);
     await tester.pumpAndSettle();

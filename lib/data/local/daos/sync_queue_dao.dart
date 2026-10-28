@@ -58,4 +58,25 @@ class SyncQueueDao extends DatabaseAccessor<AppDatabase>
   Future<int> clearQueue() {
     return delete(syncQueue).go();
   }
+
+  /// Returns true if there are any pending mutations in the queue.
+  Future<bool> hasUnsyncedChanges() async {
+    final item = await (select(syncQueue)..limit(1)).getSingleOrNull();
+    return item != null;
+  }
+
+  /// Returns count of pending sync queue items.
+  Future<int> countPending() async {
+    final countExp = syncQueue.id.count();
+    final query = selectOnly(syncQueue)..addColumns([countExp]);
+    final result = await query.map((row) => row.read(countExp)).getSingle();
+    return result ?? 0;
+  }
+
+  /// Watches the count of pending sync queue items as a reactive stream.
+  Stream<int> watchCountPending() {
+    final countExp = syncQueue.id.count();
+    final query = selectOnly(syncQueue)..addColumns([countExp]);
+    return query.map((row) => row.read(countExp) ?? 0).watchSingle();
+  }
 }

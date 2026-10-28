@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/design/tokens/admin_typography.dart';
+import '../../../../core/design/widgets/confirm_dialog.dart';
+import '../../../../core/design/widgets/list_card.dart';
+import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
 
@@ -72,10 +79,24 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     _initialized = true;
   }
 
+  bool _hasUnsavedChanges(AdminSettingsState state) {
+    if (!_initialized) return false;
+    final verChanged = _versionController.text.trim() != state.minAppVersion.version ||
+        _enforceVersion != state.minAppVersion.enforce;
+    final annChanged = _announcementActive != state.announcement.active ||
+        _annTitleAmController.text.trim() != state.announcement.titleAm ||
+        _annTitleEnController.text.trim() != state.announcement.titleEn ||
+        _annBodyAmController.text.trim() != state.announcement.bodyAm ||
+        _annBodyEnController.text.trim() != state.announcement.bodyEn;
+    final maintChanged = _maintenanceEnabled != state.maintenance.enabled ||
+        _maintMessageAmController.text.trim() != state.maintenance.messageAm ||
+        _maintMessageEnController.text.trim() != state.maintenance.messageEn;
+    return verChanged || annChanged || maintChanged;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final settingsState = ref.watch(adminSettingsProvider);
 
     if (!settingsState.isLoading && !_initialized) {
@@ -87,132 +108,191 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: theme.colorScheme.error,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
       if (next.successMessage != null && next.successMessage != prev?.successMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.successMessage!),
-            backgroundColor: Colors.green,
+            content: Text(next.successMessage ?? l10n.adminSaveSuccess),
+            backgroundColor: AdminColors.success,
           ),
         );
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.adminAppSettingsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.refresh,
-            onPressed: () {
-              _initialized = false;
-              ref.read(adminSettingsProvider.notifier).loadSettings();
-            },
+    return PopScope(
+      canPop: !_hasUnsavedChanges(settingsState),
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => ConfirmDialog(
+            title: l10n.adminUnsavedChangesTitle,
+            description: l10n.adminUnsavedChangesMessage,
+            confirmLabel: l10n.adminDiscard,
+            isDestructive: true,
+            requireReason: false,
           ),
-        ],
-      ),
-      body: settingsState.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () async {
+        );
+        if (discard == true && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AdminColors.background,
+        appBar: AppBar(
+          title: Text(l10n.adminAppSettingsTitle),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: l10n.refresh,
+              onPressed: () {
                 _initialized = false;
-                await ref.read(adminSettingsProvider.notifier).loadSettings();
+                ref.read(adminSettingsProvider.notifier).loadSettings();
               },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildVersionSection(context, l10n, theme, settingsState),
-                        const SizedBox(height: 20),
-                        _buildAnnouncementSection(context, l10n, theme, settingsState),
-                        const SizedBox(height: 20),
-                        _buildMaintenanceSection(context, l10n, theme, settingsState),
-                        const SizedBox(height: 40),
-                      ],
+            ),
+          ],
+        ),
+        body: settingsState.isLoading
+            ? const Padding(
+                padding: EdgeInsets.all(AdminSpacing.lg),
+                child: SkeletonListLoader(count: 4),
+              )
+            : RefreshIndicator(
+                color: AdminColors.primary,
+                onRefresh: () async {
+                  _initialized = false;
+                  await ref.read(adminSettingsProvider.notifier).loadSettings();
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AdminSpacing.lg,
+                    vertical: AdminSpacing.md,
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 800),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildVersionSection(context, l10n, settingsState),
+                          const SizedBox(height: AdminSpacing.xl),
+                          _buildAnnouncementSection(context, l10n, settingsState),
+                          const SizedBox(height: AdminSpacing.xl),
+                          _buildMaintenanceSection(context, l10n, settingsState),
+                          const SizedBox(height: AdminSpacing.xl),
+                          const AppLockSettingsCard(),
+                          const SizedBox(height: AdminSpacing.xxl),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
   Widget _buildVersionSection(
     BuildContext context,
     AppLocalizations l10n,
-    ThemeData theme,
     AdminSettingsState state,
   ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.system_update, color: theme.colorScheme.primary),
-                const SizedBox(width: 10),
-                Text(
-                  l10n.adminMinAppVersion,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+    return ListCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AdminSpacing.sm),
+                decoration: const BoxDecoration(
+                  color: AdminColors.infoTint,
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.adminMinAppVersionDesc,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
-            const Divider(height: 24),
-            TextFormField(
-              controller: _versionController,
-              decoration: InputDecoration(
-                labelText: l10n.adminVersionStringLabel,
-                hintText: '1.0.0',
-                prefixIcon: const Icon(Icons.numbers),
-                border: const OutlineInputBorder(),
+                child: const Icon(
+                  Icons.system_update_rounded,
+                  color: AdminColors.primary,
+                  size: 20,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.adminEnforceMinVersion),
-              subtitle: Text(l10n.adminEnforceMinVersionDesc),
-              value: _enforceVersion,
-              onChanged: (val) => setState(() => _enforceVersion = val),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: Text(l10n.save),
-                onPressed: state.isSaving
-                    ? null
-                    : () {
-                        final v = _versionController.text.trim();
-                        if (v.isNotEmpty) {
-                          ref
-                              .read(adminSettingsProvider.notifier)
-                              .saveMinAppVersion(v, _enforceVersion);
-                        }
-                      },
+              const SizedBox(width: AdminSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.adminMinAppVersion,
+                      style: AdminTypography.h3,
+                    ),
+                    Text(
+                      l10n.adminMinAppVersionDesc,
+                      style: AdminTypography.caption,
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          const Divider(height: 1, color: AdminColors.border),
+          const SizedBox(height: AdminSpacing.md),
+          TextFormField(
+            controller: _versionController,
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminVersionStringLabel,
+              hintText: '1.0.0',
+              helperText: l10n.adminVersionHelper,
+              helperStyle: AdminTypography.caption,
+              prefixIcon: const Icon(Icons.tag_rounded, color: AdminColors.textSecondary),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AdminSpacing.sm),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            activeTrackColor: AdminColors.primary,
+            activeThumbColor: Colors.white,
+            title: Text(
+              l10n.adminEnforceMinVersion,
+              style: AdminTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(
+              l10n.adminEnforceMinVersionDesc,
+              style: AdminTypography.caption,
+            ),
+            value: _enforceVersion,
+            onChanged: (val) => setState(() => _enforceVersion = val),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AdminColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),
+                ),
+              ),
+              icon: const Icon(Icons.save_rounded, size: 18),
+              label: Text(l10n.save),
+              onPressed: state.isSaving
+                  ? null
+                  : () {
+                      final v = _versionController.text.trim();
+                      if (v.isNotEmpty) {
+                        ref
+                            .read(adminSettingsProvider.notifier)
+                            .saveMinAppVersion(v, _enforceVersion);
+                      }
+                    },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -220,96 +300,176 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   Widget _buildAnnouncementSection(
     BuildContext context,
     AppLocalizations l10n,
-    ThemeData theme,
     AdminSettingsState state,
   ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.campaign, color: theme.colorScheme.primary),
-                const SizedBox(width: 10),
-                Text(
-                  l10n.adminAnnouncementSettings,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+    final previewTitle = Localizations.localeOf(context).languageCode == 'am'
+        ? (_annTitleAmController.text.isNotEmpty ? _annTitleAmController.text : _annTitleEnController.text)
+        : (_annTitleEnController.text.isNotEmpty ? _annTitleEnController.text : _annTitleAmController.text);
+    final previewBody = Localizations.localeOf(context).languageCode == 'am'
+        ? (_annBodyAmController.text.isNotEmpty ? _annBodyAmController.text : _annBodyEnController.text)
+        : (_annBodyEnController.text.isNotEmpty ? _annBodyEnController.text : _annBodyAmController.text);
+
+    return ListCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AdminSpacing.sm),
+                decoration: const BoxDecoration(
+                  color: AdminColors.infoTint,
+                  shape: BoxShape.circle,
                 ),
-              ],
+                child: const Icon(
+                  Icons.campaign_rounded,
+                  color: AdminColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AdminSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.adminAnnouncementSettings,
+                      style: AdminTypography.h3,
+                    ),
+                    Text(
+                      l10n.adminAnnouncementDesc,
+                      style: AdminTypography.caption,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          const Divider(height: 1, color: AdminColors.border),
+          const SizedBox(height: AdminSpacing.md),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            activeTrackColor: AdminColors.primary,
+            activeThumbColor: Colors.white,
+            title: Text(
+              l10n.adminAnnouncementActive,
+              style: AdminTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.adminAnnouncementDesc,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+            subtitle: Text(
+              l10n.adminAnnouncementActiveDesc,
+              style: AdminTypography.caption,
             ),
-            const Divider(height: 24),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.adminAnnouncementActive),
-              subtitle: Text(l10n.adminAnnouncementActiveDesc),
-              value: _announcementActive,
-              onChanged: (val) => setState(() => _announcementActive = val),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _annTitleAmController,
-              decoration: InputDecoration(
-                labelText: l10n.adminAnnouncementTitleAm,
-                border: const OutlineInputBorder(),
+            value: _announcementActive,
+            onChanged: (val) => setState(() => _announcementActive = val),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+
+          // Live Preview Banner
+          if (_announcementActive) ...[
+            Container(
+              padding: const EdgeInsets.all(AdminSpacing.md),
+              decoration: BoxDecoration(
+                color: AdminColors.infoTint,
+                borderRadius: BorderRadius.circular(AdminSpacing.radiusField),
+                border: Border.all(color: AdminColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.preview_rounded, size: 16, color: AdminColors.primary),
+                      const SizedBox(width: AdminSpacing.xs),
+                      Text(
+                        l10n.adminLivePreview,
+                        style: AdminTypography.caption.copyWith(
+                          color: AdminColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AdminSpacing.xs),
+                  Text(
+                    previewTitle.isNotEmpty ? previewTitle : 'Announcement Title',
+                    style: AdminTypography.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  if (previewBody.isNotEmpty) ...[
+                    const SizedBox(height: AdminSpacing.xs),
+                    Text(previewBody, style: AdminTypography.caption),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _annBodyAmController,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: l10n.adminAnnouncementBodyAm,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _annTitleEnController,
-              decoration: InputDecoration(
-                labelText: l10n.adminAnnouncementTitleEn,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _annBodyEnController,
-              maxLines: 2,
-              decoration: InputDecoration(
-                labelText: l10n.adminAnnouncementBodyEn,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: Text(l10n.save),
-                onPressed: state.isSaving
-                    ? null
-                    : () {
-                        final ann = AdminAnnouncement(
-                          active: _announcementActive,
-                          titleAm: _annTitleAmController.text.trim(),
-                          titleEn: _annTitleEnController.text.trim(),
-                          bodyAm: _annBodyAmController.text.trim(),
-                          bodyEn: _annBodyEnController.text.trim(),
-                        );
-                        ref.read(adminSettingsProvider.notifier).saveAnnouncement(ann);
-                      },
-              ),
-            ),
+            const SizedBox(height: AdminSpacing.md),
           ],
-        ),
+
+          TextFormField(
+            controller: _annTitleAmController,
+            onChanged: (_) => setState(() {}),
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminAnnouncementTitleAm,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.sm),
+          TextFormField(
+            controller: _annBodyAmController,
+            onChanged: (_) => setState(() {}),
+            maxLines: 2,
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminAnnouncementBodyAm,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          TextFormField(
+            controller: _annTitleEnController,
+            onChanged: (_) => setState(() {}),
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminAnnouncementTitleEn,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.sm),
+          TextFormField(
+            controller: _annBodyEnController,
+            onChanged: (_) => setState(() {}),
+            maxLines: 2,
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminAnnouncementBodyEn,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AdminColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),
+                ),
+              ),
+              icon: const Icon(Icons.save_rounded, size: 18),
+              label: Text(l10n.save),
+              onPressed: state.isSaving
+                  ? null
+                  : () {
+                      final ann = AdminAnnouncement(
+                        active: _announcementActive,
+                        titleAm: _annTitleAmController.text.trim(),
+                        titleEn: _annTitleEnController.text.trim(),
+                        bodyAm: _annBodyAmController.text.trim(),
+                        bodyEn: _annBodyEnController.text.trim(),
+                      );
+                      ref.read(adminSettingsProvider.notifier).saveAnnouncement(ann);
+                    },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -317,81 +477,109 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   Widget _buildMaintenanceSection(
     BuildContext context,
     AppLocalizations l10n,
-    ThemeData theme,
     AdminSettingsState state,
   ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.build_circle, color: theme.colorScheme.error),
-                const SizedBox(width: 10),
-                Text(
-                  l10n.adminMaintenanceMode,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.error,
-                  ),
+    return ListCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AdminSpacing.sm),
+                decoration: const BoxDecoration(
+                  color: AdminColors.dangerTint,
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.adminMaintenanceDesc,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
-            const Divider(height: 24),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.adminMaintenanceActive),
-              subtitle: Text(l10n.adminMaintenanceActiveDesc),
-              value: _maintenanceEnabled,
-              onChanged: (val) => setState(() => _maintenanceEnabled = val),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _maintMessageAmController,
-              decoration: InputDecoration(
-                labelText: l10n.adminMaintenanceMessageAm,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _maintMessageEnController,
-              decoration: InputDecoration(
-                labelText: l10n.adminMaintenanceMessageEn,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _maintenanceEnabled ? theme.colorScheme.error : null,
-                  foregroundColor: _maintenanceEnabled ? Colors.white : null,
+                child: const Icon(
+                  Icons.build_circle_rounded,
+                  color: AdminColors.danger,
+                  size: 20,
                 ),
-                icon: const Icon(Icons.save),
-                label: Text(l10n.save),
-                onPressed: state.isSaving
-                    ? null
-                    : () {
-                        final maint = AdminMaintenanceMode(
-                          enabled: _maintenanceEnabled,
-                          messageAm: _maintMessageAmController.text.trim(),
-                          messageEn: _maintMessageEnController.text.trim(),
-                        );
-                        ref.read(adminSettingsProvider.notifier).saveMaintenance(maint);
-                      },
+              ),
+              const SizedBox(width: AdminSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.adminMaintenanceMode,
+                      style: AdminTypography.h3.copyWith(
+                        color: _maintenanceEnabled ? AdminColors.danger : null,
+                      ),
+                    ),
+                    Text(
+                      l10n.adminMaintenanceDesc,
+                      style: AdminTypography.caption,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          const Divider(height: 1, color: AdminColors.border),
+          const SizedBox(height: AdminSpacing.md),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            activeTrackColor: AdminColors.danger,
+            activeThumbColor: Colors.white,
+            title: Text(
+              l10n.adminMaintenanceActive,
+              style: AdminTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: _maintenanceEnabled ? AdminColors.danger : null,
               ),
             ),
-          ],
-        ),
+            subtitle: Text(
+              l10n.adminMaintenanceActiveDesc,
+              style: AdminTypography.caption,
+            ),
+            value: _maintenanceEnabled,
+            onChanged: (val) => setState(() => _maintenanceEnabled = val),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          TextFormField(
+            controller: _maintMessageAmController,
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminMaintenanceMessageAm,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.sm),
+          TextFormField(
+            controller: _maintMessageEnController,
+            style: AdminTypography.bodyMedium,
+            decoration: InputDecoration(
+              labelText: l10n.adminMaintenanceMessageEn,
+            ),
+          ),
+          const SizedBox(height: AdminSpacing.md),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: _maintenanceEnabled ? AdminColors.danger : AdminColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),
+                ),
+              ),
+              icon: const Icon(Icons.save_rounded, size: 18),
+              label: Text(l10n.save),
+              onPressed: state.isSaving
+                  ? null
+                  : () {
+                      final maint = AdminMaintenanceMode(
+                        enabled: _maintenanceEnabled,
+                        messageAm: _maintMessageAmController.text.trim(),
+                        messageEn: _maintMessageEnController.text.trim(),
+                      );
+                      ref.read(adminSettingsProvider.notifier).saveMaintenance(maint);
+                    },
+            ),
+          ),
+        ],
       ),
     );
   }

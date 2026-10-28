@@ -1938,16 +1938,16 @@ abstract class AppLocalizations {
   /// **'የዳመና ማመሳሰል አገልግሎት ለጊዜው በጥገና ላይ ነው። የመስመር ውጭ የዕቃዎች እና የሽያጭ ስራዎች ሙሉ በሙሉ ይሰራሉ።'**
   String get maintenanceBanner;
 
-  /// Suspension alert title
+  /// Title for suspended account banner
   ///
   /// In am, this message translates to:
-  /// **'መለያዎ ታግዷል'**
+  /// **'መለያው ታግዷል'**
   String get accountSuspendedTitle;
 
-  /// Suspension alert message
+  /// Message for suspended account banner
   ///
   /// In am, this message translates to:
-  /// **'መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።'**
+  /// **'መለያዎ ታግዷል። ማመሳሰል ቆሟል፤ ነገር ግን የአካባቢዎ መረጃዎች ክፍት ሆነው ይቆያሉ እና መረጃ ማውጣት ይችላሉ።'**
   String get accountSuspendedMessage;
 
   /// Suspension reason label
@@ -2145,7 +2145,7 @@ abstract class AppLocalizations {
   /// No description provided for @adminCatalog.
   ///
   /// In am, this message translates to:
-  /// **'አጠቃላይ ዝርዝሮች'**
+  /// **'ካታሎግ'**
   String get adminCatalog;
 
   /// No description provided for @adminCatalogTitle.
@@ -2747,6 +2747,576 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'ጠቅላላ መዝገቦች'**
   String get totalEntries;
+
+  /// Banner message when refresh token expired or revoked
+  ///
+  /// In am, this message translates to:
+  /// **'ማመሳሰልን ለመቀጠል እባክዎ እንደገና ይግቡ'**
+  String get authNeedsLoginBanner;
+
+  /// Action button on needsLogin banner
+  ///
+  /// In am, this message translates to:
+  /// **'ግባ'**
+  String get authNeedsLoginAction;
+
+  /// Offline message on register/login
+  ///
+  /// In am, this message translates to:
+  /// **'ለመመዝገብ ወይም ለመግባት የበይነመረብ ግንኙነት ያስፈልጋል።'**
+  String get authOfflineInternetRequired;
+
+  /// Title for conflict when logging in as different owner with pending sync
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተመሳሰለ የመለያ ውሂብ'**
+  String get authDifferentOwnerConflictTitle;
+
+  /// Message for conflict when logging in as different owner with pending sync
+  ///
+  /// In am, this message translates to:
+  /// **'ይህ ስልክ ካልተመሳሰለ ሌላ መለያ ({ownerName}) ውሂብ ይዟል። ለማመሳሰል እባክዎ በቀዳሚው መለያ ይግቡ ወይም ለመቀጠል ያልተመሳሰለውን ውሂብ ያጥፉ።'**
+  String authDifferentOwnerConflictMessage(String ownerName);
+
+  /// Button to discard unsynced data and log in with new owner
+  ///
+  /// In am, this message translates to:
+  /// **'ውሂቡን አጥፋና ግባ'**
+  String get authDiscardUnsyncedAndLogin;
+
+  /// Warning message when offline duration exceeds max days
+  ///
+  /// In am, this message translates to:
+  /// **'መተግበሪያው ከመስመር ውጭ ከ{days} ቀናት በላይ ቆይቷል። መለያዎን ለማረጋገጥ እባክዎ ከበይነመረብ ጋር ይገናኙ።'**
+  String authOfflineMaxDaysWarning(int days);
+
+  /// Initial sync title
+  ///
+  /// In am, this message translates to:
+  /// **'የእርስዎን እቃዎች በማዘጋጀት ላይ...'**
+  String get initialSyncTitle;
+
+  /// Initial sync subtitle
+  ///
+  /// In am, this message translates to:
+  /// **'የእርስዎን የእቃዎች ዝርዝር ከአገልጋይ በማውረድ ላይ'**
+  String get initialSyncSubtitle;
+
+  /// Title when logout is blocked due to offline pending changes
+  ///
+  /// In am, this message translates to:
+  /// **'መውጣት አልተቻለም (ኢንተርኔት የለም)'**
+  String get logoutBlockedOfflineTitle;
+
+  /// Message explaining why offline logout with pending changes is blocked
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተመሳሰሉ {count} ለውጦች አሉ። ከመስመር ውጭ ሆነው ከወጡ ለውጦችዎ ወደ አገልጋዩ ስለማይላኩ ስራዎ በቋሚነት ይጠፋል።'**
+  String logoutBlockedOfflineMessage(int count);
+
+  /// Export data action button in logout blocked dialog
+  ///
+  /// In am, this message translates to:
+  /// **'መረጃን አውጣ (CSV)'**
+  String get exportDataAction;
+
+  /// Prompt requiring typing DISCARD
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተመሳሰሉ ለውጦችን አጥፍተው ለመውጣት ከታች DISCARD ብለው ይጻፉ:'**
+  String get logoutDiscardPrompt;
+
+  /// Button to confirm discarding unsynced changes and logging out
+  ///
+  /// In am, this message translates to:
+  /// **'አጥፍተህ ውጣ'**
+  String get logoutDiscardButton;
+
+  /// Title when logout has pending changes while online
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተመሳሰሉ ለውጦች አሉ'**
+  String get logoutPendingOnlineTitle;
+
+  /// Message showing pending count when online
+  ///
+  /// In am, this message translates to:
+  /// **'ወደ አገልጋዩ ያልተላኩ {count} ያልተመሳሰሉ ለውጦች አሉ።'**
+  String logoutPendingOnlineMessage(int count);
+
+  /// Button to sync changes then log out
+  ///
+  /// In am, this message translates to:
+  /// **'አሁን አመሳስልና ውጣ'**
+  String get syncNowAndLogout;
+
+  /// Notice when sync fails during logout
+  ///
+  /// In am, this message translates to:
+  /// **'ማመሳሰል አልተሳካም: {reason}። ለውጦችዎ እንዳይጠፉ አልወጡም።'**
+  String syncFailedLogoutCancelled(String reason);
+
+  /// Settings label for sync status
+  ///
+  /// In am, this message translates to:
+  /// **'የማመሳሰል ሁኔታ'**
+  String get syncStatusTitle;
+
+  /// Sync status when queue is empty
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም ለውጦች ተመሳስለዋል'**
+  String get syncStatusUpToDate;
+
+  /// Sync status when queue has items
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ያልተመሳሰሉ ለውጦች'**
+  String syncStatusPending(int count);
+
+  /// Sync status while pushing mutations
+  ///
+  /// In am, this message translates to:
+  /// **'ለውጦች በመመሳሰል ላይ ናቸው...'**
+  String get syncStatusSyncing;
+
+  /// Settings label for last online time
+  ///
+  /// In am, this message translates to:
+  /// **'ለመጨረሻ ጊዜ የተገናኘበት'**
+  String get lastOnlineTitle;
+
+  /// Settings label for pending changes count
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተላኩ ለውጦች'**
+  String get pendingChangesCount;
+
+  /// Title for password changed remotely banner
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል በሌላ ቦታ ተቀይሯል'**
+  String get passwordChangedRemotelyTitle;
+
+  /// Message for password changed remotely banner
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃልዎ በሌላ ስልክ ተቀይሯል። ማመሳሰልን ለማስቀጠል በአዲሱ የይለፍ ቃል ይግቡ። የአካባቢ መረጃዎ ደህንነቱ የተጠበቀ ነው።'**
+  String get passwordChangedRemotelyMessage;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'መተግበሪያ ቆልፍ'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockSubtitle.
+  ///
+  /// In am, this message translates to:
+  /// **'መተግበሪያውን በፒን ወይም በባዮሜትሪክስ ይጠብቁ'**
+  String get appLockSubtitle;
+
+  /// No description provided for @appLockEnabled.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ መቆለፊያ ነቅቷል'**
+  String get appLockEnabled;
+
+  /// No description provided for @appLockDisabled.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ መቆለፊያ ጠፍቷል'**
+  String get appLockDisabled;
+
+  /// No description provided for @appLockBiometrics.
+  ///
+  /// In am, this message translates to:
+  /// **'ባዮሜትሪክስ መክፈቻ'**
+  String get appLockBiometrics;
+
+  /// No description provided for @appLockBiometricsDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ለመክፈት የጣት አሻራ ወይም የፊት ገጽታ ይጠቀሙ'**
+  String get appLockBiometricsDesc;
+
+  /// No description provided for @appLockTimeout.
+  ///
+  /// In am, this message translates to:
+  /// **'ራስ-ሰር የመቆለፊያ ጊዜ'**
+  String get appLockTimeout;
+
+  /// No description provided for @appLockTimeoutImmediately.
+  ///
+  /// In am, this message translates to:
+  /// **'ወዲያውኑ'**
+  String get appLockTimeoutImmediately;
+
+  /// No description provided for @appLockTimeout1Min.
+  ///
+  /// In am, this message translates to:
+  /// **'ከ1 ደቂቃ በኋላ'**
+  String get appLockTimeout1Min;
+
+  /// No description provided for @appLockTimeout5Min.
+  ///
+  /// In am, this message translates to:
+  /// **'ከ5 ደቂቃ በኋላ'**
+  String get appLockTimeout5Min;
+
+  /// No description provided for @changePin.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒን ይቀይሩ'**
+  String get changePin;
+
+  /// No description provided for @setPinTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ፒን ያዘጋጁ'**
+  String get setPinTitle;
+
+  /// No description provided for @enterNewPin.
+  ///
+  /// In am, this message translates to:
+  /// **'ከ4 እስከ 6 አሃዝ ፒን ያስገቡ'**
+  String get enterNewPin;
+
+  /// No description provided for @confirmPinTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ፒን ያረጋግጡ'**
+  String get confirmPinTitle;
+
+  /// No description provided for @reenterPin.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒንዎን በድጋሚ ያስገቡ'**
+  String get reenterPin;
+
+  /// No description provided for @pinsDoNotMatch.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒኖቹ አይመሳሰሉም። እባክዎ እንደገና ይሞክሩ።'**
+  String get pinsDoNotMatch;
+
+  /// No description provided for @pinLengthError.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒኑ ከ4 እስከ 6 አሃዝ መሆን አለበት።'**
+  String get pinLengthError;
+
+  /// No description provided for @pinSetSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ፒን በተሳካ ሁኔታ ተቀይሯል።'**
+  String get pinSetSuccess;
+
+  /// No description provided for @enterPinToUnlock.
+  ///
+  /// In am, this message translates to:
+  /// **'ለመክፈት ፒን ያስገቡ'**
+  String get enterPinToUnlock;
+
+  /// No description provided for @wrongPin.
+  ///
+  /// In am, this message translates to:
+  /// **'የተሳሳተ ፒን ነው። {remaining} ሙከራዎች ቀርተዋል።'**
+  String wrongPin(int remaining);
+
+  /// No description provided for @lockoutCooldown.
+  ///
+  /// In am, this message translates to:
+  /// **'ብዙ የተሳሳቱ ሙከራዎች። ከ{seconds} ሰከንድ በኋላ እንደገና ይሞክሩ።'**
+  String lockoutCooldown(int seconds);
+
+  /// No description provided for @lockoutMaxReached.
+  ///
+  /// In am, this message translates to:
+  /// **'ከፍተኛ የተሳሳቱ ሙከራዎች ተደርገዋል። በመስመር ላይ መግባት ያስፈልጋል።'**
+  String get lockoutMaxReached;
+
+  /// No description provided for @forgotPin.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒን ረሱ?'**
+  String get forgotPin;
+
+  /// No description provided for @forgotPinTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመተግበሪያ ፒን ዳግም ያስጀምሩ'**
+  String get forgotPinTitle;
+
+  /// No description provided for @forgotPinDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ፒንዎን ዳግም ለማስጀመር በስልክ ቁጥርዎ እና በይለፍ ቃልዎ ይግቡ። የአካባቢዎ መረጃ ይጠበቃል።'**
+  String get forgotPinDesc;
+
+  /// No description provided for @biometricPromptReason.
+  ///
+  /// In am, this message translates to:
+  /// **'ኬራ ስፔር ትራከርን ለመክፈት የጣት አሻራዎን ወይም ፊትዎን ያረጋግጡ'**
+  String get biometricPromptReason;
+
+  /// No description provided for @unlockWithBiometrics.
+  ///
+  /// In am, this message translates to:
+  /// **'በባዮሜትሪክስ ይክፈቱ'**
+  String get unlockWithBiometrics;
+
+  /// No description provided for @loginToResetPin.
+  ///
+  /// In am, this message translates to:
+  /// **'ያረጋግጡ እና ፒን ዳግም ያስጀምሩ'**
+  String get loginToResetPin;
+
+  /// No description provided for @adminAuditActionUserSuspended.
+  ///
+  /// In am, this message translates to:
+  /// **'ተጠቃሚ ታግዷል'**
+  String get adminAuditActionUserSuspended;
+
+  /// No description provided for @adminAuditActionUserReactivated.
+  ///
+  /// In am, this message translates to:
+  /// **'እገዳ ተነስቷል'**
+  String get adminAuditActionUserReactivated;
+
+  /// No description provided for @adminAuditActionPasswordReset.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ተቀይሯል'**
+  String get adminAuditActionPasswordReset;
+
+  /// No description provided for @adminAuditActionUserDeleted.
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንት ተዘግቷል'**
+  String get adminAuditActionUserDeleted;
+
+  /// No description provided for @adminAuditActionBrandCreated.
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ ተፈጠረ'**
+  String get adminAuditActionBrandCreated;
+
+  /// No description provided for @adminAuditActionBrandUpdated.
+  ///
+  /// In am, this message translates to:
+  /// **'ብራንድ ተሻሻለ'**
+  String get adminAuditActionBrandUpdated;
+
+  /// No description provided for @adminAuditActionCategoryCreated.
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ ተፈጠረ'**
+  String get adminAuditActionCategoryCreated;
+
+  /// No description provided for @adminAuditActionCategoryUpdated.
+  ///
+  /// In am, this message translates to:
+  /// **'ምድብ ተሻሻለ'**
+  String get adminAuditActionCategoryUpdated;
+
+  /// No description provided for @adminAuditActionUnitCreated.
+  ///
+  /// In am, this message translates to:
+  /// **'መለኪያ ተፈጠረ'**
+  String get adminAuditActionUnitCreated;
+
+  /// No description provided for @adminAuditActionUnitUpdated.
+  ///
+  /// In am, this message translates to:
+  /// **'መለኪያ ተሻሻለ'**
+  String get adminAuditActionUnitUpdated;
+
+  /// No description provided for @adminAuditActionSettingsUpdated.
+  ///
+  /// In am, this message translates to:
+  /// **'ቅንብሮች ተሻሻሉ'**
+  String get adminAuditActionSettingsUpdated;
+
+  /// No description provided for @adminAuditDetailsTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የኦዲት መዝገብ ዝርዝር'**
+  String get adminAuditDetailsTitle;
+
+  /// No description provided for @adminAuditActor.
+  ///
+  /// In am, this message translates to:
+  /// **'ፈፃሚ'**
+  String get adminAuditActor;
+
+  /// No description provided for @adminAuditTarget.
+  ///
+  /// In am, this message translates to:
+  /// **'ዒላማ'**
+  String get adminAuditTarget;
+
+  /// No description provided for @adminAuditNoChanges.
+  ///
+  /// In am, this message translates to:
+  /// **'ምንም የተቀየረ እሴት የለም'**
+  String get adminAuditNoChanges;
+
+  /// No description provided for @adminAuditToday.
+  ///
+  /// In am, this message translates to:
+  /// **'ዛሬ'**
+  String get adminAuditToday;
+
+  /// No description provided for @adminAuditYesterday.
+  ///
+  /// In am, this message translates to:
+  /// **'ትናንት'**
+  String get adminAuditYesterday;
+
+  /// No description provided for @adminSyncHealthy.
+  ///
+  /// In am, this message translates to:
+  /// **'ጥሩ ሁኔታ'**
+  String get adminSyncHealthy;
+
+  /// No description provided for @adminSyncNeverStarted.
+  ///
+  /// In am, this message translates to:
+  /// **'ገና አልተመሳሰለም'**
+  String get adminSyncNeverStarted;
+
+  /// No description provided for @adminSyncNeedsAttention.
+  ///
+  /// In am, this message translates to:
+  /// **'ክትትል ያስፈልገዋል'**
+  String get adminSyncNeedsAttention;
+
+  /// No description provided for @adminAppVersionsTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጠቃሚ መተግበሪያ ስሪቶች'**
+  String get adminAppVersionsTitle;
+
+  /// No description provided for @adminLastUpdated.
+  ///
+  /// In am, this message translates to:
+  /// **'የመጨረሻ ማሻሻያ'**
+  String get adminLastUpdated;
+
+  /// No description provided for @adminNoMoreOwners.
+  ///
+  /// In am, this message translates to:
+  /// **'ሁሉም ባለቤቶች ተጭነዋል'**
+  String get adminNoMoreOwners;
+
+  /// No description provided for @adminSortBy.
+  ///
+  /// In am, this message translates to:
+  /// **'አስተካክል በ'**
+  String get adminSortBy;
+
+  /// No description provided for @adminSortNewest.
+  ///
+  /// In am, this message translates to:
+  /// **'አዳዲሶች መጀመሪያ'**
+  String get adminSortNewest;
+
+  /// No description provided for @adminSortBusinessName.
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ ስም'**
+  String get adminSortBusinessName;
+
+  /// No description provided for @adminSortLastSync.
+  ///
+  /// In am, this message translates to:
+  /// **'የመጨረሻ ማመሳሰል'**
+  String get adminSortLastSync;
+
+  /// No description provided for @adminNeverSynced.
+  ///
+  /// In am, this message translates to:
+  /// **'አልተመሳሰለም'**
+  String get adminNeverSynced;
+
+  /// No description provided for @adminCatalogItemsCount.
+  ///
+  /// In am, this message translates to:
+  /// **'{count} ዝርዝሮች'**
+  String adminCatalogItemsCount(int count);
+
+  /// No description provided for @adminCatalogActiveCount.
+  ///
+  /// In am, this message translates to:
+  /// **'{active} ከ {total} ንቁ'**
+  String adminCatalogActiveCount(int active, int total);
+
+  /// No description provided for @adminActiveLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'ንቁ'**
+  String get adminActiveLabel;
+
+  /// No description provided for @adminInactiveLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'ቦዝኗል'**
+  String get adminInactiveLabel;
+
+  /// No description provided for @adminConfirmDeactivateTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ዝርዝሩን አቦዝን'**
+  String get adminConfirmDeactivateTitle;
+
+  /// No description provided for @adminConfirmDeactivateMessage.
+  ///
+  /// In am, this message translates to:
+  /// **'{name}ን ማቦዘን ይፈልጋሉ? ከባለቤቶች ካታሎግ ውስጥ አይታይም።'**
+  String adminConfirmDeactivateMessage(String name);
+
+  /// No description provided for @adminSortAtoZ.
+  ///
+  /// In am, this message translates to:
+  /// **'ከሀ - ፐ'**
+  String get adminSortAtoZ;
+
+  /// No description provided for @adminLivePreview.
+  ///
+  /// In am, this message translates to:
+  /// **'የቅድመ እይታ ማሳያ'**
+  String get adminLivePreview;
+
+  /// No description provided for @adminUnsavedChangesTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተቀመጡ ለውጦች'**
+  String get adminUnsavedChangesTitle;
+
+  /// No description provided for @adminUnsavedChangesMessage.
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተቀመጡ ለውጦች አሉ። ይቅር ይባሉ?'**
+  String get adminUnsavedChangesMessage;
+
+  /// No description provided for @adminDiscard.
+  ///
+  /// In am, this message translates to:
+  /// **'ይቅር'**
+  String get adminDiscard;
+
+  /// No description provided for @adminSaveSuccess.
+  ///
+  /// In am, this message translates to:
+  /// **'ቅንብሮቹ በተሳካ ሁኔታ ተቀምጠዋል'**
+  String get adminSaveSuccess;
+
+  /// No description provided for @adminVersionHelper.
+  ///
+  /// In am, this message translates to:
+  /// **'አስገዳጅ የሆነው ዝቅተኛ የመተግበሪያ ስሪት (ለምሳሌ 1.0.0)'**
+  String get adminVersionHelper;
 }
 
 class _AppLocalizationsDelegate

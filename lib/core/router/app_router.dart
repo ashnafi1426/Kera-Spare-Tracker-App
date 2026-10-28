@@ -27,6 +27,7 @@ import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/splash/presentation/update_required_screen.dart';
 import '../../features/stock/presentation/screens/low_stock_screen.dart';
 import '../../features/stock/presentation/screens/stock_history_screen.dart';
+import '../../features/sync/presentation/screens/initial_sync_screen.dart';
 import '../providers/app_config_provider.dart';
 
 /// Helper ChangeNotifier that notifies GoRouter when Riverpod auth or config state changes.
@@ -138,6 +139,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/initial-sync',
+        name: 'initial-sync',
+        builder: (context, state) => const InitialSyncScreen(),
       ),
       GoRoute(
         path: '/settings/brands',

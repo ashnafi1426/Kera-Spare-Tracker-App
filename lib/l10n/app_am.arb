@@ -1346,7 +1346,7 @@
   "adminAuditLogs": "የኦዲት መዝገቦች",
   "adminAuditLogsEmpty": "ምንም የኦዲት መዝገብ አልተገኘም",
   "adminAuditLogsTitle": "የስርዓቱ ኦዲት መዝገብ",
-  "adminCatalog": "አጠቃላይ ዝርዝሮች",
+  "adminCatalog": "ካታሎግ",
   "adminCatalogTitle": "አጠቃላይ የካታሎግ አስተዳደር",
   "adminConfirmPhoneLabel": "ስልክ ቁጥሩን በትክክል ያስገቡ",
   "adminDashboard": "ዳሽቦርድ",
@@ -1494,5 +1494,254 @@
   "previous": "ቀዳሚ",
   "required": "አስፈላጊ",
   "success": "ተሳክቷል",
-  "totalEntries": "ጠቅላላ መዝገቦች"
+  "totalEntries": "ጠቅላላ መዝገቦች",
+  "authNeedsLoginBanner": "ማመሳሰልን ለመቀጠል እባክዎ እንደገና ይግቡ",
+  "@authNeedsLoginBanner": {
+    "description": "Banner message when refresh token expired or revoked"
+  },
+  "authNeedsLoginAction": "ግባ",
+  "@authNeedsLoginAction": {
+    "description": "Action button on needsLogin banner"
+  },
+  "authOfflineInternetRequired": "ለመመዝገብ ወይም ለመግባት የበይነመረብ ግንኙነት ያስፈልጋል።",
+  "@authOfflineInternetRequired": {
+    "description": "Offline message on register/login"
+  },
+  "authDifferentOwnerConflictTitle": "ያልተመሳሰለ የመለያ ውሂብ",
+  "@authDifferentOwnerConflictTitle": {
+    "description": "Title for conflict when logging in as different owner with pending sync"
+  },
+  "authDifferentOwnerConflictMessage": "ይህ ስልክ ካልተመሳሰለ ሌላ መለያ ({ownerName}) ውሂብ ይዟል። ለማመሳሰል እባክዎ በቀዳሚው መለያ ይግቡ ወይም ለመቀጠል ያልተመሳሰለውን ውሂብ ያጥፉ።",
+  "@authDifferentOwnerConflictMessage": {
+    "description": "Message for conflict when logging in as different owner with pending sync",
+    "placeholders": {
+      "ownerName": {
+        "type": "String"
+      }
+    }
+  },
+  "authDiscardUnsyncedAndLogin": "ውሂቡን አጥፋና ግባ",
+  "@authDiscardUnsyncedAndLogin": {
+    "description": "Button to discard unsynced data and log in with new owner"
+  },
+  "authOfflineMaxDaysWarning": "መተግበሪያው ከመስመር ውጭ ከ{days} ቀናት በላይ ቆይቷል። መለያዎን ለማረጋገጥ እባክዎ ከበይነመረብ ጋር ይገናኙ።",
+  "@authOfflineMaxDaysWarning": {
+    "description": "Warning message when offline duration exceeds max days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "initialSyncTitle": "የእርስዎን እቃዎች በማዘጋጀት ላይ...",
+  "@initialSyncTitle": {
+    "description": "Initial sync title"
+  },
+  "initialSyncSubtitle": "የእርስዎን የእቃዎች ዝርዝር ከአገልጋይ በማውረድ ላይ",
+  "@initialSyncSubtitle": {
+    "description": "Initial sync subtitle"
+  },
+  "logoutBlockedOfflineTitle": "መውጣት አልተቻለም (ኢንተርኔት የለም)",
+  "@logoutBlockedOfflineTitle": {
+    "description": "Title when logout is blocked due to offline pending changes"
+  },
+  "logoutBlockedOfflineMessage": "ያልተመሳሰሉ {count} ለውጦች አሉ። ከመስመር ውጭ ሆነው ከወጡ ለውጦችዎ ወደ አገልጋዩ ስለማይላኩ ስራዎ በቋሚነት ይጠፋል።",
+  "@logoutBlockedOfflineMessage": {
+    "description": "Message explaining why offline logout with pending changes is blocked",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportDataAction": "መረጃን አውጣ (CSV)",
+  "@exportDataAction": {
+    "description": "Export data action button in logout blocked dialog"
+  },
+  "logoutDiscardPrompt": "ያልተመሳሰሉ ለውጦችን አጥፍተው ለመውጣት ከታች DISCARD ብለው ይጻፉ:",
+  "@logoutDiscardPrompt": {
+    "description": "Prompt requiring typing DISCARD"
+  },
+  "logoutDiscardButton": "አጥፍተህ ውጣ",
+  "@logoutDiscardButton": {
+    "description": "Button to confirm discarding unsynced changes and logging out"
+  },
+  "logoutPendingOnlineTitle": "ያልተመሳሰሉ ለውጦች አሉ",
+  "@logoutPendingOnlineTitle": {
+    "description": "Title when logout has pending changes while online"
+  },
+  "logoutPendingOnlineMessage": "ወደ አገልጋዩ ያልተላኩ {count} ያልተመሳሰሉ ለውጦች አሉ።",
+  "@logoutPendingOnlineMessage": {
+    "description": "Message showing pending count when online",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNowAndLogout": "አሁን አመሳስልና ውጣ",
+  "@syncNowAndLogout": {
+    "description": "Button to sync changes then log out"
+  },
+  "syncFailedLogoutCancelled": "ማመሳሰል አልተሳካም: {reason}። ለውጦችዎ እንዳይጠፉ አልወጡም።",
+  "@syncFailedLogoutCancelled": {
+    "description": "Notice when sync fails during logout",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "syncStatusTitle": "የማመሳሰል ሁኔታ",
+  "@syncStatusTitle": {
+    "description": "Settings label for sync status"
+  },
+  "syncStatusUpToDate": "ሁሉም ለውጦች ተመሳስለዋል",
+  "@syncStatusUpToDate": {
+    "description": "Sync status when queue is empty"
+  },
+  "syncStatusPending": "{count} ያልተመሳሰሉ ለውጦች",
+  "@syncStatusPending": {
+    "description": "Sync status when queue has items",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncStatusSyncing": "ለውጦች በመመሳሰል ላይ ናቸው...",
+  "@syncStatusSyncing": {
+    "description": "Sync status while pushing mutations"
+  },
+  "lastOnlineTitle": "ለመጨረሻ ጊዜ የተገናኘበት",
+  "@lastOnlineTitle": {
+    "description": "Settings label for last online time"
+  },
+  "pendingChangesCount": "ያልተላኩ ለውጦች",
+  "@pendingChangesCount": {
+    "description": "Settings label for pending changes count"
+  },
+  "accountSuspendedTitle": "መለያው ታግዷል",
+  "@accountSuspendedTitle": {
+    "description": "Title for suspended account banner"
+  },
+  "accountSuspendedMessage": "መለያዎ ታግዷል። ማመሳሰል ቆሟል፤ ነገር ግን የአካባቢዎ መረጃዎች ክፍት ሆነው ይቆያሉ እና መረጃ ማውጣት ይችላሉ።",
+  "@accountSuspendedMessage": {
+    "description": "Message for suspended account banner"
+  },
+  "passwordChangedRemotelyTitle": "የይለፍ ቃል በሌላ ቦታ ተቀይሯል",
+  "@passwordChangedRemotelyTitle": {
+    "description": "Title for password changed remotely banner"
+  },
+  "passwordChangedRemotelyMessage": "የይለፍ ቃልዎ በሌላ ስልክ ተቀይሯል። ማመሳሰልን ለማስቀጠል በአዲሱ የይለፍ ቃል ይግቡ። የአካባቢ መረጃዎ ደህንነቱ የተጠበቀ ነው።",
+  "@passwordChangedRemotelyMessage": {
+    "description": "Message for password changed remotely banner"
+  },
+  "appLockTitle": "መተግበሪያ ቆልፍ",
+  "appLockSubtitle": "መተግበሪያውን በፒን ወይም በባዮሜትሪክስ ይጠብቁ",
+  "appLockEnabled": "የመተግበሪያ መቆለፊያ ነቅቷል",
+  "appLockDisabled": "የመተግበሪያ መቆለፊያ ጠፍቷል",
+  "appLockBiometrics": "ባዮሜትሪክስ መክፈቻ",
+  "appLockBiometricsDesc": "ለመክፈት የጣት አሻራ ወይም የፊት ገጽታ ይጠቀሙ",
+  "appLockTimeout": "ራስ-ሰር የመቆለፊያ ጊዜ",
+  "appLockTimeoutImmediately": "ወዲያውኑ",
+  "appLockTimeout1Min": "ከ1 ደቂቃ በኋላ",
+  "appLockTimeout5Min": "ከ5 ደቂቃ በኋላ",
+  "changePin": "ፒን ይቀይሩ",
+  "setPinTitle": "የመተግበሪያ ፒን ያዘጋጁ",
+  "enterNewPin": "ከ4 እስከ 6 አሃዝ ፒን ያስገቡ",
+  "confirmPinTitle": "የመተግበሪያ ፒን ያረጋግጡ",
+  "reenterPin": "ፒንዎን በድጋሚ ያስገቡ",
+  "pinsDoNotMatch": "ፒኖቹ አይመሳሰሉም። እባክዎ እንደገና ይሞክሩ።",
+  "pinLengthError": "ፒኑ ከ4 እስከ 6 አሃዝ መሆን አለበት።",
+  "pinSetSuccess": "የመተግበሪያ ፒን በተሳካ ሁኔታ ተቀይሯል።",
+  "enterPinToUnlock": "ለመክፈት ፒን ያስገቡ",
+  "wrongPin": "የተሳሳተ ፒን ነው። {remaining} ሙከራዎች ቀርተዋል።",
+  "@wrongPin": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "lockoutCooldown": "ብዙ የተሳሳቱ ሙከራዎች። ከ{seconds} ሰከንድ በኋላ እንደገና ይሞክሩ።",
+  "@lockoutCooldown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "lockoutMaxReached": "ከፍተኛ የተሳሳቱ ሙከራዎች ተደርገዋል። በመስመር ላይ መግባት ያስፈልጋል።",
+  "forgotPin": "ፒን ረሱ?",
+  "forgotPinTitle": "የመተግበሪያ ፒን ዳግም ያስጀምሩ",
+  "forgotPinDesc": "ፒንዎን ዳግም ለማስጀመር በስልክ ቁጥርዎ እና በይለፍ ቃልዎ ይግቡ። የአካባቢዎ መረጃ ይጠበቃል።",
+  "biometricPromptReason": "ኬራ ስፔር ትራከርን ለመክፈት የጣት አሻራዎን ወይም ፊትዎን ያረጋግጡ",
+  "unlockWithBiometrics": "በባዮሜትሪክስ ይክፈቱ",
+  "loginToResetPin": "ያረጋግጡ እና ፒን ዳግም ያስጀምሩ",
+  "adminAuditActionUserSuspended": "ተጠቃሚ ታግዷል",
+  "adminAuditActionUserReactivated": "እገዳ ተነስቷል",
+  "adminAuditActionPasswordReset": "የይለፍ ቃል ተቀይሯል",
+  "adminAuditActionUserDeleted": "አካውንት ተዘግቷል",
+  "adminAuditActionBrandCreated": "ብራንድ ተፈጠረ",
+  "adminAuditActionBrandUpdated": "ብራንድ ተሻሻለ",
+  "adminAuditActionCategoryCreated": "ምድብ ተፈጠረ",
+  "adminAuditActionCategoryUpdated": "ምድብ ተሻሻለ",
+  "adminAuditActionUnitCreated": "መለኪያ ተፈጠረ",
+  "adminAuditActionUnitUpdated": "መለኪያ ተሻሻለ",
+  "adminAuditActionSettingsUpdated": "ቅንብሮች ተሻሻሉ",
+  "adminAuditDetailsTitle": "የኦዲት መዝገብ ዝርዝር",
+  "adminAuditActor": "ፈፃሚ",
+  "adminAuditTarget": "ዒላማ",
+  "adminAuditNoChanges": "ምንም የተቀየረ እሴት የለም",
+  "adminAuditToday": "ዛሬ",
+  "adminAuditYesterday": "ትናንት",
+  "adminSyncHealthy": "ጥሩ ሁኔታ",
+  "adminSyncNeverStarted": "ገና አልተመሳሰለም",
+  "adminSyncNeedsAttention": "ክትትል ያስፈልገዋል",
+  "adminAppVersionsTitle": "የተጠቃሚ መተግበሪያ ስሪቶች",
+  "adminLastUpdated": "የመጨረሻ ማሻሻያ",
+  "adminNoMoreOwners": "ሁሉም ባለቤቶች ተጭነዋል",
+  "adminSortBy": "አስተካክል በ",
+  "adminSortNewest": "አዳዲሶች መጀመሪያ",
+  "adminSortBusinessName": "የንግድ ስም",
+  "adminSortLastSync": "የመጨረሻ ማመሳሰል",
+  "adminNeverSynced": "አልተመሳሰለም",
+  "adminCatalogItemsCount": "{count} ዝርዝሮች",
+  "@adminCatalogItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminCatalogActiveCount": "{active} ከ {total} ንቁ",
+  "@adminCatalogActiveCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "adminActiveLabel": "ንቁ",
+  "adminInactiveLabel": "ቦዝኗል",
+  "adminConfirmDeactivateTitle": "ዝርዝሩን አቦዝን",
+  "adminConfirmDeactivateMessage": "{name}ን ማቦዘን ይፈልጋሉ? ከባለቤቶች ካታሎግ ውስጥ አይታይም።",
+  "@adminConfirmDeactivateMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminSortAtoZ": "ከሀ - ፐ",
+  "adminLivePreview": "የቅድመ እይታ ማሳያ",
+  "adminUnsavedChangesTitle": "ያልተቀመጡ ለውጦች",
+  "adminUnsavedChangesMessage": "ያልተቀመጡ ለውጦች አሉ። ይቅር ይባሉ?",
+  "adminDiscard": "ይቅር",
+  "adminSaveSuccess": "ቅንብሮቹ በተሳካ ሁኔታ ተቀምጠዋል",
+  "adminVersionHelper": "አስገዳጅ የሆነው ዝቅተኛ የመተግበሪያ ስሪት (ለምሳሌ 1.0.0)"
 }

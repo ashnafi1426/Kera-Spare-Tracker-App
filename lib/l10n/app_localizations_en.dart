@@ -1005,7 +1005,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountSuspendedMessage =>
-      'Your account has been suspended. Local data remains safe and readable, but cloud synchronization is halted.';
+      'Your account has been suspended. Sync is paused, but your local records remain accessible and can be exported.';
 
   @override
   String suspensionReasonLabel(String reason) {
@@ -1110,7 +1110,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminAuditLogsTitle => 'System Audit Log';
 
   @override
-  String get adminCatalog => 'Global Catalog';
+  String get adminCatalog => 'Catalog';
 
   @override
   String get adminCatalogTitle => 'Global Catalog Management';
@@ -1292,7 +1292,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminSearchOwnersHint => 'Search by phone or business name...';
 
   @override
-  String get adminSettings => 'App Settings';
+  String get adminSettings => 'Settings';
 
   @override
   String get adminStatusActive => 'Active';
@@ -1437,4 +1437,321 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalEntries => 'total entries';
+
+  @override
+  String get authNeedsLoginBanner => 'Please log in again to continue syncing';
+
+  @override
+  String get authNeedsLoginAction => 'Log In';
+
+  @override
+  String get authOfflineInternetRequired =>
+      'Internet is required to register or log in.';
+
+  @override
+  String get authDifferentOwnerConflictTitle => 'Unsynced Account Data';
+
+  @override
+  String authDifferentOwnerConflictMessage(String ownerName) {
+    return 'This phone has unsynced data from another account ($ownerName). Please log in as the original account to sync, or discard the unsynced data to continue.';
+  }
+
+  @override
+  String get authDiscardUnsyncedAndLogin => 'Discard & Log In';
+
+  @override
+  String authOfflineMaxDaysWarning(int days) {
+    return 'The app has been offline for more than $days days. Please connect to the internet to verify your account.';
+  }
+
+  @override
+  String get initialSyncTitle => 'Setting up your inventory...';
+
+  @override
+  String get initialSyncSubtitle =>
+      'Downloading your parts catalog from the server';
+
+  @override
+  String get logoutBlockedOfflineTitle => 'Logout Blocked (Offline)';
+
+  @override
+  String logoutBlockedOfflineMessage(int count) {
+    return 'You have $count unsynced change(s). Logging out while offline would permanently lose your work because changes cannot be saved to the server.';
+  }
+
+  @override
+  String get exportDataAction => 'Export Data (CSV)';
+
+  @override
+  String get logoutDiscardPrompt =>
+      'To permanently discard unsynced changes and log out, type DISCARD below:';
+
+  @override
+  String get logoutDiscardButton => 'Log Out & Discard';
+
+  @override
+  String get logoutPendingOnlineTitle => 'Unsynced Changes Pending';
+
+  @override
+  String logoutPendingOnlineMessage(int count) {
+    return 'You have $count pending change(s) not yet synced with the server.';
+  }
+
+  @override
+  String get syncNowAndLogout => 'Sync Now & Log Out';
+
+  @override
+  String syncFailedLogoutCancelled(String reason) {
+    return 'Sync failed: $reason. You remain logged in to protect your changes.';
+  }
+
+  @override
+  String get syncStatusTitle => 'Sync Status';
+
+  @override
+  String get syncStatusUpToDate => 'All changes saved to server';
+
+  @override
+  String syncStatusPending(int count) {
+    return '$count changes pending sync';
+  }
+
+  @override
+  String get syncStatusSyncing => 'Syncing changes...';
+
+  @override
+  String get lastOnlineTitle => 'Last Online';
+
+  @override
+  String get pendingChangesCount => 'Pending Changes';
+
+  @override
+  String get passwordChangedRemotelyTitle => 'Password Changed Elsewhere';
+
+  @override
+  String get passwordChangedRemotelyMessage =>
+      'Your password was updated on another device. Please log in with your new password to resume syncing. Local records remain safe.';
+
+  @override
+  String get appLockTitle => 'App Lock';
+
+  @override
+  String get appLockSubtitle => 'Protect access with a PIN or biometrics';
+
+  @override
+  String get appLockEnabled => 'App Lock is enabled';
+
+  @override
+  String get appLockDisabled => 'App Lock is disabled';
+
+  @override
+  String get appLockBiometrics => 'Biometric Unlock';
+
+  @override
+  String get appLockBiometricsDesc =>
+      'Use fingerprint or face recognition to unlock';
+
+  @override
+  String get appLockTimeout => 'Auto-lock Timeout';
+
+  @override
+  String get appLockTimeoutImmediately => 'Immediately';
+
+  @override
+  String get appLockTimeout1Min => 'After 1 minute';
+
+  @override
+  String get appLockTimeout5Min => 'After 5 minutes';
+
+  @override
+  String get changePin => 'Change PIN';
+
+  @override
+  String get setPinTitle => 'Set App Lock PIN';
+
+  @override
+  String get enterNewPin => 'Enter 4 to 6 digit PIN';
+
+  @override
+  String get confirmPinTitle => 'Confirm App Lock PIN';
+
+  @override
+  String get reenterPin => 'Re-enter your PIN';
+
+  @override
+  String get pinsDoNotMatch => 'PINs do not match. Please try again.';
+
+  @override
+  String get pinLengthError => 'PIN must be between 4 and 6 digits.';
+
+  @override
+  String get pinSetSuccess => 'App Lock PIN updated successfully.';
+
+  @override
+  String get enterPinToUnlock => 'Enter PIN to unlock';
+
+  @override
+  String wrongPin(int remaining) {
+    return 'Incorrect PIN. $remaining attempt(s) remaining.';
+  }
+
+  @override
+  String lockoutCooldown(int seconds) {
+    return 'Too many attempts. Try again in ${seconds}s.';
+  }
+
+  @override
+  String get lockoutMaxReached =>
+      'Too many failed attempts. Online login required.';
+
+  @override
+  String get forgotPin => 'Forgot PIN?';
+
+  @override
+  String get forgotPinTitle => 'Reset App PIN';
+
+  @override
+  String get forgotPinDesc =>
+      'Verify with your phone number and password to reset your PIN. Your local data will remain safe.';
+
+  @override
+  String get biometricPromptReason =>
+      'Scan fingerprint or face to unlock Kera Spare Tracker';
+
+  @override
+  String get unlockWithBiometrics => 'Unlock with Biometrics';
+
+  @override
+  String get loginToResetPin => 'Log In to Reset PIN';
+
+  @override
+  String get adminAuditActionUserSuspended => 'User Suspended';
+
+  @override
+  String get adminAuditActionUserReactivated => 'User Reactivated';
+
+  @override
+  String get adminAuditActionPasswordReset => 'Password Reset';
+
+  @override
+  String get adminAuditActionUserDeleted => 'Account Disabled';
+
+  @override
+  String get adminAuditActionBrandCreated => 'Brand Created';
+
+  @override
+  String get adminAuditActionBrandUpdated => 'Brand Updated';
+
+  @override
+  String get adminAuditActionCategoryCreated => 'Category Created';
+
+  @override
+  String get adminAuditActionCategoryUpdated => 'Category Updated';
+
+  @override
+  String get adminAuditActionUnitCreated => 'Unit Created';
+
+  @override
+  String get adminAuditActionUnitUpdated => 'Unit Updated';
+
+  @override
+  String get adminAuditActionSettingsUpdated => 'Settings Updated';
+
+  @override
+  String get adminAuditDetailsTitle => 'Audit Record Details';
+
+  @override
+  String get adminAuditActor => 'Actor';
+
+  @override
+  String get adminAuditTarget => 'Target';
+
+  @override
+  String get adminAuditNoChanges => 'No recorded value diff';
+
+  @override
+  String get adminAuditToday => 'Today';
+
+  @override
+  String get adminAuditYesterday => 'Yesterday';
+
+  @override
+  String get adminSyncHealthy => 'Healthy';
+
+  @override
+  String get adminSyncNeverStarted => 'Never synced';
+
+  @override
+  String get adminSyncNeedsAttention => 'Needs attention';
+
+  @override
+  String get adminAppVersionsTitle => 'Client App Versions';
+
+  @override
+  String get adminLastUpdated => 'Last updated';
+
+  @override
+  String get adminNoMoreOwners => 'All owners loaded';
+
+  @override
+  String get adminSortBy => 'Sort by';
+
+  @override
+  String get adminSortNewest => 'Newest first';
+
+  @override
+  String get adminSortBusinessName => 'Business Name';
+
+  @override
+  String get adminSortLastSync => 'Last Synced';
+
+  @override
+  String get adminNeverSynced => 'Never synced';
+
+  @override
+  String adminCatalogItemsCount(int count) {
+    return '$count items';
+  }
+
+  @override
+  String adminCatalogActiveCount(int active, int total) {
+    return '$active of $total active';
+  }
+
+  @override
+  String get adminActiveLabel => 'Active';
+
+  @override
+  String get adminInactiveLabel => 'Inactive';
+
+  @override
+  String get adminConfirmDeactivateTitle => 'Deactivate Item';
+
+  @override
+  String adminConfirmDeactivateMessage(String name) {
+    return 'Are you sure you want to deactivate $name? It will no longer appear in owner catalogs.';
+  }
+
+  @override
+  String get adminSortAtoZ => 'A - Z';
+
+  @override
+  String get adminLivePreview => 'Live Preview';
+
+  @override
+  String get adminUnsavedChangesTitle => 'Unsaved Changes';
+
+  @override
+  String get adminUnsavedChangesMessage =>
+      'You have unsaved configuration changes. Discard them?';
+
+  @override
+  String get adminDiscard => 'Discard';
+
+  @override
+  String get adminSaveSuccess => 'Settings saved successfully';
+
+  @override
+  String get adminVersionHelper =>
+      'Current minimum required semver version (e.g. 1.0.0)';
 }

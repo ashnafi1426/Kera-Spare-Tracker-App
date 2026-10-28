@@ -12,6 +12,7 @@
     "seed": "node prisma/seed.js",
     "create-admin": "node scripts/create-admin.js",
     "cleanup-tokens": "node scripts/cleanup-tokens.js",
+    "dev:cleanup-test-data": "node scripts/dev-cleanup-test-data.js",
     "test": "vitest run --passWithNoTests"
   },
 

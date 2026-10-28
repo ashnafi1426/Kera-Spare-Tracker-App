@@ -1,12 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../../core/constants/constants.dart';
+import '../../../../core/errors/failure.dart';
+import '../../../../core/services/session_store.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
+import '../../../../data/local/database_provider.dart';
+import '../../data/repositories/api_auth_repository.dart';
 import '../controllers/auth_controller.dart';
 
 /// Screen allowing existing spare parts owners to log in with phone and password.
@@ -23,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isOfflineError = false;
   String? _errorMessage;
 
   @override
@@ -32,33 +37,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    setState(() => _errorMessage = null);
+  Future<void> _handleLogin({bool forceDiscardUnsynced = false}) async {
+    setState(() {
+      _errorMessage = null;
+      _isOfflineError = false;
+    });
     if (!_formKey.currentState!.validate()) return;
+
+    final l10n = context.l10n;
+
 
     setState(() => _isLoading = true);
 
     final result = await ref.read(authControllerProvider.notifier).login(
           phoneNumber: _phoneController.text.trim(),
           password: _passwordController.text.trim(),
+          forceDiscardUnsynced: forceDiscardUnsynced,
         );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    final l10n = context.l10n;
-    result.when(
-      onSuccess: (user) {
+    await result.when(
+      onSuccess: (user) async {
         if (user.mustChangePassword) {
           context.go('/change-password');
         } else if (user.isAdmin) {
           context.go('/admin');
         } else {
-          context.go('/home');
+          // Rule 6: Check if first login on phone has 0 parts; if so pull catalog
+          final db = ref.read(appDatabaseProvider);
+          final firstPart =
+              await (db.select(db.spareParts)..limit(1)).getSingleOrNull();
+
+          if (!mounted) return;
+          if (firstPart == null) {
+            context.go('/initial-sync');
+          } else {
+            context.go('/home');
+          }
         }
       },
+      onFailure: (failure) async {
+        if (failure is DifferentOwnerConflictFailure) {
+          // Rule 4: Different account conflict dialog
+          final discardAndProceed = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (ctx) => AlertDialog(
+              title: Text(l10n.authDifferentOwnerConflictTitle),
+              content: Text(
+                '${l10n.authDifferentOwnerConflictMessage}\n(${failure.previousOwnerName})',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(l10n.cancel),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.colorScheme.error,
+                    foregroundColor: context.colorScheme.onError,
+                  ),
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: Text(l10n.authDiscardUnsyncedAndLogin),
+                ),
+              ],
+            ),
+          );
 
-      onFailure: (failure) {
+          if (discardAndProceed == true && mounted) {
+            await _handleLogin(forceDiscardUnsynced: true);
+          }
+          return;
+        }
+
+        if (failure is OfflineInternetRequiredFailure ||
+            failure.code == 'NO_INTERNET') {
+          setState(() {
+            _isOfflineError = true;
+            _errorMessage = l10n.authOfflineInternetRequired;
+          });
+          return;
+        }
+
         String msg;
         switch (failure.code) {
           case 'INVALID_CREDENTIALS':
@@ -66,9 +128,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             break;
           case 'ACCOUNT_SUSPENDED':
             msg = l10n.authAccountSuspended;
-            break;
-          case 'NO_INTERNET':
-            msg = l10n.authNoInternet;
             break;
           case 'SERVER_ERROR':
             msg = l10n.authServerError;
@@ -92,8 +151,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: const [
-          Padding(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_ethernet_rounded),
+            tooltip: 'Server Connection Settings',
+            onPressed: () => _showServerConfigDialog(context),
+          ),
+          const Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: LanguageSegmentedSwitch(),
           ),
@@ -174,6 +238,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             ),
                           ),
+                          if (_isOfflineError) ...[
+                            const SizedBox(width: 4),
+                            IconButton(
+                              icon: const Icon(Icons.settings_ethernet_rounded, size: 20),
+                              tooltip: 'Server Settings',
+                              color: colorScheme.error,
+                              onPressed: () => _showServerConfigDialog(context),
+                            ),
+                            const SizedBox(width: 4),
+                            TextButton.icon(
+                              style: TextButton.styleFrom(
+                                backgroundColor: colorScheme.error,
+                                foregroundColor: colorScheme.onError,
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                              ),
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
+                              label: Text(l10n.retry),
+                              onPressed: _handleLogin,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -330,6 +418,205 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _showServerConfigDialog(BuildContext context) async {
+    final serverController =
+        TextEditingController(text: AppConstants.apiBaseUrl);
+    String? statusMessage;
+    bool isTesting = false;
+    bool? testSuccess;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.dns_rounded,
+                    color: Theme.of(ctx).colorScheme.primary),
+                const SizedBox(width: 8),
+                const Expanded(child: Text('Server Settings')),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Configure API Base URL to connect over Wi-Fi, hotspot, or USB tether:',
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: serverController,
+                    decoration: InputDecoration(
+                      labelText: 'API Base URL',
+                      hintText: 'http://192.168.137.146:7000/api/v1',
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () =>
+                            setDialogState(() => serverController.clear()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Quick Presets:',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ActionChip(
+                        label: const Text('Wi-Fi (.146)'),
+                        onPressed: () {
+                          setDialogState(() {
+                            serverController.text =
+                                'http://192.168.137.146:7000/api/v1';
+                          });
+                        },
+                      ),
+                      ActionChip(
+                        label: const Text('USB (127.0.0.1)'),
+                        onPressed: () {
+                          setDialogState(() {
+                            serverController.text =
+                                'http://127.0.0.1:7000/api/v1';
+                          });
+                        },
+                      ),
+                      ActionChip(
+                        label: const Text('Emulator (10.0.2.2)'),
+                        onPressed: () {
+                          setDialogState(() {
+                            serverController.text =
+                                'http://10.0.2.2:7000/api/v1';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: isTesting
+                        ? null
+                        : () async {
+                            setDialogState(() {
+                              isTesting = true;
+                              statusMessage = null;
+                              testSuccess = null;
+                            });
+                            try {
+                              final url = serverController.text.trim();
+                              final testDio = Dio(
+                                BaseOptions(
+                                  baseUrl: url,
+                                  connectTimeout: const Duration(seconds: 3),
+                                  receiveTimeout: const Duration(seconds: 3),
+                                ),
+                              );
+                              final res = await testDio.get('/health');
+                              if (res.statusCode == 200) {
+                                setDialogState(() {
+                                  isTesting = false;
+                                  testSuccess = true;
+                                  statusMessage =
+                                      'Connected! Backend is reachable.';
+                                });
+                              } else {
+                                setDialogState(() {
+                                  isTesting = false;
+                                  testSuccess = false;
+                                  statusMessage =
+                                      'Server response: ${res.statusCode}';
+                                });
+                              }
+                            } catch (_) {
+                              setDialogState(() {
+                                isTesting = false;
+                                testSuccess = false;
+                                statusMessage =
+                                    'Connection failed. Check IP & port.';
+                              });
+                            }
+                          },
+                    icon: isTesting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.bolt_rounded, size: 18),
+                    label: const Text('Test Connection'),
+                  ),
+                  if (statusMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          testSuccess == true
+                              ? Icons.check_circle_rounded
+                              : Icons.error_rounded,
+                          size: 16,
+                          color:
+                              testSuccess == true ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            statusMessage!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: testSuccess == true
+                                  ? Colors.green
+                                  : Colors.red,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final target = serverController.text.trim();
+                  final messenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(ctx);
+                  if (target.isNotEmpty) {
+                    AppConstants.setApiBaseUrl(target);
+                    final sessionStore = ref.read(sessionStoreProvider);
+                    await sessionStore.saveApiBaseUrl(target);
+                    final authRepo = ref.read(authRepositoryProvider);
+                    if (authRepo is ApiAuthRepository) {
+                      authRepo.dio.options.baseUrl = target;
+                    }
+                  }
+                  navigator.pop();
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('Server URL set to: $target')),
+                  );
+                },
+                child: const Text('Save & Apply'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

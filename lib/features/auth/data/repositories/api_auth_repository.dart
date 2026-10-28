@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -8,78 +9,125 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/services/session_store.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/utils/password_hasher.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../core/utils/validators.dart';
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/tables/enums.dart';
+import '../../../sync/data/services/sync_push_service.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'local_auth_repository.dart';
 
-const String _userSessionKey = 'kera_user_session';
-
 /// Production API implementation of [AuthRepository] connecting to the Node.js / MySQL backend via Dio.
 ///
 /// Features:
-/// - Stores access & refresh tokens in [FlutterSecureStorage].
-/// - Automatic token refresh interceptor on 401 TOKEN_EXPIRED.
-/// - Offline-first session recovery from local storage and Drift.
-/// - Account suspension (403) handling.
+/// - Manages credentials, tokens, and stable device identity via [SessionStore].
+/// - Single-refresh queued interceptor ensuring only 1 refresh request is fired concurrently.
+/// - Offline-first instant local startup decision (Rule 3) without waiting for network.
+/// - Graceful `needsLogin` state on token expiry/theft detection without deleting local data.
+/// - Account switching conflict protection with unsynced changes detection.
 class ApiAuthRepository implements AuthRepository {
   final Dio dio;
   final AppDatabase db;
   final FlutterSecureStorage _storage;
+  final SessionStore _sessionStore;
   final LocalAuthRepository _localAuthRepo;
   final String baseUrl;
+  final bool _isCustomDioClient;
+
   final _authStateController = StreamController<AuthUser?>.broadcast();
+  final _needsLoginController = StreamController<bool>.broadcast();
+  final _passwordChangedController = StreamController<bool>.broadcast();
+
   AuthUser? _cachedUser;
-  bool _isRefreshing = false;
+  bool _needsLogin = false;
+  bool _passwordChangedRemotely = false;
+  Completer<String?>? _refreshCompleter;
 
   ApiAuthRepository({
     required this.db,
     Dio? dioClient,
     FlutterSecureStorage? storage,
+    SessionStore? sessionStore,
     String? baseUrl,
     LocalAuthRepository? localAuthRepo,
-  }) : _storage = storage ?? const FlutterSecureStorage(),
-       baseUrl = baseUrl ?? AppConstants.apiBaseUrl,
-       _localAuthRepo =
-           localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
-       dio =
-           dioClient ??
-           Dio(
-             BaseOptions(
-               baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
-               connectTimeout: const Duration(seconds: 4),
-               receiveTimeout: const Duration(seconds: 4),
-               sendTimeout: const Duration(seconds: 4),
-               headers: {
-                 'Content-Type': 'application/json',
-                 'Accept': 'application/json',
-               },
-             ),
-           ) {
+  })  : _storage = storage ?? defaultSecureStorage,
+        _sessionStore = sessionStore ?? SessionStore(storage: storage),
+        baseUrl = baseUrl ??
+            (dioClient != null && dioClient.options.baseUrl.isNotEmpty
+                ? dioClient.options.baseUrl
+                : AppConstants.apiBaseUrl),
+        _localAuthRepo =
+            localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
+        _isCustomDioClient = dioClient != null,
+        dio = dioClient ??
+            Dio(
+              BaseOptions(
+                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
+                connectTimeout: const Duration(seconds: 4),
+                receiveTimeout: const Duration(seconds: 4),
+                sendTimeout: const Duration(seconds: 4),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+              ),
+            ) {
     _setupInterceptors();
+  }
+
+  SessionStore get sessionStore => _sessionStore;
+
+  /// True when the access/refresh token expired or was revoked and re-login is required.
+  /// Offline operations and local database remain 100% operational in this state.
+  bool get needsLogin => _needsLogin;
+
+  /// Stream of `needsLogin` state updates for UI banners and sync pausing.
+  Stream<bool> watchNeedsLogin() => _needsLoginController.stream;
+
+  void setNeedsLogin(bool value) {
+    if (_needsLogin != value) {
+      _needsLogin = value;
+      _needsLoginController.add(value);
+    }
+  }
+
+  /// True when tokens were rejected because password was changed on another device.
+  bool get isPasswordChangedRemotely => _passwordChangedRemotely;
+
+  /// Stream of remote password change state.
+  Stream<bool> watchPasswordChangedRemotely() =>
+      _passwordChangedController.stream;
+
+  void setPasswordChangedRemotely(bool value) {
+    if (_passwordChangedRemotely != value) {
+      _passwordChangedRemotely = value;
+      _passwordChangedController.add(value);
+    }
   }
 
   void _setupInterceptors() {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (dio.options.baseUrl != AppConstants.apiBaseUrl) {
-            dio.options.baseUrl = AppConstants.apiBaseUrl;
-            options.baseUrl = AppConstants.apiBaseUrl;
+          if (options.baseUrl.isEmpty) {
+            options.baseUrl = dio.options.baseUrl.isNotEmpty
+                ? dio.options.baseUrl
+                : baseUrl;
           }
 
-          // Send app version on every request
+          // Send app version and device ID on every request
           options.headers['X-App-Version'] = AppConstants.appVersion;
+          final deviceId = await _sessionStore.getOrCreateDeviceId();
+          options.headers['X-Device-Id'] = deviceId;
 
           // Attach Bearer access token if present
-          final token = await _storage.read(
-            key: AppConstants.secureStorageTokenKey,
-          );
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
+          final session = await _sessionStore.readSession();
+          if (session != null && session.accessToken.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer ${session.accessToken}';
           }
           return handler.next(options);
         },
@@ -110,7 +158,7 @@ class ApiAuthRepository implements AuthRepository {
               );
               _cachedUser = updated;
               await _storage.write(
-                key: _userSessionKey,
+                key: SessionStore.keyUserSession,
                 value: jsonEncode(updated.toJson()),
               );
               _authStateController.add(updated);
@@ -118,66 +166,25 @@ class ApiAuthRepository implements AuthRepository {
             return handler.reject(err);
           }
 
-          // Handle 401 TOKEN_EXPIRED: attempt token refresh once
+          // Handle 401 TOKEN_EXPIRED / INVALID_TOKEN with Single-Refresh Queued Interceptor (Rule 5 & 6)
           if (statusCode == 401 &&
-              (errorCode == 'TOKEN_EXPIRED' || errorCode == 'INVALID_TOKEN')) {
-            if (!_isRefreshing) {
-              _isRefreshing = true;
+              (errorCode == 'TOKEN_EXPIRED' ||
+                  errorCode == 'INVALID_TOKEN' ||
+                  errorCode == 'TOKEN_REUSED')) {
+            final newToken = await _refreshTokenQueued();
+
+            if (newToken != null && newToken.isNotEmpty) {
+              // Retry original request with the new access token
+              err.requestOptions.headers['Authorization'] = 'Bearer $newToken';
               try {
-                final refreshToken = await _storage.read(
-                  key: AppConstants.secureStorageRefreshTokenKey,
-                );
-
-                if (refreshToken != null && refreshToken.isNotEmpty) {
-                  // Use a separate Dio instance without interceptors to avoid loops
-                  final refreshDio = Dio(
-                    BaseOptions(
-                      baseUrl: baseUrl,
-                      connectTimeout: const Duration(seconds: 8),
-                      receiveTimeout: const Duration(seconds: 8),
-                    ),
-                  );
-
-                  final refreshRes = await refreshDio.post(
-                    '/auth/refresh',
-                    data: {'refreshToken': refreshToken},
-                  );
-
-                  if (refreshRes.statusCode == 200 &&
-                      refreshRes.data['success'] == true) {
-                    final data =
-                        refreshRes.data['data'] as Map<String, dynamic>;
-                    final newAccessToken = data['accessToken']?.toString();
-                    final newRefreshToken = data['refreshToken']?.toString();
-
-                    if (newAccessToken != null) {
-                      await _storage.write(
-                        key: AppConstants.secureStorageTokenKey,
-                        value: newAccessToken,
-                      );
-                    }
-                    if (newRefreshToken != null) {
-                      await _storage.write(
-                        key: AppConstants.secureStorageRefreshTokenKey,
-                        value: newRefreshToken,
-                      );
-                    }
-
-                    _isRefreshing = false;
-
-                    // Retry original request with new access token
-                    err.requestOptions.headers['Authorization'] =
-                        'Bearer $newAccessToken';
-                    final retryResponse = await dio.fetch(err.requestOptions);
-                    return handler.resolve(retryResponse);
-                  }
-                }
-              } catch (_) {
-                // Refresh failed; clear session and force re-login
-                await logout();
-              } finally {
-                _isRefreshing = false;
+                final retryResponse = await dio.fetch(err.requestOptions);
+                return handler.resolve(retryResponse);
+              } on DioException catch (retryErr) {
+                return handler.reject(retryErr);
               }
+            } else {
+              // Refresh failed or revoked; app transitions to needsLogin without clearing local data
+              return handler.reject(err);
             }
           }
 
@@ -185,6 +192,135 @@ class ApiAuthRepository implements AuthRepository {
         },
       ),
     );
+  }
+
+  /// Single-refresh locking queue.
+  /// If multiple concurrent requests receive 401, all wait on a single refresh call.
+  Future<String?> _refreshTokenQueued() async {
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+
+    final completer = Completer<String?>();
+    _refreshCompleter = completer;
+
+    try {
+      final session = await _sessionStore.readSession();
+      final refreshToken = session?.refreshToken;
+
+      if (refreshToken == null || refreshToken.isEmpty) {
+        setNeedsLogin(true);
+        completer.complete(null);
+        return null;
+      }
+
+      final activeBaseUrl =
+          dio.options.baseUrl.isNotEmpty ? dio.options.baseUrl : baseUrl;
+
+      // Use a separate Dio instance without interceptors to avoid loops
+      final refreshDio = Dio(
+        BaseOptions(
+          baseUrl: activeBaseUrl,
+          connectTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-App-Version': AppConstants.appVersion,
+          },
+        ),
+      )..httpClientAdapter = dio.httpClientAdapter;
+
+      final deviceId = await _sessionStore.getOrCreateDeviceId();
+      final refreshRes = await refreshDio.post(
+        '/auth/refresh',
+        data: {
+          'refreshToken': refreshToken,
+          'deviceId': deviceId,
+        },
+      );
+
+      if (refreshRes.statusCode == 200 &&
+          refreshRes.data['success'] == true) {
+        final data = refreshRes.data['data'] as Map<String, dynamic>;
+        final newAccessToken = data['accessToken']?.toString();
+        final newRefreshToken = data['refreshToken']?.toString();
+        final accessExp = data['accessTokenExpiresAt']?.toString();
+        final refreshExp = data['refreshTokenExpiresAt']?.toString();
+        final offlineMaxDays = data['offlineMaxDays'] as int?;
+
+        if (newAccessToken != null && newRefreshToken != null) {
+          await _sessionStore.updateTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            accessTokenExpiresAt: accessExp,
+            refreshTokenExpiresAt: refreshExp,
+            offlineMaxDays: offlineMaxDays,
+          );
+
+          setNeedsLogin(false);
+          completer.complete(newAccessToken);
+          return newAccessToken;
+        }
+      }
+
+      // Failed with unexpected format
+      await _sessionStore.clearTokensOnly();
+      setNeedsLogin(true);
+      completer.complete(null);
+      return null;
+    } on DioException catch (e) {
+      final errData = e.response?.data;
+      String? errCode;
+      if (errData is Map<String, dynamic> && errData['error'] is Map) {
+        errCode = errData['error']['code']?.toString();
+      }
+
+      if (e.response?.statusCode == 403 || errCode == 'ACCOUNT_SUSPENDED') {
+        if (_cachedUser != null) {
+          final updated = _cachedUser!.copyWith(status: 'SUSPENDED');
+          _cachedUser = updated;
+          await _storage.write(
+            key: SessionStore.keyUserSession,
+            value: jsonEncode(updated.toJson()),
+          );
+          _authStateController.add(updated);
+        }
+        await _sessionStore.clearTokensOnly();
+        setNeedsLogin(true);
+        completer.complete(null);
+        return null;
+      }
+
+      if (errCode == 'PASSWORD_CHANGED') {
+        setPasswordChangedRemotely(true);
+      }
+
+      // If refresh failed with TOKEN_EXPIRED, TOKEN_REUSED, or 401
+      if (e.response?.statusCode == 401 ||
+          errCode == 'TOKEN_EXPIRED' ||
+          errCode == 'TOKEN_REUSED' ||
+          errCode == 'INVALID_TOKEN' ||
+          errCode == 'PASSWORD_CHANGED') {
+        // Clear ONLY tokens; preserve all local data and offline functionality (Rule 6)
+        await _sessionStore.clearTokensOnly();
+        setNeedsLogin(true);
+        completer.complete(null);
+        return null;
+      }
+
+      // Network-level error during refresh (connection timeout, etc.):
+      // Do NOT revoke tokens or mark needsLogin; keep existing tokens for when connection restores
+      completer.complete(null);
+      return null;
+    } catch (_) {
+      await _sessionStore.clearTokensOnly();
+      setNeedsLogin(true);
+      completer.complete(null);
+      return null;
+    } finally {
+      _refreshCompleter = null;
+    }
   }
 
   @override
@@ -197,12 +333,14 @@ class ApiAuthRepository implements AuthRepository {
     required String password,
   }) async {
     try {
+      final deviceId = await _sessionStore.getOrCreateDeviceId();
       final response = await dio.post(
         '/auth/register',
         data: {
-          'phoneNumber': phoneNumber,
+          'phoneNumber': phoneNumber.trim(),
           'businessName': businessName.trim(),
           'password': password,
+          'deviceId': deviceId,
         },
       );
 
@@ -210,15 +348,37 @@ class ApiAuthRepository implements AuthRepository {
       final userMap = data['user'] as Map<String, dynamic>;
       final accessToken = data['accessToken']?.toString();
       final refreshToken = data['refreshToken']?.toString();
+      final accessTokenExpiresAt = data['accessTokenExpiresAt']?.toString();
+      final refreshTokenExpiresAt = data['refreshTokenExpiresAt']?.toString();
+      final offlineMaxDays = data['offlineMaxDays'] as int? ?? 90;
 
       final user = AuthUser.fromJson(userMap);
 
-      // Persist session tokens & user profile
-      await _persistSession(
-        user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+      await _sessionStore.saveSession(
+        accessToken: accessToken ?? '',
+        refreshToken: refreshToken ?? '',
+        accessTokenExpiresAt: accessTokenExpiresAt,
+        refreshTokenExpiresAt: refreshTokenExpiresAt,
+        ownerId: user.ownerId,
+        ownerPhone: user.phoneNumber,
+        ownerBusinessName: user.businessName,
+        offlineMaxDays: offlineMaxDays,
+        userProfile: user.toJson(),
       );
+
+      // Save profile in Drift SQLite so local queries work immediately (Rule 2)
+      if (!user.isAdmin) {
+        await db.into(db.profiles).insertOnConflictUpdate(
+          ProfilesCompanion.insert(
+            id: Value(user.id),
+            ownerId: user.ownerId,
+            phoneNumber: Value(user.phoneNumber),
+            businessName: Value(user.businessName),
+            role: const Value(UserRole.owner),
+            syncStatus: const Value(SyncStatus.synced),
+          ),
+        );
+      }
 
       // Save local password hash for offline continuity
       try {
@@ -229,21 +389,36 @@ class ApiAuthRepository implements AuthRepository {
         );
       } catch (_) {}
 
+      _cachedUser = user;
+      _authStateController.add(user);
+      setNeedsLogin(false);
+
       return Result.success(user);
     } on DioException catch (e) {
-      final failure = _mapDioError(e);
-      // Seamless offline fallback: register locally in Drift SQLite and queue for sync
-      if (failure is NetworkFailure) {
-        final localResult = await _localAuthRepo.register(
-          phoneNumber: phoneNumber,
-          businessName: businessName,
-          password: password,
-        );
-        if (localResult.isSuccess && localResult.valueOrNull != null) {
-          _cachedUser = localResult.valueOrNull;
-          _authStateController.add(_cachedUser);
+      if (!_isCustomDioClient &&
+          !kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android &&
+          (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.connectionError ||
+              e.type == DioExceptionType.unknown ||
+              e.response == null)) {
+        final working = await _probeWorkingCandidate();
+        if (working != null && working != dio.options.baseUrl) {
+          AppConstants.setApiBaseUrl(working);
+          dio.options.baseUrl = working;
+          await _sessionStore.saveApiBaseUrl(working);
+          return register(
+            phoneNumber: phoneNumber,
+            businessName: businessName,
+            password: password,
+          );
         }
-        return localResult;
+      }
+
+      final failure = _mapDioError(e);
+      // Rule 1: Registration REQUIRES internet
+      if (failure is NetworkFailure) {
+        return const Result.failure(OfflineInternetRequiredFailure());
       }
       return Result.failure(failure);
     } catch (e) {
@@ -253,100 +428,111 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
+  /// Probes candidate Android base URLs in parallel to quickly discover the active backend host.
+  Future<String?> _probeWorkingCandidate() async {
+    final candidates = AppConstants.candidateAndroidBaseUrls;
+    try {
+      final results = await Future.wait(
+        candidates.map((candidate) async {
+          try {
+            final probeDio = Dio(
+              BaseOptions(
+                baseUrl: candidate,
+                connectTimeout: const Duration(milliseconds: 1500),
+                receiveTimeout: const Duration(milliseconds: 1500),
+                sendTimeout: const Duration(milliseconds: 1500),
+              ),
+            );
+            final res = await probeDio.get('/health');
+            if (res.statusCode == 200) {
+              return candidate;
+            }
+          } catch (_) {}
+          return null;
+        }),
+      );
+      for (final c in results) {
+        if (c != null) return c;
+      }
+    } catch (_) {}
+    return null;
+  }
+
   @override
   Future<Result<AuthUser>> login({
     required String phoneNumber,
     required String password,
+    bool forceDiscardUnsynced = false,
   }) async {
     try {
+      final deviceId = await _sessionStore.getOrCreateDeviceId();
       final response = await dio.post(
         '/auth/login',
-        data: {'phoneNumber': phoneNumber.trim(), 'password': password.trim()},
+        data: {
+          'phoneNumber': phoneNumber.trim(),
+          'password': password.trim(),
+          'deviceId': deviceId,
+        },
       );
 
-      final data = response.data['data'] as Map<String, dynamic>;
-      final userMap = data['user'] as Map<String, dynamic>;
-      final accessToken = data['accessToken']?.toString();
-      final refreshToken = data['refreshToken']?.toString();
-
-      final user = AuthUser.fromJson(userMap);
-
-      await _persistSession(
-        user,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
+      return await _handleSuccessfulAuthResponse(
+        response.data['data'] as Map<String, dynamic>,
+        password: password,
+        forceDiscardUnsynced: forceDiscardUnsynced,
       );
-
-      // Save local password hash for offline continuity
-      try {
-        final hash = await PasswordHasher().hashPassword(password);
-        await _storage.write(
-          key: 'kera_passhash_${user.phoneNumber}',
-          value: hash,
-        );
-      } catch (_) {}
-
-      return Result.success(user);
     } on DioException catch (e) {
-      if (!kIsWeb &&
+      // Android loopback / Wi-Fi candidate check (testing across USB reverse, Wi-Fi LAN, and emulator)
+      if (!_isCustomDioClient &&
+          !kIsWeb &&
           defaultTargetPlatform == TargetPlatform.android &&
           (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.connectionError)) {
-        for (final candidate in AppConstants.candidateAndroidBaseUrls) {
-          if (candidate == dio.options.baseUrl) continue;
+              e.type == DioExceptionType.connectionError ||
+              e.type == DioExceptionType.unknown ||
+              e.response == null)) {
+        final working = await _probeWorkingCandidate();
+        if (working != null && working != dio.options.baseUrl) {
+          AppConstants.setApiBaseUrl(working);
+          dio.options.baseUrl = working;
+          await _sessionStore.saveApiBaseUrl(working);
           try {
-            final testDio = Dio(
-              BaseOptions(
-                baseUrl: candidate,
-                connectTimeout: const Duration(seconds: 2),
-                receiveTimeout: const Duration(seconds: 3),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'X-App-Version': AppConstants.appVersion,
-                },
-              ),
-            );
-            final response = await testDio.post(
+            final deviceId = await _sessionStore.getOrCreateDeviceId();
+            final response = await dio.post(
               '/auth/login',
-              data: {'phoneNumber': phoneNumber.trim(), 'password': password.trim()},
+              data: {
+                'phoneNumber': phoneNumber.trim(),
+                'password': password.trim(),
+                'deviceId': deviceId,
+              },
             );
             if (response.statusCode == 200 && response.data['success'] == true) {
-              AppConstants.setApiBaseUrl(candidate);
-              dio.options.baseUrl = candidate;
-
-              final data = response.data['data'] as Map<String, dynamic>;
-              final userMap = data['user'] as Map<String, dynamic>;
-              final accessToken = data['accessToken']?.toString();
-              final refreshToken = data['refreshToken']?.toString();
-
-              final user = AuthUser.fromJson(userMap);
-              await _persistSession(
-                user,
-                accessToken: accessToken,
-                refreshToken: refreshToken,
+              return await _handleSuccessfulAuthResponse(
+                response.data['data'] as Map<String, dynamic>,
+                password: password,
+                forceDiscardUnsynced: forceDiscardUnsynced,
               );
-              try {
-                final hash = await PasswordHasher().hashPassword(password);
-                await _storage.write(
-                  key: 'kera_passhash_${user.phoneNumber}',
-                  value: hash,
-                );
-              } catch (_) {}
-              return Result.success(user);
             }
-          } catch (_) {
-            // Keep testing candidates
-          }
+          } catch (_) {}
         }
       }
 
       final failure = _mapDioError(e);
-      // Seamless offline fallback: authenticate against local SQLite & secure hash
       if (failure is NetworkFailure) {
+        // Rule 1: First login on a new or empty phone REQUIRES internet
+        final normalizedPhone = Validators.normalizeEthiopianPhone(phoneNumber);
+        final localProfile = await (db.select(db.profiles)
+              ..where((t) =>
+                  t.phoneNumber.equals(normalizedPhone) & t.deletedAt.isNull()))
+            .getSingleOrNull();
+
+        if (localProfile == null) {
+          return const Result.failure(OfflineInternetRequiredFailure());
+        }
+
+        // Existing local owner on phone: authenticate offline with local hash
         final localResult = await _localAuthRepo.login(
           phoneNumber: phoneNumber,
           password: password,
+          forceDiscardUnsynced: forceDiscardUnsynced,
         );
         if (localResult.isSuccess && localResult.valueOrNull != null) {
           _cachedUser = localResult.valueOrNull;
@@ -356,32 +542,154 @@ class ApiAuthRepository implements AuthRepository {
       }
       return Result.failure(failure);
     } catch (e) {
+      if (e is Failure) return Result.failure(e);
       return Result.failure(
         AuthFailure(message: 'Login failed: ${e.toString()}', cause: e),
       );
     }
   }
 
+  Future<Result<AuthUser>> _handleSuccessfulAuthResponse(
+    Map<String, dynamic> data, {
+    required String password,
+    required bool forceDiscardUnsynced,
+  }) async {
+    final userMap = data['user'] as Map<String, dynamic>;
+    final accessToken = data['accessToken']?.toString();
+    final refreshToken = data['refreshToken']?.toString();
+    final accessTokenExpiresAt = data['accessTokenExpiresAt']?.toString();
+    final refreshTokenExpiresAt = data['refreshTokenExpiresAt']?.toString();
+    final offlineMaxDays = data['offlineMaxDays'] as int? ?? 90;
+
+    final user = AuthUser.fromJson(userMap);
+
+    // Rule 4: Multi-account conflict detection
+    final previousOwnerId = await _sessionStore.getLastOwnerId();
+    if (previousOwnerId != null &&
+        previousOwnerId.isNotEmpty &&
+        previousOwnerId != user.ownerId) {
+      final hasUnsynced = await db.syncQueueDao.hasUnsyncedChanges();
+      if (hasUnsynced && !forceDiscardUnsynced) {
+        final previousName = await _sessionStore.getLastOwnerDisplayName();
+        return Result.failure(
+          DifferentOwnerConflictFailure(
+            previousOwnerId: previousOwnerId,
+            previousOwnerName: previousName,
+          ),
+        );
+      }
+      if (hasUnsynced && forceDiscardUnsynced) {
+        // Explicitly confirmed: clear old tenant data to make room for new owner
+        await db.clearAllOwnerData();
+      }
+    }
+
+    await _sessionStore.saveSession(
+      accessToken: accessToken ?? '',
+      refreshToken: refreshToken ?? '',
+      accessTokenExpiresAt: accessTokenExpiresAt,
+      refreshTokenExpiresAt: refreshTokenExpiresAt,
+      ownerId: user.ownerId,
+      ownerPhone: user.phoneNumber,
+      ownerBusinessName: user.businessName,
+      offlineMaxDays: offlineMaxDays,
+      userProfile: user.toJson(),
+    );
+
+    // Save profile row in Drift SQLite so offline queries work immediately
+    if (!user.isAdmin) {
+      await db.into(db.profiles).insertOnConflictUpdate(
+        ProfilesCompanion.insert(
+          id: Value(user.id),
+          ownerId: user.ownerId,
+          phoneNumber: Value(user.phoneNumber),
+          businessName: Value(user.businessName),
+          role: const Value(UserRole.owner),
+          syncStatus: const Value(SyncStatus.synced),
+        ),
+      );
+    }
+
+    // Save local password hash for offline continuity
+    try {
+      final hash = await PasswordHasher().hashPassword(password);
+      await _storage.write(
+        key: 'kera_passhash_${user.phoneNumber}',
+        value: hash,
+      );
+    } catch (_) {}
+
+    _cachedUser = user;
+    _authStateController.add(user);
+    setNeedsLogin(false);
+
+    return Result.success(user);
+  }
+
+  @override
+  Future<LogoutPrecheck> precheckLogout() async {
+    final pendingCount = await db.syncQueueDao.countPending();
+    bool isOnline = false;
+    try {
+      final connectivity = await Connectivity().checkConnectivity();
+      isOnline = connectivity.isNotEmpty &&
+          !connectivity.contains(ConnectivityResult.none);
+    } catch (_) {}
+    return LogoutPrecheck(pendingCount: pendingCount, isOnline: isOnline);
+  }
+
+  @override
+  Future<Result<void>> performSyncAndLogout() async {
+    final pushService = SyncPushService(
+      db: db,
+      dio: dio,
+      sessionStore: _sessionStore,
+    );
+    final pushResult = await pushService.pushPendingQueue();
+    if (pushResult.isFailure) {
+      return Result.failure(pushResult.failureOrNull!);
+    }
+
+    final remaining = await db.syncQueueDao.countPending();
+    if (remaining > 0) {
+      return const Result.failure(
+        SyncFailure(
+          message:
+              'Some changes could not be synchronized. Please try again.',
+        ),
+      );
+    }
+
+    return logout();
+  }
+
+  @override
+  Future<Result<void>> forceDiscardAndLogout() async {
+    return logout();
+  }
+
   @override
   Future<Result<void>> logout() async {
     try {
-      final refreshToken = await _storage.read(
-        key: AppConstants.secureStorageRefreshTokenKey,
-      );
-      if (refreshToken != null) {
-        // Attempt server-side revocation (ignore network errors if offline)
+      final session = await _sessionStore.readSession();
+      if (session != null && session.refreshToken.isNotEmpty) {
         try {
-          await dio.post('/auth/logout', data: {'refreshToken': refreshToken});
+          await dio.post(
+            '/auth/logout',
+            data: {
+              'refreshToken': session.refreshToken,
+              'deviceId': session.deviceId,
+            },
+          );
         } catch (_) {}
       }
 
-      await _storage.delete(key: AppConstants.secureStorageTokenKey);
-      await _storage.delete(key: AppConstants.secureStorageRefreshTokenKey);
-      await _storage.delete(key: AppConstants.secureStorageOwnerIdKey);
-      await _storage.delete(key: _userSessionKey);
-
+      await _sessionStore.clearAllSession();
+      await db.clearAllOwnerData();
       _cachedUser = null;
       _authStateController.add(null);
+      setNeedsLogin(false);
+      setPasswordChangedRemotely(false);
       return const Result.success(null);
     } catch (e) {
       return Result.failure(
@@ -399,47 +707,43 @@ class ApiAuthRepository implements AuthRepository {
         return Result.success(_cachedUser);
       }
 
-      // 2. Offline-First: Read securely stored session without blocking on the network
-      final sessionJson = await _storage.read(key: _userSessionKey);
-      debugPrint('[STARTUP] ApiAuthRepository currentUser() secureStorage.read: ${sw.elapsedMilliseconds}ms');
-      if (sessionJson == null || sessionJson.isEmpty) {
+      // 2. Offline-First: Read securely stored session without blocking on the network (Rule 3)
+      final session = await _sessionStore.readSession();
+      debugPrint(
+        '[STARTUP] ApiAuthRepository currentUser() sessionStore.read: ${sw.elapsedMilliseconds}ms',
+      );
+      if (session == null || session.userProfile == null) {
         _authStateController.add(null);
         return const Result.success(null);
       }
 
-      final map = jsonDecode(sessionJson) as Map<String, dynamic>;
-      final user = AuthUser.fromJson(map);
+      final user = AuthUser.fromJson(session.userProfile!);
+
+      // 3. For owners: verify that local profile exists in Drift SQLite (Rule 3)
+      if (!user.isAdmin) {
+        final profile = await (db.select(db.profiles)
+              ..where((t) => t.id.equals(user.id)))
+            .getSingleOrNull();
+        if (profile == null) {
+          debugPrint('[STARTUP] Local Drift profile missing for stored session');
+          _authStateController.add(null);
+          return const Result.success(null);
+        }
+      }
+
       _cachedUser = user;
       _authStateController.add(user);
 
-      // 3. Opportunistic background check if connected (silent, non-blocking)
-      _syncProfileSilently(user.id);
+      // 4. If tokens were cleared due to expiry/theft, notify needsLogin state
+      if (session.refreshToken.isEmpty) {
+        setNeedsLogin(true);
+      }
 
       return Result.success(user);
     } catch (e) {
       _authStateController.add(null);
       return const Result.success(null);
     }
-  }
-
-  void _syncProfileSilently(String userId) {
-    unawaited(() async {
-      try {
-        final res = await dio.get('/auth/me');
-        if (res.statusCode == 200 && res.data['success'] == true) {
-          final data = res.data['data'] as Map<String, dynamic>;
-          final updatedUser = AuthUser.fromJson(data);
-          _cachedUser = updatedUser;
-          await _storage.write(
-            key: _userSessionKey,
-            value: jsonEncode(updatedUser.toJson()),
-          );
-          _authStateController.add(updatedUser);
-        }
-      } catch (_) {
-        // Ignore background network/auth errors in silent profile sync
-      }
-    }());
   }
 
   @override
@@ -457,23 +761,22 @@ class ApiAuthRepository implements AuthRepository {
         final data = response.data['data'] as Map<String, dynamic>;
         final newAccessToken = data['accessToken']?.toString();
         final newRefreshToken = data['refreshToken']?.toString();
-        if (newAccessToken != null && newAccessToken.isNotEmpty) {
-          await _storage.write(
-            key: AppConstants.secureStorageTokenKey,
-            value: newAccessToken,
-          );
-        }
-        if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
-          await _storage.write(
-            key: AppConstants.secureStorageRefreshTokenKey,
-            value: newRefreshToken,
+        final accessExp = data['accessTokenExpiresAt']?.toString();
+        final refreshExp = data['refreshTokenExpiresAt']?.toString();
+
+        if (newAccessToken != null && newRefreshToken != null) {
+          await _sessionStore.updateTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            accessTokenExpiresAt: accessExp,
+            refreshTokenExpiresAt: refreshExp,
           );
         }
       }
       if (_cachedUser != null) {
         _cachedUser = _cachedUser!.copyWith(mustChangePassword: false);
         await _storage.write(
-          key: _userSessionKey,
+          key: SessionStore.keyUserSession,
           value: jsonEncode(_cachedUser!.toJson()),
         );
         _authStateController.add(_cachedUser);
@@ -485,7 +788,6 @@ class ApiAuthRepository implements AuthRepository {
         );
       } catch (_) {}
       return const Result.success(null);
-
     } on DioException catch (e) {
       final failure = _mapDioError(e);
       if (failure is NetworkFailure) {
@@ -527,7 +829,7 @@ class ApiAuthRepository implements AuthRepository {
 
       final updatedUser = user.copyWith(businessName: newBusinessName);
       await _storage.write(
-        key: _userSessionKey,
+        key: SessionStore.keyUserSession,
         value: jsonEncode(updatedUser.toJson()),
       );
       _cachedUser = updatedUser;
@@ -544,63 +846,16 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
-  Future<void> _persistSession(
-    AuthUser user, {
-    String? accessToken,
-    String? refreshToken,
-  }) async {
-    _cachedUser = user;
-
-    if (accessToken != null) {
-      await _storage.write(
-        key: AppConstants.secureStorageTokenKey,
-        value: accessToken,
-      );
-    }
-    if (refreshToken != null) {
-      await _storage.write(
-        key: AppConstants.secureStorageRefreshTokenKey,
-        value: refreshToken,
-      );
-    }
-
-    await _storage.write(
-      key: AppConstants.secureStorageOwnerIdKey,
-      value: user.ownerId,
-    );
-
-    await _storage.write(
-      key: _userSessionKey,
-      value: jsonEncode(user.toJson()),
-    );
-
-    // Save profile row in Drift SQLite so offline queries and local repos work immediately (owners only)
-    if (!user.isAdmin) {
-      await db
-          .into(db.profiles)
-          .insertOnConflictUpdate(
-            ProfilesCompanion.insert(
-              id: Value(user.id),
-              ownerId: user.ownerId,
-              phoneNumber: Value(user.phoneNumber),
-              businessName: Value(user.businessName),
-              role: const Value(UserRole.owner),
-              syncStatus: const Value(SyncStatus.synced),
-            ),
-          );
-    }
-
-    _authStateController.add(user);
-
-  }
-
   Failure _mapDioError(DioException e) {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.connectionError) {
+        e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.unknown ||
+        e.response == null) {
       return const NetworkFailure(
-        message: 'No internet connection. Please connect to the internet to authenticate.',
+        message:
+            'No internet connection. Please connect to the internet to authenticate.',
         code: 'NO_INTERNET',
       );
     }
@@ -629,6 +884,8 @@ class ApiAuthRepository implements AuthRepository {
 
   void dispose() {
     _authStateController.close();
+    _needsLoginController.close();
+    _passwordChangedController.close();
     _localAuthRepo.dispose();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/context_extensions.dart';
+import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/screens/inventory_screen.dart';
 import '../../../reports/presentation/screens/reports_screen.dart';
 import '../../../sales/presentation/screens/sales_list_tab.dart';
@@ -31,9 +32,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: tabs,
+        child: Column(
+          children: [
+            const NeedsLoginBanner(),
+            const OfflineMaxDaysBanner(),
+            const AccountSuspendedBanner(),
+            const PasswordChangedBanner(),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: tabs,
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: NavigationBar(

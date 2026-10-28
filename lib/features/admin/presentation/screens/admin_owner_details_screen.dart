@@ -4,7 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/design/presentation/audit_action_presentation.dart';
+import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/design/tokens/admin_typography.dart';
+import '../../../../core/design/widgets/confirm_dialog.dart';
+import '../../../../core/design/widgets/error_state.dart';
+import '../../../../core/design/widgets/list_card.dart';
+import '../../../../core/design/widgets/metric_card.dart';
+import '../../../../core/design/widgets/relative_time_text.dart';
+import '../../../../core/design/widgets/section_header.dart';
+import '../../../../core/design/widgets/skeleton_loader.dart';
+import '../../../../core/design/widgets/status_chip.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/admin_providers.dart';
 
@@ -29,64 +40,24 @@ class _AdminOwnerDetailsScreenState
 
   Future<void> _handleSuspend(String currentReason) async {
     final l10n = AppLocalizations.of(context)!;
-    final reasonController = TextEditingController(text: currentReason);
-    final formKey = GlobalKey<FormState>();
-
-    final confirmed = await showDialog<bool>(
+    final reason = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.adminSuspendOwnerTitle),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.adminSuspendPrompt),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: reasonController,
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: l10n.adminSuspensionReasonLabel,
-                  hintText: l10n.adminSuspensionReasonHint,
-                ),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
-                    return l10n.adminReasonRequired;
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorColor,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.of(ctx).pop(true);
-              }
-            },
-            child: Text(l10n.adminSuspendConfirm),
-          ),
-        ],
+      builder: (ctx) => ConfirmDialog(
+        title: l10n.adminSuspendOwnerTitle,
+        description: l10n.adminSuspendPrompt,
+        confirmLabel: l10n.adminSuspendConfirm,
+        isDestructive: true,
+        requireReason: true,
+        reasonLabel: l10n.adminSuspensionReasonLabel,
+        reasonHint: l10n.adminSuspensionReasonHint,
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if (reason != null && mounted) {
       final repo = ref.read(adminRepositoryProvider);
       final res = await repo.suspendOwner(
         widget.ownerId,
-        reason: reasonController.text.trim(),
+        reason: reason.trim(),
       );
 
       if (!mounted) return;
@@ -94,7 +65,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.adminOwnerSuspendedSuccess),
-            backgroundColor: AppTheme.successColor,
+            backgroundColor: AdminColors.success,
           ),
         );
         ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
@@ -103,7 +74,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res.failureOrNull?.message ?? l10n.authServerError),
-            backgroundColor: AppTheme.errorColor,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
@@ -114,23 +85,12 @@ class _AdminOwnerDetailsScreenState
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.adminReactivateOwnerTitle),
-        content: Text(l10n.adminReactivatePrompt),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.successColor,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.adminReactivateConfirm),
-          ),
-        ],
+      builder: (ctx) => ConfirmDialog(
+        title: l10n.adminReactivateOwnerTitle,
+        description: l10n.adminReactivatePrompt,
+        confirmLabel: l10n.adminReactivateConfirm,
+        isDestructive: false,
+        requireReason: false,
       ),
     );
 
@@ -143,7 +103,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.adminOwnerReactivatedSuccess),
-            backgroundColor: AppTheme.successColor,
+            backgroundColor: AdminColors.success,
           ),
         );
         ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
@@ -152,7 +112,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res.failureOrNull?.message ?? l10n.authServerError),
-            backgroundColor: AppTheme.errorColor,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
@@ -163,19 +123,12 @@ class _AdminOwnerDetailsScreenState
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.adminResetPasswordTitle),
-        content: Text(l10n.adminResetPasswordPrompt),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.adminResetPasswordConfirm),
-          ),
-        ],
+      builder: (ctx) => ConfirmDialog(
+        title: l10n.adminResetPasswordTitle,
+        description: l10n.adminResetPasswordPrompt,
+        confirmLabel: l10n.adminResetPasswordConfirm,
+        isDestructive: false,
+        requireReason: false,
       ),
     );
 
@@ -192,19 +145,23 @@ class _AdminOwnerDetailsScreenState
           context: context,
           barrierDismissible: false,
           builder: (ctx) => AlertDialog(
-            title: Text(l10n.adminTempPasswordTitle),
+            backgroundColor: AdminColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+            ),
+            title: Text(l10n.adminTempPasswordTitle, style: AdminTypography.h3),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.adminTempPasswordWarning),
-                const SizedBox(height: 16),
+                Text(l10n.adminTempPasswordWarning, style: AdminTypography.caption),
+                const SizedBox(height: AdminSpacing.md),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Theme.of(ctx).colorScheme.outline),
+                    color: AdminColors.raised,
+                    borderRadius: BorderRadius.circular(AdminSpacing.radiusField),
+                    border: Border.all(color: AdminColors.border),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,10 +172,12 @@ class _AdminOwnerDetailsScreenState
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.2,
+                          fontFamily: 'monospace',
+                          color: AdminColors.textPrimary,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.copy_rounded),
+                        icon: const Icon(Icons.copy_rounded, color: AdminColors.primary),
                         tooltip: l10n.copy,
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: tempPassword));
@@ -248,7 +207,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res.failureOrNull?.message ?? l10n.authServerError),
-            backgroundColor: AppTheme.errorColor,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
@@ -264,7 +223,11 @@ class _AdminOwnerDetailsScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.adminEditOwnerTitle),
+        backgroundColor: AdminColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+        ),
+        title: Text(l10n.adminEditOwnerTitle, style: AdminTypography.h3),
         content: Form(
           key: formKey,
           child: Column(
@@ -273,19 +236,16 @@ class _AdminOwnerDetailsScreenState
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(labelText: l10n.businessName),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return l10n.required;
-                  return null;
-                },
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? l10n.required : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AdminSpacing.md),
               TextFormField(
                 controller: phoneController,
                 decoration: InputDecoration(labelText: l10n.phoneNumber),
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return l10n.required;
-                  return null;
-                },
+                keyboardType: TextInputType.phone,
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? l10n.required : null,
               ),
             ],
           ),
@@ -320,7 +280,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.adminOwnerUpdatedSuccess),
-            backgroundColor: AppTheme.successColor,
+            backgroundColor: AdminColors.success,
           ),
         );
         ref.invalidate(adminOwnerDetailsProvider(widget.ownerId));
@@ -329,7 +289,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res.failureOrNull?.message ?? l10n.authServerError),
-            backgroundColor: AppTheme.errorColor,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
@@ -344,7 +304,11 @@ class _AdminOwnerDetailsScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.adminDisableAccountTitle),
+        backgroundColor: AdminColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+        ),
+        title: Text(l10n.adminDisableAccountTitle, style: AdminTypography.h3),
         content: Form(
           key: formKey,
           child: Column(
@@ -353,9 +317,9 @@ class _AdminOwnerDetailsScreenState
             children: [
               Text(
                 l10n.adminDisableWarningPrompt(expectedPhone),
-                style: const TextStyle(height: 1.4),
+                style: AdminTypography.bodyMedium,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AdminSpacing.md),
               TextFormField(
                 controller: confirmController,
                 decoration: InputDecoration(
@@ -379,7 +343,7 @@ class _AdminOwnerDetailsScreenState
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorColor,
+              backgroundColor: AdminColors.danger,
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -405,7 +369,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.adminAccountDisabledSuccess),
-            backgroundColor: AppTheme.successColor,
+            backgroundColor: AdminColors.success,
           ),
         );
         await ref.read(adminOwnersProvider.notifier).loadOwners();
@@ -416,7 +380,7 @@ class _AdminOwnerDetailsScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(res.failureOrNull?.message ?? l10n.authServerError),
-            backgroundColor: AppTheme.errorColor,
+            backgroundColor: AdminColors.danger,
           ),
         );
       }
@@ -429,24 +393,19 @@ class _AdminOwnerDetailsScreenState
     final detailsAsync = ref.watch(adminOwnerDetailsProvider(widget.ownerId));
 
     return Scaffold(
+      backgroundColor: AdminColors.background,
       appBar: AppBar(
         title: Text(l10n.adminOwnerDetailsTitle),
       ),
       body: detailsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(AdminSpacing.lg),
+          child: SkeletonListLoader(count: 4),
+        ),
         error: (err, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline_rounded, size: 48, color: AppTheme.errorColor),
-              const SizedBox(height: 12),
-              Text(err.toString()),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.refresh(adminOwnerDetailsProvider(widget.ownerId)),
-                child: Text(l10n.retry),
-              ),
-            ],
+          child: ErrorState(
+            message: err.toString(),
+            onRetry: () => ref.refresh(adminOwnerDetailsProvider(widget.ownerId)),
           ),
         ),
         data: (details) {
@@ -454,155 +413,135 @@ class _AdminOwnerDetailsScreenState
           final isSuspended = owner.isSuspended;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AdminSpacing.lg,
+              vertical: AdminSpacing.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. Header & Status Card
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                owner.businessName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
+                ListCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              owner.businessName,
+                              style: AdminTypography.h2,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isSuspended
-                                    ? AppTheme.errorColor.withValues(alpha: 0.12)
-                                    : AppTheme.successColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                isSuspended ? l10n.adminStatusSuspended : l10n.adminStatusActive,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isSuspended ? AppTheme.errorColor : AppTheme.successColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          owner.phoneNumber,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                        ),
-                        if (owner.suspendedReason != null && owner.suspendedReason!.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppTheme.errorColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.info_outline_rounded,
-                                    size: 18, color: AppTheme.errorColor),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    '${l10n.adminSuspensionReasonLabel}: ${owner.suspendedReason}',
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          StatusChip(
+                            label: isSuspended
+                                ? l10n.adminStatusSuspended
+                                : l10n.adminStatusActive,
+                            icon: isSuspended
+                                ? Icons.block_rounded
+                                : Icons.check_circle_outline_rounded,
+                            color: isSuspended ? AdminColors.danger : AdminColors.success,
+                            backgroundColor: isSuspended
+                                ? AdminColors.dangerTint
+                                : AdminColors.successTint,
                           ),
                         ],
-                        const Divider(height: 24),
-                        _DetailRow(label: l10n.adminRegisteredDate, value: _dateFormat.format(owner.createdAt)),
-                        _DetailRow(
-                          label: l10n.adminLastSync,
-                          value: owner.lastSyncAt != null ? _dateFormat.format(owner.lastSyncAt!) : l10n.adminSyncNever,
+                      ),
+                      const SizedBox(height: AdminSpacing.xs),
+                      Text(
+                        owner.phoneNumber,
+                        style: AdminTypography.caption.copyWith(
+                          fontFamily: 'monospace',
+                          color: AdminColors.textSecondary,
                         ),
-                        _DetailRow(label: l10n.adminAppVersion, value: owner.appVersion ?? 'N/A'),
-                        _DetailRow(label: l10n.adminFailedSyncCount, value: owner.failedSyncCount.toString()),
+                      ),
+                      if (owner.suspendedReason != null &&
+                          owner.suspendedReason!.isNotEmpty) ...[
+                        const SizedBox(height: AdminSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.all(AdminSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AdminColors.dangerTint,
+                            borderRadius: BorderRadius.circular(AdminSpacing.radiusField),
+                            border: Border.all(color: AdminColors.danger.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 16,
+                                color: AdminColors.danger,
+                              ),
+                              const SizedBox(width: AdminSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  '${l10n.adminSuspensionReasonLabel}: ${owner.suspendedReason}',
+                                  style: AdminTypography.caption.copyWith(
+                                    color: AdminColors.danger,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
+                      const SizedBox(height: AdminSpacing.md),
+                      const Divider(height: 1, color: AdminColors.border),
+                      const SizedBox(height: AdminSpacing.md),
+                      _detailRow(l10n.adminRegisteredDate, _dateFormat.format(owner.createdAt)),
+                      _detailRow(
+                        l10n.adminLastSync,
+                        owner.lastSyncAt != null
+                            ? _dateFormat.format(owner.lastSyncAt!)
+                            : l10n.adminSyncNever,
+                      ),
+                      _detailRow(l10n.adminAppVersion, owner.appVersion ?? 'N/A'),
+                      _detailRow(l10n.adminFailedSyncCount, owner.failedSyncCount.toString()),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AdminSpacing.xl),
 
-                // 2. Activity Statistics (COUNTS ONLY, strictly no row contents)
-                Text(
-                  l10n.adminTenantCountsOnly,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
+                // 2. Activity Statistics (COUNTS ONLY)
+                SectionHeader(title: l10n.adminTenantCountsOnly),
+                const SizedBox(height: AdminSpacing.sm),
                 Row(
                   children: [
                     Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(l10n.adminTotalPartsCount, style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: 4),
-                              Text(
-                                details.totalParts.toString(),
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: MetricCard(
+                        label: l10n.adminTotalPartsCount,
+                        value: details.totalParts.toString(),
+                        icon: Icons.precision_manufacturing_rounded,
+                        accentColor: const Color(0xFF818CF8),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AdminSpacing.md),
                     Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(l10n.adminTotalSalesCount, style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: 4),
-                              Text(
-                                details.totalSales.toString(),
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: MetricCard(
+                        label: l10n.adminTotalSalesCount,
+                        value: details.totalSales.toString(),
+                        icon: Icons.point_of_sale_rounded,
+                        accentColor: const Color(0xFF38BDF8),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AdminSpacing.xl),
 
                 // 3. Administrative Actions Section
-                Text(
-                  l10n.adminActionsHeader,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
+                SectionHeader(title: l10n.adminActionsHeader),
+                const SizedBox(height: AdminSpacing.sm),
                 Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
+                  spacing: AdminSpacing.sm,
+                  runSpacing: AdminSpacing.sm,
                   children: [
                     if (!isSuspended)
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.errorColor,
+                          backgroundColor: AdminColors.danger,
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () => _handleSuspend(owner.suspendedReason ?? ''),
@@ -612,7 +551,7 @@ class _AdminOwnerDetailsScreenState
                     else
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.successColor,
+                          backgroundColor: AdminColors.success,
                           foregroundColor: Colors.white,
                         ),
                         onPressed: _handleReactivate,
@@ -631,8 +570,8 @@ class _AdminOwnerDetailsScreenState
                     ),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.errorColor,
-                        side: const BorderSide(color: AppTheme.errorColor),
+                        foregroundColor: AdminColors.danger,
+                        side: const BorderSide(color: AdminColors.danger),
                       ),
                       onPressed: () => _handleDisable(owner.phoneNumber),
                       icon: const Icon(Icons.delete_forever_rounded, size: 18),
@@ -640,47 +579,66 @@ class _AdminOwnerDetailsScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: AdminSpacing.xl),
 
                 // 4. Audit History for this Owner
-                Text(
-                  l10n.adminAuditHistoryForUser,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
+                SectionHeader(title: l10n.adminAuditHistoryForUser),
+                const SizedBox(height: AdminSpacing.sm),
                 if (details.auditLogs.isEmpty)
-                  Card(
+                  ListCard(
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(l10n.adminNoAuditLogs),
+                      padding: const EdgeInsets.symmetric(vertical: AdminSpacing.md),
+                      child: Center(
+                        child: Text(
+                          l10n.adminNoAuditLogs,
+                          style: AdminTypography.caption,
+                        ),
+                      ),
                     ),
                   )
                 else
-                  Card(
+                  ListCard(
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: details.auditLogs.length,
-                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      separatorBuilder: (_, _) => const Divider(height: 1, color: AdminColors.border),
                       itemBuilder: (ctx, i) {
                         final log = details.auditLogs[i];
-                        return ListTile(
-                          title: Text(
-                            log.action,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                          ),
-                          subtitle: Text(
-                            log.reason ?? _dateFormat.format(log.createdAt),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          trailing: Text(
-                            _dateFormat.format(log.createdAt),
-                            style: Theme.of(context).textTheme.bodySmall,
+                        final pres = AuditActionPresentation.resolve(log.action, l10n);
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AdminSpacing.sm),
+                          child: Row(
+                            children: [
+                              StatusChip(
+                                label: pres.label,
+                                icon: pres.icon,
+                                color: pres.color,
+                                backgroundColor: pres.tintColor,
+                              ),
+                              const SizedBox(width: AdminSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  log.reason ?? '',
+                                  style: AdminTypography.caption.copyWith(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              RelativeTimeText(
+                                dateTime: log.createdAt,
+                                style: AdminTypography.caption,
+                              ),
+                            ],
                           ),
                         );
                       },
                     ),
                   ),
+                const SizedBox(height: AdminSpacing.xxl),
               ],
             ),
           );
@@ -688,23 +646,25 @@ class _AdminOwnerDetailsScreenState
       ),
     );
   }
-}
 
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _detailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: AdminSpacing.xs),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(
+            label,
+            style: AdminTypography.caption.copyWith(
+              color: AdminColors.textSecondary,
+            ),
+          ),
+          Text(
+            value,
+            style: AdminTypography.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/constants/constants.dart';
+import 'package:kera_spare_tracker/core/errors/failure.dart';
 import 'package:kera_spare_tracker/data/local/app_database.dart';
 import 'package:kera_spare_tracker/features/auth/data/repositories/api_auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
@@ -63,6 +64,17 @@ void main() {
       // Pre-seed secure storage
       inMemoryStorage['kera_user_session'] = jsonEncode(user.toJson());
       inMemoryStorage[AppConstants.secureStorageTokenKey] = 'test-access-token';
+      inMemoryStorage[AppConstants.secureStorageOwnerIdKey] = 'user-123';
+
+      // Seed local Drift profile
+      await db.into(db.profiles).insert(
+        ProfilesCompanion.insert(
+          id: const Value('user-123'),
+          ownerId: 'user-123',
+          phoneNumber: const Value('+251911223344'),
+          businessName: const Value('Offline Test Motors'),
+        ),
+      );
 
       final repo = ApiAuthRepository(
         db: db,
@@ -137,7 +149,7 @@ void main() {
       expect(storedSession, contains('Updated Kera Motors'));
     });
 
-    test('Offline-First: register() falls back to local registration when API is unreachable', () async {
+    test('Rule 1: register() returns OfflineInternetRequiredFailure when offline', () async {
       // Dio is configured with invalid host/port so network connection will fail
       final unreachableDio = Dio(
         BaseOptions(
@@ -159,23 +171,8 @@ void main() {
         password: 'SecurePassword123!',
       );
 
-      expect(regResult.isSuccess, true);
-      expect(regResult.valueOrNull?.phoneNumber, '+251911998877');
-      expect(regResult.valueOrNull?.businessName, 'Offline Kera Motors');
-
-      // Verify Drift DB profile was inserted
-      final profile = await (db.select(db.profiles)
-            ..where((t) => t.phoneNumber.equals('+251911998877')))
-          .getSingleOrNull();
-      expect(profile, isNotNull);
-      expect(profile?.businessName, 'Offline Kera Motors');
-
-      // Verify sync mutation was enqueued
-      final queueItems = await db.select(db.syncQueue).get();
-      expect(queueItems.any((item) => item.tableTarget == 'profiles'), isTrue);
-
-      // Verify local session was persisted
-      expect(inMemoryStorage['kera_user_session'], isNotNull);
+      expect(regResult.isFailure, true);
+      expect(regResult.failureOrNull, isA<OfflineInternetRequiredFailure>());
     });
 
     test('Admin user role is parsed correctly and isAdmin returns true', () {
