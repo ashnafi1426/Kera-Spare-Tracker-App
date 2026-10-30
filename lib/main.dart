@@ -9,10 +9,10 @@ import 'core/providers/locale_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/session_store.dart';
-import 'core/services/storage_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/security/presentation/widgets/app_lock_lifecycle_wrapper.dart';
 import 'l10n/app_localizations.dart';
+
 
 Future<void> main() async {
   final totalStartupStopwatch = Stopwatch()..start();
@@ -64,38 +64,10 @@ Future<void> main() async {
   };
   debugPrint('[STARTUP] Error boundaries configured: ${stepStopwatch.elapsedMilliseconds}ms');
 
-  // Load persisted user preferences (locale & theme mode)
-  stepStopwatch.reset();
-  String? savedLocaleCode;
-  String? savedThemeModeString;
-  try {
-    const storage = LocalStorageService();
-    final results = await Future.wait([
-      storage.getSavedLocaleCode(),
-      storage.getSavedThemeMode(),
-    ]).timeout(const Duration(milliseconds: 300), onTimeout: () => [null, null]);
-    savedLocaleCode = results[0];
-    savedThemeModeString = results[1];
-  } catch (e) {
-    debugPrint('[STARTUP] LocalStorageService fallback: $e');
-  }
-  debugPrint('[STARTUP] LocalStorageService read preferences: ${stepStopwatch.elapsedMilliseconds}ms');
-
-  stepStopwatch.reset();
-  final initialThemeMode = switch (savedThemeModeString) {
-    'light' => ThemeMode.light,
-    'dark' => ThemeMode.dark,
-    _ => ThemeMode.system,
-  };
-
+  // Launch UI immediately without blocking on asynchronous disk or keystore access
   runApp(
-    ProviderScope(
-      overrides: [
-        if (savedLocaleCode != null)
-          initialLocaleCodeProvider.overrideWithValue(savedLocaleCode),
-        initialThemeModeProvider.overrideWithValue(initialThemeMode),
-      ],
-      child: const KeraSpareTrackerApp(),
+    const ProviderScope(
+      child: KeraSpareTrackerApp(),
     ),
   );
   debugPrint('[STARTUP] runApp() called: ${stepStopwatch.elapsedMilliseconds}ms (Total before runApp: ${totalStartupStopwatch.elapsedMilliseconds}ms)');

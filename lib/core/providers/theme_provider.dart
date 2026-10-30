@@ -20,7 +20,23 @@ class ThemeModeController extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
     _storage = ref.watch(localStorageServiceProvider);
-    return ref.watch(initialThemeModeProvider);
+    final initialMode = ref.watch(initialThemeModeProvider);
+    Future.microtask(_loadSavedTheme);
+    return initialMode;
+  }
+
+  Future<void> _loadSavedTheme() async {
+    try {
+      final modeString = await _storage.getSavedThemeMode();
+      if (modeString != null && modeString.isNotEmpty) {
+        final mode = switch (modeString) {
+          'light' => ThemeMode.light,
+          'dark' => ThemeMode.dark,
+          _ => ThemeMode.system,
+        };
+        if (mode != state) state = mode;
+      }
+    } catch (_) {}
   }
 
   /// Sets and persists the selected ThemeMode.

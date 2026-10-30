@@ -1,9 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/constants.dart';
 
-/// Default shared instance of FlutterSecureStorage configured with encryptedSharedPreferences on Android.
+/// Default shared instance of FlutterSecureStorage configured with safe error recovery on Android.
 const defaultSecureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  aOptions: AndroidOptions(
+    resetOnError: true,
+  ),
 );
 
 /// Local storage service for user preferences and persistent configuration.

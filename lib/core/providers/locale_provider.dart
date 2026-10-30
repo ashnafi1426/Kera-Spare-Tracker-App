@@ -21,7 +21,17 @@ class LocaleController extends Notifier<Locale> {
   @override
   Locale build() {
     final initialCode = ref.watch(initialLocaleCodeProvider);
+    Future.microtask(_loadSavedLocale);
     return Locale(initialCode);
+  }
+
+  Future<void> _loadSavedLocale() async {
+    try {
+      final code = await _storage.getSavedLocaleCode();
+      if (code != null && code.isNotEmpty && code != state.languageCode) {
+        state = Locale(code);
+      }
+    } catch (_) {}
   }
 
   /// Sets the application locale immediately and persists it.

@@ -58,10 +58,10 @@ class AuthUser {
       };
 
   factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
-        id: (json['id'] ?? json['owner_id']) as String,
-        ownerId: (json['owner_id'] ?? json['id']) as String,
-        phoneNumber: (json['phone_number'] ?? json['phoneNumber']) as String,
-        businessName: (json['business_name'] ?? json['businessName']) as String,
+        id: (json['id'] ?? json['owner_id'] ?? '') as String,
+        ownerId: (json['owner_id'] ?? json['id'] ?? '') as String,
+        phoneNumber: (json['phone_number'] ?? json['phoneNumber'] ?? '') as String,
+        businessName: (json['business_name'] ?? json['businessName'] ?? '') as String,
         role: (json['role'] as String? ?? 'owner').toLowerCase(),
         mustChangePassword: json['must_change_password'] == true || json['mustChangePassword'] == true,
         status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),

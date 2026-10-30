@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -21,6 +22,10 @@ import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'local_auth_repository.dart';
 
+/// Error code used when the phone has a network but the API server cannot be
+/// reached (wrong IP/port, firewall, cleartext blocked, server stopped...).
+const String kServerUnreachableCode = 'SERVER_UNREACHABLE';
+
 /// Production API implementation of [AuthRepository] connecting to the Node.js / MySQL backend via Dio.
 ///
 /// Features:
@@ -29,6 +34,8 @@ import 'local_auth_repository.dart';
 /// - Offline-first instant local startup decision (Rule 3) without waiting for network.
 /// - Graceful `needsLogin` state on token expiry/theft detection without deleting local data.
 /// - Account switching conflict protection with unsynced changes detection.
+/// - Accurate error reporting: "no internet" is only reported when the phone
+///   really has no network; otherwise the failing server address is reported.
 class ApiAuthRepository implements AuthRepository {
   final Dio dio;
   final AppDatabase db;
@@ -37,6 +44,13 @@ class ApiAuthRepository implements AuthRepository {
   final LocalAuthRepository _localAuthRepo;
   final String baseUrl;
   final bool _isCustomDioClient;
+
+  /// When true, on Android the repository probes the candidate base URLs
+  /// (USB reverse, Wi-Fi LAN, emulator) if the current one cannot be reached.
+  /// Defaults to true when the repository creates its own Dio client. Pass
+  /// `true` explicitly if your provider supplies a [Dio] but you still want
+  /// the automatic detection.
+  final bool _autoProbeServer;
 
   final _authStateController = StreamController<AuthUser?>.broadcast();
   final _needsLoginController = StreamController<bool>.broadcast();
@@ -54,28 +68,33 @@ class ApiAuthRepository implements AuthRepository {
     SessionStore? sessionStore,
     String? baseUrl,
     LocalAuthRepository? localAuthRepo,
-  })  : _storage = storage ?? defaultSecureStorage,
-        _sessionStore = sessionStore ?? SessionStore(storage: storage),
-        baseUrl = baseUrl ??
-            (dioClient != null && dioClient.options.baseUrl.isNotEmpty
-                ? dioClient.options.baseUrl
-                : AppConstants.apiBaseUrl),
-        _localAuthRepo =
-            localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
-        _isCustomDioClient = dioClient != null,
-        dio = dioClient ??
-            Dio(
-              BaseOptions(
-                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
-                connectTimeout: const Duration(seconds: 4),
-                receiveTimeout: const Duration(seconds: 4),
-                sendTimeout: const Duration(seconds: 4),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-              ),
-            ) {
+    bool? autoProbeServer,
+  }) : _storage = storage ?? defaultSecureStorage,
+       _sessionStore = sessionStore ?? SessionStore(storage: storage),
+       baseUrl =
+           baseUrl ??
+           (dioClient != null && dioClient.options.baseUrl.isNotEmpty
+               ? dioClient.options.baseUrl
+               : AppConstants.apiBaseUrl),
+       _localAuthRepo =
+           localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
+       _isCustomDioClient = dioClient != null,
+       _autoProbeServer = autoProbeServer ?? (dioClient == null),
+       dio =
+           dioClient ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
+               // Generous timeouts: hotspots and cold servers are slow.
+               connectTimeout: const Duration(seconds: 10),
+               receiveTimeout: const Duration(seconds: 20),
+               sendTimeout: const Duration(seconds: 20),
+               headers: {
+                 'Content-Type': 'application/json',
+                 'Accept': 'application/json',
+               },
+             ),
+           ) {
     _setupInterceptors();
   }
 
@@ -109,7 +128,78 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Network helpers
+  // ---------------------------------------------------------------------------
+
+  /// True when the phone is connected to some network (Wi-Fi, mobile, ...).
+  /// Note: this does NOT prove the API server is reachable.
+  /// connectivity_plus v6 returns a List, so we check the list properly.
+  Future<bool> _hasNetwork() async {
+    try {
+      final results = await Connectivity().checkConnectivity();
+      if (results.any((r) => r != ConnectivityResult.none)) {
+        return true;
+      }
+    } catch (_) {
+      // If the check itself fails, never block the real request.
+      return true;
+    }
+
+    // Fallback: On Windows or certain emulators/adapters, connectivity_plus can
+    // falsely report [ConnectivityResult.none] even when internet is working properly.
+    if (!kIsWeb) {
+      try {
+        final lookup = await InternetAddress.lookup('dns.google')
+            .timeout(const Duration(milliseconds: 1500));
+        if (lookup.isNotEmpty && lookup[0].rawAddress.isNotEmpty) {
+          return true;
+        }
+      } catch (_) {
+        try {
+          final lookup2 = await InternetAddress.lookup('one.one.one.one')
+              .timeout(const Duration(milliseconds: 1500));
+          if (lookup2.isNotEmpty && lookup2[0].rawAddress.isNotEmpty) {
+            return true;
+          }
+        } catch (_) {}
+      }
+    }
+    return false;
+  }
+
+  bool _isConnectionProblem(DioException e) =>
+      e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.sendTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.unknown ||
+      e.response == null;
+
+  bool get _shouldProbeCandidates => _autoProbeServer && !kIsWeb;
+  bool get _shouldProbeOnAndroid => _shouldProbeCandidates;
+
+  // ---------------------------------------------------------------------------
+  // Interceptors
+  // ---------------------------------------------------------------------------
+
   void _setupInterceptors() {
+    // Debug logging for our own client only. Request bodies and headers are
+    // NOT logged so passwords and tokens never reach the console.
+    if (kDebugMode && !_isCustomDioClient) {
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestHeader: false,
+          requestBody: false,
+          responseHeader: false,
+          responseBody: true,
+          error: true,
+          logPrint: (o) => debugPrint('[DIO] $o'),
+        ),
+      );
+    }
+
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -214,15 +304,16 @@ class ApiAuthRepository implements AuthRepository {
         return null;
       }
 
-      final activeBaseUrl =
-          dio.options.baseUrl.isNotEmpty ? dio.options.baseUrl : baseUrl;
+      final activeBaseUrl = dio.options.baseUrl.isNotEmpty
+          ? dio.options.baseUrl
+          : baseUrl;
 
       // Use a separate Dio instance without interceptors to avoid loops
       final refreshDio = Dio(
         BaseOptions(
           baseUrl: activeBaseUrl,
-          connectTimeout: const Duration(seconds: 8),
-          receiveTimeout: const Duration(seconds: 8),
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 15),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -234,14 +325,10 @@ class ApiAuthRepository implements AuthRepository {
       final deviceId = await _sessionStore.getOrCreateDeviceId();
       final refreshRes = await refreshDio.post(
         '/auth/refresh',
-        data: {
-          'refreshToken': refreshToken,
-          'deviceId': deviceId,
-        },
+        data: {'refreshToken': refreshToken, 'deviceId': deviceId},
       );
 
-      if (refreshRes.statusCode == 200 &&
-          refreshRes.data['success'] == true) {
+      if (refreshRes.statusCode == 200 && refreshRes.data['success'] == true) {
         final data = refreshRes.data['data'] as Map<String, dynamic>;
         final newAccessToken = data['accessToken']?.toString();
         final newRefreshToken = data['refreshToken']?.toString();
@@ -323,8 +410,14 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
+
+
   @override
   Stream<AuthUser?> watchCurrentUser() => _authStateController.stream;
+
+  // ---------------------------------------------------------------------------
+  // Register
+  // ---------------------------------------------------------------------------
 
   @override
   Future<Result<AuthUser>> register({
@@ -368,16 +461,18 @@ class ApiAuthRepository implements AuthRepository {
 
       // Save profile in Drift SQLite so local queries work immediately (Rule 2)
       if (!user.isAdmin) {
-        await db.into(db.profiles).insertOnConflictUpdate(
-          ProfilesCompanion.insert(
-            id: Value(user.id),
-            ownerId: user.ownerId,
-            phoneNumber: Value(user.phoneNumber),
-            businessName: Value(user.businessName),
-            role: const Value(UserRole.owner),
-            syncStatus: const Value(SyncStatus.synced),
-          ),
-        );
+        await db
+            .into(db.profiles)
+            .insertOnConflictUpdate(
+              ProfilesCompanion.insert(
+                id: Value(user.id),
+                ownerId: user.ownerId,
+                phoneNumber: Value(user.phoneNumber),
+                businessName: Value(user.businessName),
+                role: const Value(UserRole.owner),
+                syncStatus: const Value(SyncStatus.synced),
+              ),
+            );
       }
 
       // Save local password hash for offline continuity
@@ -395,13 +490,7 @@ class ApiAuthRepository implements AuthRepository {
 
       return Result.success(user);
     } on DioException catch (e) {
-      if (!_isCustomDioClient &&
-          !kIsWeb &&
-          defaultTargetPlatform == TargetPlatform.android &&
-          (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.connectionError ||
-              e.type == DioExceptionType.unknown ||
-              e.response == null)) {
+      if (_shouldProbeOnAndroid && _isConnectionProblem(e)) {
         final working = await _probeWorkingCandidate();
         if (working != null && working != dio.options.baseUrl) {
           AppConstants.setApiBaseUrl(working);
@@ -415,9 +504,9 @@ class ApiAuthRepository implements AuthRepository {
         }
       }
 
-      final failure = _mapDioError(e);
-      // Rule 1: Registration REQUIRES internet
+      final failure = _mapDioError(e, hasNetwork: await _hasNetwork());
       if (failure is NetworkFailure) {
+        // Rule 1: Registration REQUIRES internet
         return const Result.failure(OfflineInternetRequiredFailure());
       }
       return Result.failure(failure);
@@ -438,9 +527,9 @@ class ApiAuthRepository implements AuthRepository {
             final probeDio = Dio(
               BaseOptions(
                 baseUrl: candidate,
-                connectTimeout: const Duration(milliseconds: 1500),
-                receiveTimeout: const Duration(milliseconds: 1500),
-                sendTimeout: const Duration(milliseconds: 1500),
+                connectTimeout: const Duration(milliseconds: 2500),
+                receiveTimeout: const Duration(milliseconds: 2500),
+                sendTimeout: const Duration(milliseconds: 2500),
               ),
             );
             final res = await probeDio.get('/health');
@@ -458,6 +547,10 @@ class ApiAuthRepository implements AuthRepository {
     return null;
   }
 
+  // ---------------------------------------------------------------------------
+  // Login
+  // ---------------------------------------------------------------------------
+
   @override
   Future<Result<AuthUser>> login({
     required String phoneNumber,
@@ -465,12 +558,17 @@ class ApiAuthRepository implements AuthRepository {
     bool forceDiscardUnsynced = false,
   }) async {
     try {
+      final trimmedPhone = phoneNumber.trim();
+      final isAdmin = trimmedPhone == '0900000000' || trimmedPhone == '+251900000000';
+      final endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
+
       final deviceId = await _sessionStore.getOrCreateDeviceId();
       final response = await dio.post(
-        '/auth/login',
+        endpoint,
         data: {
-          'phoneNumber': phoneNumber.trim(),
-          'password': password.trim(),
+          'phoneNumber': trimmedPhone,
+          // Never trim a password: register() sends it exactly as typed.
+          'password': password,
           'deviceId': deviceId,
         },
       );
@@ -481,54 +579,80 @@ class ApiAuthRepository implements AuthRepository {
         forceDiscardUnsynced: forceDiscardUnsynced,
       );
     } on DioException catch (e) {
-      // Android loopback / Wi-Fi candidate check (testing across USB reverse, Wi-Fi LAN, and emulator)
-      if (!_isCustomDioClient &&
-          !kIsWeb &&
-          defaultTargetPlatform == TargetPlatform.android &&
-          (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.connectionError ||
-              e.type == DioExceptionType.unknown ||
-              e.response == null)) {
+      final hasNetwork = await _hasNetwork();
+
+      // Android loopback / Wi-Fi candidate check (USB reverse, Wi-Fi LAN, emulator)
+      if (_shouldProbeCandidates && _isConnectionProblem(e)) {
         final working = await _probeWorkingCandidate();
         if (working != null && working != dio.options.baseUrl) {
           AppConstants.setApiBaseUrl(working);
           dio.options.baseUrl = working;
           await _sessionStore.saveApiBaseUrl(working);
           try {
+            final trimmedPhone = phoneNumber.trim();
+            final isAdmin = trimmedPhone == '0900000000' || trimmedPhone == '+251900000000';
+            final endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
+
             final deviceId = await _sessionStore.getOrCreateDeviceId();
             final response = await dio.post(
-              '/auth/login',
+              endpoint,
               data: {
-                'phoneNumber': phoneNumber.trim(),
-                'password': password.trim(),
+                'phoneNumber': trimmedPhone,
+                'password': password,
                 'deviceId': deviceId,
               },
             );
-            if (response.statusCode == 200 && response.data['success'] == true) {
+            if (response.statusCode == 200 &&
+                response.data['success'] == true) {
               return await _handleSuccessfulAuthResponse(
                 response.data['data'] as Map<String, dynamic>,
                 password: password,
                 forceDiscardUnsynced: forceDiscardUnsynced,
               );
             }
+          } on DioException catch (retryErr) {
+            // The server answered (for example wrong password): report that,
+            // do not fall back to "no internet".
+            if (retryErr.response != null) {
+              return Result.failure(
+                _mapDioError(retryErr, hasNetwork: hasNetwork),
+              );
+            }
           } catch (_) {}
         }
       }
 
-      final failure = _mapDioError(e);
+      final failure = _mapDioError(e, hasNetwork: hasNetwork);
       if (failure is NetworkFailure) {
-        // Rule 1: First login on a new or empty phone REQUIRES internet
+        // Existing local owner on this phone: authenticate offline with the local hash.
         final normalizedPhone = Validators.normalizeEthiopianPhone(phoneNumber);
-        final localProfile = await (db.select(db.profiles)
-              ..where((t) =>
-                  t.phoneNumber.equals(normalizedPhone) & t.deletedAt.isNull()))
-            .getSingleOrNull();
+        final localProfile =
+            await (db.select(db.profiles)..where(
+                  (t) =>
+                      t.phoneNumber.equals(normalizedPhone) &
+                      t.deletedAt.isNull(),
+                ))
+                .getSingleOrNull();
 
         if (localProfile == null) {
+          // First login on a new or empty phone REQUIRES the server (Rule 1).
+          // If the phone has a network but the server is unreachable, say so.
+          if (failure.code == kServerUnreachableCode) {
+            return Result.failure(failure);
+          }
+          if (hasNetwork) {
+            return Result.failure(
+              NetworkFailure(
+                message:
+                    'Cannot reach the server at ${dio.options.baseUrl}. '
+                    'Please check the server address or status.',
+                code: kServerUnreachableCode,
+              ),
+            );
+          }
           return const Result.failure(OfflineInternetRequiredFailure());
         }
 
-        // Existing local owner on phone: authenticate offline with local hash
         final localResult = await _localAuthRepo.login(
           phoneNumber: phoneNumber,
           password: password,
@@ -598,16 +722,18 @@ class ApiAuthRepository implements AuthRepository {
 
     // Save profile row in Drift SQLite so offline queries work immediately
     if (!user.isAdmin) {
-      await db.into(db.profiles).insertOnConflictUpdate(
-        ProfilesCompanion.insert(
-          id: Value(user.id),
-          ownerId: user.ownerId,
-          phoneNumber: Value(user.phoneNumber),
-          businessName: Value(user.businessName),
-          role: const Value(UserRole.owner),
-          syncStatus: const Value(SyncStatus.synced),
-        ),
-      );
+      await db
+          .into(db.profiles)
+          .insertOnConflictUpdate(
+            ProfilesCompanion.insert(
+              id: Value(user.id),
+              ownerId: user.ownerId,
+              phoneNumber: Value(user.phoneNumber),
+              businessName: Value(user.businessName),
+              role: const Value(UserRole.owner),
+              syncStatus: const Value(SyncStatus.synced),
+            ),
+          );
     }
 
     // Save local password hash for offline continuity
@@ -617,6 +743,13 @@ class ApiAuthRepository implements AuthRepository {
         key: 'kera_passhash_${user.phoneNumber}',
         value: hash,
       );
+      final normalized = Validators.normalizeEthiopianPhone(user.phoneNumber);
+      if (normalized != user.phoneNumber) {
+        await _storage.write(
+          key: 'kera_passhash_$normalized',
+          value: hash,
+        );
+      }
     } catch (_) {}
 
     _cachedUser = user;
@@ -626,15 +759,14 @@ class ApiAuthRepository implements AuthRepository {
     return Result.success(user);
   }
 
+  // ---------------------------------------------------------------------------
+  // Logout
+  // ---------------------------------------------------------------------------
+
   @override
   Future<LogoutPrecheck> precheckLogout() async {
     final pendingCount = await db.syncQueueDao.countPending();
-    bool isOnline = false;
-    try {
-      final connectivity = await Connectivity().checkConnectivity();
-      isOnline = connectivity.isNotEmpty &&
-          !connectivity.contains(ConnectivityResult.none);
-    } catch (_) {}
+    final isOnline = await _hasNetwork();
     return LogoutPrecheck(pendingCount: pendingCount, isOnline: isOnline);
   }
 
@@ -654,8 +786,7 @@ class ApiAuthRepository implements AuthRepository {
     if (remaining > 0) {
       return const Result.failure(
         SyncFailure(
-          message:
-              'Some changes could not be synchronized. Please try again.',
+          message: 'Some changes could not be synchronized. Please try again.',
         ),
       );
     }
@@ -698,6 +829,10 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Current user
+  // ---------------------------------------------------------------------------
+
   @override
   Future<Result<AuthUser?>> currentUser() async {
     final sw = Stopwatch()..start();
@@ -721,11 +856,13 @@ class ApiAuthRepository implements AuthRepository {
 
       // 3. For owners: verify that local profile exists in Drift SQLite (Rule 3)
       if (!user.isAdmin) {
-        final profile = await (db.select(db.profiles)
-              ..where((t) => t.id.equals(user.id)))
-            .getSingleOrNull();
+        final profile = await (db.select(
+          db.profiles,
+        )..where((t) => t.id.equals(user.id))).getSingleOrNull();
         if (profile == null) {
-          debugPrint('[STARTUP] Local Drift profile missing for stored session');
+          debugPrint(
+            '[STARTUP] Local Drift profile missing for stored session',
+          );
           _authStateController.add(null);
           return const Result.success(null);
         }
@@ -745,6 +882,10 @@ class ApiAuthRepository implements AuthRepository {
       return const Result.success(null);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Change password / business name
+  // ---------------------------------------------------------------------------
 
   @override
   Future<Result<void>> changePassword({
@@ -789,7 +930,7 @@ class ApiAuthRepository implements AuthRepository {
       } catch (_) {}
       return const Result.success(null);
     } on DioException catch (e) {
-      final failure = _mapDioError(e);
+      final failure = _mapDioError(e, hasNetwork: await _hasNetwork());
       if (failure is NetworkFailure) {
         return _localAuthRepo.changePassword(
           currentPassword: currentPassword,
@@ -846,17 +987,35 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
-  Failure _mapDioError(DioException e) {
-    if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout ||
-        e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.unknown ||
-        e.response == null) {
-      return const NetworkFailure(
+  // ---------------------------------------------------------------------------
+  // Error mapping
+  // ---------------------------------------------------------------------------
+
+  /// Maps a [DioException] to a [Failure].
+  ///
+  /// - No response and the phone has NO network  -> `NO_INTERNET`.
+  /// - No response but the phone HAS a network   -> `SERVER_UNREACHABLE`
+  ///   (wrong IP/port, firewall, cleartext blocked, server stopped, timeout).
+  /// - A response was received                   -> the server's own error code.
+  Failure _mapDioError(DioException e, {required bool hasNetwork}) {
+    if (e.response == null) {
+      debugPrint(
+        'AUTH NETWORK ERROR type=${e.type.name} '
+        'url=${e.requestOptions.uri} error=${e.error} message=${e.message}',
+      );
+
+      if (!hasNetwork) {
+        return const NetworkFailure(
+          message: 'No internet connection. Please connect to the internet to authenticate.',
+          code: 'NO_INTERNET',
+        );
+      }
+
+      return NetworkFailure(
         message:
-            'No internet connection. Please connect to the internet to authenticate.',
-        code: 'NO_INTERNET',
+            'Cannot reach the server at ${dio.options.baseUrl} '
+            '(${e.type.name}). Check the server address in Server Settings.',
+        code: kServerUnreachableCode,
       );
     }
 

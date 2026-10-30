@@ -145,64 +145,68 @@ class AppLockService {
 
   /// Initializes app lock state from secure storage and hardware capabilities.
   Future<void> init() async {
-    final enabledStr = await _storage.read(key: keyAppLockEnabled);
-    final isEnabled = enabledStr == 'true';
-
-    final pinHash = await _storage.read(key: keyPinHash);
-    final hasValidPin = pinHash != null && pinHash.isNotEmpty;
-
-    final pinLengthStr = await _storage.read(key: keyPinLength);
-    final pinLength = int.tryParse(pinLengthStr ?? '4') ?? 4;
-
-    final biometricsEnabledStr =
-        await _storage.read(key: keyBiometricsEnabled);
-    final isBiometricsEnabled = biometricsEnabledStr == 'true';
-
-    final timeoutStr = await _storage.read(key: keyTimeoutSeconds);
-    final timeoutSec = int.tryParse(timeoutStr ?? '0') ?? 0;
-    final timeout = AppLockTimeout.fromSeconds(timeoutSec);
-
-    final failedAttemptsStr = await _storage.read(key: keyFailedAttempts);
-    final failedAttempts = int.tryParse(failedAttemptsStr ?? '0') ?? 0;
-
-    final maxLockedStr = await _storage.read(key: keyMaxLocked);
-    final isMaxLocked = maxLockedStr == 'true' || failedAttempts >= 10;
-
-    bool isBiometricsSupported = false;
     try {
-      final canCheck = await _localAuth.canCheckBiometrics;
-      final isDeviceSupported = await _localAuth.isDeviceSupported();
-      final available = await _localAuth.getAvailableBiometrics();
-      isBiometricsSupported = canCheck || isDeviceSupported || available.isNotEmpty;
-    } catch (_) {
-      isBiometricsSupported = false;
-    }
+      final enabledStr = await _storage.read(key: keyAppLockEnabled);
+      final isEnabled = enabledStr == 'true';
 
-    final cooldownUntilStr = await _storage.read(key: keyCooldownUntil);
-    int remainingCooldown = 0;
-    if (cooldownUntilStr != null) {
-      final cooldownUntil = DateTime.tryParse(cooldownUntilStr);
-      if (cooldownUntil != null && cooldownUntil.isAfter(DateTime.now())) {
-        remainingCooldown = cooldownUntil.difference(DateTime.now()).inSeconds;
+      final pinHash = await _storage.read(key: keyPinHash);
+      final hasValidPin = pinHash != null && pinHash.isNotEmpty;
+
+      final pinLengthStr = await _storage.read(key: keyPinLength);
+      final pinLength = int.tryParse(pinLengthStr ?? '4') ?? 4;
+
+      final biometricsEnabledStr =
+          await _storage.read(key: keyBiometricsEnabled);
+      final isBiometricsEnabled = biometricsEnabledStr == 'true';
+
+      final timeoutStr = await _storage.read(key: keyTimeoutSeconds);
+      final timeoutSec = int.tryParse(timeoutStr ?? '0') ?? 0;
+      final timeout = AppLockTimeout.fromSeconds(timeoutSec);
+
+      final failedAttemptsStr = await _storage.read(key: keyFailedAttempts);
+      final failedAttempts = int.tryParse(failedAttemptsStr ?? '0') ?? 0;
+
+      final maxLockedStr = await _storage.read(key: keyMaxLocked);
+      final isMaxLocked = maxLockedStr == 'true' || failedAttempts >= 10;
+
+      bool isBiometricsSupported = false;
+      try {
+        final canCheck = await _localAuth.canCheckBiometrics;
+        final isDeviceSupported = await _localAuth.isDeviceSupported();
+        final available = await _localAuth.getAvailableBiometrics();
+        isBiometricsSupported = canCheck || isDeviceSupported || available.isNotEmpty;
+      } catch (_) {
+        isBiometricsSupported = false;
       }
-    }
 
-    _state = AppLockState(
-      isEnabled: isEnabled && hasValidPin,
-      // Cold start: if app lock is enabled, start locked!
-      isLocked: isEnabled && hasValidPin,
-      isBiometricsEnabled: isBiometricsEnabled && isBiometricsSupported,
-      isBiometricsSupported: isBiometricsSupported,
-      timeout: timeout,
-      pinLength: pinLength,
-      failedAttempts: failedAttempts,
-      remainingCooldownSeconds: remainingCooldown,
-      isMaxLocked: isMaxLocked,
-    );
-    _stateController.add(_state);
+      final cooldownUntilStr = await _storage.read(key: keyCooldownUntil);
+      int remainingCooldown = 0;
+      if (cooldownUntilStr != null) {
+        final cooldownUntil = DateTime.tryParse(cooldownUntilStr);
+        if (cooldownUntil != null && cooldownUntil.isAfter(DateTime.now())) {
+          remainingCooldown = cooldownUntil.difference(DateTime.now()).inSeconds;
+        }
+      }
 
-    if (remainingCooldown > 0) {
-      _startCooldownTicker();
+      _state = AppLockState(
+        isEnabled: isEnabled && hasValidPin,
+        // Cold start: if app lock is enabled, start locked!
+        isLocked: isEnabled && hasValidPin,
+        isBiometricsEnabled: isBiometricsEnabled && isBiometricsSupported,
+        isBiometricsSupported: isBiometricsSupported,
+        timeout: timeout,
+        pinLength: pinLength,
+        failedAttempts: failedAttempts,
+        remainingCooldownSeconds: remainingCooldown,
+        isMaxLocked: isMaxLocked,
+      );
+      _stateController.add(_state);
+
+      if (remainingCooldown > 0) {
+        _startCooldownTicker();
+      }
+    } catch (e) {
+      debugPrint('[AppLockService] init error: $e');
     }
   }
 

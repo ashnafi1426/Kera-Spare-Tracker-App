@@ -63,11 +63,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         context.go('/home');
       },
       onFailure: (failure) {
-        if (failure is OfflineInternetRequiredFailure ||
-            failure.code == 'NO_INTERNET') {
+        if (failure is OfflineInternetRequiredFailure) {
           setState(() {
             _isOfflineError = true;
             _errorMessage = l10n.authOfflineInternetRequired;
+          });
+          return;
+        }
+
+        if (failure.code == 'NO_INTERNET') {
+          setState(() {
+            _isOfflineError = true;
+            _errorMessage = l10n.authNoInternet;
+          });
+          return;
+        }
+
+        if (failure.code == 'SERVER_UNREACHABLE' ||
+            failure is NetworkFailure) {
+          setState(() {
+            _isOfflineError = true;
+            _errorMessage = failure.message;
           });
           return;
         }
