@@ -39,7 +39,7 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Configure API Base URL to connect over Wi-Fi, hotspot, or USB tether:',
+                  'Configure API Base URL for Render Cloud, Wi-Fi, or USB tether:',
                   style: TextStyle(fontSize: 13),
                 ),
                 const SizedBox(height: 12),
@@ -47,7 +47,7 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                   controller: serverController,
                   decoration: InputDecoration(
                     labelText: 'API Base URL',
-                    hintText: 'http://192.168.137.90:7000/api/v1',
+                    hintText: 'https://kera-spare-tracker-api.onrender.com/api/v1',
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.clear, size: 18),
@@ -66,6 +66,16 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.cloud_done_rounded, size: 16),
+                      label: const Text('Render Cloud (HTTPS)'),
+                      onPressed: () {
+                        setDialogState(() {
+                          serverController.text =
+                              'https://kera-spare-tracker-api.onrender.com/api/v1';
+                        });
+                      },
+                    ),
                     ActionChip(
                       label: const Text('Wi-Fi (.90)'),
                       onPressed: () {

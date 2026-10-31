@@ -80,10 +80,12 @@ class AppConstants {
   }
 
   /// Candidates for Android host connection:
+  /// - https://...onrender.com: works globally anywhere via public HTTPS cloud backend
   /// - 127.0.0.1 / localhost: works with `adb reverse tcp:7000 tcp:7000` over USB
   /// - 10.0.2.2: works on official Android Studio QEMU emulator
-  /// - 192.168.137.43: works over local Wi-Fi / hotspot
+  /// - 192.168.137.x: works over local Wi-Fi / hotspot
   static List<String> get candidateAndroidBaseUrls => const [
+        'https://kera-spare-tracker-api.onrender.com/api/v1',
         'http://127.0.0.1:7000/api/v1',
         'http://192.168.137.6:7000/api/v1',
         'http://192.168.137.90:7000/api/v1',
