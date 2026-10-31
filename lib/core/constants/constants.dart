@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// Application-wide constants for Kera Spare Tracker.
 class AppConstants {
 
