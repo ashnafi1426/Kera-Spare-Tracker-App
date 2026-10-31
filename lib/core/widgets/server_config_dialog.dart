@@ -68,7 +68,7 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                   children: [
                     ActionChip(
                       avatar: const Icon(Icons.cloud_done_rounded, size: 16),
-                      label: const Text('Render Cloud (HTTPS)'),
+                      label: const Text('Render Cloud (Default)'),
                       onPressed: () {
                         setDialogState(() {
                           serverController.text =
@@ -77,47 +77,12 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                       },
                     ),
                     ActionChip(
-                      label: const Text('Wi-Fi (.90)'),
-                      onPressed: () {
-                        setDialogState(() {
-                          serverController.text =
-                              'http://192.168.137.90:7000/api/v1';
-                        });
-                      },
-                    ),
-                    ActionChip(
-                      label: const Text('Wi-Fi (.6)'),
-                      onPressed: () {
-                        setDialogState(() {
-                          serverController.text =
-                              'http://192.168.137.6:7000/api/v1';
-                        });
-                      },
-                    ),
-                    ActionChip(
-                      label: const Text('USB (127.0.0.1)'),
+                      avatar: const Icon(Icons.usb_rounded, size: 16),
+                      label: const Text('Local USB (127.0.0.1)'),
                       onPressed: () {
                         setDialogState(() {
                           serverController.text =
                               'http://127.0.0.1:7000/api/v1';
-                        });
-                      },
-                    ),
-                    ActionChip(
-                      label: const Text('Wi-Fi (.146)'),
-                      onPressed: () {
-                        setDialogState(() {
-                          serverController.text =
-                              'http://192.168.137.146:7000/api/v1';
-                        });
-                      },
-                    ),
-                    ActionChip(
-                      label: const Text('Emulator (10.0.2.2)'),
-                      onPressed: () {
-                        setDialogState(() {
-                          serverController.text =
-                              'http://10.0.2.2:7000/api/v1';
                         });
                       },
                     ),

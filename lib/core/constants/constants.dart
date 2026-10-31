@@ -80,35 +80,21 @@ class AppConstants {
   }
 
   /// Candidates for Android host connection:
-  /// - https://...onrender.com: works globally anywhere via public HTTPS cloud backend
-  /// - 127.0.0.1 / localhost: works with `adb reverse tcp:7000 tcp:7000` over USB
-  /// - 10.0.2.2: works on official Android Studio QEMU emulator
-  /// - 192.168.137.x: works over local Wi-Fi / hotspot
+  /// - Primary: Deployed HTTPS Render cloud backend (works on any Wi-Fi or mobile data)
+  /// - Local dev fallback: 127.0.0.1 with `adb reverse tcp:7000 tcp:7000` over USB
   static List<String> get candidateAndroidBaseUrls => const [
         'https://kera-spare-tracker-api.onrender.com/api/v1',
         'http://127.0.0.1:7000/api/v1',
-        'http://192.168.137.6:7000/api/v1',
-        'http://192.168.137.90:7000/api/v1',
-        'http://localhost:7000/api/v1',
-        'http://192.168.137.1:7000/api/v1',
-        'http://192.168.137.146:7000/api/v1',
-        'http://192.168.137.43:7000/api/v1',
-        'http://192.168.137.100:7000/api/v1',
-        'http://10.0.2.2:7000/api/v1',
       ];
 
-  /// API Configuration loaded from runtime detection or --dart-define
+  /// API Configuration loaded from runtime detection, --dart-define, or live Render Cloud
   static String get apiBaseUrl {
     if (_resolvedApiBaseUrl != null && _resolvedApiBaseUrl!.isNotEmpty) {
       return _resolvedApiBaseUrl!;
     }
     const fromEnv = String.fromEnvironment('API_BASE_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
-    if (kIsWeb) return 'http://localhost:7000/api/v1';
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://127.0.0.1:7000/api/v1';
-    }
-    return 'http://localhost:7000/api/v1';
+    return 'https://kera-spare-tracker-api.onrender.com/api/v1';
   }
 
 
