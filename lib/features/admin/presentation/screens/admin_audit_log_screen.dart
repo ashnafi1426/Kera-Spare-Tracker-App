@@ -12,6 +12,7 @@ import '../../../../core/design/widgets/list_card.dart';
 import '../../../../core/design/widgets/relative_time_text.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/design/widgets/status_chip.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -111,6 +112,9 @@ class AdminAuditLogScreen extends ConsumerWidget {
                       message: auditState.errorMessage!,
                       onRetry: () =>
                           ref.read(adminAuditLogsProvider.notifier).loadLogs(),
+                      secondaryActionLabel: 'Server Settings',
+                      secondaryActionIcon: Icons.settings_ethernet_rounded,
+                      onSecondaryAction: () => showServerConfigDialog(context, ref),
                     ),
                   );
                 }

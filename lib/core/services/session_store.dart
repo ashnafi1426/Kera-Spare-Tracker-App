@@ -162,11 +162,16 @@ class SessionStore {
   /// Reads and constructs current session data if available.
   Future<SessionData?> readSession() async {
     try {
-      final token = await _storage.read(key: keyAccessToken);
-      final refresh = await _storage.read(key: keyRefreshToken);
-      String? ownerId = await _storage.read(key: keyOwnerId);
+      Map<String, String> all = {};
+      try {
+        all = await _storage.readAll();
+      } catch (_) {}
 
-      final sessionJson = await _storage.read(key: keyUserSession);
+      final token = all[keyAccessToken] ?? await _storage.read(key: keyAccessToken);
+      final refresh = all[keyRefreshToken] ?? await _storage.read(key: keyRefreshToken);
+      String? ownerId = all[keyOwnerId] ?? await _storage.read(key: keyOwnerId);
+
+      final sessionJson = all[keyUserSession] ?? await _storage.read(key: keyUserSession);
       Map<String, dynamic>? userMap;
       if (sessionJson != null && sessionJson.isNotEmpty) {
         try {
@@ -180,20 +185,29 @@ class SessionStore {
         return null;
       }
 
-      final deviceId = await getOrCreateDeviceId();
-      final lastOnlineStr = await _storage.read(key: keyLastOnlineAt);
+      final deviceId = all[keyDeviceId] ?? await getOrCreateDeviceId();
+      if (_cachedDeviceId == null && deviceId.isNotEmpty) {
+        _cachedDeviceId = deviceId;
+      }
+
+      final lastOnlineStr = all[keyLastOnlineAt] ?? await _storage.read(key: keyLastOnlineAt);
       final lastOnline = lastOnlineStr != null ? DateTime.tryParse(lastOnlineStr) : null;
-      final maxDaysStr = await _storage.read(key: keyOfflineMaxDays);
+      final maxDaysStr = all[keyOfflineMaxDays] ?? await _storage.read(key: keyOfflineMaxDays);
       final maxDays = maxDaysStr != null ? int.tryParse(maxDaysStr) ?? 90 : 90;
+
+      final accessExp = all[keyAccessTokenExpiresAt] ?? await _storage.read(key: keyAccessTokenExpiresAt);
+      final refreshExp = all[keyRefreshTokenExpiresAt] ?? await _storage.read(key: keyRefreshTokenExpiresAt);
+      final ownerPhone = all[keyOwnerPhone] ?? await _storage.read(key: keyOwnerPhone);
+      final ownerBiz = all[keyOwnerBusinessName] ?? await _storage.read(key: keyOwnerBusinessName);
 
       return SessionData(
         accessToken: token ?? '',
         refreshToken: refresh ?? '',
-        accessTokenExpiresAt: await _storage.read(key: keyAccessTokenExpiresAt),
-        refreshTokenExpiresAt: await _storage.read(key: keyRefreshTokenExpiresAt),
+        accessTokenExpiresAt: accessExp,
+        refreshTokenExpiresAt: refreshExp,
         ownerId: ownerId,
-        ownerPhone: await _storage.read(key: keyOwnerPhone),
-        ownerBusinessName: await _storage.read(key: keyOwnerBusinessName),
+        ownerPhone: ownerPhone,
+        ownerBusinessName: ownerBiz,
         deviceId: deviceId,
         lastOnlineAt: lastOnline ?? DateTime.now(),
         offlineMaxDays: maxDays,

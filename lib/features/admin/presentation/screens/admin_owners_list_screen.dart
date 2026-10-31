@@ -12,6 +12,7 @@ import '../../../../core/design/widgets/list_card.dart';
 import '../../../../core/design/widgets/relative_time_text.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/design/widgets/status_chip.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -124,6 +125,11 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             ],
           ),
           IconButton(
+            icon: const Icon(Icons.settings_ethernet_rounded),
+            tooltip: 'Server Settings',
+            onPressed: () => showServerConfigDialog(context, ref),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: l10n.refresh,
             onPressed: () => ref.read(adminOwnersProvider.notifier).loadOwners(),
@@ -214,6 +220,9 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     child: ErrorState(
                       message: state.errorMessage!,
                       onRetry: () => ref.read(adminOwnersProvider.notifier).loadOwners(),
+                      secondaryActionLabel: 'Server Settings',
+                      secondaryActionIcon: Icons.settings_ethernet_rounded,
+                      onSecondaryAction: () => showServerConfigDialog(context, ref),
                     ),
                   );
                 }

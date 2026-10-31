@@ -284,32 +284,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 20),
                   ],
 
-                  // Online Requirement Notice Banner
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withAlpha(120),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: colorScheme.outlineVariant.withAlpha(80)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.wifi_outlined, size: 20, color: colorScheme.primary),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            l10n.authRequiresInternetNotice,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
                   // Phone Number Input
                   Text(
                     l10n.phoneNumber,
@@ -492,11 +466,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     runSpacing: 6,
                     children: [
                       ActionChip(
-                        label: const Text('Wi-Fi (.146)'),
+                        label: const Text('Wi-Fi (.90)'),
                         onPressed: () {
                           setDialogState(() {
                             serverController.text =
-                                'http://192.168.137.146:7000/api/v1';
+                                'http://192.168.137.90:7000/api/v1';
                           });
                         },
                       ),
@@ -506,6 +480,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           setDialogState(() {
                             serverController.text =
                                 'http://127.0.0.1:7000/api/v1';
+                          });
+                        },
+                      ),
+                      ActionChip(
+                        label: const Text('Wi-Fi (.146)'),
+                        onPressed: () {
+                          setDialogState(() {
+                            serverController.text =
+                                'http://192.168.137.146:7000/api/v1';
                           });
                         },
                       ),

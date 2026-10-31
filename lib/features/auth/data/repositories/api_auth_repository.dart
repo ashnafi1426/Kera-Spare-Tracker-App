@@ -24,7 +24,6 @@ import 'local_auth_repository.dart';
 
 /// Error code used when the phone has a network but the API server cannot be
 /// reached (wrong IP/port, firewall, cleartext blocked, server stopped...).
-const String kServerUnreachableCode = 'SERVER_UNREACHABLE';
 
 /// Production API implementation of [AuthRepository] connecting to the Node.js / MySQL backend via Dio.
 ///
@@ -492,7 +491,7 @@ class ApiAuthRepository implements AuthRepository {
     } on DioException catch (e) {
       if (_shouldProbeOnAndroid && _isConnectionProblem(e)) {
         final working = await _probeWorkingCandidate();
-        if (working != null && working != dio.options.baseUrl) {
+        if (working != null) {
           AppConstants.setApiBaseUrl(working);
           dio.options.baseUrl = working;
           await _sessionStore.saveApiBaseUrl(working);
@@ -504,9 +503,10 @@ class ApiAuthRepository implements AuthRepository {
         }
       }
 
-      final failure = _mapDioError(e, hasNetwork: await _hasNetwork());
+      final hasNetwork = await _hasNetwork();
+      final failure = _mapDioError(e, hasNetwork: hasNetwork);
       if (failure is NetworkFailure) {
-        // Rule 1: Registration REQUIRES internet
+        // Rule 1: Registration strictly REQUIRES internet
         return const Result.failure(OfflineInternetRequiredFailure());
       }
       return Result.failure(failure);
@@ -527,9 +527,9 @@ class ApiAuthRepository implements AuthRepository {
             final probeDio = Dio(
               BaseOptions(
                 baseUrl: candidate,
-                connectTimeout: const Duration(milliseconds: 2500),
-                receiveTimeout: const Duration(milliseconds: 2500),
-                sendTimeout: const Duration(milliseconds: 2500),
+                connectTimeout: const Duration(milliseconds: 1500),
+                receiveTimeout: const Duration(milliseconds: 1500),
+                sendTimeout: const Duration(milliseconds: 1500),
               ),
             );
             final res = await probeDio.get('/health');
@@ -584,7 +584,7 @@ class ApiAuthRepository implements AuthRepository {
       // Android loopback / Wi-Fi candidate check (USB reverse, Wi-Fi LAN, emulator)
       if (_shouldProbeCandidates && _isConnectionProblem(e)) {
         final working = await _probeWorkingCandidate();
-        if (working != null && working != dio.options.baseUrl) {
+        if (working != null) {
           AppConstants.setApiBaseUrl(working);
           dio.options.baseUrl = working;
           await _sessionStore.saveApiBaseUrl(working);
@@ -635,17 +635,14 @@ class ApiAuthRepository implements AuthRepository {
                 .getSingleOrNull();
 
         if (localProfile == null) {
-          // First login on a new or empty phone REQUIRES the server (Rule 1).
-          // If the phone has a network but the server is unreachable, say so.
-          if (failure.code == kServerUnreachableCode) {
-            return Result.failure(failure);
-          }
-          if (hasNetwork) {
+          // First login on a new or empty phone (or admin) REQUIRES the server (Rule 1).
+          // If the server is unreachable or device has a network, report SERVER_UNREACHABLE.
+          if (failure.code == kServerUnreachableCode || hasNetwork) {
             return Result.failure(
               NetworkFailure(
                 message:
                     'Cannot reach the server at ${dio.options.baseUrl}. '
-                    'Please check the server address or status.',
+                    'Please check the server address in Server Settings.',
                 code: kServerUnreachableCode,
               ),
             );

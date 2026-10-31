@@ -10,6 +10,7 @@ import '../../../../core/design/widgets/metric_card.dart';
 import '../../../../core/design/widgets/section_header.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/design/widgets/status_chip.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/admin_providers.dart';
 
@@ -27,6 +28,11 @@ class AdminDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.adminDashboardTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_ethernet_rounded),
+            tooltip: 'Server Settings',
+            onPressed: () => showServerConfigDialog(context, ref),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: l10n.refresh,
@@ -51,6 +57,9 @@ class AdminDashboardScreen extends ConsumerWidget {
           child: ErrorState(
             message: err.toString().replaceAll('Exception: ', ''),
             onRetry: () => ref.refresh(adminDashboardProvider),
+            secondaryActionLabel: 'Server Settings',
+            secondaryActionIcon: Icons.settings_ethernet_rounded,
+            onSecondaryAction: () => showServerConfigDialog(context, ref),
           ),
         ),
         data: (stats) => RefreshIndicator(

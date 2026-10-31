@@ -146,40 +146,47 @@ class AppLockService {
   /// Initializes app lock state from secure storage and hardware capabilities.
   Future<void> init() async {
     try {
-      final enabledStr = await _storage.read(key: keyAppLockEnabled);
+      final all = await _storage.readAll();
+      final enabledStr = all[keyAppLockEnabled];
       final isEnabled = enabledStr == 'true';
 
-      final pinHash = await _storage.read(key: keyPinHash);
+      final pinHash = all[keyPinHash];
       final hasValidPin = pinHash != null && pinHash.isNotEmpty;
 
-      final pinLengthStr = await _storage.read(key: keyPinLength);
+      final pinLengthStr = all[keyPinLength];
       final pinLength = int.tryParse(pinLengthStr ?? '4') ?? 4;
 
-      final biometricsEnabledStr =
-          await _storage.read(key: keyBiometricsEnabled);
+      final biometricsEnabledStr = all[keyBiometricsEnabled];
       final isBiometricsEnabled = biometricsEnabledStr == 'true';
 
-      final timeoutStr = await _storage.read(key: keyTimeoutSeconds);
+      final timeoutStr = all[keyTimeoutSeconds];
       final timeoutSec = int.tryParse(timeoutStr ?? '0') ?? 0;
       final timeout = AppLockTimeout.fromSeconds(timeoutSec);
 
-      final failedAttemptsStr = await _storage.read(key: keyFailedAttempts);
+      final failedAttemptsStr = all[keyFailedAttempts];
       final failedAttempts = int.tryParse(failedAttemptsStr ?? '0') ?? 0;
 
-      final maxLockedStr = await _storage.read(key: keyMaxLocked);
+      final maxLockedStr = all[keyMaxLocked];
       final isMaxLocked = maxLockedStr == 'true' || failedAttempts >= 10;
 
       bool isBiometricsSupported = false;
-      try {
-        final canCheck = await _localAuth.canCheckBiometrics;
-        final isDeviceSupported = await _localAuth.isDeviceSupported();
-        final available = await _localAuth.getAvailableBiometrics();
-        isBiometricsSupported = canCheck || isDeviceSupported || available.isNotEmpty;
-      } catch (_) {
-        isBiometricsSupported = false;
+      if (isEnabled && hasValidPin) {
+        try {
+          final results = await Future.wait([
+            _localAuth.canCheckBiometrics,
+            _localAuth.isDeviceSupported(),
+            _localAuth.getAvailableBiometrics(),
+          ]);
+          final canCheck = results[0] as bool;
+          final isDeviceSupported = results[1] as bool;
+          final available = results[2] as List;
+          isBiometricsSupported = canCheck || isDeviceSupported || available.isNotEmpty;
+        } catch (_) {
+          isBiometricsSupported = false;
+        }
       }
 
-      final cooldownUntilStr = await _storage.read(key: keyCooldownUntil);
+      final cooldownUntilStr = all[keyCooldownUntil];
       int remainingCooldown = 0;
       if (cooldownUntilStr != null) {
         final cooldownUntil = DateTime.tryParse(cooldownUntilStr);

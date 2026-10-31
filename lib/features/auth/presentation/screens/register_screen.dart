@@ -223,32 +223,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: 20),
                   ],
 
-                  // Online Requirement Notice Banner
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withAlpha(120),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: colorScheme.outlineVariant.withAlpha(80)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.wifi_outlined, size: 20, color: colorScheme.primary),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            l10n.authRequiresInternetNotice,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
                   // Business Name Input
                   Text(
                     l10n.businessName,

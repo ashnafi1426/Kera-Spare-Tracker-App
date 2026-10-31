@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
@@ -228,8 +229,13 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                   ),
                 ],
               ),
-              actions: const [
-                Padding(
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.settings_ethernet_rounded),
+                  tooltip: 'Server Settings',
+                  onPressed: () => showServerConfigDialog(context, ref),
+                ),
+                const Padding(
                   padding: EdgeInsets.only(right: 12.0),
                   child: LanguageSegmentedSwitch(),
                 ),
@@ -304,6 +310,15 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                   onTap: () {
                     Navigator.of(ctx).pop();
                     context.go('/admin/audit-logs');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings_ethernet_rounded),
+                  title: const Text('Server Connection'),
+                  subtitle: const Text('Configure IP / Port for API connectivity'),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    showServerConfigDialog(context, ref);
                   },
                 ),
                 ListTile(

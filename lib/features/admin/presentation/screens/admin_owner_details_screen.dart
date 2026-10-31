@@ -16,6 +16,7 @@ import '../../../../core/design/widgets/relative_time_text.dart';
 import '../../../../core/design/widgets/section_header.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/design/widgets/status_chip.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/admin_providers.dart';
 
@@ -406,6 +407,9 @@ class _AdminOwnerDetailsScreenState
           child: ErrorState(
             message: err.toString(),
             onRetry: () => ref.refresh(adminOwnerDetailsProvider(widget.ownerId)),
+            secondaryActionLabel: 'Server Settings',
+            secondaryActionIcon: Icons.settings_ethernet_rounded,
+            onSecondaryAction: () => showServerConfigDialog(context, ref),
           ),
         ),
         data: (details) {

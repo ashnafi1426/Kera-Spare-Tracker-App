@@ -34,6 +34,9 @@ class DatabaseFailure extends Failure {
   });
 }
 
+/// Constant code for when the device has connectivity but the backend server is unreachable.
+const String kServerUnreachableCode = 'SERVER_UNREACHABLE';
+
 /// Represents an error originating from network or lack of connectivity.
 class NetworkFailure extends Failure {
   const NetworkFailure({
@@ -130,4 +133,3 @@ class SyncFailure extends Failure {
     super.cause,
   });
 }
-

@@ -18,9 +18,7 @@ class LocalStorageService {
   /// Retrieves the persisted language code ('am' or 'en'), or null if unset.
   Future<String?> getSavedLocaleCode() async {
     try {
-      return await _storage
-          .read(key: AppConstants.localePreferenceKey)
-          .timeout(const Duration(milliseconds: 300), onTimeout: () => null);
+      return await _storage.read(key: AppConstants.localePreferenceKey);
     } catch (_) {
       return null;
     }
@@ -38,9 +36,7 @@ class LocalStorageService {
   /// Retrieves the persisted theme mode ('system', 'light', 'dark'), or null if unset.
   Future<String?> getSavedThemeMode() async {
     try {
-      return await _storage
-          .read(key: AppConstants.themeModePreferenceKey)
-          .timeout(const Duration(milliseconds: 300), onTimeout: () => null);
+      return await _storage.read(key: AppConstants.themeModePreferenceKey);
     } catch (_) {
       return null;
     }

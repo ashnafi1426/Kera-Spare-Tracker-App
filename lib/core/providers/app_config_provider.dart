@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/app_config_service.dart';
@@ -54,19 +53,29 @@ class AppConfigNotifier extends AsyncNotifier<AppConfigState> {
 
   @override
   Future<AppConfigState> build() async {
-    final sw = Stopwatch()..start();
     final service = ref.read(appConfigServiceProvider);
 
-    final dismissedHash = await _storage.read(key: _dismissedKey);
-    final storageMs = sw.elapsedMilliseconds;
-    sw.reset();
-    final config = await service.fetchAppConfig();
-    final fetchMs = sw.elapsedMilliseconds;
-    debugPrint('[STARTUP] AppConfigNotifier.build(): secureStorage.read=${storageMs}ms, fetchAppConfig()=${fetchMs}ms');
+    // Non-blocking background fetch so initial frame renders instantly without waiting for disk or network
+    unawaited(
+      Future.microtask(() async {
+        try {
+          final dismissedHash = await _storage.read(key: _dismissedKey);
+          final config = await service.fetchAppConfig();
+          final current = state.value;
+          if (current != null) {
+            state = AsyncValue.data(
+              current.copyWith(
+                config: config,
+                dismissedAnnouncementHash: dismissedHash,
+              ),
+            );
+          }
+        } catch (_) {}
+      }),
+    );
 
-    await _connSub?.cancel();
     _connSub = service.onConnectivityChanged.listen((results) {
-      if (results.isNotEmpty && !results.contains(ConnectivityResult.none)) {
+      if (results.any((r) => r != ConnectivityResult.none)) {
         refreshConfig();
       }
     });
@@ -76,8 +85,7 @@ class AppConfigNotifier extends AsyncNotifier<AppConfigState> {
     });
 
     return AppConfigState(
-      config: config,
-      dismissedAnnouncementHash: dismissedHash,
+      config: AppConfig.defaults(),
     );
   }
 

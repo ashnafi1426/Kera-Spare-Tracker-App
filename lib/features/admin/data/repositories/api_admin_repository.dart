@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -35,6 +36,45 @@ class ApiAdminRepository implements AdminRepository {
     _setupInterceptors();
   }
 
+  Dio get dio => _dio;
+
+  bool _isConnectionProblem(DioException e) =>
+      e.type == DioExceptionType.connectionTimeout ||
+      e.type == DioExceptionType.connectionError ||
+      e.type == DioExceptionType.sendTimeout ||
+      e.type == DioExceptionType.receiveTimeout ||
+      e.type == DioExceptionType.unknown ||
+      e.response == null;
+
+  Future<String?> _probeWorkingCandidate() async {
+    final candidates = AppConstants.candidateAndroidBaseUrls;
+    try {
+      final results = await Future.wait(
+        candidates.map((candidate) async {
+          try {
+            final probeDio = Dio(
+              BaseOptions(
+                baseUrl: candidate,
+                connectTimeout: const Duration(milliseconds: 1500),
+                receiveTimeout: const Duration(milliseconds: 1500),
+                sendTimeout: const Duration(milliseconds: 1500),
+              ),
+            );
+            final res = await probeDio.get('/health');
+            if (res.statusCode == 200) {
+              return candidate;
+            }
+          } catch (_) {}
+          return null;
+        }),
+      );
+      for (final c in results) {
+        if (c != null) return c;
+      }
+    } catch (_) {}
+    return null;
+  }
+
   void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -52,6 +92,24 @@ class ApiAdminRepository implements AdminRepository {
           }
           return handler.next(options);
         },
+        onError: (DioException err, handler) async {
+          if (!kIsWeb && _isConnectionProblem(err)) {
+            final working = await _probeWorkingCandidate();
+            if (working != null) {
+              AppConstants.setApiBaseUrl(working);
+              final newBase = '$working/admin';
+              _dio.options.baseUrl = newBase;
+              err.requestOptions.baseUrl = newBase;
+              try {
+                final response = await _dio.fetch(err.requestOptions);
+                return handler.resolve(response);
+              } on DioException catch (retryErr) {
+                return handler.reject(retryErr);
+              }
+            }
+          }
+          return handler.next(err);
+        },
       ),
     );
   }
@@ -60,10 +118,12 @@ class ApiAdminRepository implements AdminRepository {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.connectionError) {
-      return const NetworkFailure(
-        message: 'No internet connection. Admin operations require online access.',
-        code: 'NO_INTERNET',
+        e.type == DioExceptionType.connectionError ||
+        e.response == null) {
+      return NetworkFailure(
+        message:
+            'Cannot reach the admin server at ${_dio.options.baseUrl}. Please check your connection or server settings.',
+        code: kServerUnreachableCode,
       );
     }
 
@@ -126,7 +186,9 @@ class ApiAdminRepository implements AdminRepository {
       final res = await _dio.get('/users', queryParameters: query);
       if (res.statusCode == 200 && res.data['success'] == true) {
         final rawUsers = res.data['data'] as List<dynamic>? ?? [];
-        final pagination = res.data['pagination'] as Map<String, dynamic>? ?? {};
+        final pagination = res.data['pagination'] as Map<String, dynamic>? ??
+            res.data['meta'] as Map<String, dynamic>? ??
+            {};
 
         final owners = rawUsers
             .map((u) => AdminOwnerSummary.fromJson(u as Map<String, dynamic>))

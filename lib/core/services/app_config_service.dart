@@ -261,25 +261,32 @@ class AppConfigService {
           defaultTargetPlatform == TargetPlatform.android &&
           (e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.connectionError)) {
-        for (final candidate in AppConstants.candidateAndroidBaseUrls) {
-          if (candidate == _dio.options.baseUrl) continue;
-          try {
-            final candidateDio = Dio(
-              BaseOptions(
-                baseUrl: candidate,
-                connectTimeout: const Duration(seconds: 2),
-                receiveTimeout: const Duration(seconds: 2),
-              ),
-            );
-            final res = await candidateDio.get('/app-config');
-            if (res.statusCode == 200 && res.data['success'] == true) {
-              AppConstants.setApiBaseUrl(candidate);
-              _dio.options.baseUrl = candidate;
-              final data = res.data['data'] as Map<String, dynamic>;
-              return AppConfig.fromJson(data, installedVersion: currentVersion);
-            }
-          } catch (_) {
-            // Continue testing candidates
+        final candidates = AppConstants.candidateAndroidBaseUrls
+            .where((c) => c != _dio.options.baseUrl)
+            .toList();
+        final probeResults = await Future.wait(
+          candidates.map((candidate) async {
+            try {
+              final candidateDio = Dio(
+                BaseOptions(
+                  baseUrl: candidate,
+                  connectTimeout: const Duration(milliseconds: 1500),
+                  receiveTimeout: const Duration(milliseconds: 1500),
+                ),
+              );
+              final res = await candidateDio.get('/app-config');
+              if (res.statusCode == 200 && res.data['success'] == true) {
+                return (candidate, res.data['data'] as Map<String, dynamic>);
+              }
+            } catch (_) {}
+            return null;
+          }),
+        );
+        for (final item in probeResults) {
+          if (item != null) {
+            AppConstants.setApiBaseUrl(item.$1);
+            _dio.options.baseUrl = item.$1;
+            return AppConfig.fromJson(item.$2, installedVersion: currentVersion);
           }
         }
       }
