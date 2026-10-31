@@ -85,6 +85,7 @@ class AppConstants {
   /// - 192.168.137.43: works over local Wi-Fi / hotspot
   static List<String> get candidateAndroidBaseUrls => const [
         'http://127.0.0.1:7000/api/v1',
+        'http://192.168.137.6:7000/api/v1',
         'http://192.168.137.90:7000/api/v1',
         'http://localhost:7000/api/v1',
         'http://192.168.137.1:7000/api/v1',

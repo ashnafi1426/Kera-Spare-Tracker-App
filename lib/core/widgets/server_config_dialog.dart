@@ -76,6 +76,15 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                       },
                     ),
                     ActionChip(
+                      label: const Text('Wi-Fi (.6)'),
+                      onPressed: () {
+                        setDialogState(() {
+                          serverController.text =
+                              'http://192.168.137.6:7000/api/v1';
+                        });
+                      },
+                    ),
+                    ActionChip(
                       label: const Text('USB (127.0.0.1)'),
                       onPressed: () {
                         setDialogState(() {
