@@ -350,14 +350,36 @@ class _OwnerListTile extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        owner.businessName,
-                        style: AdminTypography.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AdminColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              owner.businessName,
+                              style: AdminTypography.bodyMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AdminColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: AdminSpacing.xs),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AdminColors.primary.withAlpha(20),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Kera Hub #${(owner.id.hashCode.abs() % 24) + 1}',
+                              style: AdminTypography.caption.copyWith(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AdminColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: AdminSpacing.xs),

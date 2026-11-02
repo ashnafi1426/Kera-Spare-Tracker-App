@@ -188,7 +188,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [
                             KeraColors.primaryNavyDark,
                             KeraColors.primaryNavyLight,
@@ -426,3 +426,4 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
     );
   }
 }
+

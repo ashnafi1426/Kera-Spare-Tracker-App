@@ -10,6 +10,8 @@ class CurrencyFormatter {
 
   /// Formats a monetary amount into ETB currency with thousands separators.
   /// Example: 1250000.5 -> "ETB 1,250,000.50"
+  static String format(num? amount) => formatEtb(amount);
+
   static String formatEtb(num? amount) {
     if (amount == null) return 'ETB 0.00';
     return 'ETB ${_currencyFormat.format(amount)}';

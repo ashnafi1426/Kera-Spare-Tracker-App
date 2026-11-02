@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -24,7 +25,6 @@ import '../widgets/dashboard_offline_banner.dart';
 import '../widgets/dashboard_quick_actions.dart';
 import '../widgets/dashboard_recent_sales.dart';
 import '../widgets/dashboard_sales_trend.dart';
-import '../widgets/dashboard_sync_error_sheet.dart';
 
 /// Screen 1 / Module 2: Business Dashboard (ዋና ዳሽቦርድ).
 ///
@@ -80,31 +80,7 @@ class BusinessDashboardScreen extends ConsumerWidget {
                   pendingSyncCount:
                       metricsAsync.value?.pendingSyncCount ?? 0,
                   onSyncTap: () {
-                    final pending =
-                        metricsAsync.value?.pendingSyncCount ?? 0;
-                    if (pending > 0) {
-                      DashboardSyncErrorSheet.show(
-                        context,
-                        pendingCount: pending,
-                        onContinueLocal: () {},
-                        onRetryReconnect: () {
-                          ref.invalidate(pendingSyncCountProvider);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('የሰርቨር ግንኙነት በመሞከር ላይ... (Retrying Sync)'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('ሁሉም መረጃዎች የተመሳሰሉ ናቸው (All Synced)'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
+                    context.push('/sync');
                   },
                 ),
 
@@ -113,6 +89,7 @@ class BusinessDashboardScreen extends ConsumerWidget {
                     metricsAsync.value!.pendingSyncCount > 0)
                   DashboardOfflineBanner(
                     pendingCount: metricsAsync.value!.pendingSyncCount,
+                    onInspectQueue: () => context.push('/sync/offline'),
                     onRetrySync: () {
                       ref.invalidate(pendingSyncCountProvider);
                       ScaffoldMessenger.of(context).showSnackBar(

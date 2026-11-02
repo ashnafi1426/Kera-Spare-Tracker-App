@@ -23,6 +23,8 @@ class KeraColors {
   static const Color surfaceCard = surfacePure;
   static const Color borderVariant = outlineVariant;
   static const Color borderNeutral = surfaceMuted;
+  static const Color borderLight = outlineBorder;
+  static const Color successGreen = stockInText;
   static const Color tealDark = utilityTeal;
   static const Color tealFixed = utilityTeal;
   static const Color tealAccent = Color(0xFF6BD8CB);

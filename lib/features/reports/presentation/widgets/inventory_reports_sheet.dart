@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/design.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
-import '../providers/reports_providers.dart';
 
 /// Modal bottom sheet for inventory valuation, stock health, and category distribution.
 ///
@@ -25,7 +24,6 @@ class InventoryReportsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final valuationAsync = ref.watch(inventoryValuationProvider);
     final partsAsync = ref.watch(partsStreamProvider);
 
     return Container(
@@ -126,7 +124,7 @@ class InventoryReportsSheet extends ConsumerWidget {
 
                       if (qty <= 0) {
                         outOfStockCount++;
-                      } else if (qty <= (p.lowStockLevel)) {
+                      } else if (qty <= (p.lowStockLevel ?? 5.0)) {
                         lowStockCount++;
                       } else {
                         healthyCount++;
@@ -425,3 +423,4 @@ class InventoryReportsSheet extends ConsumerWidget {
     );
   }
 }
+

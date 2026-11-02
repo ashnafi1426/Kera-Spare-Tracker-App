@@ -26,7 +26,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final summaryAsync = ref.watch(salesSummaryProvider);
     final chartPointsAsync = ref.watch(chartPointsProvider);
-    final salesHistoryAsync = ref.watch(salesHistoryProvider);
+    final salesHistoryAsync = ref.watch(activeSalesStreamProvider);
 
     return Container(
       constraints: BoxConstraints(
@@ -406,3 +406,4 @@ class SalesAnalyticsSheet extends ConsumerWidget {
     );
   }
 }
+
