@@ -19,6 +19,20 @@ export function errorHandler(err, req, res, next) {
     });
   }
 
+  // Handle Prisma database connection / initialization errors
+  if (
+    err.name === 'PrismaClientInitializationError' ||
+    (err.message && err.message.includes("Can't reach database server"))
+  ) {
+    return res.status(503).json({
+      success: false,
+      error: {
+        code: 'DATABASE_UNAVAILABLE',
+        message: 'The database server is unreachable or currently suspended. Please check your cloud database service.',
+      },
+    });
+  }
+
   // Handle Prisma known errors
   if (err.code === 'P2002') {
     const isPhone = Array.isArray(err.meta?.target) && err.meta.target.includes('phoneNumber');

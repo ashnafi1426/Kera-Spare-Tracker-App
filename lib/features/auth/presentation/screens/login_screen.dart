@@ -129,10 +129,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
 
         if (failure.code == 'SERVER_UNREACHABLE' ||
+            failure.code == 'INTERNAL_SERVER_ERROR' ||
+            failure.code == 'DATABASE_UNAVAILABLE' ||
             failure is NetworkFailure) {
           setState(() {
             _isOfflineError = true;
-            _errorMessage = failure.message;
+            _errorMessage = failure.code == 'DATABASE_UNAVAILABLE'
+                ? '${l10n.authServerError} (Database offline)'
+                : (failure.code == 'INTERNAL_SERVER_ERROR'
+                    ? l10n.authServerError
+                    : failure.message);
           });
           return;
         }
