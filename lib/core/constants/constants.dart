@@ -83,7 +83,6 @@ class AppConstants {
   static List<String> get candidateAndroidBaseUrls => const [
         'https://kera-spare-tracker-api.onrender.com/api/v1'
       ];
-
   /// API Configuration loaded from runtime detection, --dart-define, or live Render Cloud
   static String get apiBaseUrl {
     if (_resolvedApiBaseUrl != null && _resolvedApiBaseUrl!.isNotEmpty) {
