@@ -78,7 +78,7 @@ class BusinessProfile {
   }
 
   Map<String, String> toSettingsMap() {
-    return {
+    final map = {
       'profile_tin_number': tinNumber,
       'profile_category': category,
       'profile_owner_name': ownerFullName,
@@ -88,8 +88,11 @@ class BusinessProfile {
       'profile_landmark': landmark,
       'profile_receipt_footer': receiptFooter,
       'profile_vat_registered': isVatRegistered ? 'true' : 'false',
-      if (logoPath != null) 'profile_logo_path': logoPath!,
     };
+    if (logoPath != null) {
+      map['profile_logo_path'] = logoPath!;
+    }
+    return map;
   }
 }
 

@@ -87,7 +87,7 @@ class _SecuritySessionsScreenState
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: KeraRadii.borderSheet),
+        shape: const RoundedRectangleBorder(borderRadius: KeraRadii.borderSheet),
         title: Row(
           children: [
             Container(
@@ -138,7 +138,7 @@ class _SecuritySessionsScreenState
             style: ElevatedButton.styleFrom(
               backgroundColor: KeraColors.error,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: KeraRadii.borderButton,
               ),
             ),
@@ -408,8 +408,11 @@ class _SecuritySessionsScreenState
                         const SizedBox(height: 8),
 
                         // Password Strength Bar
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
                           children: [
                             Text(
                               'የይለፍ ቃል ጥንካሬ (Strength):',
@@ -541,7 +544,7 @@ class _SecuritySessionsScreenState
                               side: const BorderSide(
                                 color: KeraColors.actionBlue,
                               ),
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 borderRadius: KeraRadii.borderButton,
                               ),
                             ),
@@ -647,21 +650,26 @@ class _SecuritySessionsScreenState
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
+                                    Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 6,
+                                      runSpacing: 2,
                                       children: [
                                         Text(
                                           'Samsung Galaxy A54',
                                           style: KeraTypography.titleSmall(),
                                         ),
-                                        const SizedBox(width: 6),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 6,
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: KeraColors.actionBlue.withAlpha(20),
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: KeraColors.actionBlue
+                                                .withAlpha(20),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
                                           ),
                                           child: Text(
                                             'ይህ ስልክ (This Device)',
@@ -1080,7 +1088,7 @@ class _SecuritySessionsScreenState
                             style: ElevatedButton.styleFrom(
                               backgroundColor: KeraColors.error,
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                 borderRadius: KeraRadii.borderButton,
                               ),
                             ),
@@ -1109,7 +1117,7 @@ class _SecuritySessionsScreenState
               padding: const EdgeInsets.all(KeraSpacing.lg),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(
+                border: const Border(
                   top: BorderSide(color: KeraColors.borderVariant),
                 ),
                 boxShadow: [
@@ -1127,7 +1135,7 @@ class _SecuritySessionsScreenState
                   style: ElevatedButton.styleFrom(
                     backgroundColor: KeraColors.actionBlue,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: KeraRadii.borderButton,
                     ),
                   ),
@@ -1162,7 +1170,7 @@ class _SecuritySessionsScreenState
             : KeraColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isMet ? Colors.emerald.shade200 : KeraColors.borderVariant,
+          color: isMet ? const Color(0xFFA7F3D0) : KeraColors.borderVariant,
         ),
       ),
       child: Row(

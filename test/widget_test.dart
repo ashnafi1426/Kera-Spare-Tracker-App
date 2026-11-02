@@ -179,7 +179,7 @@ void main() {
     expect(find.text('+251911223344'), findsOneWidget);
 
     // Scroll to and tap Logout button
-    final logoutBtn = find.widgetWithText(OutlinedButton, 'ውጣ');
+    final logoutBtn = find.text('ከመለያ ውጣ (Sign Out / Logout)');
     await tester.scrollUntilVisible(logoutBtn, 500);
     await tester.ensureVisible(logoutBtn);
     await tester.pumpAndSettle();

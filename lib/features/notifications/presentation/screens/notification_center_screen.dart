@@ -48,9 +48,12 @@ class NotificationCenterScreen extends ConsumerWidget {
               size: 20,
             ),
             const SizedBox(width: 8),
-            Text(
-              'ኬራ ስፔር / Kera Spare',
-              style: KeraTypography.titleMedium(color: Colors.white),
+            Expanded(
+              child: Text(
+                'ኬራ ስፔር / Kera Spare',
+                style: KeraTypography.titleMedium(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -86,7 +89,7 @@ class NotificationCenterScreen extends ConsumerWidget {
             tooltip: 'Sync',
             icon: const Icon(Icons.sync_rounded),
             onPressed: () {
-              ref.read(syncPushServiceProvider).pushAll();
+              ref.read(syncPushServiceProvider).pushPendingQueue();
               context.showSnackBar('ማመሳሰል ተጀምሯል (Syncing...)');
             },
           ),
@@ -103,7 +106,7 @@ class NotificationCenterScreen extends ConsumerWidget {
             // Sub-Header: Page Identity & Mark All Read Action
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
                   bottom: BorderSide(color: KeraColors.borderVariant),
@@ -115,32 +118,35 @@ class NotificationCenterScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            'የማሳወቂያ ማዕከል',
-                            style: KeraTypography.headlineSmall(),
-                          ),
-                          if (unreadCount > 0) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: KeraColors.errorBg,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$unreadCount አዲስ',
-                                style: KeraTypography.labelSmall(
-                                  color: KeraColors.error,
+                      Expanded(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                              'የማሳወቂያ ማዕከል',
+                              style: KeraTypography.headlineSmall(),
+                            ),
+                            if (unreadCount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: KeraColors.errorBg,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '$unreadCount አዲስ',
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.error,
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
-                        ],
+                        ),
                       ),
                       TextButton.icon(
                         style: TextButton.styleFrom(
@@ -177,48 +183,50 @@ class NotificationCenterScreen extends ConsumerWidget {
             Container(
               height: 52,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
                   bottom: BorderSide(color: KeraColors.borderVariant),
                 ),
               ),
-              child: ListView(
+              child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                children: [
-                  _buildFilterChip(
-                    label: 'ሁሉም (All ${allNotifs.length})',
-                    isSelected: currentFilter == NotificationFilter.all,
-                    onTap: () => ref
-                        .read(notificationFilterProvider.notifier)
-                        .state = NotificationFilter.all,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'ያልተነበቡ (Unread $unreadCount)',
-                    hasDot: unreadCount > 0,
-                    isSelected: currentFilter == NotificationFilter.unread,
-                    onTap: () => ref
-                        .read(notificationFilterProvider.notifier)
-                        .state = NotificationFilter.unread,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'የክምችት (Stock $stockCount)',
-                    isSelected: currentFilter == NotificationFilter.stock,
-                    onTap: () => ref
-                        .read(notificationFilterProvider.notifier)
-                        .state = NotificationFilter.stock,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    label: 'ሽያጭና ሲንክ (Sales $salesSyncCount)',
-                    isSelected: currentFilter == NotificationFilter.salesSync,
-                    onTap: () => ref
-                        .read(notificationFilterProvider.notifier)
-                        .state = NotificationFilter.salesSync,
-                  ),
-                ],
+                child: Row(
+                  children: [
+                    _buildFilterChip(
+                      label: 'ሁሉም (All ${allNotifs.length})',
+                      isSelected: currentFilter == NotificationFilter.all,
+                      onTap: () => ref
+                          .read(notificationFilterProvider.notifier)
+                          .setFilter(NotificationFilter.all),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      label: 'ያልተነበቡ (Unread $unreadCount)',
+                      hasDot: unreadCount > 0,
+                      isSelected: currentFilter == NotificationFilter.unread,
+                      onTap: () => ref
+                          .read(notificationFilterProvider.notifier)
+                          .setFilter(NotificationFilter.unread),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      label: 'የክምችት (Stock $stockCount)',
+                      isSelected: currentFilter == NotificationFilter.stock,
+                      onTap: () => ref
+                          .read(notificationFilterProvider.notifier)
+                          .setFilter(NotificationFilter.stock),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      label: 'ሽያጭና ሲንክ (Sales $salesSyncCount)',
+                      isSelected: currentFilter == NotificationFilter.salesSync,
+                      onTap: () => ref
+                          .read(notificationFilterProvider.notifier)
+                          .setFilter(NotificationFilter.salesSync),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -393,53 +401,62 @@ class NotificationCenterScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: KeraColors.errorBg,
-                          borderRadius: BorderRadius.circular(6),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: KeraColors.errorBg,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.inventory_2_rounded,
+                            color: KeraColors.error,
+                            size: 18,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.inventory_2_rounded,
-                          color: KeraColors.error,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KeraColors.errorBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: KeraColors.error,
-                              ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'ዕቃ አልቋል: Out of Stock',
-                              style: KeraTypography.labelSmall(
-                                color: KeraColors.error,
-                              ),
+                            decoration: BoxDecoration(
+                              color: KeraColors.errorBg,
+                              borderRadius: BorderRadius.circular(4),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: KeraColors.error,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    'ዕቃ አልቋል: Out of Stock',
+                                    style: KeraTypography.labelSmall(
+                                      color: KeraColors.error,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     'ከ 8 ደቂቃ በፊት',
                     style: KeraTypography.labelSmall(
@@ -476,12 +493,16 @@ class NotificationCenterScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'የቀረው ክምችት: 0 pcs remaining',
-                            style: KeraTypography.labelSmall(
-                              color: KeraColors.error,
+                          Expanded(
+                            child: Text(
+                              'የቀረው ክምችት: 0 pcs remaining',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.error,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             'ደቂቅ ትዕዛዝ #441',
                             style: KeraTypography.labelSmall(
@@ -519,7 +540,7 @@ class NotificationCenterScreen extends ConsumerWidget {
                         const SizedBox(width: 8),
                         IconButton(
                           style: IconButton.styleFrom(
-                            side: BorderSide(color: KeraColors.borderVariant),
+                            side: const BorderSide(color: KeraColors.borderVariant),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -574,40 +595,46 @@ class NotificationCenterScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: KeraColors.warningBg,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.warning_amber_rounded,
-                          color: KeraColors.warning,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KeraColors.warningBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'አስቸኳይ: አነስተኛ ክምችት',
-                          style: KeraTypography.labelSmall(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: KeraColors.warningBg,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
                             color: KeraColors.warning,
+                            size: 18,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: KeraColors.warningBg,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'አስቸኳይ: አነስተኛ ክምችት',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.warning,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     'ከ 34 ደቂቃ በፊት',
                     style: KeraTypography.labelSmall(
@@ -647,12 +674,16 @@ class NotificationCenterScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'የቀረው: 3 pcs left (Critical)',
-                            style: KeraTypography.labelSmall(
-                              color: KeraColors.warning,
+                          Expanded(
+                            child: Text(
+                              'የቀረው: 3 pcs left (Critical)',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.warning,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             'ዋጋ: 1,450 ETB',
                             style: KeraTypography.labelSmall(
@@ -690,7 +721,7 @@ class NotificationCenterScreen extends ConsumerWidget {
                         const SizedBox(width: 8),
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: KeraColors.borderVariant),
+                            side: const BorderSide(color: KeraColors.borderVariant),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -741,40 +772,46 @@ class NotificationCenterScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: KeraColors.stockInBg,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.check_circle_rounded,
-                          color: KeraColors.stockInText,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KeraColors.stockInBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'የተሳካ ሽያጭ: Sale Completed',
-                          style: KeraTypography.labelSmall(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: KeraColors.stockInBg,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.check_circle_rounded,
                             color: KeraColors.stockInText,
+                            size: 18,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: KeraColors.stockInBg,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'የተሳካ ሽያጭ: Sale Completed',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.stockInText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     '10:42 ጠዋት',
                     style: KeraTypography.labelSmall(
@@ -792,10 +829,14 @@ class NotificationCenterScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          notif.titleAm,
-                          style: KeraTypography.titleSmall(),
+                        Expanded(
+                          child: Text(
+                            notif.titleAm,
+                            style: KeraTypography.titleSmall(),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         RichText(
                           text: TextSpan(
                             children: [
@@ -833,12 +874,17 @@ class NotificationCenterScreen extends ConsumerWidget {
                             color: KeraColors.textMuted,
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () {
-                            context.push('/home');
-                          },
-                          icon: const Icon(Icons.receipt_rounded, size: 16),
-                          label: const Text('ደረሰኝ ይመልከቱ / View Receipt'),
+                        Flexible(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              context.push('/home');
+                            },
+                            icon: const Icon(Icons.receipt_rounded, size: 16),
+                            label: const Text(
+                              'ደረሰኝ ይመልከቱ / View Receipt',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -879,40 +925,46 @@ class NotificationCenterScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: KeraColors.errorBg,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.sync_problem_rounded,
-                          color: KeraColors.error,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KeraColors.errorBg,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'ማመሳሰል አልተሳካም: Sync Failed',
-                          style: KeraTypography.labelSmall(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: KeraColors.errorBg,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.sync_problem_rounded,
                             color: KeraColors.error,
+                            size: 18,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: KeraColors.errorBg,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'ማመሳሰል አልተሳካም: Sync Failed',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.error,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     'ትናንት 4:15 ከሰዓት',
                     style: KeraTypography.labelSmall(
@@ -951,7 +1003,7 @@ class NotificationCenterScreen extends ConsumerWidget {
                           ),
                         ),
                         onPressed: () {
-                          ref.read(syncPushServiceProvider).pushAll();
+                          ref.read(syncPushServiceProvider).pushPendingQueue();
                           context.showSnackBar('ዳግም ማመሳሰል ተጀምሯል (Retrying sync...)');
                         },
                         icon: const Icon(Icons.sync_rounded, size: 18),
@@ -987,40 +1039,46 @@ class NotificationCenterScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: KeraColors.utilityTeal.withAlpha(20),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.cloud_done_rounded,
-                      color: KeraColors.utilityTeal,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: KeraColors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'ማመሳሰል ተጠናቋል / Synced',
-                      style: KeraTypography.labelSmall(
-                        color: KeraColors.textPrimary,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: KeraColors.utilityTeal.withAlpha(20),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.cloud_done_rounded,
+                        color: KeraColors.utilityTeal,
+                        size: 18,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'ማመሳሰል ተጠናቋል / Synced',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               Text(
                 'ትናንት 2:00',
                 style: KeraTypography.labelSmall(
@@ -1048,10 +1106,13 @@ class NotificationCenterScreen extends ConsumerWidget {
                       color: KeraColors.textMuted,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      'Addis Central Server • All records verified',
-                      style: KeraTypography.labelSmall(
-                        color: KeraColors.textMuted,
+                    Expanded(
+                      child: Text(
+                        'Addis Central Server • All records verified',
+                        style: KeraTypography.labelSmall(
+                          color: KeraColors.textMuted,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -1091,40 +1152,46 @@ class NotificationCenterScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: KeraColors.actionBlue.withAlpha(20),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.security_rounded,
-                          color: KeraColors.actionBlue,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: KeraColors.actionBlue.withAlpha(20),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'የመለያ ደህንነት ማሳሰቢያ',
-                          style: KeraTypography.labelSmall(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: KeraColors.actionBlue.withAlpha(20),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.security_rounded,
                             color: KeraColors.actionBlue,
+                            size: 18,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: KeraColors.actionBlue.withAlpha(20),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'የመለያ ደህንነት ማሳሰቢያ',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.actionBlue,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     'ሚያዝያ 08',
                     style: KeraTypography.labelSmall(
@@ -1153,7 +1220,7 @@ class NotificationCenterScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: KeraColors.borderVariant),
+                        side: const BorderSide(color: KeraColors.borderVariant),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),

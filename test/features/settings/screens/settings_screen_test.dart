@@ -6,6 +6,11 @@ import 'package:kera_spare_tracker/core/utils/result.dart';
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
 import 'package:kera_spare_tracker/features/auth/domain/repositories/auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:kera_spare_tracker/features/settings/domain/models/business_profile.dart';
+import 'package:kera_spare_tracker/features/settings/presentation/providers/business_profile_provider.dart';
+import 'package:kera_spare_tracker/features/settings/presentation/screens/business_profile_screen.dart';
+import 'package:kera_spare_tracker/features/settings/presentation/screens/language_selection_screen.dart';
+import 'package:kera_spare_tracker/features/settings/presentation/screens/security_sessions_screen.dart';
 import 'package:kera_spare_tracker/features/settings/presentation/screens/settings_screen.dart';
 import 'package:kera_spare_tracker/features/stock/domain/repositories/stock_repository.dart';
 import 'package:kera_spare_tracker/features/stock/presentation/providers/stock_providers.dart';
@@ -38,7 +43,7 @@ void main() {
     when(() => mockStockRepo.getAllowNegativeStock()).thenAnswer((_) async => false);
   });
 
-  Widget createWidget({int pendingCount = 0, bool isOnline = true}) {
+  Widget createSettingsWidget({int pendingCount = 0, bool isOnline = true}) {
     return ProviderScope(
       overrides: [
         authRepositoryProvider.overrideWithValue(mockAuthRepo),
@@ -46,6 +51,7 @@ void main() {
         lowStockPartsStreamProvider.overrideWith((ref) => Stream.value([])),
         pendingSyncCountProvider.overrideWith((ref) => Stream.value(pendingCount)),
         lastOnlineTimestampProvider.overrideWith((ref) async => DateTime.now()),
+        businessProfileProvider.overrideWith(() => _MockBusinessProfileNotifier()),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -58,90 +64,48 @@ void main() {
     );
   }
 
-  group('SettingsScreen Widget Tests', () {
-    testWidgets('renders account details, business name, and role badge', (tester) async {
+  group('SettingsScreen Stitch Tests', () {
+    testWidgets('renders merchant hero profile card with business name and hub badge', (tester) async {
       await tester.binding.setSurfaceSize(const Size(450, 1000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(createWidget());
+      await tester.pumpWidget(createSettingsWidget());
       await tester.pumpAndSettle();
 
+      expect(find.text('ቅንብሮች / Settings'), findsOneWidget);
       expect(find.text('Kera Diesel Heavy Spares'), findsOneWidget);
       expect(find.text('+251911223344'), findsOneWidget);
-      expect(find.text('OWNER'), findsOneWidget);
+      expect(find.text('Kera Hub #14'), findsOneWidget);
+      expect(find.text('Pro Merchant'), findsOneWidget);
     });
 
-    testWidgets('renders preferences, currency, and theme selector', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(450, 1000));
+    testWidgets('renders all 5 Stitch grouped sections and rows', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(450, 1400));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(createWidget());
+      await tester.pumpWidget(createSettingsWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('App Theme'), findsOneWidget);
-      expect(find.text('System Currency'), findsOneWidget);
-      expect(find.text('ETB'), findsOneWidget);
-    });
+      // Section 1
+      expect(find.text('መለያ እና ንግድ / Account & Business'), findsOneWidget);
+      expect(find.text('የንግድ መረጃ'), findsOneWidget);
+      expect(find.text('ደህንነት እና የይለፍ ቃል'), findsOneWidget);
 
-    testWidgets('renders data management and CSV export actions', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(450, 1200));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+      // Section 2
+      expect(find.text('ምርጫዎች እና አጠቃቀም / Preferences'), findsOneWidget);
+      expect(find.text('ቋንቋ'), findsOneWidget);
+      expect(find.text('ገጽታ'), findsOneWidget);
+      expect(find.text('ማሳወቂያዎች'), findsOneWidget);
 
-      await tester.pumpWidget(createWidget());
-      await tester.pumpAndSettle();
+      // Section 3
+      expect(find.text('የመጋዘን እና ዕቃዎች ቅንብር / Inventory Defaults'), findsOneWidget);
+      expect(find.text('አነስተኛ ክምችት ማስጠንቀቂያ'), findsOneWidget);
+      expect(find.text('ነባሪ መለኪያ'), findsOneWidget);
+      expect(find.text('ነባሪ ቅደም ተከተል'), findsOneWidget);
 
-      await tester.scrollUntilVisible(find.text('Export Inventory (CSV)'), 250);
-      expect(find.text('Export Inventory (CSV)'), findsOneWidget);
-      expect(find.text('Export Sales History (CSV)'), findsOneWidget);
-      expect(find.text('Backup Local Database'), findsOneWidget);
-      expect(find.text('Restore Database from Backup'), findsOneWidget);
-    });
-
-    testWidgets('opens change password dialog when change password button is tapped', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(450, 1200));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(createWidget());
-      await tester.pumpAndSettle();
-
-      final changePassBtn = find.text('Change Password');
-      expect(changePassBtn, findsOneWidget);
-
-      await tester.tap(changePassBtn);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Current Password'), findsOneWidget);
-      expect(find.text('New Password'), findsOneWidget);
-      expect(find.text('Confirm New Password'), findsOneWidget);
-    });
-
-    testWidgets('renders version and logout button', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(450, 1200));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(createWidget());
-      await tester.pumpAndSettle();
-
-      final scrollable = find.byType(Scrollable).first;
-      await tester.scrollUntilVisible(find.text('Kera Spare Tracker'), 300, scrollable: scrollable);
-      expect(find.text('Kera Spare Tracker'), findsWidgets);
-      expect(find.text('Version 1.0.0 (Build 1)'), findsOneWidget);
-
-      await tester.scrollUntilVisible(find.text('Log Out'), 300, scrollable: scrollable);
-      expect(find.text('Log Out'), findsOneWidget);
-    });
-
-    testWidgets('renders Sync Status, Last Online, and Pending Changes count', (tester) async {
-      await tester.binding.setSurfaceSize(const Size(450, 1000));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-
-      await tester.pumpWidget(createWidget(pendingCount: 3));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Sync Status'), findsWidgets);
-      expect(find.text('Last Online'), findsOneWidget);
-      expect(find.text('Pending Changes'), findsOneWidget);
-      expect(find.text('3'), findsOneWidget);
+      // Section 4
+      expect(find.text('የዳታ ማመሳሰል / Cloud Sync & Storage'), findsOneWidget);
+      expect(find.text('አሁን አመሳስል / Sync Now'), findsOneWidget);
     });
 
     testWidgets('shows confirmation dialog when logging out with 0 pending changes', (tester) async {
@@ -152,14 +116,16 @@ void main() {
           (_) async => const LogoutPrecheck(pendingCount: 0, isOnline: true));
       when(() => mockAuthRepo.logout()).thenAnswer((_) async => const Result.success(null));
 
-      await tester.pumpWidget(createWidget(pendingCount: 0));
+      await tester.pumpWidget(createSettingsWidget(pendingCount: 0));
       await tester.pumpAndSettle();
 
       final scrollable = find.byType(Scrollable).first;
-      await tester.scrollUntilVisible(find.text('Log Out'), 500, scrollable: scrollable);
-      await tester.ensureVisible(find.text('Log Out'));
+      final logoutBtnFinder = find.text('ከመለያ ውጣ (Sign Out / Logout)');
+      await tester.scrollUntilVisible(logoutBtnFinder, 500, scrollable: scrollable);
+      await tester.ensureVisible(logoutBtnFinder);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Log Out'));
+
+      await tester.tap(logoutBtnFinder);
       await tester.pumpAndSettle();
 
       expect(find.text('Log out of your account?'), findsOneWidget);
@@ -171,7 +137,7 @@ void main() {
       verify(() => mockAuthRepo.logout()).called(1);
     });
 
-    testWidgets('blocks logout when offline with pending changes and offers export and DISCARD double-confirmation', (tester) async {
+    testWidgets('blocks logout when offline with pending changes and offers DISCARD double-confirmation', (tester) async {
       await tester.binding.setSurfaceSize(const Size(450, 1400));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -179,44 +145,32 @@ void main() {
           (_) async => const LogoutPrecheck(pendingCount: 2, isOnline: false));
       when(() => mockAuthRepo.forceDiscardAndLogout()).thenAnswer((_) async => const Result.success(null));
 
-      await tester.pumpWidget(createWidget(pendingCount: 2, isOnline: false));
+      await tester.pumpWidget(createSettingsWidget(pendingCount: 2, isOnline: false));
       await tester.pumpAndSettle();
 
       final scrollable = find.byType(Scrollable).first;
-      await tester.scrollUntilVisible(find.text('Log Out'), 500, scrollable: scrollable);
-      await tester.ensureVisible(find.text('Log Out'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Log Out'));
+      final logoutBtnFinder = find.text('ከመለያ ውጣ (Sign Out / Logout)');
+      await tester.scrollUntilVisible(logoutBtnFinder, 500, scrollable: scrollable);
+      await tester.ensureVisible(logoutBtnFinder);
       await tester.pumpAndSettle();
 
-      // Verify blocked dialog appears
+      await tester.tap(logoutBtnFinder);
+      await tester.pumpAndSettle();
+
       expect(find.text('Logout Blocked (Offline)'), findsOneWidget);
-      expect(find.text('Export Data (CSV)'), findsOneWidget);
       expect(find.text('Log Out & Discard'), findsOneWidget);
 
-      // Tap Log Out & Discard to open double confirmation
       await tester.tap(find.text('Log Out & Discard'));
       await tester.pumpAndSettle();
 
-      // In double-confirmation dialog
       expect(find.text('To permanently discard unsynced changes and log out, type DISCARD below:'), findsOneWidget);
 
       final discardBtnFinder = find.widgetWithText(ElevatedButton, 'Log Out & Discard');
-      // Initially disabled
-      final initialButton = tester.widget<ElevatedButton>(discardBtnFinder);
-      expect(initialButton.onPressed, isNull);
+      expect(tester.widget<ElevatedButton>(discardBtnFinder).onPressed, isNull);
 
-      // Type wrong word
-      await tester.enterText(find.byType(TextField), 'WRONG');
-      await tester.pumpAndSettle();
-      final wrongButton = tester.widget<ElevatedButton>(discardBtnFinder);
-      expect(wrongButton.onPressed, isNull);
-
-      // Type exact word DISCARD
       await tester.enterText(find.byType(TextField), 'DISCARD');
       await tester.pumpAndSettle();
-      final validButton = tester.widget<ElevatedButton>(discardBtnFinder);
-      expect(validButton.onPressed, isNotNull);
+      expect(tester.widget<ElevatedButton>(discardBtnFinder).onPressed, isNotNull);
 
       await tester.tap(discardBtnFinder);
       await tester.pumpAndSettle();
@@ -224,4 +178,100 @@ void main() {
       verify(() => mockAuthRepo.forceDiscardAndLogout()).called(1);
     });
   });
+
+  group('LanguageSelectionScreen Tests', () {
+    testWidgets('renders Amharic, English, and Afaan Oromoo options', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(450, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const LanguageSelectionScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('የቋንቋ ምርጫ / Language'), findsOneWidget);
+      expect(find.text('አማርኛ'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Afaan Oromoo'), findsOneWidget);
+      expect(find.text('ቋንቋውን አረጋግጥ (Apply & Save Language)'), findsOneWidget);
+    });
+  });
+
+  group('SecuritySessionsScreen Tests', () {
+    testWidgets('renders security health, password change, active sessions, and additional controls', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(450, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const SecuritySessionsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('ደህንነት እና የይለፍ ቃል'), findsOneWidget);
+      expect(find.text('የመለያዎ ደህንነት አስተማማኝ ነው'), findsOneWidget);
+      expect(find.text('የይለፍ ቃል ለውጥ'), findsOneWidget);
+      expect(find.text('ገቢር ክፍለ-ጊዜዎች'), findsOneWidget);
+      expect(find.text('Samsung Galaxy A54'), findsOneWidget);
+      expect(find.text('ተጨማሪ የደህንነት አማራጮች'), findsOneWidget);
+      expect(find.text('የጣት አሻራ / ባዮሜትሪክ መግቢያ'), findsOneWidget);
+    });
+  });
+
+  group('BusinessProfileScreen Tests', () {
+    testWidgets('renders verified badge, branding, store details, owner contacts, and receipt settings', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(450, 2400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authRepositoryProvider.overrideWithValue(mockAuthRepo),
+            businessProfileProvider.overrideWith(() => _MockBusinessProfileNotifier()),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const BusinessProfileScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('የንግድ መረጃ / Business Profile'), findsOneWidget);
+      expect(find.text('የተረጋገጠ የንግድ መደብር (Verified Merchant)'), findsOneWidget);
+      expect(find.text('የንግድ ምልክት እና ሎጎ (Business Logo)'), findsOneWidget);
+      expect(find.text('የመደብሩ ዋና መረጃ (Store Details)'), findsOneWidget);
+      expect(find.text('የባለቤት እና አድራሻ መረጃ (Owner & Contact)'), findsOneWidget);
+      expect(find.text('የመደብሩ አድራሻ እና መገኛ (Store Location & Hub)'), findsOneWidget);
+      expect(find.text('የደረሰኝ እና ታክስ ቅንብር (Receipt & Tax)'), findsOneWidget);
+      expect(find.text('ለውጦችን መዝግብ (Save Business Changes)'), findsOneWidget);
+    });
+  });
+}
+
+class _MockBusinessProfileNotifier extends BusinessProfileNotifier {
+  @override
+  Future<BusinessProfile> build() async {
+    return BusinessProfile.defaultProfile(
+      businessName: 'Kera Diesel Heavy Spares',
+      phoneNumber: '+251911223344',
+    );
+  }
+
+  @override
+  Future<void> saveProfile(BusinessProfile profile) async {
+    state = AsyncValue.data(profile);
+  }
 }

@@ -81,10 +81,7 @@ class AppConstants {
   /// - Primary: Deployed HTTPS Render cloud backend (works on any Wi-Fi or mobile data)
   /// - Local dev fallback: 127.0.0.1 with `adb reverse tcp:7000 tcp:7000` over USB
   static List<String> get candidateAndroidBaseUrls => const [
-        'https://kera-spare-tracker-api.onrender.com/api/v1',
-        'http://127.0.0.1:7000/api/v1',
-        'http://10.0.2.2:7000/api/v1',
-        'http://192.168.137.43:7000/api/v1',
+        'https://kera-spare-tracker-api.onrender.com/api/v1'
       ];
 
   /// API Configuration loaded from runtime detection, --dart-define, or live Render Cloud

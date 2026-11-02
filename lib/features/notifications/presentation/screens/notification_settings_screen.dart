@@ -503,16 +503,16 @@ class _NotificationSettingsScreenState
                 // Sticky Bottom Confirmation Bar
                 Container(
                   padding: const EdgeInsets.all(KeraSpacing.lg),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     border: Border(
                       top: BorderSide(color: KeraColors.borderVariant),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withAlpha(8),
+                        color: Color(0x14000000),
                         blurRadius: 8,
-                        offset: const Offset(0, -3),
+                        offset: Offset(0, -3),
                       ),
                     ],
                   ),
@@ -523,7 +523,7 @@ class _NotificationSettingsScreenState
                       style: ElevatedButton.styleFrom(
                         backgroundColor: KeraColors.actionBlue,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: KeraRadii.borderButton,
                         ),
                       ),
@@ -566,15 +566,23 @@ class _NotificationSettingsScreenState
       children: [
         Icon(icon, size: 20, color: iconColor),
         const SizedBox(width: 8),
-        Text(
-          titleAm,
-          style: KeraTypography.titleSmall(),
+        Flexible(
+          child: Text(
+            titleAm,
+            style: KeraTypography.titleSmall(),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-        const SizedBox(width: 6),
-        Text(
-          titleEn,
-          style: KeraTypography.labelSmall(color: KeraColors.textMuted),
-        ),
+        if (titleEn.isNotEmpty) ...[
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              titleEn,
+              style: KeraTypography.labelSmall(color: KeraColors.textMuted),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -598,14 +606,16 @@ class _NotificationSettingsScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  runSpacing: 2,
                   children: [
                     Text(
                       title,
                       style: KeraTypography.titleSmall(),
                     ),
-                    if (badge != null) ...[
-                      const SizedBox(width: 6),
+                    if (badge != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 6,
@@ -622,7 +632,6 @@ class _NotificationSettingsScreenState
                           ),
                         ),
                       ),
-                    ],
                   ],
                 ),
                 Text(
@@ -666,32 +675,42 @@ class _NotificationSettingsScreenState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: KeraColors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: KeraColors.primaryNavy, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: KeraTypography.titleSmall()),
-                  Text(
-                    subtitle,
-                    style: KeraTypography.labelSmall(
-                      color: KeraColors.textSecondary,
-                    ),
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: KeraColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-              ),
-            ],
+                  child: Icon(icon, color: KeraColors.primaryNavy, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: KeraTypography.titleSmall(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        subtitle,
+                        style: KeraTypography.labelSmall(
+                          color: KeraColors.textSecondary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(

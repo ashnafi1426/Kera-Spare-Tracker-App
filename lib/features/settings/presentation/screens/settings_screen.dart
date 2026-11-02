@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/constants.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -31,7 +30,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final authState = ref.watch(authControllerProvider);
     final user = authState.value;
     final currentThemeMode = ref.watch(themeModeControllerProvider);
@@ -515,22 +513,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.database_rounded,
-                              size: 16,
-                              color: KeraColors.textMuted,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'ከመስመር ውጭ ዳታ (SQLite)',
-                              style: KeraTypography.bodySmall(
-                                color: KeraColors.textSecondary,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.storage_rounded,
+                                size: 16,
+                                color: KeraColors.textMuted,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'ከመስመር ውጭ ዳታ (SQLite)',
+                                  style: KeraTypography.bodySmall(
+                                    color: KeraColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           '1,482 ዕቃዎች • 4.2 MB',
                           style: KeraTypography.labelSmall(
@@ -552,7 +556,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                         onPressed: () {
-                          ref.read(syncPushServiceProvider).pushAll();
+                          ref.read(syncPushServiceProvider).pushPendingQueue();
                           context.showSnackBar(
                             'ማመሳሰል ተጀምሯል... (Syncing with server)',
                           );
@@ -733,7 +737,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     foregroundColor: KeraColors.error,
                     elevation: 0,
                     side: BorderSide(color: KeraColors.error.withAlpha(40)),
-                    shape: RoundedRectangleBorder(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: KeraRadii.borderButton,
                     ),
                   ),
@@ -855,7 +859,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -873,7 +879,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -910,28 +915,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 2,
                   children: [
                     const Icon(
                       Icons.person_rounded,
                       size: 14,
                       color: KeraColors.textMuted,
                     ),
-                    const SizedBox(width: 4),
                     Text(
                       ownerName,
                       style: KeraTypography.labelSmall(
                         color: KeraColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(width: 6),
                     Text(
                       '•',
                       style: KeraTypography.labelSmall(
                         color: KeraColors.textMuted,
                       ),
                     ),
-                    const SizedBox(width: 6),
                     Text(
                       phone,
                       style: KeraTypography.labelSmall(
@@ -964,9 +969,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       children: [
         Icon(icon, size: 16, color: KeraColors.actionBlue),
         const SizedBox(width: 6),
-        Text(
-          title,
-          style: KeraTypography.labelSmall(color: KeraColors.textSecondary),
+        Expanded(
+          child: Text(
+            title,
+            style: KeraTypography.labelSmall(color: KeraColors.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
@@ -1008,16 +1017,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        titleAm,
-                        style: KeraTypography.titleSmall(),
+                      Flexible(
+                        child: Text(
+                          titleAm,
+                          style: KeraTypography.titleSmall(),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       if (titleEn.isNotEmpty) ...[
                         const SizedBox(width: 4),
-                        Text(
-                          titleEn,
-                          style: KeraTypography.bodySmall(
-                            color: KeraColors.textSecondary,
+                        Flexible(
+                          child: Text(
+                            titleEn,
+                            style: KeraTypography.bodySmall(
+                              color: KeraColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -1337,7 +1352,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (!context.mounted) return;
 
     // CASE 1: No pending un-synced changes
-    if (precheck.canSafelyLogout) {
+    if (!precheck.hasPending) {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(

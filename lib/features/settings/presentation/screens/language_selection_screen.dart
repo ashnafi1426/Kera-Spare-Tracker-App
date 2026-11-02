@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/constants.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -250,8 +249,11 @@ class _LanguageSelectionScreenState
                         const SizedBox(height: KeraSpacing.sm),
                         const Divider(height: 1),
                         const SizedBox(height: KeraSpacing.sm),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -263,6 +265,7 @@ class _LanguageSelectionScreenState
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
                                     Icons.lock_clock_rounded,
@@ -356,7 +359,7 @@ class _LanguageSelectionScreenState
               padding: const EdgeInsets.all(KeraSpacing.lg),
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(
+                border: const Border(
                   top: BorderSide(color: KeraColors.borderVariant),
                 ),
                 boxShadow: [
@@ -377,7 +380,7 @@ class _LanguageSelectionScreenState
                       style: ElevatedButton.styleFrom(
                         backgroundColor: KeraColors.primaryNavy,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: KeraRadii.borderButton,
                         ),
                       ),
@@ -471,7 +474,10 @@ class _LanguageSelectionScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 2,
                         children: [
                           Text(
                             title,
@@ -481,7 +487,6 @@ class _LanguageSelectionScreenState
                                   : KeraColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Text(
                             subtitle,
                             style: KeraTypography.labelMedium(
@@ -536,8 +541,11 @@ class _LanguageSelectionScreenState
             const SizedBox(height: KeraSpacing.sm),
             const Divider(height: 1),
             const SizedBox(height: KeraSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 if (isActiveNow)
                   Container(
@@ -548,9 +556,10 @@ class _LanguageSelectionScreenState
                     decoration: BoxDecoration(
                       color: KeraColors.stockInBg,
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.emerald.shade200),
+                      border: Border.all(color: const Color(0xFFA7F3D0)),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           width: 6,

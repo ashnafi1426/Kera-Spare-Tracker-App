@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../data/local/database_provider.dart';
 import '../../domain/models/app_notification.dart';
 
 enum NotificationFilter {
@@ -8,7 +7,6 @@ enum NotificationFilter {
   stock,
   salesSync,
 }
-
 class NotificationsNotifier extends Notifier<List<AppNotification>> {
   @override
   List<AppNotification> build() {
@@ -113,37 +111,42 @@ final notificationsProvider =
   NotificationsNotifier.new,
 );
 
-final notificationFilterProvider = StateProvider<NotificationFilter>((ref) {
-  return NotificationFilter.all;
-});
+class NotificationFilterNotifier extends Notifier<NotificationFilter> {
+  @override
+  NotificationFilter build() => NotificationFilter.all;
+
+  void setFilter(NotificationFilter filter) {
+    state = filter;
+  }
+}
+
+final notificationFilterProvider =
+    NotifierProvider<NotificationFilterNotifier, NotificationFilter>(
+  NotificationFilterNotifier.new,
+);
 
 final filteredNotificationsProvider = Provider<List<AppNotification>>((ref) {
   final notifs = ref.watch(notificationsProvider);
   final filter = ref.watch(notificationFilterProvider);
 
-  switch (filter) {
-    case NotificationFilter.all:
-      return notifs;
-    case NotificationFilter.unread:
-      return notifs.where((n) => !n.isRead).toList();
-    case NotificationFilter.stock:
-      return notifs
-          .where((n) =>
-              n.type == NotificationType.outOfStock ||
-              n.type == NotificationType.lowStock)
-          .toList();
-    case NotificationFilter.salesSync:
-      return notifs
-          .where((n) =>
-              n.type == NotificationType.saleCompleted ||
-              n.type == NotificationType.syncFailed ||
-              n.type == NotificationType.syncComplete)
-          .toList();
-  }
+  return switch (filter) {
+    NotificationFilter.all => notifs,
+    NotificationFilter.unread => notifs.where((n) => !n.isRead).toList(),
+    NotificationFilter.stock => notifs
+        .where((n) =>
+            n.type == NotificationType.outOfStock ||
+            n.type == NotificationType.lowStock)
+        .toList(),
+    NotificationFilter.salesSync => notifs
+        .where((n) =>
+            n.type == NotificationType.saleCompleted ||
+            n.type == NotificationType.syncFailed ||
+            n.type == NotificationType.syncComplete)
+        .toList(),
+  };
 });
 
 final unreadNotificationsCountProvider = Provider<int>((ref) {
   final notifs = ref.watch(notificationsProvider);
   return notifs.where((n) => !n.isRead).length;
 });
-

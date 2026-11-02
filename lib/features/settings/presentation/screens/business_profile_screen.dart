@@ -7,6 +7,7 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../domain/models/business_profile.dart';
 import '../providers/business_profile_provider.dart';
 
 /// Screen 2: Business Profile screen adhering to Google Stitch specs.
@@ -112,15 +113,10 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
 
     setState(() => _isSaving = true);
 
-    final currentProfile = ref.read(businessProfileProvider).value;
-    final updated = (currentProfile ??
-            ref.read(businessProfileProvider.notifier).build().then((v) => v))
-        as dynamic;
+    final currentProfile = ref.read(businessProfileProvider).value ??
+        BusinessProfile.defaultProfile();
 
-    final newProfile = (currentProfile ??
-            const AsyncValue.loading().value ??
-            ref.read(businessProfileProvider).requireValue)
-        .copyWith(
+    final newProfile = currentProfile.copyWith(
       businessName: _businessNameController.text.trim(),
       tinNumber: _tinController.text.trim(),
       category: _selectedCategory,
@@ -198,7 +194,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
             // Store Verification Banner
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
                   bottom: BorderSide(color: KeraColors.borderVariant),
@@ -207,32 +203,36 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: KeraColors.stockInText,
+                  Expanded(
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 6,
+                      runSpacing: 2,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: KeraColors.stockInText,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'የተረጋገጠ የንግድ መደብር (Verified Merchant)',
-                        style: KeraTypography.labelSmall(
-                          color: KeraColors.textPrimary,
+                        Text(
+                          'የተረጋገጠ የንግድ መደብር (Verified Merchant)',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '•  Kera Automotive District',
-                        style: KeraTypography.labelSmall(
-                          color: KeraColors.textSecondary,
+                        Text(
+                          '•  Kera Automotive District',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   const Icon(
                     Icons.verified_rounded,
                     color: KeraColors.stockInText,
@@ -265,20 +265,25 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.branding_watermark_rounded,
-                                    color: KeraColors.actionBlue,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'የንግድ ምልክት እና ሎጎ (Business Logo)',
-                                    style: KeraTypography.titleMedium(),
-                                  ),
-                                ],
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.branding_watermark_rounded,
+                                      color: KeraColors.actionBlue,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'የንግድ ምልክት እና ሎጎ (Business Logo)',
+                                        style: KeraTypography.titleMedium(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -436,9 +441,11 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'የመደብሩ ዋና መረጃ (Store Details)',
-                                style: KeraTypography.titleMedium(),
+                              Expanded(
+                                child: Text(
+                                  'የመደብሩ ዋና መረጃ (Store Details)',
+                                  style: KeraTypography.titleMedium(),
+                                ),
                               ),
                             ],
                           ),
@@ -500,7 +507,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           ),
                           const SizedBox(height: 4),
                           DropdownButtonFormField<String>(
-                            value: _selectedCategory,
+                            initialValue: _selectedCategory,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(
                                 borderRadius: KeraRadii.borderInput,
@@ -549,9 +556,11 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'የባለቤት እና አድራሻ መረጃ (Owner & Contact)',
-                                style: KeraTypography.titleMedium(),
+                              Expanded(
+                                child: Text(
+                                  'የባለቤት እና አድራሻ መረጃ (Owner & Contact)',
+                                  style: KeraTypography.titleMedium(),
+                                ),
                               ),
                             ],
                           ),
@@ -584,10 +593,13 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'ዋና ስልክ ቁጥር (Primary Phone / Telebirr) *',
-                                style: KeraTypography.labelMedium(),
+                              Expanded(
+                                child: Text(
+                                  'ዋና ስልክ ቁጥር (Primary Phone / Telebirr) *',
+                                  style: KeraTypography.labelMedium(),
+                                ),
                               ),
+                              const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 6,
@@ -684,9 +696,11 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'የመደብሩ አድራሻ እና መገኛ (Store Location & Hub)',
-                                style: KeraTypography.titleMedium(),
+                              Expanded(
+                                child: Text(
+                                  'የመደብሩ አድራሻ እና መገኛ (Store Location & Hub)',
+                                  style: KeraTypography.titleMedium(),
+                                ),
                               ),
                             ],
                           ),
@@ -701,7 +715,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           ),
                           const SizedBox(height: 4),
                           DropdownButtonFormField<String>(
-                            value: _selectedDistrict,
+                            initialValue: _selectedDistrict,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(
                                 borderRadius: KeraRadii.borderInput,
@@ -789,9 +803,11 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'የደረሰኝ እና ታክስ ቅንብር (Receipt & Tax)',
-                                style: KeraTypography.titleMedium(),
+                              Expanded(
+                                child: Text(
+                                  'የደረሰኝ እና ታክስ ቅንብር (Receipt & Tax)',
+                                  style: KeraTypography.titleMedium(),
+                                ),
                               ),
                             ],
                           ),
@@ -871,10 +887,14 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           color: KeraColors.actionBlue.withAlpha(30),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
                                 Icons.cloud_sync_rounded,
@@ -909,16 +929,16 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
             // Fixed Bottom Action Bar
             Container(
               padding: const EdgeInsets.all(KeraSpacing.lg),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 border: Border(
                   top: BorderSide(color: KeraColors.borderVariant),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(8),
+                    color: Color(0x14000000),
                     blurRadius: 8,
-                    offset: const Offset(0, -3),
+                    offset: Offset(0, -3),
                   ),
                 ],
               ),
@@ -932,7 +952,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: KeraColors.actionBlue,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: KeraRadii.borderButton,
                         ),
                       ),
