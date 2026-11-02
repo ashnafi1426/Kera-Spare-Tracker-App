@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/utils/context_extensions.dart';
 
 /// Top header banner for the business dashboard.
 ///
 /// Features:
-/// - Store branding: "ኬራ ስፔር / Kera Spare"
+/// - Store branding dynamically localized
 /// - Business Persona avatar with initials & shop title
+/// - One-tap Language Switcher pill (አማ / EN)
 /// - Live connectivity and sync status indicator
-class DashboardHeader extends StatelessWidget {
+class DashboardHeader extends ConsumerWidget {
   final String businessName;
   final String? phoneNumber;
   final int pendingSyncCount;
@@ -39,9 +44,10 @@ class DashboardHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isSynced = pendingSyncCount == 0;
     final initials = _getInitials(businessName);
+    final isAmharic = context.isAmharic;
 
     return Container(
       color: KeraColors.primaryNavy,
@@ -52,7 +58,7 @@ class DashboardHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top bar: App Name & Action icons
+          // Top bar: App Name & Action icons + Quick Language Switcher
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -73,7 +79,7 @@ class DashboardHeader extends StatelessWidget {
                   ),
                   const SizedBox(width: KeraSpacing.sm),
                   Text(
-                    'ኬራ ስፔር / Kera Spare',
+                    context.tr('ኬራ ስፔር', 'Kera Spare Tracker'),
                     style: KeraTypography.titleMedium().copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -83,6 +89,37 @@ class DashboardHeader extends StatelessWidget {
               ),
               Row(
                 children: [
+                  // One-tap Language Toggle Pill
+                  InkWell(
+                    onTap: () {
+                      ref.read(localeControllerProvider.notifier).toggleLocale();
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.language_rounded, color: Colors.white70, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            isAmharic ? 'English' : 'አማርኛ',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
                   IconButton(
                     icon: Icon(
                       isSynced
@@ -92,7 +129,7 @@ class DashboardHeader extends StatelessWidget {
                           ? Colors.white
                           : KeraColors.warningAmber,
                     ),
-                    tooltip: 'Sync',
+                    tooltip: context.tr('አመሳስል', 'Sync'),
                     onPressed: onSyncTap,
                   ),
                   IconButton(
@@ -100,7 +137,7 @@ class DashboardHeader extends StatelessWidget {
                       Icons.notifications_outlined,
                       color: Colors.white,
                     ),
-                    tooltip: 'Notifications',
+                    tooltip: context.tr('ማስታወቂያዎች', 'Notifications'),
                     onPressed: onNotificationTap,
                   ),
                 ],
@@ -159,7 +196,7 @@ class DashboardHeader extends StatelessWidget {
                     Text(
                       businessName.isNotEmpty
                           ? businessName
-                          : 'ተስፋዬ እና ልጆቹ የጃፓን መለዋወጫ',
+                          : context.tr('የመለዋወጫ መደብር', 'Auto Spare Shop'),
                       style: KeraTypography.headlineSmall().copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -170,8 +207,8 @@ class DashboardHeader extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       phoneNumber != null && phoneNumber!.isNotEmpty
-                          ? '$phoneNumber • ኬራ መገናኛ'
-                          : 'Tesfaye Auto Spares • Kera Zone',
+                          ? '$phoneNumber • ${context.tr("ኬራ ማዕከል", "Kera Hub")}'
+                          : context.tr('ኬራ መለዋወጫ ማዕከል', 'Kera Auto Spares Zone'),
                       style: KeraTypography.labelSmall().copyWith(
                         color: Colors.white.withValues(alpha: 0.75),
                       ),
@@ -199,7 +236,7 @@ class DashboardHeader extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'እንደምን ዋሉ',
+                          context.tr('እንደምን ዋሉ', 'Welcome back'),
                           style: KeraTypography.bodySmall().copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
@@ -210,7 +247,7 @@ class DashboardHeader extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      'ዛሬ • Today',
+                      context.tr('የዛሬ የሥራ እንቅስቃሴ', "Today's Business Overview"),
                       style: KeraTypography.labelSmall().copyWith(
                         color: Colors.white.withValues(alpha: 0.65),
                       ),
@@ -246,8 +283,8 @@ class DashboardHeader extends StatelessWidget {
                     const SizedBox(width: 6),
                     Text(
                       isSynced
-                          ? 'የመስመር ላይ • የተመሳሰለ'
-                          : 'ያልተላከ ($pendingSyncCount)',
+                          ? context.tr('የተመሳሰለ (የመስመር ላይ)', 'Live & Synced')
+                          : context.tr('ያልተላከ ($pendingSyncCount)', 'Pending ($pendingSyncCount)'),
                       style: KeraTypography.labelSmall().copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
