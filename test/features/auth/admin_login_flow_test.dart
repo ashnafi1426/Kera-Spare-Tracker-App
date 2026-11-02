@@ -171,11 +171,9 @@ void main() {
       expect(updatedUserResult.valueOrNull?.mustChangePassword, isFalse);
     });
 
-    test('4. Candidate Android base URLs include local USB reverse and Wi-Fi endpoints', () {
+    test('4. Candidate Android base URLs include primary cloud endpoint', () {
       final candidates = AppConstants.candidateAndroidBaseUrls;
-      expect(candidates, contains('http://127.0.0.1:7000/api/v1'));
-      expect(candidates, contains('http://10.0.2.2:7000/api/v1'));
-      expect(candidates, contains('http://192.168.137.43:7000/api/v1'));
+      expect(candidates, contains('https://kera-spare-tracker-api.onrender.com/api/v1'));
     });
 
     test('5. Dynamic setApiBaseUrl updates AppConstants.apiBaseUrl correctly', () {
