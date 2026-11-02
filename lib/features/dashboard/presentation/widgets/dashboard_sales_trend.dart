@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../reports/domain/models/chart_point.dart';
 import '../../../reports/domain/models/report_period.dart';
 
@@ -35,6 +37,8 @@ class DashboardSalesTrend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currencyUnit = context.tr('ብር', 'ETB');
+
     // Determine max value for relative bar heights
     final maxValue = points.isEmpty
         ? 1.0
@@ -67,14 +71,14 @@ class DashboardSalesTrend extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'የሽያጭ ሂደት / Trends',
+                      context.tr('የሽያጭ ሂደት', 'Sales Trend'),
                       style: KeraTypography.titleMedium().copyWith(
                         fontWeight: FontWeight.bold,
                         color: KeraColors.textPrimary,
                       ),
                     ),
                     Text(
-                      'Performance insights',
+                      context.tr('የገቢ እና ትርፍ ሁኔታ', 'Revenue & performance insights'),
                       style: KeraTypography.labelSmall().copyWith(
                         color: KeraColors.textSecondary,
                       ),
@@ -94,17 +98,17 @@ class DashboardSalesTrend extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _PeriodTab(
-                      label: 'ዛሬ',
+                      label: context.tr('ዛሬ', 'Today'),
                       isSelected: selectedPeriod == ReportPeriod.daily,
                       onTap: () => onPeriodChanged(ReportPeriod.daily),
                     ),
                     _PeriodTab(
-                      label: 'ሳምንት',
+                      label: context.tr('ሳምንት', 'Week'),
                       isSelected: selectedPeriod == ReportPeriod.weekly,
                       onTap: () => onPeriodChanged(ReportPeriod.weekly),
                     ),
                     _PeriodTab(
-                      label: 'ወር',
+                      label: context.tr('ወር', 'Month'),
                       isSelected: selectedPeriod == ReportPeriod.monthly,
                       onTap: () => onPeriodChanged(ReportPeriod.monthly),
                     ),
@@ -116,117 +120,83 @@ class DashboardSalesTrend extends StatelessWidget {
 
           const SizedBox(height: KeraSpacing.md),
 
-          // Metric highlights strip
+          // Period revenue summary strip
           Container(
-            padding: const EdgeInsets.all(KeraSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KeraSpacing.sm,
+              vertical: KeraSpacing.xs,
+            ),
             decoration: BoxDecoration(
-              color: KeraColors.surfaceContainerLow,
+              color: KeraColors.surfaceSubtle,
               borderRadius: BorderRadius.circular(KeraRadii.xs),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'ጠቅላላ ገቢ (Revenue)',
-                        style: KeraTypography.labelSmall().copyWith(
-                          color: KeraColors.textSecondary,
-                          fontSize: 11,
-                        ),
+                Row(
+                  children: [
+                    Text(
+                      '${context.tr("ጠቅላላ ገቢ", "Period Revenue")}: ',
+                      style: KeraTypography.labelSmall().copyWith(
+                        color: KeraColors.textSecondary,
                       ),
-                      const SizedBox(height: 2),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            _formatCurrency(periodRevenue),
-                            style: KeraTypography.titleMedium().copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: KeraColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'ብር',
-                            style: KeraTypography.labelSmall().copyWith(
-                              color: KeraColors.textSecondary,
-                            ),
-                          ),
-                        ],
+                    ),
+                    Text(
+                      '${_formatCurrency(periodRevenue)} $currencyUnit',
+                      style: KeraTypography.labelSmall().copyWith(
+                        color: KeraColors.tealDark,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 1,
-                  height: 32,
-                  color: KeraColors.borderVariant,
-                ),
-                const SizedBox(width: KeraSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'አማካይ ትርፍ (Margin)',
-                        style: KeraTypography.labelSmall().copyWith(
-                          color: KeraColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '${profitMargin.toStringAsFixed(1)}%',
-                            style: KeraTypography.titleMedium().copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: KeraColors.tealDark,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'ጥቅል',
-                            style: KeraTypography.labelSmall().copyWith(
-                              color: KeraColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                Text(
+                  '${context.tr("የትርፍ ህዳግ", "Profit Margin")}: ~${profitMargin.toStringAsFixed(0)}%',
+                  style: KeraTypography.labelSmall().copyWith(
+                    color: KeraColors.actionBlue,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: KeraSpacing.md),
+          const SizedBox(height: KeraSpacing.lg),
 
-          // Custom tactile bar chart
+          // Bar Chart Canvas (custom responsive bar representation)
           if (points.isEmpty)
             Container(
-              height: 100,
+              height: 140,
               alignment: Alignment.center,
-              child: Text(
-                'ምንም የሽያጭ መረጃ አልተገኘም (No data yet)',
-                style: KeraTypography.bodySmall().copyWith(
-                  color: KeraColors.textSecondary,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.bar_chart_rounded,
+                    size: 36,
+                    color: KeraColors.textTertiary,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.tr(
+                      'በዚህ ወቅት የተመዘገበ ሽያጭ የለም',
+                      'No sales data recorded for this period',
+                    ),
+                    style: KeraTypography.bodySmall().copyWith(
+                      color: KeraColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             )
           else
             SizedBox(
-              height: 120,
+              height: 140,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: points.map((p) {
-                  final ratio = (p.revenue / effectiveMax).clamp(0.08, 1.0);
-                  final isPeak = p.revenue == maxValue && maxValue > 0;
+                  final fraction = (p.revenue / effectiveMax).clamp(0.08, 1.0);
+                  final isToday = p == points.last;
 
                   return Expanded(
                     child: Padding(
@@ -234,34 +204,34 @@ class DashboardSalesTrend extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            _formatCurrency(p.revenue),
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight:
-                                  isPeak ? FontWeight.bold : FontWeight.normal,
-                              color: isPeak
-                                  ? KeraColors.actionBlue
-                                  : KeraColors.textSecondary,
+                          if (p.revenue > 0)
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _formatCurrency(p.revenue),
+                                style: KeraTypography.labelSmall().copyWith(
+                                  fontSize: 8,
+                                  color: isToday
+                                      ? KeraColors.actionBlue
+                                      : KeraColors.textSecondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Expanded(
                             child: Align(
                               alignment: Alignment.bottomCenter,
                               child: FractionallySizedBox(
-                                heightFactor: ratio,
+                                heightFactor: fraction,
+                                widthFactor: 0.65,
                                 child: Container(
-                                  width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: isPeak
+                                    color: isToday
                                         ? KeraColors.actionBlue
-                                        : KeraColors.actionBlue
-                                            .withValues(alpha: 0.35),
+                                        : KeraColors.actionBlue.withValues(alpha: 0.35),
                                     borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(4),
+                                      top: Radius.circular(3),
                                     ),
                                   ),
                                 ),
@@ -271,13 +241,14 @@ class DashboardSalesTrend extends StatelessWidget {
                           const SizedBox(height: 6),
                           Text(
                             p.label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight:
-                                  isPeak ? FontWeight.bold : FontWeight.w500,
-                              color: isPeak
-                                  ? KeraColors.actionBlue
+                            style: KeraTypography.labelSmall().copyWith(
+                              fontSize: 9,
+                              color: isToday
+                                  ? KeraColors.textPrimary
                                   : KeraColors.textSecondary,
+                              fontWeight: isToday
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -308,8 +279,9 @@ class _PeriodTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(KeraRadii.xs),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
@@ -318,7 +290,7 @@ class _PeriodTab extends StatelessWidget {
           boxShadow: isSelected
               ? const [
                   BoxShadow(
-                    color: Color(0x10000000),
+                    color: Color(0x0C000000),
                     blurRadius: 2,
                     offset: Offset(0, 1),
                   ),
@@ -329,7 +301,9 @@ class _PeriodTab extends StatelessWidget {
           label,
           style: KeraTypography.labelSmall().copyWith(
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? KeraColors.actionBlue : KeraColors.textSecondary,
+            color: isSelected
+                ? KeraColors.primaryNavy
+                : KeraColors.textSecondary,
             fontSize: 11,
           ),
         ),

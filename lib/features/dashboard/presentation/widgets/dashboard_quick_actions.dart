@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/utils/context_extensions.dart';
 
 /// 4-column quick action grid matching Stitch Screen 7.
 ///
@@ -31,7 +33,7 @@ class DashboardQuickActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ፈጣን ተግባራት / Quick Actions',
+          context.tr('ፈጣን ተግባራት', 'Quick Actions'),
           style: KeraTypography.titleMedium().copyWith(
             color: KeraColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -43,8 +45,7 @@ class DashboardQuickActions extends StatelessWidget {
             // Action 1: Add Part
             Expanded(
               child: _QuickActionButton(
-                labelAm: 'አዲስ ዕቃ',
-                labelEn: '+ Part',
+                label: context.tr('አዲስ ዕቃ', 'Add Part'),
                 icon: Icons.add_circle_outline_rounded,
                 iconBgColor: KeraColors.actionBlue,
                 iconColor: Colors.white,
@@ -56,8 +57,7 @@ class DashboardQuickActions extends StatelessWidget {
             // Action 2: New Sale
             Expanded(
               child: _QuickActionButton(
-                labelAm: 'ሽያጭ መዝግብ',
-                labelEn: 'New Sale',
+                label: context.tr('አዲስ ሽያጭ', 'New Sale'),
                 icon: Icons.point_of_sale_rounded,
                 iconBgColor: KeraColors.primaryNavy,
                 iconColor: Colors.white,
@@ -69,8 +69,7 @@ class DashboardQuickActions extends StatelessWidget {
             // Action 3: Restock
             Expanded(
               child: _QuickActionButton(
-                labelAm: 'ክምችት አድስ',
-                labelEn: 'Restock',
+                label: context.tr('ክምችት አድስ', 'Restock'),
                 icon: Icons.update_rounded,
                 iconBgColor: KeraColors.borderNeutral,
                 iconColor: KeraColors.primaryNavy,
@@ -82,8 +81,7 @@ class DashboardQuickActions extends StatelessWidget {
             // Action 4: Barcode Scanner
             Expanded(
               child: _QuickActionButton(
-                labelAm: 'ባርኮድ ቃኝ',
-                labelEn: 'Scanner',
+                label: context.tr('ባርኮድ ቃኝ', 'Scan Barcode'),
                 icon: Icons.qr_code_scanner_rounded,
                 iconBgColor: KeraColors.borderNeutral,
                 iconColor: KeraColors.actionBlue,
@@ -98,16 +96,14 @@ class DashboardQuickActions extends StatelessWidget {
 }
 
 class _QuickActionButton extends StatelessWidget {
-  final String labelAm;
-  final String labelEn;
+  final String label;
   final IconData icon;
   final Color iconBgColor;
   final Color iconColor;
   final VoidCallback onTap;
 
   const _QuickActionButton({
-    required this.labelAm,
-    required this.labelEn,
+    required this.label,
     required this.icon,
     required this.iconBgColor,
     required this.iconColor,
@@ -123,7 +119,7 @@ class _QuickActionButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(KeraRadii.md),
         child: Container(
-          constraints: const BoxConstraints(minHeight: 76),
+          constraints: const BoxConstraints(minHeight: 74),
           padding: const EdgeInsets.symmetric(
             horizontal: 4,
             vertical: KeraSpacing.sm,
@@ -151,23 +147,13 @@ class _QuickActionButton extends StatelessWidget {
                 ),
                 child: Icon(icon, color: iconColor, size: 20),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
-                labelAm,
+                label,
                 style: KeraTypography.labelSmall().copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 11,
                   color: KeraColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                labelEn,
-                style: KeraTypography.labelSmall().copyWith(
-                  fontSize: 9,
-                  color: KeraColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,

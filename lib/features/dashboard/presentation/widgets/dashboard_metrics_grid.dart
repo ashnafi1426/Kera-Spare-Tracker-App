@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../providers/dashboard_providers.dart';
 
 /// 2x3 statistics bento grid matching Stitch Screen 7.
@@ -42,6 +44,9 @@ class DashboardMetricsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currencyUnit = context.tr('ብር', 'ETB');
+    final pcsUnit = context.tr('ፍሬ', 'pcs');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -50,7 +55,7 @@ class DashboardMetricsGrid extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'የንግድ ማጠቃለያ / Overview',
+                context.tr('የንግድ ማጠቃለያ', 'Business Overview'),
                 style: KeraTypography.titleMedium().copyWith(
                   color: KeraColors.textPrimary,
                   fontWeight: FontWeight.bold,
@@ -73,7 +78,7 @@ class DashboardMetricsGrid extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'የቀጥታ መረጃ (Live)',
+                  context.tr('የቀጥታ መረጃ', 'Live Data'),
                   style: KeraTypography.labelSmall().copyWith(
                     color: KeraColors.actionBlue,
                     fontWeight: FontWeight.w600,
@@ -96,8 +101,8 @@ class DashboardMetricsGrid extends StatelessWidget {
           children: [
             // Stat 1: Active SKUs
             _MetricCard(
-              title: 'መለዋወጫ ዓይነቶች',
-              subtitle: 'Active SKUs',
+              title: context.tr('የመለዋወጫ ዓይነቶች', 'Active SKUs'),
+              subtitle: context.tr('የተመዘገቡ ዕቃዎች', 'Catalog Parts'),
               value: _formatNumber(metrics.totalSkus),
               icon: Icons.inventory_2_outlined,
               iconColor: KeraColors.actionBlue,
@@ -107,9 +112,10 @@ class DashboardMetricsGrid extends StatelessWidget {
 
             // Stat 2: Total Quantity
             _MetricCard(
-              title: 'ጠቅላላ ክምችት',
-              subtitle: 'Total Quantity (pcs)',
+              title: context.tr('ጠቅላላ ክምችት', 'Total Inventory'),
+              subtitle: context.tr('በመጋዘን ውስጥ ያለው', 'Units in Stock'),
               value: _formatNumber(metrics.totalQuantity),
+              unit: pcsUnit,
               icon: Icons.layers_outlined,
               iconColor: KeraColors.primaryNavy,
               iconBgColor: KeraColors.borderNeutral,
@@ -118,11 +124,10 @@ class DashboardMetricsGrid extends StatelessWidget {
 
             // Stat 3: Today's Revenue
             _MetricCard(
-              title: 'የዛሬ ገቢ',
-              subtitle: 'Today Revenue',
+              title: context.tr('የዛሬ ገቢ', "Today's Revenue"),
+              subtitle: context.tr('የቀኑ ሽያጭ', 'Gross Sales'),
               value: _formatCurrency(metrics.todayRevenue),
-              unit: 'ብር',
-              trend: 'የቀኑ ሽያጭ',
+              unit: currencyUnit,
               icon: Icons.payments_outlined,
               iconColor: KeraColors.tealDark,
               iconBgColor: KeraColors.tealFixed.withValues(alpha: 0.6),
@@ -130,10 +135,10 @@ class DashboardMetricsGrid extends StatelessWidget {
 
             // Stat 4: Estimated Profit
             _MetricCard(
-              title: 'የተጣራ ትርፍ',
-              subtitle: 'Margin ~${metrics.profitMargin.toStringAsFixed(0)}%',
+              title: context.tr('የተጣራ ትርፍ', 'Estimated Profit'),
+              subtitle: context.tr('ህዳግ ~${metrics.profitMargin.toStringAsFixed(0)}%', 'Margin ~${metrics.profitMargin.toStringAsFixed(0)}%'),
               value: _formatCurrency(metrics.todayProfit),
-              unit: 'ብር',
+              unit: currencyUnit,
               icon: Icons.trending_up_rounded,
               iconColor: KeraColors.actionBlue,
               iconBgColor: KeraColors.borderNeutral,
@@ -141,10 +146,12 @@ class DashboardMetricsGrid extends StatelessWidget {
 
             // Stat 5: Low-Stock Alerts
             _MetricCard(
-              title: 'አነስተኛ ክምችት',
-              subtitle: metrics.lowStockCount > 0 ? 'Reorder required' : 'Stock healthy',
+              title: context.tr('አነስተኛ ክምችት', 'Low Stock Alert'),
+              subtitle: metrics.lowStockCount > 0
+                  ? context.tr('ማዘዝ ያስፈልጋል', 'Reorder Required')
+                  : context.tr('ክምችት በቂ ነው', 'Healthy Stock'),
               value: metrics.lowStockCount.toString(),
-              unit: 'ዕቃዎች',
+              unit: pcsUnit,
               icon: Icons.warning_amber_rounded,
               iconColor: const Color(0xFFB45309),
               iconBgColor: const Color(0xFFFEF3C7),
@@ -156,10 +163,12 @@ class DashboardMetricsGrid extends StatelessWidget {
 
             // Stat 6: Out-of-Stock
             _MetricCard(
-              title: 'ያለቁ ዕቃዎች',
-              subtitle: metrics.outOfStockCount > 0 ? 'Out of stock (0 pcs)' : 'All in stock',
+              title: context.tr('ያለቁ ዕቃዎች', 'Out of Stock'),
+              subtitle: metrics.outOfStockCount > 0
+                  ? context.tr('ያለቁ (0 ፍሬ)', '0 pcs available')
+                  : context.tr('ሁሉም ይገኛሉ', 'All in Stock'),
               value: metrics.outOfStockCount.toString(),
-              unit: 'ዕቃዎች',
+              unit: pcsUnit,
               icon: Icons.error_outline_rounded,
               iconColor: KeraColors.errorRed,
               iconBgColor: KeraColors.errorRed.withValues(alpha: 0.12),
@@ -202,99 +211,124 @@ class _MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardContent = Container(
-      padding: const EdgeInsets.all(KeraSpacing.sm),
-      decoration: BoxDecoration(
-        color: KeraColors.surfaceCard,
-        borderRadius: BorderRadius.circular(KeraRadii.md),
-        border: Border.all(color: KeraColors.borderVariant),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 4,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: KeraTypography.labelSmall().copyWith(
-                    color: KeraColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(KeraRadii.xs),
-                ),
-                child: Icon(icon, size: 16, color: iconColor),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    value,
-                    style: KeraTypography.numericStat().copyWith(
-                      color: valueColor ?? KeraColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  if (unit != null) ...[
-                    const SizedBox(width: 4),
-                    Text(
-                      unit!,
-                      style: KeraTypography.labelSmall().copyWith(
-                        color: KeraColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: KeraTypography.labelSmall().copyWith(
-                  color: valueColor ?? KeraColors.textSecondary,
-                  fontSize: 10,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    if (onTap != null) {
-      return InkWell(
+    return Material(
+      color: KeraColors.surfaceCard,
+      borderRadius: BorderRadius.circular(KeraRadii.md),
+      child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(KeraRadii.md),
-        child: cardContent,
-      );
-    }
+        child: Container(
+          padding: const EdgeInsets.all(KeraSpacing.sm),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(KeraRadii.md),
+            border: Border.all(color: KeraColors.borderVariant),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 4,
+                offset: Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Header: Icon + Trend or Title
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: iconBgColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: iconColor, size: 16),
+                  ),
+                  if (trend != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: KeraColors.tealFixed.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(KeraRadii.xs),
+                      ),
+                      child: Text(
+                        trend!,
+                        style: KeraTypography.labelSmall().copyWith(
+                          fontSize: 9,
+                          color: KeraColors.tealDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
 
-    return cardContent;
+              // Value row
+              FittedBox(
+                alignment: Alignment.centerLeft,
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      value,
+                      style: KeraTypography.headlineMedium().copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: valueColor ?? KeraColors.textPrimary,
+                        fontSize: 22,
+                      ),
+                    ),
+                    if (unit != null) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        unit!,
+                        style: KeraTypography.labelSmall().copyWith(
+                          color: KeraColors.textSecondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              // Title and Subtitle
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: KeraTypography.labelSmall().copyWith(
+                      color: KeraColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    subtitle,
+                    style: KeraTypography.labelSmall().copyWith(
+                      color: KeraColors.textSecondary,
+                      fontSize: 10,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

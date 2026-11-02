@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../reports/domain/models/top_selling_part.dart';
 
 /// Top 3 best-selling parts preview matching Stitch Screen 7.
@@ -23,6 +26,7 @@ class DashboardBestSellers extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
 
     final top3 = items.take(3).toList();
+    final soldUnit = context.tr('ፍሬ ተሽጧል', 'pcs sold');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +39,7 @@ class DashboardBestSellers extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ተፈላጊ መለዋወጫዎች / Best Sellers',
+                    context.tr('ተፈላጊ መለዋወጫዎች', 'Top Selling Parts'),
                     style: KeraTypography.titleMedium().copyWith(
                       fontWeight: FontWeight.bold,
                       color: KeraColors.textPrimary,
@@ -44,7 +48,7 @@ class DashboardBestSellers extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'Top-moving parts by sales volume',
+                    context.tr('በሽያጭ ብዛት ቀዳሚ የሆኑ', 'Highest volume moving parts'),
                     style: KeraTypography.labelSmall().copyWith(
                       color: KeraColors.textSecondary,
                     ),
@@ -58,151 +62,123 @@ class DashboardBestSellers extends StatelessWidget {
               TextButton(
                 onPressed: onViewAll,
                 style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
                   foregroundColor: KeraColors.actionBlue,
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 36),
                 ),
-                child: const Text(
-                  'ሁሉንም እይ',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                child: Text(
+                  context.tr('ሁሉንም እይ', 'View All'),
+                  style: KeraTypography.labelSmall().copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: KeraColors.actionBlue,
+                  ),
                 ),
               ),
           ],
         ),
         const SizedBox(height: KeraSpacing.sm),
+        Column(
+          children: top3.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
 
-        // List of items
-        ListView.separated(
-          itemCount: top3.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (_, _) => const SizedBox(height: KeraSpacing.sm),
-          itemBuilder: (context, index) {
-            final part = top3[index];
-            final rank = index + 1;
-
-            return InkWell(
-              onTap: onItemTap != null ? () => onItemTap!(part) : null,
-              borderRadius: BorderRadius.circular(KeraRadii.md),
-              child: Container(
-                padding: const EdgeInsets.all(KeraSpacing.sm),
-                decoration: BoxDecoration(
-                  color: KeraColors.surfaceCard,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: KeraSpacing.xs),
+              child: Material(
+                color: KeraColors.surfaceCard,
+                borderRadius: BorderRadius.circular(KeraRadii.md),
+                child: InkWell(
+                  onTap: onItemTap != null ? () => onItemTap!(item) : null,
                   borderRadius: BorderRadius.circular(KeraRadii.md),
-                  border: Border.all(color: KeraColors.borderVariant),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x04000000),
-                      blurRadius: 3,
-                      offset: Offset(0, 1),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KeraSpacing.md,
+                      vertical: KeraSpacing.sm,
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // Rank badge
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: rank == 1
-                            ? KeraColors.actionBlue.withValues(alpha: 0.15)
-                            : KeraColors.borderNeutral,
-                        borderRadius: BorderRadius.circular(KeraRadii.xs),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '#$rank',
-                        style: TextStyle(
-                          color: rank == 1
-                              ? KeraColors.actionBlue
-                              : KeraColors.primaryNavy,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(KeraRadii.md),
+                      border: Border.all(color: KeraColors.borderVariant),
                     ),
-                    const SizedBox(width: KeraSpacing.md),
-
-                    // Part details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            part.partName,
-                            style: KeraTypography.bodySmall().copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: KeraColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${part.quantitySold.toInt()} ተሽጧል • sold',
-                            style: KeraTypography.labelSmall().copyWith(
-                              color: KeraColors.actionBlue,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Total revenue
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    child: Row(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
+                        // Rank Badge (#1, #2, #3)
+                        Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: index == 0
+                                ? const Color(0xFFFEF3C7)
+                                : KeraColors.surfaceSubtle,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '#${index + 1}',
+                            style: KeraTypography.labelSmall().copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: index == 0
+                                  ? const Color(0xFFB45309)
+                                  : KeraColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: KeraSpacing.sm),
+
+                        // Part details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.partName,
+                                style: KeraTypography.bodyMedium().copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: KeraColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (item.partNumber.isNotEmpty)
+                                Text(
+                                  item.partNumber,
+                                  style: KeraTypography.labelSmall().copyWith(
+                                    color: KeraColors.textSecondary,
+                                    fontSize: 10,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        // Quantity & Revenue
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              part.totalRevenue.toStringAsFixed(0),
-                              style: KeraTypography.titleMedium().copyWith(
+                              '${item.quantitySold} $soldUnit',
+                              style: KeraTypography.labelSmall().copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: KeraColors.textPrimary,
-                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 2),
-                            const Text(
-                              'ብር',
-                              style: TextStyle(
+                            Text(
+                              CurrencyFormatter.formatEtb(item.totalRevenue),
+                              style: KeraTypography.labelSmall().copyWith(
+                                color: KeraColors.tealDark,
                                 fontSize: 10,
-                                color: KeraColors.textSecondary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFECFDF5), // emerald-50
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'በክምችት አለ',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF059669),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
-          },
+          }).toList(),
         ),
       ],
     );
