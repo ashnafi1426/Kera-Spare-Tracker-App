@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/design/design.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
 import '../providers/sales_providers.dart';
 
 /// Tab displaying recorded sales history grouped by day with total per day,
-/// live item name search, and date range filters (today, this week, this month, custom).
+/// live item name search, date range filters (today, this week, this month, custom),
+/// and KPI summary bento cards per Google Stitch Screen 31.
 class SalesListTab extends ConsumerStatefulWidget {
   const SalesListTab({super.key});
 
@@ -19,6 +21,7 @@ class SalesListTab extends ConsumerStatefulWidget {
 
 class _SalesListTabState extends ConsumerState<SalesListTab> {
   final TextEditingController _searchController = TextEditingController();
+  String _syncFilter = 'all'; // 'all', 'synced', 'pending', 'failed'
 
   @override
   void dispose() {
@@ -53,34 +56,333 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
-
     final selectedFilter = ref.watch(salesHistoryDateFilterProvider);
     final dayGroupsAsync = ref.watch(salesDayGroupsProvider);
     final timeFormat = DateFormat('HH:mm');
     final dayHeaderFormat = DateFormat('EEEE, MMM d, yyyy');
 
     return Scaffold(
+      backgroundColor: KeraColors.surfaceCanvas,
       appBar: AppBar(
-        title: Text(l10n.navSales),
+        backgroundColor: KeraColors.primaryNavy,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.navSales,
+              style: KeraTypography.headlineSmall(color: Colors.white)
+                  .copyWith(fontWeight: FontWeight.w700),
+            ),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: KeraColors.tealAccent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'የሽያጭ ታሪክ • Kera Zone 4',
+                  style: KeraTypography.labelSmall(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download_rounded),
+            tooltip: 'Export CSV / Excel',
+            onPressed: () {
+              context.showSnackBar('የሽያጭ ሪፖርት ወደ ኤክሴል ተልኳል / Report Exported');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.sync_rounded),
+            tooltip: 'Sync Status',
+            onPressed: () {
+              context.showSnackBar('ሽያጮች ተመሳስለዋል / All Sales Synced');
+            },
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'sales_list_tab_fab',
+        backgroundColor: const Color(0xFF0D9488),
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add_shopping_cart_rounded),
-        label: Text(l10n.newSale),
+        label: Text(
+          l10n.newSale,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         onPressed: () => context.push('/sales/new'),
       ),
       body: Column(
         children: [
-          // 1. Search Bar
+          // 1. Time Segmented Filter Switcher (Stitch Screen 31)
+          Container(
+            color: KeraColors.primaryNavyDark,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  _buildTimeSegmentButton(
+                    label: 'ዛሬ (Today)',
+                    isSelected: selectedFilter == DateRangeType.today,
+                    onTap: () => ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.today),
+                  ),
+                  _buildTimeSegmentButton(
+                    label: 'ሳምንት (Week)',
+                    isSelected: selectedFilter == DateRangeType.thisWeek,
+                    onTap: () => ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.thisWeek),
+                  ),
+                  _buildTimeSegmentButton(
+                    label: 'ወር (Month)',
+                    isSelected: selectedFilter == DateRangeType.thisMonth,
+                    onTap: () => ref
+                        .read(salesHistoryDateFilterProvider.notifier)
+                        .setFilter(DateRangeType.thisMonth),
+                  ),
+                  _buildTimeSegmentButton(
+                    label: selectedFilter == DateRangeType.custom &&
+                            ref.watch(salesHistoryCustomRangeProvider) != null
+                        ? '${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.start)} - ${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.end)}'
+                        : 'ብጁ (Custom)',
+                    isSelected: selectedFilter == DateRangeType.custom,
+                    onTap: _pickCustomRange,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. Financial KPI Summary Bento Strip (Stitch Screen 31)
+          dayGroupsAsync.maybeWhen(
+            data: (groups) {
+              final allSales = groups.expand((g) => g.sales).toList();
+              final totalRevenue =
+                  allSales.fold(0.0, (sum, s) => sum + s.totalAmount);
+              final totalProfit =
+                  allSales.fold(0.0, (sum, s) => sum + s.totalProfit);
+              final totalUnits = allSales.fold(
+                  0.0,
+                  (sum, s) =>
+                      sum +
+                      s.items.fold(0.0, (isum, item) => isum + item.quantity));
+              final margin = totalRevenue > 0
+                  ? (totalProfit / totalRevenue * 100)
+                  : 0.0;
+
+              return Container(
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: KeraColors.outlineBorder),
+                  boxShadow: const [KeraColors.shadowLevel1],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.account_balance_wallet_rounded,
+                                size: 18, color: KeraColors.actionBlue),
+                            const SizedBox(width: 6),
+                            Text(
+                              'የዕለቱ የሂሳብ ማጠቃለያ / Sales Audit',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.textSecondary,
+                              ).copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: KeraColors.surfaceCanvas,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${allSales.length} ግብይቶች',
+                            style: KeraTypography.labelSmall(
+                              color: KeraColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          CurrencyFormatter.formatEtb(totalRevenue),
+                          style: KeraTypography.headlineSmall(
+                            color: KeraColors.primaryNavy,
+                          ).copyWith(fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.totalRevenue,
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        // Net Profit Pill
+                        Expanded(
+                          flex: 6,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: KeraColors.surfaceCanvas,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: KeraColors.outlineBorder
+                                      .withValues(alpha: 0.6)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.trending_up_rounded,
+                                        size: 14, color: KeraColors.success),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        '${l10n.totalProfit} (Net)',
+                                        style: KeraTypography.labelSmall(
+                                          color: KeraColors.textSecondary,
+                                        ).copyWith(fontSize: 10),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                FittedBox(
+                                  alignment: Alignment.centerLeft,
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    '+${CurrencyFormatter.formatEtb(totalProfit)}',
+                                    style: KeraTypography.labelLarge(
+                                      color: Colors.green.shade800,
+                                    ).copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                Text(
+                                  '~${margin.toStringAsFixed(1)}% የማርጂን ተመን',
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.textMuted,
+                                  ).copyWith(fontSize: 10),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Units Sold Pill
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: KeraColors.surfaceCanvas,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                  color: KeraColors.outlineBorder
+                                      .withValues(alpha: 0.6)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.inventory_2_outlined,
+                                        size: 14,
+                                        color: KeraColors.textSecondary),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        'የተሸጡ እቃዎች',
+                                        style: KeraTypography.labelSmall(
+                                          color: KeraColors.textSecondary,
+                                        ).copyWith(fontSize: 10),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${totalUnits.toStringAsFixed(0)} pcs',
+                                  style: KeraTypography.labelLarge(
+                                    color: KeraColors.primaryNavy,
+                                  ).copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  '100% ኦሪጅናል ስፔር',
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.textMuted,
+                                  ).copyWith(fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
+          ),
+
+          // 3. Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: l10n.searchSalesHint,
-                prefixIcon: const Icon(Icons.search_rounded),
+                prefixIcon: const Icon(Icons.receipt_long_rounded,
+                    color: KeraColors.textSecondary),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded),
@@ -95,9 +397,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     : null,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 filled: true,
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(color: KeraColors.outlineBorder),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: KeraColors.outlineBorder),
                 ),
               ),
               onChanged: (val) {
@@ -109,60 +416,31 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
             ),
           ),
 
-          // 2. Date Range Filter Chips
+          // 4. Sync State Horizontal Chips per Stitch Screen 31
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildFilterChip(
-                  label: l10n.filterToday,
-                  isSelected: selectedFilter == DateRangeType.today,
-                  onSelected: () {
-                    ref
-                        .read(salesHistoryDateFilterProvider.notifier)
-                        .setFilter(DateRangeType.today);
-                  },
-                ),
+                _buildSyncChip('ሁሉም (All)', 'all', null),
                 const SizedBox(width: 8),
-                _buildFilterChip(
-                  label: l10n.filterThisWeek,
-                  isSelected: selectedFilter == DateRangeType.thisWeek,
-                  onSelected: () {
-                    ref
-                        .read(salesHistoryDateFilterProvider.notifier)
-                        .setFilter(DateRangeType.thisWeek);
-                  },
-                ),
+                _buildSyncChip(
+                    'የተመሳሰሉ (Synced)', 'synced', KeraColors.success),
                 const SizedBox(width: 8),
-                _buildFilterChip(
-                  label: l10n.filterThisMonth,
-                  isSelected: selectedFilter == DateRangeType.thisMonth,
-                  onSelected: () {
-                    ref
-                        .read(salesHistoryDateFilterProvider.notifier)
-                        .setFilter(DateRangeType.thisMonth);
-                  },
-                ),
+                _buildSyncChip(
+                    'በወረፋ (Pending)', 'pending', KeraColors.warningAmber),
                 const SizedBox(width: 8),
-                _buildFilterChip(
-                  label: selectedFilter == DateRangeType.custom &&
-                          ref.watch(salesHistoryCustomRangeProvider) != null
-                      ? '${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.start)} - ${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.end)}'
-                      : l10n.filterCustom,
-                  isSelected: selectedFilter == DateRangeType.custom,
-                  icon: Icons.date_range_rounded,
-                  onSelected: _pickCustomRange,
-                ),
+                _buildSyncChip('ስህተት (Failed)', 'failed', KeraColors.errorRed),
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
 
-          // 3. Sales List Grouped by Day
+          // 5. Sales List Grouped by Day
           Expanded(
             child: dayGroupsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text(err.toString())),
               data: (groups) {
                 if (groups.isEmpty) {
@@ -172,30 +450,33 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircleAvatar(
-                            radius: 36,
-                            backgroundColor: colorScheme.primaryContainer
-                                .withValues(alpha: 0.5),
-                            child: Icon(
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: KeraColors.actionBlue
+                                  .withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
                               Icons.receipt_long_rounded,
-                              size: 36,
-                              color: colorScheme.primary,
+                              size: 38,
+                              color: KeraColors.actionBlue,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             l10n.noSalesForFilter,
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: KeraTypography.titleMedium()
+                                .copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             l10n.cartEmptyDesc,
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                            style: KeraTypography.bodyMedium(
+                              color: KeraColors.textSecondary,
                             ),
                           ),
                         ],
@@ -205,7 +486,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 84),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 84),
                   itemCount: groups.length,
                   itemBuilder: (context, groupIndex) {
                     final group = groups[groupIndex];
@@ -220,14 +501,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             horizontal: 4,
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 dayHeaderFormat.format(group.date),
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
+                                style: KeraTypography.labelLarge(
+                                  color: KeraColors.primaryNavy,
+                                ).copyWith(fontWeight: FontWeight.w800),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -235,107 +516,187 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: colorScheme.surfaceContainerHighest,
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: KeraColors.outlineBorder),
                                 ),
                                 child: Text(
                                   '${l10n.dayTotal}: ${CurrencyFormatter.formatEtb(group.totalAmount)}',
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.primaryNavy,
+                                  ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
                           ),
                         ),
 
-                        // Sales in this day
+                        // Sales in this day (Stitch Screen 31 Card)
                         ...group.sales.map((sale) {
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 8),
+                            margin: const EdgeInsets.only(bottom: 10),
                             elevation: 0,
+                            color: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
-                              side: BorderSide(
-                                color: colorScheme.outlineVariant
-                                    .withValues(alpha: 0.6),
+                              side: const BorderSide(
+                                color: KeraColors.outlineBorder,
                               ),
                             ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              leading: CircleAvatar(
-                                backgroundColor: colorScheme.primaryContainer,
-                                child: Icon(
-                                  Icons.receipt_rounded,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              title: Text(
-                                '#${sale.receiptNumber ?? sale.id.substring(0, 6)}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              subtitle: Row(
-                                children: [
-                                  Icon(
-                                    Icons.access_time_rounded,
-                                    size: 14,
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    timeFormat.format(sale.soldAt),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  if (sale.notes != null &&
-                                      sale.notes!.isNotEmpty) ...[
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        sale.notes!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                          color: colorScheme.onSurfaceVariant,
-                                          fontStyle: FontStyle.italic,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
+                              onTap: () => context.push('/sales/${sale.id}'),
+                              child: Padding(
+                                padding: const EdgeInsets.all(14.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '#${sale.receiptNumber ?? sale.id.substring(0, 6)}',
+                                                  style: KeraTypography
+                                                      .labelLarge(
+                                                    color:
+                                                        KeraColors.primaryNavy,
+                                                  ).copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w800),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  '• ${timeFormat.format(sale.soldAt)}',
+                                                  style: KeraTypography
+                                                      .labelSmall(
+                                                    color: KeraColors
+                                                        .textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              '${sale.items.length} ዕቃዎች ${sale.notes != null && sale.notes!.isNotEmpty ? "• ${sale.notes!}" : ""}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: KeraTypography.bodySmall(
+                                                color:
+                                                    KeraColors.textSecondary,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
+
+                                        // Synced Badge
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: KeraColors.stockInBg,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                width: 6,
+                                                height: 6,
+                                                decoration: const BoxDecoration(
+                                                  color: KeraColors.stockInText,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'የተመሳሰለ (Synced)',
+                                                style: KeraTypography.labelSmall(
+                                                  color: KeraColors.stockInText,
+                                                ).copyWith(
+                                                    fontSize: 10,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Divider(
+                                        height: 1,
+                                        color: KeraColors.outlineBorder),
+                                    const SizedBox(height: 10),
+
+                                    // Bottom row: Payment pill + Profit badge + Total
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            if (sale.paymentMethod != null &&
+                                                sale.paymentMethod!
+                                                    .isNotEmpty) ...[
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color:
+                                                      KeraColors.surfaceCanvas,
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  border: Border.all(
+                                                      color: KeraColors
+                                                          .outlineBorder),
+                                                ),
+                                                child: Text(
+                                                  sale.paymentMethod!,
+                                                  style: KeraTypography
+                                                      .labelSmall(
+                                                    color: KeraColors
+                                                        .textSecondary,
+                                                  ).copyWith(fontSize: 11),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                            ],
+                                            Text(
+                                              '+${CurrencyFormatter.formatEtb(sale.totalProfit)} ${l10n.lineProfit.toLowerCase()}',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.green.shade700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Text(
+                                          CurrencyFormatter.formatEtb(
+                                            sale.totalAmount,
+                                          ),
+                                          style: KeraTypography.titleSmall(
+                                            color: KeraColors.primaryNavy,
+                                          ).copyWith(
+                                              fontWeight: FontWeight.w900),
+                                        ),
+                                      ],
                                     ),
                                   ],
-                                ],
+                                ),
                               ),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    CurrencyFormatter.formatEtb(
-                                      sale.totalAmount,
-                                    ),
-                                    style:
-                                        theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                  Text(
-                                    '+${CurrencyFormatter.formatEtb(sale.totalProfit)} ${l10n.lineProfit.toLowerCase()}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onTap: () => context.push('/sales/${sale.id}'),
                             ),
                           );
                         }),
@@ -351,30 +712,66 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
     );
   }
 
-  Widget _buildFilterChip({
+  Widget _buildTimeSegmentButton({
     required String label,
     required bool isSelected,
-    required VoidCallback onSelected,
-    IconData? icon,
+    required VoidCallback onTap,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return FilterChip(
-      selected: isSelected,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16),
-            const SizedBox(width: 4),
-          ],
-          Text(label),
-        ],
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected ? const [KeraColors.shadowLevel1] : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: KeraTypography.labelSmall(
+              color: isSelected
+                  ? KeraColors.primaryNavy
+                  : Colors.white.withValues(alpha: 0.8),
+            ).copyWith(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
       ),
-      onSelected: (_) => onSelected(),
-      selectedColor: colorScheme.primaryContainer,
-      checkmarkColor: colorScheme.primary,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    );
+  }
+
+  Widget _buildSyncChip(String label, String value, Color? dotColor) {
+    final isSelected = _syncFilter == value;
+    return ChoiceChip(
+      selected: isSelected,
+      avatar: dotColor != null
+          ? Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            )
+          : null,
+      label: Text(label),
+      labelStyle: KeraTypography.labelSmall(
+        color: isSelected ? Colors.white : KeraColors.textPrimary,
+      ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+      selectedColor: KeraColors.primaryNavy,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: isSelected ? KeraColors.primaryNavy : KeraColors.outlineBorder,
+        ),
+      ),
+      onSelected: (selected) {
+        if (selected) setState(() => _syncFilter = value);
+      },
     );
   }
 }

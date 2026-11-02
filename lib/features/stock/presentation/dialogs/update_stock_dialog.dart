@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/tokens/kera_colors.dart';
-import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../parts/domain/models/part_item.dart';

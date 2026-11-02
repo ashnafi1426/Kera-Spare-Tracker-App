@@ -10,7 +10,6 @@ import '../../../../core/utils/context_extensions.dart';
 import '../../../../data/local/tables/enums.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
-import '../../domain/models/stock_movement_item.dart';
 import '../providers/stock_providers.dart';
 
 /// Stitch Screen 22, 24 & 25: Stock Movement History & Product Ledger.
@@ -287,7 +286,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                           Container(
                             width: 72,
                             height: 72,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: KeraColors.surfaceContainer,
                               shape: BoxShape.circle,
                             ),
