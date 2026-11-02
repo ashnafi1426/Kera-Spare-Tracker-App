@@ -10,6 +10,12 @@ extension LocalizationX on BuildContext {
     return localizations!;
   }
 
+  /// Returns true if active locale is Amharic.
+  bool get isAmharic => Localizations.localeOf(this).languageCode == 'am';
+
+  /// Resolves string based on active locale (Amharic or English).
+  String tr(String amharic, String english) => isAmharic ? amharic : english;
+
   /// Convenient accessor for current ThemeData.
   ThemeData get theme => Theme.of(this);
 
