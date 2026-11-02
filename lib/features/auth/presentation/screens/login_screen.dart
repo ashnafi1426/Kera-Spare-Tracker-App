@@ -359,7 +359,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 if (_isOfflineError) ...[
                   const SizedBox(height: 6),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       TextButton.icon(
                         style: TextButton.styleFrom(
@@ -371,7 +373,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         label: const Text('Server Settings'),
                         onPressed: () => _showServerConfigDialog(context),
                       ),
-                      const SizedBox(width: 8),
                       TextButton.icon(
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,

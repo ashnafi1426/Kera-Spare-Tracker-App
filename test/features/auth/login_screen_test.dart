@@ -11,6 +11,7 @@ import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
 import 'package:kera_spare_tracker/features/auth/domain/repositories/auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/screens/login_screen.dart';
+import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/parts_providers.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valuation.dart';
@@ -23,8 +24,6 @@ import 'package:mocktail/mocktail.dart';
 class MockLocalStorageService extends Mock implements LocalStorageService {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
-
-class MockAppDatabase extends Mock implements AppDatabase {}
 
 class _FakeInventoryListNotifier extends InventoryListNotifier {
   @override
@@ -135,7 +134,9 @@ void main() {
     await tester.tap(loginBtn);
     await tester.pumpAndSettle();
 
-    expect(find.text('ልክ ያልሆነ የስልክ ቁጥር'), findsOneWidget);
+    expect(
+        find.text('ትክክለኛ የኢትዮጵያ ስልክ ቁጥር ያስገቡ (ለምሳሌ 09... ወይም 07...)'),
+        findsOneWidget);
   });
 
   testWidgets('4. Password visibility toggle works', (tester) async {
@@ -221,7 +222,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Server Settings'), findsOneWidget);
-    expect(find.text('እንደገና ይሞክሩ'), findsOneWidget); // Retry button
+    expect(find.text('እንደገና ሞክር'), findsOneWidget); // Retry button
   });
 
   testWidgets('7. Quick Admin Credentials fill button works', (tester) async {
