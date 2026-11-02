@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/app_picker_bottom_sheet.dart';
 import '../../domain/models/inventory_filter.dart';
 import '../providers/inventory_providers.dart';
 import '../providers/metadata_providers.dart';
 
+/// Stitch Screen 17: Inventory Filter Bottom Sheet (የዕቃዎች ማጣሪያ).
+///
 /// Modal bottom sheet allowing users to filter inventory by stock status, brand,
-/// category, location, and apply custom sorting orders.
+/// category, storage shelf, and apply custom sorting orders.
 class InventoryFilterSheet extends ConsumerStatefulWidget {
   const InventoryFilterSheet({super.key});
 
@@ -18,6 +23,7 @@ class InventoryFilterSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => const InventoryFilterSheet(),
     );
   }
@@ -77,8 +83,6 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
 
     final brandsAsync = ref.watch(brandsStreamProvider);
     final categoriesAsync = ref.watch(categoriesStreamProvider);
@@ -105,47 +109,69 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: KeraRadii.borderSheet,
           ),
           child: Column(
             children: [
-              // Header
+              // 1. Drag Handle
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  decoration: BoxDecoration(
+                    color: KeraColors.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // 2. Header
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 8),
+                padding: const EdgeInsets.fromLTRB(20, 8, 16, 8),
                 child: Row(
                   children: [
+                    const Icon(Icons.tune_rounded, color: KeraColors.primaryNavy, size: 22),
+                    const SizedBox(width: 8),
                     Text(
-                      l10n.filters,
-                      style: theme.textTheme.titleLarge?.copyWith(
+                      'የዕቃዎች ማጣሪያ (Filter)',
+                      style: KeraTypography.titleMedium(color: KeraColors.primaryNavy).copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const Spacer(),
                     TextButton(
                       onPressed: _reset,
-                      child: Text(l10n.resetFilters),
+                      child: Text(
+                        l10n.resetFilters,
+                        style: const TextStyle(
+                          color: KeraColors.actionBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(Icons.close_rounded, color: KeraColors.textSecondary),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(height: 1, color: KeraColors.outlineBorder),
 
-              // Filter Content
+              // 3. Filter Content
               Expanded(
                 child: ListView(
                   controller: scrollController,
                   padding: const EdgeInsets.all(20),
                   children: [
-                    // 1. Stock Status
+                    // A. Stock Status (Stitch Screen 17)
                     Text(
                       l10n.stockStatus,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: KeraTypography.titleSmall().copyWith(
+                        color: KeraColors.primaryNavy,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -162,16 +188,17 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     ),
                     const SizedBox(height: 24),
 
-                    // 2. Brand Filter
+                    // B. Brand Filter
                     Text(
                       l10n.brand,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: KeraTypography.titleSmall().copyWith(
+                        color: KeraColors.primaryNavy,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     _buildSelectorCard(
-                      icon: Icons.label_outline_rounded,
+                      icon: Icons.directions_car_outlined,
                       title: _brandName ?? l10n.brand,
                       hasValue: _brandId != null,
                       onTap: () async {
@@ -199,16 +226,17 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 3. Category Filter
+                    // C. Category Filter
                     Text(
                       l10n.category,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: KeraTypography.titleSmall().copyWith(
+                        color: KeraColors.primaryNavy,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     _buildSelectorCard(
-                      icon: Icons.category_outlined,
+                      icon: Icons.folder_open_outlined,
                       title: _categoryName ?? l10n.category,
                       hasValue: _categoryId != null,
                       onTap: () async {
@@ -237,16 +265,17 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 4. Storage Location Filter
+                    // D. Storage Location Filter
                     Text(
                       l10n.storageLocation,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: KeraTypography.titleSmall().copyWith(
+                        color: KeraColors.primaryNavy,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     _buildSelectorCard(
-                      icon: Icons.place_outlined,
+                      icon: Icons.shelves,
                       title: _locationName ?? l10n.storageLocation,
                       hasValue: _locationId != null,
                       onTap: () async {
@@ -275,60 +304,89 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     ),
                     const SizedBox(height: 24),
 
-                    // 5. Sorting Criteria
+                    // E. Sorting Criteria (Stitch Screen 17)
                     Text(
                       l10n.sortBy,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: KeraTypography.titleSmall().copyWith(
+                        color: KeraColors.primaryNavy,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.newest,
-                      ascending: false,
-                      label: l10n.sortNewest,
-                    ),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.name,
-                      ascending: true,
-                      label: l10n.sortName,
-                    ),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.quantity,
-                      ascending: false,
-                      label: l10n.sortQuantityHigh,
-                    ),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.quantity,
-                      ascending: true,
-                      label: l10n.sortQuantityLow,
-                    ),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.price,
-                      ascending: false,
-                      label: l10n.sortPriceHigh,
-                    ),
-                    _buildSortTile(
-                      sortBy: PartsSortBy.price,
-                      ascending: true,
-                      label: l10n.sortPriceLow,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: KeraColors.surfaceMuted,
+                        borderRadius: KeraRadii.borderCard,
+                        border: Border.all(color: KeraColors.outlineBorder),
+                      ),
+                      child: Column(
+                        children: [
+                          _buildSortTile(
+                            sortBy: PartsSortBy.newest,
+                            ascending: false,
+                            label: l10n.sortNewest,
+                          ),
+                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          _buildSortTile(
+                            sortBy: PartsSortBy.name,
+                            ascending: true,
+                            label: l10n.sortName,
+                          ),
+                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          _buildSortTile(
+                            sortBy: PartsSortBy.quantity,
+                            ascending: false,
+                            label: l10n.sortQuantityHigh,
+                          ),
+                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          _buildSortTile(
+                            sortBy: PartsSortBy.quantity,
+                            ascending: true,
+                            label: l10n.sortQuantityLow,
+                          ),
+                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          _buildSortTile(
+                            sortBy: PartsSortBy.price,
+                            ascending: false,
+                            label: l10n.sortPriceHigh,
+                          ),
+                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          _buildSortTile(
+                            sortBy: PartsSortBy.price,
+                            ascending: true,
+                            label: l10n.sortPriceLow,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              // Bottom Apply Action
-              Padding(
-                padding: const EdgeInsets.all(20),
+              // 4. Bottom Sticky Apply Action
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: KeraColors.outlineBorder)),
+                ),
                 child: SizedBox(
                   width: double.infinity,
-                  height: AppConstants.minTouchTargetSize,
-                  child: ElevatedButton(
-                    onPressed: _apply,
-                    child: Text(
-                      l10n.applyFilters,
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                  height: AppConstants.standardButtonHeight,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: KeraColors.actionBlue,
+                      foregroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: KeraRadii.borderButton,
+                      ),
                     ),
+                    icon: const Icon(Icons.check_rounded),
+                    label: Text(
+                      l10n.applyFilters,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    ),
+                    onPressed: _apply,
                   ),
                 ),
               ),
@@ -341,17 +399,20 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
 
   Widget _buildStockChip(StockFilter filter, String label) {
     final isSelected = _stockFilter == filter;
-    final colorScheme = context.colorScheme;
 
     return FilterChip(
       selected: isSelected,
       label: Text(label),
       onSelected: (_) => setState(() => _stockFilter = filter),
-      selectedColor: colorScheme.primaryContainer,
-      checkmarkColor: colorScheme.primary,
+      backgroundColor: KeraColors.surfaceMuted,
+      selectedColor: KeraColors.primaryNavy,
+      shape: const RoundedRectangleBorder(
+        borderRadius: KeraRadii.borderMicro,
+        side: BorderSide(color: KeraColors.outlineBorder),
+      ),
       labelStyle: TextStyle(
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: isSelected ? colorScheme.onPrimaryContainer : null,
+        color: isSelected ? Colors.white : KeraColors.textPrimary,
       ),
     );
   }
@@ -363,39 +424,35 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
     required VoidCallback onTap,
     required VoidCallback onClear,
   }) {
-    final colorScheme = context.colorScheme;
-
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: KeraRadii.borderInput,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: KeraRadii.borderInput,
           border: Border.all(
-            color: hasValue
-                ? colorScheme.primary
-                : colorScheme.outlineVariant,
+            color: hasValue ? KeraColors.actionBlue : KeraColors.outlineBorder,
             width: hasValue ? 1.5 : 1.0,
           ),
           color: hasValue
-              ? colorScheme.primaryContainer.withValues(alpha: 0.2)
-              : null,
+              ? KeraColors.actionBlue.withValues(alpha: 0.08)
+              : KeraColors.surfaceMuted,
         ),
         child: Row(
           children: [
             Icon(
               icon,
               size: 20,
-              color: hasValue ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: hasValue ? KeraColors.actionBlue : KeraColors.textSecondary,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: KeraTypography.bodyMedium().copyWith(
                   fontWeight: hasValue ? FontWeight.w600 : FontWeight.normal,
-                  color: hasValue ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                  color: hasValue ? KeraColors.textPrimary : KeraColors.textSecondary,
                 ),
               ),
             ),
@@ -407,7 +464,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                 constraints: const BoxConstraints(),
               )
             else
-              const Icon(Icons.arrow_drop_down_rounded),
+              const Icon(Icons.arrow_drop_down_rounded, color: KeraColors.textSecondary),
           ],
         ),
       ),
@@ -420,7 +477,6 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
     required String label,
   }) {
     final isSelected = _sortBy == sortBy && _sortAscending == ascending;
-    final colorScheme = context.colorScheme;
 
     return InkWell(
       onTap: () {
@@ -429,25 +485,23 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
           _sortAscending = ascending;
         });
       },
-      borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         child: Row(
           children: [
             Icon(
               isSelected
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_off_rounded,
-              color:
-                  isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: isSelected ? KeraColors.actionBlue : KeraColors.textSecondary,
               size: 20,
             ),
             const SizedBox(width: 12),
             Text(
               label,
-              style: TextStyle(
+              style: KeraTypography.bodyMedium().copyWith(
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
-                color: isSelected ? colorScheme.primary : null,
+                color: isSelected ? KeraColors.actionBlue : KeraColors.textPrimary,
               ),
             ),
           ],

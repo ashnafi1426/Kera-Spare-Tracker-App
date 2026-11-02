@@ -3317,6 +3317,114 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'አስገዳጅ የሆነው ዝቅተኛ የመተግበሪያ ስሪት (ለምሳሌ 1.0.0)'**
   String get adminVersionHelper;
+
+  /// No description provided for @dashboardTab.
+  ///
+  /// In am, this message translates to:
+  /// **'ዳሽቦርድ'**
+  String get dashboardTab;
+
+  /// No description provided for @dashboardOverview.
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ ማጠቃለያ'**
+  String get dashboardOverview;
+
+  /// No description provided for @activeSkus.
+  ///
+  /// In am, this message translates to:
+  /// **'መለዋወጫ ዓይነቶች'**
+  String get activeSkus;
+
+  /// No description provided for @totalQuantityPcs.
+  ///
+  /// In am, this message translates to:
+  /// **'ጠቅላላ ክምችት'**
+  String get totalQuantityPcs;
+
+  /// No description provided for @todayRevenue.
+  ///
+  /// In am, this message translates to:
+  /// **'የዛሬ ገቢ'**
+  String get todayRevenue;
+
+  /// No description provided for @estProfit.
+  ///
+  /// In am, this message translates to:
+  /// **'የተጣራ ትርፍ'**
+  String get estProfit;
+
+  /// No description provided for @lowStockAlert.
+  ///
+  /// In am, this message translates to:
+  /// **'አነስተኛ ክምችት'**
+  String get lowStockAlert;
+
+  /// No description provided for @outOfStockAlert.
+  ///
+  /// In am, this message translates to:
+  /// **'ያለቁ ዕቃዎች'**
+  String get outOfStockAlert;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In am, this message translates to:
+  /// **'ፈጣን ተግባራት'**
+  String get quickActions;
+
+  /// No description provided for @addPartAction.
+  ///
+  /// In am, this message translates to:
+  /// **'+ አዲስ ዕቃ'**
+  String get addPartAction;
+
+  /// No description provided for @newSaleAction.
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ መዝግብ'**
+  String get newSaleAction;
+
+  /// No description provided for @restockAction.
+  ///
+  /// In am, this message translates to:
+  /// **'ክምችት አድስ'**
+  String get restockAction;
+
+  /// No description provided for @scannerAction.
+  ///
+  /// In am, this message translates to:
+  /// **'ባርኮድ ቃኝ'**
+  String get scannerAction;
+
+  /// No description provided for @salesTrends.
+  ///
+  /// In am, this message translates to:
+  /// **'የሽያጭ ሂደት'**
+  String get salesTrends;
+
+  /// No description provided for @bestSellers.
+  ///
+  /// In am, this message translates to:
+  /// **'ተፈላጊ መለዋወጫዎች'**
+  String get bestSellers;
+
+  /// No description provided for @recentTransactions.
+  ///
+  /// In am, this message translates to:
+  /// **'የቅርብ ሽያጮች'**
+  String get recentTransactions;
+
+  /// No description provided for @offlineModeActive.
+  ///
+  /// In am, this message translates to:
+  /// **'ከመስመር ውጭ ይሰራል'**
+  String get offlineModeActive;
+
+  /// No description provided for @retrySync.
+  ///
+  /// In am, this message translates to:
+  /// **'አሁን ሞክር'**
+  String get retrySync;
 }
 
 class _AppLocalizationsDelegate

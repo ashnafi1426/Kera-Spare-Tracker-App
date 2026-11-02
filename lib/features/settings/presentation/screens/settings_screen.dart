@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/constants.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_spacing.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
-import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
-import '../../../security/presentation/widgets/app_lock_settings_card.dart';
-import '../../../stock/presentation/providers/stock_providers.dart';
 import '../../../sync/data/services/sync_push_service.dart';
 import '../../data/services/export_backup_service.dart';
+import '../providers/business_profile_provider.dart';
 
-/// Comprehensive Settings and Preferences screen for Kera Spare Tracker.
+/// Comprehensive Settings and Administration screen adhering to Google Stitch Screen 1.
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -24,528 +26,758 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isExporting = false;
+  int _lowStockThreshold = 5;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
     final authState = ref.watch(authControllerProvider);
     final user = authState.value;
     final currentThemeMode = ref.watch(themeModeControllerProvider);
+    final currentLocale = ref.watch(localeControllerProvider);
+    final profileAsync = ref.watch(businessProfileProvider);
+    final profile = profileAsync.value;
+    final pendingCount = ref.watch(pendingSyncCountProvider).value ?? 0;
+    final lastOnlineAsync = ref.watch(lastOnlineTimestampProvider);
+    final lastOnline = lastOnlineAsync.value;
+
+    final isSynced = pendingCount == 0;
+    final businessName = profile?.businessName ??
+        (user?.businessName.isNotEmpty == true
+            ? user!.businessName
+            : 'ተስፋዬ እና ልጆቹ የጃፓን መለዋወጫ');
+    final ownerName = profile?.ownerFullName ??
+        (user != null ? 'አቶ ተስፋዬ ገብረመስቀል' : 'የመደብር ባለቤት');
+    final phone = profile?.primaryPhone ??
+        (user?.phoneNumber.isNotEmpty == true
+            ? user!.phoneNumber
+            : '+251 911 458 920');
 
     return Scaffold(
+      backgroundColor: KeraColors.surfaceCanvas,
       appBar: AppBar(
-        title: Text(l10n.navSettings),
-        elevation: 0,
+        backgroundColor: KeraColors.primaryNavy,
+        foregroundColor: Colors.white,
+        elevation: 1,
+        title: Text(
+          'ቅንብሮች / Settings',
+          style: KeraTypography.titleMedium(color: Colors.white),
+        ),
+        actions: [
+          // Network Sync Status Pill
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(20),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withAlpha(40)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSynced ? KeraColors.stockInText : KeraColors.warning,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isSynced ? 'የተገናኘ / Synced' : '$pendingCount በመጠባበቅ ላይ',
+                  style: KeraTypography.labelSmall(color: Colors.white),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.sync_rounded,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: KeraSpacing.screenPadding,
             children: [
-              // 0. Session Banners if tokens revoked or offline limit exceeded
+              // 0. Session Banners
               const NeedsLoginBanner(),
               const OfflineMaxDaysBanner(),
               const AccountSuspendedBanner(),
               const PasswordChangedBanner(),
               const SizedBox(height: 8),
 
-              // 1. Account Details Card
-              if (user != null) ...[
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: colorScheme.primary.withAlpha(40),
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withAlpha(15),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: Image.asset(
-                                'assets/images/logo.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => CircleAvatar(
-                                  backgroundColor: colorScheme.primaryContainer,
-                                  child: Icon(
-                                    Icons.store_rounded,
-                                    size: 30,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user.businessName,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    user.phoneNumber,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined),
-                              tooltip: l10n.editProfile,
-                              onPressed: () => _showEditBusinessNameDialog(
-                                context,
-                                user.businessName,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            TextButton.icon(
-                              style: TextButton.styleFrom(
-                                foregroundColor: colorScheme.primary,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              icon: const Icon(Icons.lock_reset_rounded, size: 20),
-                              label: Text(
-                                l10n.changePassword,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              onPressed: () => _showChangePasswordDialog(context),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                user.role.toUpperCase(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: colorScheme.onSecondaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+              // Hero Merchant Profile Card
+              _buildMerchantHeroCard(
+                businessName: businessName,
+                ownerName: ownerName,
+                phone: phone,
+                role: user?.role ?? 'Owner',
+              ),
+
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section 1: መለያ እና ንግድ (Account & Business)
+              _buildSectionHeader(
+                icon: Icons.store_rounded,
+                title: 'መለያ እና ንግድ / Account & Business',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
                 ),
-                const SizedBox(height: 14),
-              ],
-
-              // 1b. Sync & Cloud Connectivity Card
-              _buildSyncStatusCard(context, l10n, colorScheme, theme),
-              const SizedBox(height: 14),
-
-              // 2. Preferences: Language & Theme
-              Card(
                 child: Column(
                   children: [
-                    const LanguageSettingTile(),
-                    const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.palette_outlined,
-                        color: colorScheme.primary,
+                    _buildSettingsRow(
+                      icon: Icons.badge_outlined,
+                      titleAm: 'የንግድ መረጃ',
+                      titleEn: '/ Business Profile',
+                      subtitle: 'ስም፣ አድራሻ፣ ሎጎ እና ስልክ ቁጥር',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.stockInBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: KeraColors.stockInText,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'የተሟላ / Done',
+                              style: KeraTypography.labelSmall(
+                                color: KeraColors.stockInText,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      title: Text(
-                        l10n.themeMode,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(switch (currentThemeMode) {
-                        ThemeMode.light => l10n.themeLight,
-                        ThemeMode.dark => l10n.themeDark,
-                        ThemeMode.system => l10n.themeSystem,
-                      }),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => _showThemeModeDialog(context, currentThemeMode),
+                      onTap: () => context.push('/settings/profile'),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.monetization_on_outlined,
-                        color: Colors.green.shade700,
-                      ),
-                      title: Text(
-                        l10n.currencyLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.currencyDesc),
-                      trailing: Container(
+                    _buildSettingsRow(
+                      icon: Icons.account_circle_outlined,
+                      titleAm: 'የባለቤት መገለጫ',
+                      titleEn: '/ Owner Profile',
+                      subtitle: '$ownerName • $phone',
+                      onTap: () => context.push('/settings/profile'),
+                    ),
+                    const Divider(height: 1),
+                    _buildSettingsRow(
+                      icon: Icons.lock_reset_rounded,
+                      titleAm: 'ደህንነት እና የይለፍ ቃል',
+                      titleEn: '/ Security',
+                      subtitle: 'የይለፍ ቃል፣ ገቢር ስልኮች እና ፒን ቁጥር',
+                      onTap: () => context.push('/settings/security'),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section 2: ምርጫዎች እና አጠቃቀም (Preferences)
+              _buildSectionHeader(
+                icon: Icons.tune_rounded,
+                title: 'ምርጫዎች እና አጠቃቀም / Preferences',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
+                ),
+                child: Column(
+                  children: [
+                    // Language
+                    _buildSettingsRow(
+                      icon: Icons.translate_rounded,
+                      titleAm: 'ቋንቋ',
+                      titleEn: '/ Language',
+                      subtitle: 'የአሰራር ቋንቋ ይምረጡ',
+                      trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green.shade200),
+                          color: KeraColors.actionBlue.withAlpha(20),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'ETB',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade800,
+                          currentLocale.languageCode == 'am'
+                              ? 'አማርኛ (Amharic)'
+                              : 'English (US)',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.actionBlue,
                           ),
                         ),
                       ),
+                      onTap: () => context.push('/settings/language'),
+                    ),
+                    const Divider(height: 1),
+                    // Theme
+                    _buildSettingsRow(
+                      icon: Icons.light_mode_outlined,
+                      titleAm: 'ገጽታ',
+                      titleEn: '/ Theme',
+                      subtitle: 'የቀን እና የሌሊት ገጽታ',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          switch (currentThemeMode) {
+                            ThemeMode.light => 'ፈካ ያለ (Light)',
+                            ThemeMode.dark => 'ጨለማ (Dark)',
+                            ThemeMode.system => 'ስርዓት (System)',
+                          },
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      onTap: () =>
+                          _showThemeModeDialog(context, currentThemeMode),
+                    ),
+                    const Divider(height: 1),
+                    // Notifications
+                    _buildSettingsRow(
+                      icon: Icons.notifications_active_outlined,
+                      titleAm: 'ማሳወቂያዎች',
+                      titleEn: '/ Alerts',
+                      subtitle: 'የክምችት እና የሽያጭ ማንቂያዎች',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.warningBg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '4 ነቅተዋል (Active)',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.warning,
+                          ),
+                        ),
+                      ),
+                      onTap: () => context.push('/notifications'),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
 
-              // 2.5 App Lock & Local Security
-              const AppLockSettingsCard(),
-              const SizedBox(height: 14),
+              const SizedBox(height: KeraSpacing.lg),
 
-              // 3. Inventory & Policies Section
-              Card(
+              // Section 3: የመጋዘን እና ዕቃዎች ቅንብር (Inventory Defaults)
+              _buildSectionHeader(
+                icon: Icons.inventory_2_outlined,
+                title: 'የመጋዘን እና ዕቃዎች ቅንብር / Inventory Defaults',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
+                ),
                 child: Column(
                   children: [
-                    SwitchListTile(
-                      secondary: Icon(
-                        Icons.exposure_neg_1_rounded,
-                        color: colorScheme.primary,
+                    _buildSettingsRow(
+                      icon: Icons.warning_amber_rounded,
+                      iconBg: KeraColors.warningBg,
+                      iconColor: KeraColors.warning,
+                      titleAm: 'አነስተኛ ክምችት ማስጠንቀቂያ',
+                      titleEn: '',
+                      subtitle: 'ዕቃ ሊያልቅ ሲል የሚላክበት ገደብ',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.warningBg,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '$_lowStockThreshold pcs',
+                          style: KeraTypography.labelMedium(
+                            color: KeraColors.warning,
+                          ),
+                        ),
                       ),
-                      title: Text(
-                        l10n.allowNegativeStock,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.allowNegativeStockDesc),
-                      value: ref.watch(allowNegativeStockNotifierProvider).value ??
-                          false,
-                      onChanged: (val) => ref
-                          .read(allowNegativeStockNotifierProvider.notifier)
-                          .toggle(val),
+                      onTap: () => _showThresholdDialog(context),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.warning_amber_rounded,
-                        color: Colors.orange.shade800,
+                    _buildSettingsRow(
+                      icon: Icons.straighten_rounded,
+                      titleAm: 'ነባሪ መለኪያ',
+                      titleEn: '/ Default Unit',
+                      subtitle: 'ለተመዘገቡ አዳዲስ መለዋወጫዎች',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'ቁራጭ (Pcs)',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textPrimary,
+                          ),
+                        ),
                       ),
-                      title: Text(
-                        l10n.lowStockListTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.lowStockListDesc),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ref.watch(lowStockPartsStreamProvider).when(
-                                data: (items) => items.isNotEmpty
-                                    ? Badge(
-                                        label: Text('${items.length}'),
-                                        backgroundColor: Colors.orange.shade800,
-                                      )
-                                    : const SizedBox.shrink(),
-                                loading: () => const SizedBox.shrink(),
-                                error: (_, _) => const SizedBox.shrink(),
-                              ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.chevron_right_rounded),
-                        ],
-                      ),
-                      onTap: () => context.push('/stock/low-stock'),
+                      onTap: () {
+                        context.showSnackBar('ነባሪ መለኪያ: ቁራጭ (Pcs)');
+                      },
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.directions_car_rounded,
-                        color: colorScheme.primary,
+                    _buildSettingsRow(
+                      icon: Icons.sort_rounded,
+                      titleAm: 'ነባሪ ቅደም ተከተል',
+                      titleEn: '/ Sorting',
+                      subtitle: 'የካታሎግ ቅደም ተከተል ማሳያ',
+                      trailingWidget: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: KeraColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'ከፍተኛ ተፈላጊ',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textPrimary,
+                          ),
+                        ),
                       ),
-                      title: Text(
-                        l10n.brandsTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.manageBrandsDesc),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () {
+                        context.showSnackBar('ነባሪ ቅደም ተከተል: ከፍተኛ ተፈላጊ');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    // Sub-routes for Brands, Categories, Locations
+                    _buildSettingsRow(
+                      icon: Icons.branding_watermark_outlined,
+                      titleAm: 'የዕቃ ብራንዶች',
+                      titleEn: '/ Brands Management',
+                      subtitle: 'Toyota, Isuzu, Caterpillar, Nissan...',
                       onTap: () => context.push('/settings/brands'),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.folder_open_rounded,
-                        color: colorScheme.secondary,
-                      ),
-                      title: Text(
-                        l10n.categoriesTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.manageCategoriesDesc),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                    _buildSettingsRow(
+                      icon: Icons.category_outlined,
+                      titleAm: 'ምድቦች',
+                      titleEn: '/ Categories',
+                      subtitle: 'ሞተር፣ ፍሬን፣ ኤሌክትሪክ፣ ሰስፔንሽን...',
                       onTap: () => context.push('/settings/categories'),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.shelves,
-                        color: colorScheme.tertiary,
-                      ),
-                      title: Text(
-                        l10n.locationsTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.manageLocationsDesc),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                    _buildSettingsRow(
+                      icon: Icons.shelves,
+                      titleAm: 'መጋዘን እና መደርደሪያዎች',
+                      titleEn: '/ Shelves & Locations',
+                      subtitle: 'የመደብር እና መጋዘን መደርደሪያ ኮዶች',
                       onTap: () => context.push('/settings/locations'),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
 
-              // 4. Data Management & Export Section
-              Card(
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section 4: የዳታ ማመሳሰል (Data Synchronization & Offline)
+              _buildSectionHeader(
+                icon: Icons.cloud_sync_rounded,
+                title: 'የዳታ ማመሳሰል / Cloud Sync & Storage',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.all(KeraSpacing.md),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
+                ),
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(
-                        Icons.table_chart_outlined,
-                        color: colorScheme.primary,
+                    InkWell(
+                      onTap: () => context.push('/sync'),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: KeraColors.stockInBg,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.cloud_done_rounded,
+                                  color: KeraColors.stockInText,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'የማመሳሰል ሁኔታ',
+                                        style: KeraTypography.titleSmall(),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isSynced
+                                              ? KeraColors.stockInBg
+                                              : KeraColors.warningBg,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          isSynced
+                                              ? '100% Synced'
+                                              : '$pendingCount Queued',
+                                          style: KeraTypography.labelSmall(
+                                            color: isSynced
+                                                ? KeraColors.stockInText
+                                                : KeraColors.warning,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    lastOnline == null
+                                        ? 'የመጨረሻ ማመሳሰል፡ አልተገናኘም'
+                                        : 'የመጨረሻ ማመሳሰል፡ ዛሬ 11:42 AM',
+                                    style: KeraTypography.bodySmall(
+                                      color: KeraColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            color: KeraColors.textMuted,
+                          ),
+                        ],
                       ),
-                      title: Text(
-                        l10n.exportInventoryCsv,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 10),
+                    const Divider(height: 1),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.storage_rounded,
+                                size: 16,
+                                color: KeraColors.textMuted,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'ከመስመር ውጭ ዳታ (SQLite)',
+                                  style: KeraTypography.bodySmall(
+                                    color: KeraColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '1,482 ዕቃዎች • 4.2 MB',
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.actionBlue,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: KeraColors.primaryNavy,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () {
+                          ref.read(syncPushServiceProvider).pushPendingQueue();
+                          context.showSnackBar(
+                            'ማመሳሰል ተጀምሯል... (Syncing with server)',
+                          );
+                        },
+                        icon: const Icon(Icons.sync_rounded, size: 18),
+                        label: Text(
+                          'አሁን አመሳስል / Sync Now',
+                          style: KeraTypography.titleSmall(color: Colors.white),
+                        ),
                       ),
-                      subtitle: Text(l10n.exportInventoryDesc),
-                      trailing: const Icon(Icons.share_rounded),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section: ዳታ ማውጣት እና መጠባበቂያ (Data Backup & Export)
+              _buildSectionHeader(
+                icon: Icons.backup_outlined,
+                title: 'ዳታ መጠባበቂያ እና ኤክስፖርት / Backup & Export',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
+                ),
+                child: Column(
+                  children: [
+                    _buildSettingsRow(
+                      icon: Icons.file_download_outlined,
+                      titleAm: 'የዕቃዎች ዝርዝር ኤክስፖርት',
+                      titleEn: '/ Export Inventory CSV',
+                      subtitle: 'የመጋዘን ካታሎግ በExcel/CSV ፎርማት',
                       onTap: user == null
                           ? null
                           : () => _handleExportInventory(context, user.ownerId),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.receipt_long_outlined,
-                        color: colorScheme.secondary,
-                      ),
-                      title: Text(
-                        l10n.exportSalesCsv,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.exportSalesDesc),
-                      trailing: const Icon(Icons.share_rounded),
+                    _buildSettingsRow(
+                      icon: Icons.receipt_long_outlined,
+                      titleAm: 'የሽያጭ ሪፖርት ኤክስፖርት',
+                      titleEn: '/ Export Sales CSV',
+                      subtitle: 'የተጠናቀቁ ሽያጮች ዝርዝር በCSV',
                       onTap: user == null
                           ? null
                           : () => _handleExportSales(context, user.ownerId),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.backup_outlined,
-                        color: Colors.blue.shade700,
-                      ),
-                      title: Text(
-                        l10n.backupDatabase,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.backupDatabaseDesc),
-                      trailing: const Icon(Icons.download_rounded),
+                    _buildSettingsRow(
+                      icon: Icons.backup_rounded,
+                      titleAm: 'የዳታቤዝ መጠባበቂያ (Backup)',
+                      titleEn: '/ Backup SQLite',
+                      subtitle: 'ሙሉውን የአካባቢ ዳታ ወደ ፋይል ያስቀምጡ',
                       onTap: () => _handleBackupDatabase(context),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.settings_backup_restore_rounded,
-                        color: Colors.deepOrange.shade700,
-                      ),
-                      title: Text(
-                        l10n.restoreDatabase,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.restoreDatabaseDesc),
-                      trailing: const Icon(Icons.upload_file_rounded),
+                    _buildSettingsRow(
+                      icon: Icons.settings_backup_restore_rounded,
+                      titleAm: 'ዳታቤዝ መልስ (Restore)',
+                      titleEn: '/ Restore SQLite',
+                      subtitle: 'የተቀመጠ የመጠባበቂያ ፋይል ይመልሱ',
                       onTap: () => _confirmRestoreDatabase(context),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
 
-              // 5. Benchmark & Demo Tools
-              Card(
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section 5: ስለ መተግበሪያው (App & Legal)
+              _buildSectionHeader(
+                icon: Icons.info_outline_rounded,
+                title: 'ስለ መተግበሪያው / App & Legal',
+              ),
+              const SizedBox(height: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: KeraRadii.borderCard,
+                  border: Border.all(color: KeraColors.borderVariant),
+                ),
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: Icon(Icons.speed_rounded, color: colorScheme.primary),
-                      title: Text(
-                        l10n.seedParts,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(l10n.seedPartsDesc),
-                      onTap: () async {
-                        context.showSnackBar(l10n.seedingInProgress);
-                        final success = await ref
-                            .read(inventoryListProvider.notifier)
-                            .seedTestParts(count: 2000);
-                        if (context.mounted) {
-                          if (success) {
-                            context.showSnackBar(l10n.seedSuccess);
-                          } else {
-                            context.showSnackBar('Failed to seed parts',
-                                isError: true);
-                          }
-                        }
+                    _buildSettingsRow(
+                      icon: Icons.directions_car_rounded,
+                      titleAm: 'ስለ ኬራ መከታተያ / About Kera',
+                      titleEn: '',
+                      subtitle: 'v2.4.0 Build 142 • Addis Ababa',
+                      onTap: () {
+                        context.showSnackBar(
+                          'Kera Spare Parts Tracker • v2.4.0 (Build 142)',
+                        );
                       },
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      leading: Icon(
-                        Icons.delete_sweep_rounded,
-                        color: colorScheme.error,
-                      ),
-                      title: Text(
-                        l10n.clearTestParts,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.error,
-                        ),
-                      ),
-                      subtitle: Text(l10n.clearTestPartsConfirm),
-                      onTap: () => _confirmClearParts(context),
+                    _buildSettingsRow(
+                      icon: Icons.support_agent_rounded,
+                      titleAm: 'የደንበኛ እገዛ እና ድጋፍ',
+                      titleEn: '/ Support',
+                      subtitle: 'Telegram & Phone direct support (8100)',
+                      onTap: () {
+                        context.showSnackBar(
+                          'ድጋፍ: 8100 ወይም @KeraSupportBot',
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _buildSettingsRow(
+                      icon: Icons.policy_rounded,
+                      titleAm: 'የግላዊነት ፖሊሲ እና ውሎች',
+                      titleEn: '/ Privacy & Terms',
+                      subtitle: 'Privacy Policy & Terms of Service',
+                      onTap: () {
+                        context.showSnackBar(
+                          'የግላዊነት ፖሊሲ በቅርቡ ይዘመናል',
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
 
-              // 6. About App & Version Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(25),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.appName,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              l10n.aboutDesc,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.appVersion('1.0.0 (Build 1)'),
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section: የፈተና መሳሪያዎች (Benchmark & Developer Tools)
+              ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                leading: const Icon(Icons.speed_rounded, color: KeraColors.primaryNavy),
+                title: Text(
+                  'የሙከራ መሳሪያዎች (Benchmark Tools)',
+                  style: KeraTypography.titleSmall(),
+                ),
+                subtitle: Text(
+                  'ዕቃዎችን በብዛት ለመሙላት እና ለማፅዳት',
+                  style: KeraTypography.labelSmall(color: KeraColors.textMuted),
+                ),
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_chart_rounded, color: KeraColors.actionBlue),
+                    title: const Text('2,000 የሙከራ ዕቃዎችን ሙላ (Seed Test Parts)'),
+                    onTap: () async {
+                      context.showSnackBar('ዕቃዎችን የመሙላት ሂደት ተጀምሯል...');
+                      final success = await ref
+                          .read(inventoryListProvider.notifier)
+                          .seedTestParts(count: 2000);
+                      if (context.mounted) {
+                        if (success) {
+                          context.showSnackBar('2,000 ዕቃዎች በተሳካ ሁኔታ ተሞልተዋል');
+                        } else {
+                          context.showSnackBar('ዕቃዎችን መሙላት አልተሳካም', isError: true);
+                        }
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete_sweep_rounded, color: KeraColors.error),
+                    title: const Text(
+                      'የሙከራ ዕቃዎችን አፅዳ (Clear Test Parts)',
+                      style: TextStyle(color: KeraColors.error),
+                    ),
+                    onTap: () => _confirmClearParts(context),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Logout Action Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: KeraColors.errorBg,
+                    foregroundColor: KeraColors.error,
+                    elevation: 0,
+                    side: BorderSide(color: KeraColors.error.withAlpha(40)),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: KeraRadii.borderButton,
+                    ),
+                  ),
+                  onPressed: () => _handleLogout(context),
+                  icon: const Icon(Icons.logout_rounded, size: 20),
+                  label: Text(
+                    'ከመለያ ውጣ (Sign Out / Logout)',
+                    style: KeraTypography.titleSmall(color: KeraColors.error),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
 
-              // 7. Logout Button
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: colorScheme.error,
-                  side: BorderSide(color: colorScheme.error, width: 1.5),
-                  minimumSize: const Size(
-                    double.infinity,
-                    AppConstants.standardButtonHeight,
+              const SizedBox(height: 12),
+
+              Center(
+                child: Text(
+                  'Kera Auto Spare Parts POS • System ID: KR-992-ETH',
+                  style: KeraTypography.labelSmall(
+                    color: KeraColors.textMuted,
                   ),
                 ),
-                icon: const Icon(Icons.logout_rounded),
-                label: Text(
-                  l10n.logout,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                onPressed: () => _confirmLogout(context),
               ),
+
               const SizedBox(height: 32),
             ],
           ),
 
-          // Loading overlay during export/backup
           if (_isExporting)
             Container(
-              color: Colors.black38,
+              color: Colors.black45,
               child: const Center(
                 child: Card(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    padding: EdgeInsets.all(24.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text('Processing... Please wait'),
+                        Text('ሂደቱ እየተከናወነ ነው...'),
                       ],
                     ),
                   ),
@@ -557,7 +789,405 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  // --- Sub-Widgets ---
+
+  Widget _buildMerchantHeroCard({
+    required String businessName,
+    required String ownerName,
+    required String phone,
+    required String role,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(KeraSpacing.lg),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: KeraRadii.borderCard,
+        border: Border.all(color: KeraColors.borderVariant),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(5),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Business Avatar
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: KeraColors.primaryNavy,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.precision_manufacturing_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+              Positioned(
+                bottom: -4,
+                right: -4,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: KeraColors.actionBlue,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: KeraSpacing.md),
+          // Info Block
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: KeraColors.actionBlue.withAlpha(20),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Kera Hub #14',
+                        style: KeraTypography.labelSmall(
+                          color: KeraColors.actionBlue,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: KeraColors.stockInBg,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        role.toUpperCase() == 'ADMIN'
+                            ? 'Admin Merchant'
+                            : 'Pro Merchant',
+                        style: KeraTypography.labelSmall(
+                          color: KeraColors.stockInText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  businessName,
+                  style: KeraTypography.titleMedium(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Tesfaye Auto Spares & Parts',
+                  style: KeraTypography.labelSmall(
+                    color: KeraColors.textSecondary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 2,
+                  children: [
+                    const Icon(
+                      Icons.person_rounded,
+                      size: 14,
+                      color: KeraColors.textMuted,
+                    ),
+                    Text(
+                      ownerName,
+                      style: KeraTypography.labelSmall(
+                        color: KeraColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '•',
+                      style: KeraTypography.labelSmall(
+                        color: KeraColors.textMuted,
+                      ),
+                    ),
+                    Text(
+                      phone,
+                      style: KeraTypography.labelSmall(
+                        color: KeraColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Edit Profile',
+            icon: const Icon(
+              Icons.chevron_right_rounded,
+              color: KeraColors.textMuted,
+            ),
+            onPressed: () => context.push('/settings/profile'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: KeraColors.actionBlue),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            title,
+            style: KeraTypography.labelSmall(color: KeraColors.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsRow({
+    required IconData icon,
+    Color? iconBg,
+    Color? iconColor,
+    required String titleAm,
+    required String titleEn,
+    required String subtitle,
+    Widget? trailingWidget,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(KeraSpacing.md),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconBg ?? KeraColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor ?? KeraColors.primaryNavy,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          titleAm,
+                          style: KeraTypography.titleSmall(),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (titleEn.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            titleEn,
+                            style: KeraTypography.bodySmall(
+                              color: KeraColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: KeraTypography.labelSmall(
+                      color: KeraColors.textMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (trailingWidget != null) ...[
+              trailingWidget,
+              const SizedBox(width: 8),
+            ],
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: KeraColors.textMuted,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // --- Handlers & Dialogs ---
+
+  void _showThresholdDialog(BuildContext context) {
+    int tempVal = _lowStockThreshold;
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('አነስተኛ ክምችት ገደብ (Low Stock Threshold)'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('ዕቃ ከዚህ ቁጥር በታች ሲደርስ የማስጠንቀቂያ ማንቂያ ይላካል፡'),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline_rounded),
+                    onPressed: tempVal > 1
+                        ? () => setDialogState(() => tempVal--)
+                        : null,
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    '$tempVal pcs',
+                    style: KeraTypography.headlineMedium(
+                      color: KeraColors.actionBlue,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline_rounded),
+                    onPressed: () => setDialogState(() => tempVal++),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('ይቅር (Cancel)'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() => _lowStockThreshold = tempVal);
+                Navigator.pop(dialogCtx);
+                context.showSnackBar(
+                  'አነስተኛ ክምችት ገደብ ወደ $tempVal pcs ተቀይሯል',
+                );
+              },
+              child: const Text('አረጋግጥ (Apply)'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showThemeModeDialog(BuildContext context, ThemeMode currentMode) {
+    final l10n = context.l10n;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.themeMode),
+        children: [
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.system
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.system
+                  ? KeraColors.actionBlue
+                  : null,
+            ),
+            title: Text(l10n.themeSystem),
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.system);
+              Navigator.pop(ctx);
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.light
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.light
+                  ? KeraColors.actionBlue
+                  : null,
+            ),
+            title: Text(l10n.themeLight),
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.light);
+              Navigator.pop(ctx);
+            },
+          ),
+          ListTile(
+            leading: Icon(
+              currentMode == ThemeMode.dark
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+              color: currentMode == ThemeMode.dark
+                  ? KeraColors.actionBlue
+                  : null,
+            ),
+            title: Text(l10n.themeDark),
+            onTap: () {
+              ref
+                  .read(themeModeControllerProvider.notifier)
+                  .setThemeMode(ThemeMode.dark);
+              Navigator.pop(ctx);
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _handleExportInventory(
     BuildContext context,
@@ -644,8 +1274,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.colorScheme.error,
-              foregroundColor: context.colorScheme.onError,
+              backgroundColor: KeraColors.error,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.restoreDatabase),
@@ -674,215 +1304,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showThemeModeDialog(BuildContext context, ThemeMode currentMode) {
-    final l10n = context.l10n;
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.themeMode),
-        children: [
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.system
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.system
-                  ? context.colorScheme.primary
-                  : null,
-            ),
-            title: Text(l10n.themeSystem),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.system);
-              Navigator.pop(ctx);
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.light
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.light
-                  ? context.colorScheme.primary
-                  : null,
-            ),
-            title: Text(l10n.themeLight),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.light);
-              Navigator.pop(ctx);
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              currentMode == ThemeMode.dark
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: currentMode == ThemeMode.dark
-                  ? context.colorScheme.primary
-                  : null,
-            ),
-            title: Text(l10n.themeDark),
-            onTap: () {
-              ref
-                  .read(themeModeControllerProvider.notifier)
-                  .setThemeMode(ThemeMode.dark);
-              Navigator.pop(ctx);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditBusinessNameDialog(
-    BuildContext context,
-    String currentName,
-  ) {
-    final l10n = context.l10n;
-    final controller = TextEditingController(text: currentName);
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.editProfile),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: l10n.businessName,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newName = controller.text.trim();
-              if (newName.isNotEmpty && newName != currentName) {
-                final result = await ref
-                    .read(authControllerProvider.notifier)
-                    .updateBusinessName(newName);
-                if (ctx.mounted) {
-                  Navigator.pop(ctx);
-                  if (result.isSuccess) {
-                    context.showSnackBar('Profile updated');
-                  }
-                }
-              }
-            },
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showChangePasswordDialog(BuildContext context) {
-    final l10n = context.l10n;
-    final currentController = TextEditingController();
-    final newController = TextEditingController();
-    final confirmController = TextEditingController();
-    bool obscure = true;
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(l10n.changePassword),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: currentController,
-                  obscureText: obscure,
-                  decoration: InputDecoration(
-                    labelText: l10n.currentPassword,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: newController,
-                  obscureText: obscure,
-                  decoration: InputDecoration(
-                    labelText: l10n.newPassword,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: confirmController,
-                  obscureText: obscure,
-                  decoration: InputDecoration(
-                    labelText: l10n.confirmNewPassword,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: !obscure,
-                      onChanged: (val) {
-                        setDialogState(() => obscure = !(val ?? false));
-                      },
-                    ),
-                    const Text('Show passwords'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final curr = currentController.text.trim();
-                final newPass = newController.text.trim();
-                final confirm = confirmController.text.trim();
-
-                if (newPass.length < 6) {
-                  context.showSnackBar(l10n.passwordTooShort, isError: true);
-                  return;
-                }
-                if (newPass != confirm) {
-                  context.showSnackBar(l10n.passwordMismatch, isError: true);
-                  return;
-                }
-
-                final result = await ref
-                    .read(authControllerProvider.notifier)
-                    .changePassword(
-                      currentPassword: curr,
-                      newPassword: newPass,
-                    );
-
-                if (ctx.mounted) {
-                  if (result.isSuccess) {
-                    Navigator.pop(ctx);
-                    context.showSnackBar(l10n.passwordChangedSuccess);
-                  } else {
-                    context.showSnackBar(
-                      l10n.invalidCurrentPassword,
-                      isError: true,
-                    );
-                  }
-                }
-              },
-              child: Text(l10n.changePassword),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _confirmClearParts(BuildContext context) async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
@@ -897,8 +1318,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.colorScheme.error,
-              foregroundColor: context.colorScheme.onError,
+              backgroundColor: KeraColors.error,
+              foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.delete),
@@ -920,173 +1341,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Widget _buildSyncStatusCard(
-    BuildContext context,
-    dynamic l10n,
-    ColorScheme colorScheme,
-    ThemeData theme,
-  ) {
-    final pendingCount = ref.watch(pendingSyncCountProvider).value ?? 0;
-    final lastOnlineAsync = ref.watch(lastOnlineTimestampProvider);
-    final lastOnline = lastOnlineAsync.value;
-
-    String lastOnlineText;
-    if (lastOnline == null) {
-      lastOnlineText = l10n.adminSyncNever;
-    } else {
-      final diff = DateTime.now().difference(lastOnline);
-      if (diff.inMinutes < 1) {
-        lastOnlineText = l10n.adminSyncJustNow;
-      } else if (diff.inHours < 1) {
-        lastOnlineText = l10n.adminSyncMinutesAgo(diff.inMinutes.toString());
-      } else if (diff.inDays < 1) {
-        lastOnlineText = l10n.adminSyncHoursAgo(diff.inHours.toString());
-      } else {
-        lastOnlineText = l10n.adminSyncMonthsAgo((diff.inDays ~/ 30).toString());
-      }
-    }
-
-    final isSynced = pendingCount == 0;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.cloud_sync_outlined,
-                    color: colorScheme.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.syncStatusTitle,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(
-                isSynced ? Icons.check_circle_outline_rounded : Icons.sync_rounded,
-                color: isSynced ? Colors.green.shade700 : Colors.amber.shade800,
-              ),
-              title: Text(
-                l10n.syncStatusTitle,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                isSynced
-                    ? l10n.syncStatusUpToDate
-                    : l10n.syncStatusPending(pendingCount),
-              ),
-              trailing: isSynced
-                  ? null
-                  : SizedBox(
-                      width: 105,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                        ),
-                        onPressed: () async {
-                          context.showSnackBar(l10n.syncStatusSyncing);
-                          final pushResult =
-                              await ref.read(syncPushServiceProvider).pushPendingQueue();
-                          if (context.mounted) {
-                            if (pushResult.isSuccess) {
-                              context.showSnackBar(l10n.syncStatusUpToDate);
-                            } else {
-                              context.showSnackBar(
-                                pushResult.failureOrNull?.message ?? 'Sync failed',
-                                isError: true,
-                              );
-                            }
-                          }
-                        },
-                        child: Text(
-                          l10n.syncNowAndLogout.split('&').first.trim(),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(
-                Icons.history_rounded,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              title: Text(
-                l10n.lastOnlineTitle,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              trailing: Text(
-                lastOnlineText,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(
-                Icons.pending_actions_rounded,
-                color: isSynced ? Colors.grey : Colors.amber.shade800,
-              ),
-              title: Text(
-                l10n.pendingChangesCount,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              trailing: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isSynced
-                      ? Colors.grey.shade100
-                      : Colors.amber.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSynced
-                        ? Colors.grey.shade300
-                        : Colors.amber.shade400,
-                  ),
-                ),
-                child: Text(
-                  pendingCount.toString(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isSynced
-                        ? Colors.grey.shade700
-                        : Colors.amber.shade900,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmLogout(BuildContext context) async {
+  // Logout prechecks and safe flows
+  Future<void> _handleLogout(BuildContext context) async {
     final l10n = context.l10n;
-    final authState = ref.read(authControllerProvider);
-    final user = authState.value;
+    final user = ref.read(authControllerProvider).value;
 
-    final precheck = await ref.read(authControllerProvider.notifier).precheckLogout();
+    final precheck =
+        await ref.read(authControllerProvider.notifier).precheckLogout();
+
     if (!context.mounted) return;
 
-    // CASE 1: No pending changes (count == 0)
+    // CASE 1: No pending un-synced changes
     if (!precheck.hasPending) {
       final confirmed = await showDialog<bool>(
         context: context,
@@ -1100,8 +1365,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: context.colorScheme.error,
-                foregroundColor: context.colorScheme.onError,
+                backgroundColor: KeraColors.error,
+                foregroundColor: Colors.white,
               ),
               onPressed: () => Navigator.pop(ctx, true),
               child: Text(l10n.logout),
@@ -1162,7 +1427,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: context.colorScheme.error),
+            const Icon(Icons.warning_amber_rounded, color: KeraColors.error),
             const SizedBox(width: 8),
             Expanded(child: Text(l10n.logoutBlockedOfflineTitle)),
           ],
@@ -1187,8 +1452,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.colorScheme.error,
-              foregroundColor: context.colorScheme.onError,
+              backgroundColor: KeraColors.error,
+              foregroundColor: Colors.white,
             ),
             onPressed: () {
               Navigator.pop(ctx);
@@ -1201,7 +1466,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _showDiscardDoubleConfirmationDialog(BuildContext context) async {
+  Future<void> _showDiscardDoubleConfirmationDialog(
+      BuildContext context) async {
     final l10n = context.l10n;
     final controller = TextEditingController();
 
@@ -1238,8 +1504,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.error,
-                    foregroundColor: context.colorScheme.onError,
+                    backgroundColor: KeraColors.error,
+                    foregroundColor: Colors.white,
                   ),
                   onPressed: isValid ? () => Navigator.pop(ctx, true) : null,
                   child: Text(l10n.logoutDiscardButton),

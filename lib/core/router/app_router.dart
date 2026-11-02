@@ -14,20 +14,30 @@ import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/notifications/presentation/screens/notification_center_screen.dart';
+import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
 import '../../features/sales/presentation/screens/new_sale_screen.dart';
 import '../../features/sales/presentation/screens/sale_details_screen.dart';
 import '../../features/sales/presentation/screens/sale_success_screen.dart';
 import '../../features/settings/presentation/screens/brands_management_screen.dart';
+import '../../features/settings/presentation/screens/business_profile_screen.dart';
 import '../../features/settings/presentation/screens/categories_management_screen.dart';
+import '../../features/settings/presentation/screens/language_selection_screen.dart';
 import '../../features/settings/presentation/screens/locations_management_screen.dart';
+import '../../features/settings/presentation/screens/security_sessions_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/splash/presentation/update_required_screen.dart';
 import '../../features/stock/presentation/screens/low_stock_screen.dart';
 import '../../features/stock/presentation/screens/stock_history_screen.dart';
+import '../../features/sync/presentation/screens/conflict_resolution_screen.dart';
 import '../../features/sync/presentation/screens/initial_sync_screen.dart';
+import '../../features/sync/presentation/screens/offline_dashboard_screen.dart';
+import '../../features/sync/presentation/screens/sync_center_screen.dart';
+import '../../features/sync/presentation/screens/sync_diagnostics_screen.dart';
 import '../providers/app_config_provider.dart';
 
 /// Helper ChangeNotifier that notifies GoRouter when Riverpod auth or config state changes.
@@ -67,7 +77,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final user = authState.value;
       final isAuthenticated = user != null;
-      final isAuthRoute = location == '/login' || location == '/register';
+      final isAuthRoute =
+          location == '/login' || location == '/register' || location == '/welcome';
 
       // Unauthenticated users are redirected to /login
       if (!isAuthenticated) {
@@ -126,6 +137,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
+        path: '/welcome',
+        name: 'welcome',
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
@@ -144,6 +160,51 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/initial-sync',
         name: 'initial-sync',
         builder: (context, state) => const InitialSyncScreen(),
+      ),
+      GoRoute(
+        path: '/sync',
+        name: 'sync-center',
+        builder: (context, state) => const SyncCenterScreen(),
+      ),
+      GoRoute(
+        path: '/sync/conflicts',
+        name: 'sync-conflicts',
+        builder: (context, state) => const ConflictResolutionScreen(),
+      ),
+      GoRoute(
+        path: '/sync/diagnostics',
+        name: 'sync-diagnostics',
+        builder: (context, state) => const SyncDiagnosticsScreen(),
+      ),
+      GoRoute(
+        path: '/sync/offline',
+        name: 'sync-offline',
+        builder: (context, state) => const OfflineDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/settings/profile',
+        name: 'settings-profile',
+        builder: (context, state) => const BusinessProfileScreen(),
+      ),
+      GoRoute(
+        path: '/settings/security',
+        name: 'settings-security',
+        builder: (context, state) => const SecuritySessionsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/language',
+        name: 'settings-language',
+        builder: (context, state) => const LanguageSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationCenterScreen(),
+      ),
+      GoRoute(
+        path: '/notifications/settings',
+        name: 'notifications-settings',
+        builder: (context, state) => const NotificationSettingsScreen(),
       ),
       GoRoute(
         path: '/settings/brands',

@@ -204,8 +204,8 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    // Switch to Sales tab (index 1 in NavigationBar)
-    final salesNav = find.byType(NavigationDestination).at(1);
+    // Switch to Sales tab (index 2 in 5-tab NavigationBar: Dashboard, Inventory, Sales, Reports, Settings)
+    final salesNav = find.byType(NavigationDestination).at(2);
     expect(salesNav, findsOneWidget);
     await tester.tap(salesNav);
     await tester.pumpAndSettle();

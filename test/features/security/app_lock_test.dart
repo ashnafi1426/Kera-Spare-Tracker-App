@@ -46,6 +46,8 @@ void main() {
       return inMemoryStorage[key];
     });
 
+    when(() => mockStorage.readAll()).thenAnswer((_) async => inMemoryStorage);
+
     when(() => mockStorage.write(
           key: any(named: 'key'),
           value: any(named: 'value'),

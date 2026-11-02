@@ -3,27 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/context_extensions.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
+import '../../../dashboard/presentation/screens/business_dashboard_screen.dart';
 import '../../../parts/presentation/screens/inventory_screen.dart';
 import '../../../reports/presentation/screens/reports_screen.dart';
 import '../../../sales/presentation/screens/sales_list_tab.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 
-/// Main container screen with bottom navigation for Inventory, Sales, Reports, and Settings.
+/// Main container screen with bottom navigation for Dashboard, Inventory, Sales, Reports, and Settings.
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final int initialIndex;
+
+  const HomeScreen({
+    super.key,
+    this.initialIndex = 0,
+  });
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
     final tabs = [
+      BusinessDashboardScreen(
+        onSwitchToInventory: () => setState(() => _currentIndex = 1),
+        onSwitchToSales: () => setState(() => _currentIndex = 2),
+      ),
       const InventoryScreen(),
       const SalesListTab(),
       const ReportsScreen(),
@@ -53,6 +69,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           setState(() => _currentIndex = index);
         },
         destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.analytics_outlined),
+            selectedIcon: const Icon(Icons.analytics_rounded),
+            label: l10n.dashboardTab,
+          ),
           NavigationDestination(
             icon: const Icon(Icons.inventory_2_outlined),
             selectedIcon: const Icon(Icons.inventory_2_rounded),

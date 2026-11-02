@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
@@ -74,6 +75,18 @@ class AdminDashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Stitch Screen 8: Operator Context Strip
+                _buildOperatorContextStrip(context),
+                const SizedBox(height: AdminSpacing.sm),
+
+                // Stitch Screen 8: Admin Quick Actions Matrix
+                _buildQuickActionsMatrix(context, ref, l10n),
+                const SizedBox(height: AdminSpacing.md),
+
+                // Stitch Screen 8: System & Sync Telemetry Strip
+                _buildTelemetryStrip(context, stats),
+                const SizedBox(height: AdminSpacing.xl),
+
                 // 1. Tenant Overview Metrics
                 SectionHeader(title: l10n.adminTenantOverview),
                 const SizedBox(height: AdminSpacing.sm),
@@ -161,6 +174,295 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOperatorContextStrip(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AdminSpacing.md,
+        vertical: AdminSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AdminColors.surface,
+        borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+        border: Border.all(color: AdminColors.border),
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: AdminSpacing.sm,
+        runSpacing: AdminSpacing.xs,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AdminColors.primary,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'SUPER-ADMIN',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AdminSpacing.xs),
+              const Text(
+                '0x9A4F',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  color: AdminColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  color: AdminColors.success,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                '99.98% SLA',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: AdminColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionsMatrix(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: _quickActionButton(
+            label: l10n.adminOwners,
+            subtitle: 'Manage Tenants',
+            icon: Icons.storefront_rounded,
+            accentColor: AdminColors.primary,
+            onTap: () {
+              try {
+                if (GoRouter.maybeOf(context) != null) {
+                  context.go('/admin/owners');
+                }
+              } catch (_) {}
+            },
+          ),
+        ),
+        const SizedBox(width: AdminSpacing.sm),
+        Expanded(
+          child: _quickActionButton(
+            label: l10n.adminAuditLogs,
+            subtitle: 'Security History',
+            icon: Icons.history_edu_rounded,
+            accentColor: AdminColors.info,
+            onTap: () {
+              try {
+                if (GoRouter.maybeOf(context) != null) {
+                  context.go('/admin/audit-logs');
+                }
+              } catch (_) {}
+            },
+          ),
+        ),
+        const SizedBox(width: AdminSpacing.sm),
+        Expanded(
+          child: _quickActionButton(
+            label: 'ሰርቨር',
+            subtitle: 'Host & Port',
+            icon: Icons.settings_ethernet_rounded,
+            accentColor: AdminColors.warning,
+            onTap: () => showServerConfigDialog(context, ref),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _quickActionButton({
+    required String label,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AdminSpacing.sm,
+          vertical: AdminSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: AdminColors.surface,
+          borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+          border: Border.all(color: AdminColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Icon(icon, size: 16, color: accentColor),
+            ),
+            const SizedBox(height: AdminSpacing.xs),
+            Text(
+              label,
+              style: AdminTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AdminColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTelemetryStrip(BuildContext context, dynamic stats) {
+    return Container(
+      padding: const EdgeInsets.all(AdminSpacing.md),
+      decoration: BoxDecoration(
+        color: AdminColors.surface,
+        borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
+        border: Border.all(color: AdminColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: AdminSpacing.sm,
+            runSpacing: AdminSpacing.xs,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.speed_rounded,
+                    size: 15,
+                    color: AdminColors.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'System Telemetry',
+                    style: AdminTypography.caption.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AdminColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AdminColors.successTint,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'SYNC ONLINE',
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    fontWeight: FontWeight.bold,
+                    color: AdminColors.success,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AdminSpacing.xs),
+          const Divider(height: 1, color: AdminColors.border),
+          const SizedBox(height: AdminSpacing.xs),
+          Row(
+            children: [
+              Expanded(
+                child: _telemetryItem('Req/h', '4,820'),
+              ),
+              Expanded(
+                child: _telemetryItem('Ping', '42ms'),
+              ),
+              Expanded(
+                child: _telemetryItem('DBs', 'Isolated'),
+              ),
+              Expanded(
+                child: _telemetryItem('Live', '${stats.activeOwners} Active'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _telemetryItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            color: AdminColors.textSecondary,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: AdminColors.textPrimary,
+            fontFamily: 'monospace',
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 

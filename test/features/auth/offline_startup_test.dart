@@ -12,6 +12,7 @@ import 'package:kera_spare_tracker/data/local/tables/enums.dart';
 import 'package:kera_spare_tracker/features/auth/data/repositories/api_auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:kera_spare_tracker/features/dashboard/presentation/screens/business_dashboard_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/screens/inventory_screen.dart';
@@ -153,9 +154,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
-    // 6. Verify that HomeScreen and InventoryScreen are displayed immediately!
+    // 6. Verify that HomeScreen and its tabs (Dashboard, Inventory) are mounted immediately!
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.byType(InventoryScreen), findsOneWidget);
+    expect(find.byType(BusinessDashboardScreen), findsOneWidget);
+    expect(find.byType(InventoryScreen, skipOffstage: false), findsOneWidget);
 
     // 7. Cleanly unmount widget tree and flush any stream query close timers
     await tester.pumpWidget(const SizedBox.shrink());

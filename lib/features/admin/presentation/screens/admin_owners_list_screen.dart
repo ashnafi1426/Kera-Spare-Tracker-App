@@ -370,12 +370,34 @@ class _OwnerListTile extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AdminSpacing.xs),
-                Text(
-                  owner.phoneNumber,
-                  style: AdminTypography.caption.copyWith(
-                    fontFamily: 'monospace',
-                    color: AdminColors.textSecondary,
-                  ),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AdminSpacing.xs,
+                  runSpacing: 2,
+                  children: [
+                    Text(
+                      owner.phoneNumber,
+                      style: AdminTypography.caption.copyWith(
+                        fontFamily: 'monospace',
+                        color: AdminColors.textSecondary,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AdminColors.primary.withAlpha(20),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Kera Hub #${(owner.id.hashCode.abs() % 24) + 1}',
+                        style: AdminTypography.caption.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AdminColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AdminSpacing.xs),
                 Row(
