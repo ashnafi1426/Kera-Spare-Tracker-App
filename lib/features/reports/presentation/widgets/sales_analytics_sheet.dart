@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../sales/presentation/providers/sales_providers.dart';
 import '../providers/reports_providers.dart';
@@ -68,7 +69,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'የሽያጭ ሪፖርት / Sales Analytics',
+                              context.tr('የሽያጭ ሪፖርት', 'Sales Analytics'),
                               style: KeraTypography.titleMedium()
                                   .copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -78,7 +79,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                         ],
                       ),
                       Text(
-                        'Revenue Velocity & Payment Breakdown',
+                        context.tr('የገቢ ሂደት እና የክፍያ ስርጭት', 'Revenue Velocity & Payment Breakdown'),
                         style: KeraTypography.bodySmall(
                           color: KeraColors.textSecondary,
                         ),
@@ -128,7 +129,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'ጠቅላላ ገቢ / TOTAL REVENUE',
+                                context.tr('ጠቅላላ ገቢ', 'TOTAL REVENUE'),
                                 style: KeraTypography.labelSmall(
                                   color: Colors.white70,
                                 ).copyWith(letterSpacing: 1),
@@ -141,7 +142,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'የተረጋገጠ',
+                                  context.tr('የተረጋገጠ', 'Verified'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.tealAccent,
                                   ).copyWith(fontWeight: FontWeight.bold),
@@ -170,14 +171,14 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'ደረሰኞች (Receipts)',
+                                      context.tr('ደረሰኞች', 'Receipts'),
                                       style: KeraTypography.labelSmall(
                                         color: Colors.white70,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${summary.salesCount} ሽያጮች',
+                                      '${summary.salesCount} ${context.tr("ሽያጮች", "sales")}',
                                       style: KeraTypography.labelLarge(
                                         color: Colors.white,
                                       ).copyWith(fontWeight: FontWeight.bold),
@@ -190,7 +191,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'አማካይ ደረሰኝ (ATV)',
+                                      context.tr('አማካይ ደረሰኝ', 'Average Ticket'),
                                       style: KeraTypography.labelSmall(
                                         color: Colors.white70,
                                       ),
@@ -220,7 +221,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
 
                 // 2. Payment Method Breakdown (Calculated from real DB transactions)
                 Text(
-                  'የክፍያ ዘዴዎች / Payment Breakdown',
+                  context.tr('የክፍያ ዘዴዎች', 'Payment Breakdown'),
                   style: KeraTypography.titleSmall()
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -273,34 +274,38 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                           _buildPaymentRow(
                             icon: Icons.payments_rounded,
                             iconColor: Colors.green.shade700,
-                            name: 'ጥሬ ገንዘብ (Cash)',
+                            name: context.tr('ጥሬ ገንዘብ', 'Cash'),
                             amount: cashTotal,
                             percent: cashPct,
+                            shareLabel: context.tr('ድርሻ', 'share'),
                           ),
                           const Divider(height: 16),
                           _buildPaymentRow(
                             icon: Icons.phone_android_rounded,
                             iconColor: KeraColors.actionBlue,
-                            name: 'ቴሌብር (Telebirr)',
+                            name: context.tr('ቴሌብር', 'Telebirr'),
                             amount: telebirrTotal,
                             percent: telebirrPct,
+                            shareLabel: context.tr('ድርሻ', 'share'),
                           ),
                           const Divider(height: 16),
                           _buildPaymentRow(
                             icon: Icons.account_balance_rounded,
                             iconColor: Colors.purple.shade700,
-                            name: 'የባንክ ሂሳብ (CBE / BOA)',
+                            name: context.tr('የባንክ ሂሳብ', 'Bank Transfer'),
                             amount: bankTotal,
                             percent: bankPct,
+                            shareLabel: context.tr('ድርሻ', 'share'),
                           ),
                           if (creditTotal > 0) ...[
                             const Divider(height: 16),
                             _buildPaymentRow(
                               icon: Icons.assignment_late_outlined,
                               iconColor: KeraColors.warningAmber,
-                              name: 'ብድር (Credit)',
+                              name: context.tr('ብድር', 'Credit'),
                               amount: creditTotal,
                               percent: creditPct,
+                              shareLabel: context.tr('ድርሻ', 'share'),
                             ),
                           ],
                         ],
@@ -341,7 +346,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'ከፍተኛ የሽያጭ ቀን / Record Peak Day',
+                                  context.tr('ከፍተኛ የሽያጭ ቀን', 'Peak Revenue Day'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.actionBlue,
                                   ).copyWith(fontWeight: FontWeight.bold),
@@ -375,6 +380,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
     required String name,
     required double amount,
     required double percent,
+    required String shareLabel,
   }) {
     return Row(
       children: [
@@ -390,7 +396,7 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                     .copyWith(fontWeight: FontWeight.w600),
               ),
               Text(
-                '${percent.toStringAsFixed(1)}% ድርሻ',
+                '${percent.toStringAsFixed(1)}% $shareLabel',
                 style: KeraTypography.bodySmall(color: KeraColors.textSecondary)
                     .copyWith(fontSize: 11),
               ),
@@ -406,4 +412,3 @@ class SalesAnalyticsSheet extends ConsumerWidget {
     );
   }
 }
-

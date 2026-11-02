@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../domain/models/chart_point.dart';
@@ -29,6 +30,7 @@ class ReportsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = context.theme;
     final colorScheme = context.colorScheme;
+    final isAmharic = context.isAmharic;
 
     final selectedPeriod = ref.watch(selectedReportPeriodProvider);
     final summaryAsync = ref.watch(salesSummaryProvider);
@@ -64,12 +66,12 @@ class ReportsScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${l10n.reportsTitle} / Overview',
+                    context.tr('የፋይናንስ ሪፖርቶች', 'Financial Reports'),
                     style: KeraTypography.titleMedium(color: Colors.white)
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'ኬራ ስፔር • Kera Hub Financial Health',
+                    context.tr('ኬራ ስፔር • የሂሳብ እና ንግድ ሁኔታ', 'Kera Spare • Business Performance'),
                     style: KeraTypography.labelSmall(
                       color: Colors.white.withValues(alpha: 0.7),
                     ).copyWith(fontSize: 10),
@@ -80,6 +82,39 @@ class ReportsScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // One-tap Language Toggle Pill
+          InkWell(
+            onTap: () {
+              ref.read(localeControllerProvider.notifier).toggleLocale();
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.language_rounded, color: Colors.white70, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    isAmharic ? 'English' : 'አማርኛ',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+
           // Live Synced Pill
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
@@ -104,7 +139,7 @@ class ReportsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  'የተገናኘ / Synced',
+                  context.tr('የተገናኘ', 'Synced'),
                   style: KeraTypography.labelSmall(color: Colors.white)
                       .copyWith(fontSize: 10, fontWeight: FontWeight.w600),
                 ),
@@ -116,7 +151,7 @@ class ReportsScreen extends ConsumerWidget {
           // Refresh button
           IconButton(
             icon: const Icon(Icons.sync_rounded, color: Colors.white),
-            tooltip: 'Sync & Refresh',
+            tooltip: context.tr('አድስ', 'Refresh'),
             onPressed: () {
               ref.invalidate(salesSummaryProvider);
               ref.invalidate(chartPointsProvider);
@@ -155,12 +190,12 @@ class ReportsScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'የሪፖርቶች ማጠቃለያ',
+                            context.tr('የሪፖርቶች ማጠቃለያ', 'Reports Overview'),
                             style: KeraTypography.titleSmall()
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'Reports Overview • Financial Health',
+                            context.tr('የፋይናንስ እና ንግድ ጤንነት', 'Financial Health & Metrics'),
                             style: KeraTypography.labelSmall(
                               color: KeraColors.textSecondary,
                             ),
@@ -180,7 +215,7 @@ class ReportsScreen extends ConsumerWidget {
                       ),
                       icon: const Icon(Icons.file_download_outlined, size: 16),
                       label: Text(
-                        'አውርድ (Export)',
+                        context.tr('አውርድ', 'Export'),
                         style: KeraTypography.labelSmall()
                             .copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -279,7 +314,7 @@ class ReportsScreen extends ConsumerWidget {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'ጥቅምት',
+                                    context.tr('ወቅታዊ', 'Current Period'),
                                     style: KeraTypography.labelSmall(
                                       color: KeraColors.tealAccent,
                                     ).copyWith(fontSize: 10),
@@ -305,7 +340,7 @@ class ReportsScreen extends ConsumerWidget {
                                       size: 14, color: KeraColors.tealAccent),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '+18.4%',
+                                    '${margin >= 0 ? "+" : ""}${margin.toStringAsFixed(1)}%',
                                     style: KeraTypography.labelSmall(
                                       color: KeraColors.tealAccent,
                                     ).copyWith(fontWeight: FontWeight.bold),
@@ -363,7 +398,7 @@ class ReportsScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'የትርፍ ህዳግ (Margin)',
+                                    context.tr('የትርፍ ህዳግ', 'Profit Margin'),
                                     style: KeraTypography.labelSmall(
                                       color: Colors.white70,
                                     ),
@@ -375,7 +410,7 @@ class ReportsScreen extends ConsumerWidget {
                                     alignment: Alignment.centerLeft,
                                     fit: BoxFit.scaleDown,
                                     child: Text(
-                                      '${margin.toStringAsFixed(1)}% (Target: 25%)',
+                                      '${margin.toStringAsFixed(1)}%',
                                       style: KeraTypography.labelLarge(
                                         color: KeraColors.tealAccent,
                                       ).copyWith(fontWeight: FontWeight.bold),
@@ -394,7 +429,10 @@ class ReportsScreen extends ConsumerWidget {
                             const SizedBox(width: 5),
                             Expanded(
                               child: Text(
-                                'ትክክለኛ ትርፍ በግዢ ዋጋ (COGS) መዝገብ ላይ የተመሠረተ ነው',
+                                context.tr(
+                                  'ትክክለኛ ትርፍ በግዢ ዋጋ (COGS) መዝገብ ላይ የተመሠረተ ነው',
+                                  'Profit is calculated based on Cost of Goods Sold (COGS)',
+                                ),
                                 style: KeraTypography.labelSmall(
                                   color: Colors.white60,
                                 ).copyWith(fontSize: 10),
@@ -419,6 +457,7 @@ class ReportsScreen extends ConsumerWidget {
                   final atv = summary.salesCount > 0
                       ? summary.totalRevenue / summary.salesCount
                       : 0.0;
+                  final currencyUnit = context.tr('ብር', 'ETB');
 
                   return Column(
                     children: [
@@ -432,7 +471,7 @@ class ReportsScreen extends ConsumerWidget {
                               value: CurrencyFormatter.formatCount(
                                 summary.salesCount,
                               ),
-                              subtitle: 'የተጠናቀቁ ደረሰኞች',
+                              subtitle: context.tr('የተጠናቀቁ ደረሰኞች', 'Completed receipts'),
                               icon: Icons.receipt_long_rounded,
                               iconColor: KeraColors.primaryNavy,
                             ),
@@ -443,11 +482,11 @@ class ReportsScreen extends ConsumerWidget {
                           Expanded(
                             child: _buildBentoTile(
                               context,
-                              title: 'አማካይ ደረሰኝ (ATV)',
+                              title: context.tr('አማካይ ደረሰኝ', 'Average Ticket'),
                               value: atv > 0
-                                  ? '${atv.toStringAsFixed(0)} ETB'
-                                  : '0 ETB',
-                              subtitle: 'በአንድ ደረሰኝ ሽያጭ',
+                                  ? '${atv.toStringAsFixed(0)} $currencyUnit'
+                                  : '0 $currencyUnit',
+                              subtitle: context.tr('በአንድ ደረሰኝ ሽያጭ', 'Average per receipt'),
                               icon: Icons.calculate_outlined,
                               iconColor: KeraColors.actionBlue,
                             ),
@@ -461,11 +500,11 @@ class ReportsScreen extends ConsumerWidget {
                           Expanded(
                             child: _buildBentoTile(
                               context,
-                              title: 'የተሸጡ እቃዎች / Items',
+                              title: context.tr('የተሸጡ ዕቃዎች', 'Units Sold'),
                               value: summary.salesCount > 0
-                                  ? '${summary.salesCount * 3} pcs'
-                                  : '0 pcs',
-                              subtitle: 'ክፍሎች በተለያዩ SKUs',
+                                  ? '${summary.salesCount} ${context.tr("ሽያጮች", "sales")}'
+                                  : '0',
+                              subtitle: context.tr('የተመዘገቡ ግብይቶች', 'Recorded checkouts'),
                               icon: Icons.shopping_bag_outlined,
                               iconColor: Colors.teal.shade800,
                             ),
@@ -476,9 +515,11 @@ class ReportsScreen extends ConsumerWidget {
                           Expanded(
                             child: _buildBentoTile(
                               context,
-                              title: 'የሽያጭ ሂደት / Growth',
-                              value: '+18.4%',
-                              subtitle: 'ካለፈው ወር ጋር ሲነጻጸር',
+                              title: context.tr('የትርፍ ሁኔታ', 'Profitability'),
+                              value: summary.totalRevenue > 0
+                                  ? '${((summary.totalProfit / summary.totalRevenue) * 100).toStringAsFixed(0)}%'
+                                  : '0%',
+                              subtitle: context.tr('አማካይ የትርፍ መጠን', 'Net margin ratio'),
                               icon: Icons.trending_up_rounded,
                               iconColor: KeraColors.success,
                             ),
@@ -552,7 +593,10 @@ class ReportsScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'ከፍተኛ የሽያጭ ቀን: ቅዳሜ',
+                                context.tr(
+                                  'የቀናት የሽያጭ እና ትርፍ ንፅፅር',
+                                  'Daily revenue vs profit comparison',
+                                ),
                                 style: KeraTypography.labelSmall(
                                   color: KeraColors.textSecondary,
                                 ),
@@ -560,7 +604,7 @@ class ReportsScreen extends ConsumerWidget {
                               InkWell(
                                 onTap: () => SalesAnalyticsSheet.show(context),
                                 child: Text(
-                                  'ዝርዝር እይ →',
+                                  context.tr('ዝርዝር እይ →', 'View Details →'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.actionBlue,
                                   ).copyWith(fontWeight: FontWeight.bold),
@@ -578,7 +622,7 @@ class ReportsScreen extends ConsumerWidget {
 
               // 5. Deep-Dive Analytic Module Cards (Stitch Screens 2, 3, 4, 5)
               Text(
-                'ዝርዝር ሪፖርቶች / Analytic Modules',
+                context.tr('ዝርዝር ሪፖርቶች', 'Analytic Modules'),
                 style: KeraTypography.titleSmall()
                     .copyWith(fontWeight: FontWeight.bold),
               ),
@@ -587,8 +631,8 @@ class ReportsScreen extends ConsumerWidget {
                 icon: Icons.query_stats_rounded,
                 iconColor: KeraColors.primaryNavy,
                 iconBg: KeraColors.surfaceContainer,
-                title: 'የሽያጭ ሪፖርት (Sales Analytics)',
-                subtitle: 'Revenue Trajectory & Payment Breakdown',
+                title: context.tr('የሽያጭ ሪፖርት', 'Sales Analytics'),
+                subtitle: context.tr('የገቢ ሂደት እና የክፍያ ዓይነቶች', 'Revenue Velocity & Payment Breakdown'),
                 onTap: () => SalesAnalyticsSheet.show(context),
               ),
               const SizedBox(height: 8),
@@ -596,8 +640,8 @@ class ReportsScreen extends ConsumerWidget {
                 icon: Icons.payments_rounded,
                 iconColor: Colors.green.shade800,
                 iconBg: Colors.green.shade50,
-                title: 'የትርፍ እና ወጪ ሪፖርት (Profit & Margins)',
-                subtitle: 'P&L Waterfall & Direct COGS Analysis',
+                title: context.tr('የትርፍ እና ወጪ ሪፖርት', 'Profit & Margins'),
+                subtitle: context.tr('የትርፍ ህዳግ እና የግዢ ወጪ ትንተና', 'P&L Waterfall & Direct COGS Analysis'),
                 onTap: () => ProfitReportsSheet.show(context),
               ),
               const SizedBox(height: 8),
@@ -605,8 +649,8 @@ class ReportsScreen extends ConsumerWidget {
                 icon: Icons.inventory_2_rounded,
                 iconColor: Colors.teal.shade800,
                 iconBg: Colors.teal.shade50,
-                title: 'የመጋዘን ክምችት ሪፖርት (Inventory Health)',
-                subtitle: 'Total Capital Locked & Health Breakdown',
+                title: context.tr('የመጋዘን ክምችት ሪፖርት', 'Inventory Health'),
+                subtitle: context.tr('የጠቅላላ ክምችት ካፒታል እና ሁኔታ', 'Total Capital Locked & Health Breakdown'),
                 onTap: () => InventoryReportsSheet.show(context),
               ),
               const SizedBox(height: 8),
@@ -614,8 +658,8 @@ class ReportsScreen extends ConsumerWidget {
                 icon: Icons.leaderboard_rounded,
                 iconColor: Colors.amber.shade900,
                 iconBg: Colors.amber.shade50,
-                title: 'ከፍተኛ ተፈላጊ ዕቃዎች (Best Sellers)',
-                subtitle: 'Top 10 Moving Products Leaderboard',
+                title: context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best Sellers'),
+                subtitle: context.tr('በሽያጭ ቀዳሚ የሆኑ 10 ዕቃዎች', 'Top 10 Moving Products Leaderboard'),
                 onTap: () => BestSellersSheet.show(context),
               ),
               const SizedBox(height: 20),
@@ -648,18 +692,23 @@ class ReportsScreen extends ConsumerWidget {
                               Expanded(
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.star_rounded,
-                                      color: Colors.amber.shade700,
-                                      size: 22,
+                                    Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.shade100,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(Icons.star_rounded,
+                                          color: Colors.amber.shade800,
+                                          size: 18),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        l10n.topSellingParts,
-                                        style: KeraTypography.titleMedium()
-                                            .copyWith(
-                                                fontWeight: FontWeight.bold),
+                                        context.tr('በሽያጭ ቀዳሚ የሆኑ ዕቃዎች', 'Top Selling Auto Parts'),
+                                        style: KeraTypography.titleSmall()
+                                            .copyWith(fontWeight: FontWeight.bold),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -667,11 +716,10 @@ class ReportsScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: () => BestSellersSheet.show(context),
+                              TextButton(
+                                onPressed: () => BestSellersSheet.show(context),
                                 child: Text(
-                                  'ሁሉንም እይ →',
+                                  context.tr('ሁሉንም እይ', 'View All'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.actionBlue,
                                   ).copyWith(fontWeight: FontWeight.bold),
@@ -679,13 +727,13 @@ class ReportsScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const Divider(height: 16),
                           if (parts.isEmpty)
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Center(
                                 child: Text(
-                                  l10n.noSalesInPeriod,
+                                  context.tr('ምንም የተሸጠ እቃ የለም', 'No sales recorded yet'),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -696,30 +744,42 @@ class ReportsScreen extends ConsumerWidget {
                             ListView.separated(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: parts.length,
-                              separatorBuilder: (_, _) => const Divider(height: 1),
+                              itemCount: min(parts.length, 5),
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 12),
                               itemBuilder: (context, index) {
                                 final p = parts[index];
+                                final rankColors = [
+                                  Colors.amber.shade700,
+                                  Colors.grey.shade600,
+                                  Colors.brown.shade600,
+                                ];
+                                final badgeColor = index < 3
+                                    ? rankColors[index]
+                                    : colorScheme.outline;
+
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
-                                        radius: 14,
-                                        backgroundColor:
-                                            KeraColors.surfaceContainerHighest,
+                                      Container(
+                                        width: 24,
+                                        height: 24,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: badgeColor.withValues(alpha: 0.15),
+                                          shape: BoxShape.circle,
+                                        ),
                                         child: Text(
                                           '${index + 1}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
+                                          style: TextStyle(
+                                            color: badgeColor,
                                             fontWeight: FontWeight.bold,
-                                            color: KeraColors.primaryNavy,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 12),
+                                      const SizedBox(width: 10),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
@@ -727,20 +787,18 @@ class ReportsScreen extends ConsumerWidget {
                                           children: [
                                             Text(
                                               p.partName,
-                                              style: const TextStyle(
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
                                                 fontWeight: FontWeight.w600,
                                               ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                             Text(
-                                              l10n.unitsSold(
-                                                CurrencyFormatter.formatQuantity(
-                                                  p.quantitySold,
-                                                ),
-                                              ),
-                                              style: theme.textTheme.bodySmall
-                                                  ?.copyWith(
-                                                color: colorScheme
-                                                    .onSurfaceVariant,
+                                              '${p.quantitySold} ${context.tr("ተሽጧል", "units sold")}',
+                                              style:
+                                                  theme.textTheme.bodySmall?.copyWith(
+                                                color: colorScheme.onSurfaceVariant,
                                               ),
                                             ),
                                           ],
@@ -814,7 +872,7 @@ class ReportsScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${valuation.totalActiveParts} ${l10n.inventoryTab.toLowerCase()}',
+                                      '${valuation.totalActiveParts} ${context.tr("የተመዘገቡ ዕቃዎች", "active parts")}',
                                       style: theme.textTheme.bodySmall,
                                     ),
                                   ],
@@ -862,7 +920,7 @@ class ReportsScreen extends ConsumerWidget {
                             children: [
                               CircleAvatar(
                                 backgroundColor: valuation.lowStockCount > 0
-                                    ? Colors.amber.shade200
+                                    ? Colors.amber.shade100
                                     : colorScheme.surfaceContainerHighest,
                                 child: Icon(
                                   Icons.warning_amber_rounded,
@@ -878,43 +936,39 @@ class ReportsScreen extends ConsumerWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      l10n.lowStockCount,
+                                      l10n.lowStockAlerts,
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         color: valuation.lowStockCount > 0
                                             ? Colors.amber.shade900
                                             : colorScheme.onSurfaceVariant,
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       valuation.lowStockCount > 0
-                                          ? '${valuation.lowStockCount} items at or below reorder limit'
-                                          : l10n.noLowStockItems,
-                                      style: theme.textTheme.bodySmall,
+                                          ? '${valuation.lowStockCount} ${context.tr("ዕቃዎች ሊያልቁ ነው (አስቸኳይ ማዘዝ)", "parts low in stock (reorder required)")}'
+                                          : context.tr('ክምችት በጥሩ ሁኔታ ላይ ነው', 'All parts sufficiently stocked'),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: valuation.lowStockCount > 0
+                                            ? Colors.amber.shade900
+                                            : colorScheme.onSurfaceVariant,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              if (valuation.lowStockCount > 0) ...[
-                                const SizedBox(width: 8),
-                                OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: const Size(0, 36),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    foregroundColor: Colors.amber.shade900,
-                                    side: BorderSide(
-                                      color: Colors.amber.shade700,
+                              if (valuation.lowStockCount > 0)
+                                TextButton(
+                                  onPressed: () => context.push('/stock/low'),
+                                  child: Text(
+                                    context.tr('እይ', 'View'),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber.shade900,
                                     ),
                                   ),
-                                  onPressed: () =>
-                                      context.push('/stock/low-stock'),
-                                  child: Text(l10n.viewLowStock),
                                 ),
-                              ],
                             ],
                           ),
                         ),
@@ -922,59 +976,6 @@ class ReportsScreen extends ConsumerWidget {
                     ],
                   );
                 },
-              ),
-              const SizedBox(height: 16),
-
-              // 8. Executive Quick Export Banner (Stitch Screen 1 bottom)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: KeraColors.surfaceCanvas,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: KeraColors.outlineBorder),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'የወሩን ሪፖርት አውርድ',
-                            style: KeraTypography.titleSmall()
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'PDF ወይም Excel ፋይል ለኦዲት እና ለሂሳብ ሹም',
-                            style: KeraTypography.bodySmall(
-                              color: KeraColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: KeraColors.primaryNavy,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      icon: const Icon(Icons.download_rounded, size: 16),
-                      label: Text(
-                        'አውርድ (Export)',
-                        style: KeraTypography.labelSmall(color: Colors.white)
-                            .copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: () => ExportReportsSheet.show(context),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
