@@ -1,7 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../parts/domain/models/part_item.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
@@ -14,7 +18,17 @@ enum _StockActionType {
   adjust,
 }
 
-/// Dialog allowing the user to Add, Remove, or Adjust stock using the movement ledger.
+/// Google Stitch Screen 21 & 23: Stock Adjustment Modal & Update Stock.
+///
+/// Complete industrial stock adjustment engine for retail automotive inventory.
+/// Features:
+/// 1. Selected Part Industrial Card with thumbnail, OEM code, and shelf location.
+/// 2. 3-mode segmented action selection: Stock In (+), Stock Out (−), Audit Count (=).
+/// 3. Quantity stepper engine with large controls, quick increment chips (+1, +5, +10, +25),
+///    and dynamic Before ➔ Delta ➔ After impact flow calculation.
+/// 4. Common automotive reason presets for rapid selection in greasy garage conditions.
+/// 5. Unit cost tracking, PO/reference docs, and internal memo.
+/// 6. Strict negative stock enforcement preserving tenant configurations.
 class UpdateStockDialog extends ConsumerStatefulWidget {
   final PartItem part;
 
@@ -60,10 +74,25 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
 
   @override
   void dispose() {
-    _quantityController.disposeDispose();
+    _quantityController.dispose();
     _unitCostController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _applyQuickQuantity(double delta, {bool replace = false}) {
+    final currentVal = double.tryParse(_quantityController.text.trim()) ?? 0.0;
+    final newVal = replace ? delta : (currentVal + delta);
+    setState(() {
+      _quantityController.text =
+          newVal % 1 == 0 ? newVal.toInt().toString() : newVal.toStringAsFixed(1);
+    });
+  }
+
+  void _selectReasonPreset(String preset) {
+    setState(() {
+      _noteController.text = preset;
+    });
   }
 
   Future<void> _submit() async {
@@ -253,7 +282,6 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
     final colorScheme = context.colorScheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
@@ -262,12 +290,30 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
         ? ' ${widget.part.unit}'
         : '';
 
+    final inputQty = double.tryParse(_quantityController.text.trim()) ?? 0.0;
+    double projectedStock = currentQty;
+    if (_selectedAction == _StockActionType.add) {
+      projectedStock = currentQty + inputQty;
+    } else if (_selectedAction == _StockActionType.remove) {
+      projectedStock = currentQty - inputQty;
+    } else {
+      projectedStock = inputQty;
+    }
+
+    final hasPhoto = widget.part.photoLocalPath != null &&
+        File(widget.part.photoLocalPath!).existsSync();
+
+    final locationDisplay = widget.part.customLocation != null &&
+            widget.part.customLocation!.trim().isNotEmpty
+        ? widget.part.customLocation!.trim()
+        : (widget.part.locationName ?? '');
+
     return Container(
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: const BoxDecoration(
+        color: KeraColors.surfacePure,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + bottomInset),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomInset),
       child: SafeArea(
         top: false,
         child: SingleChildScrollView(
@@ -277,26 +323,34 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Handle bar
+                // Drag Handle
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
+                    width: 44,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(2),
+                      color: KeraColors.outlineVariant,
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                 ),
 
-                // Title & Part name
+                // Top Header Row
                 Row(
                   children: [
-                    CircleAvatar(
-                      backgroundColor: colorScheme.primaryContainer,
-                      child: Icon(Icons.inventory_2_rounded,
-                          color: colorScheme.primary),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: KeraColors.primaryNavy.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.inventory_2_rounded,
+                        color: KeraColors.primaryNavy,
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -305,14 +359,14 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                         children: [
                           Text(
                             l10n.updateStock,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: KeraTypography.headlineSmall(
+                              color: KeraColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.w700),
                           ),
                           Text(
-                            widget.part.displayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                            'የክምችት ማስተካከያ',
+                            style: KeraTypography.bodyMedium(
+                              color: KeraColors.textSecondary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -321,52 +375,151 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(Icons.close_rounded,
+                          color: KeraColors.textSecondary),
                       onPressed: () => Navigator.pop(context),
+                      tooltip: l10n.cancel,
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Current stock status banner
+                // SECTION 1: Selected Part Summary Card (Stitch Screen 21)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    color: KeraColors.surfaceCanvas,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: KeraColors.outlineBorder),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        l10n.currentStock,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: KeraColors.surfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: KeraColors.outlineBorder),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: hasPhoto
+                            ? Image.file(
+                                File(widget.part.photoLocalPath!),
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(
+                                Icons.settings_suggest_rounded,
+                                color: KeraColors.primaryNavy,
+                                size: 28,
+                              ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.part.displayName,
+                              style: KeraTypography.titleMedium(
+                                color: KeraColors.textPrimary,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: [
+                                if (widget.part.partNumber != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: KeraColors.surfaceContainer,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'OEM: ${widget.part.partNumber!}',
+                                      style: KeraTypography.labelSmall(
+                                        color: KeraColors.textSecondary,
+                                      ).copyWith(fontFamily: 'monospace'),
+                                    ),
+                                  ),
+                                if (locationDisplay.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFEF3C7),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      locationDisplay,
+                                      style: KeraTypography.labelSmall(
+                                        color: const Color(0xFF92400E),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        '${currentQty.toStringAsFixed(1)}$unit',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: currentQty > 0
-                              ? Colors.green.shade700
-                              : colorScheme.error,
-                        ),
+                      const SizedBox(width: 8),
+                      // Current Stock Pill
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            l10n.currentStock,
+                            style: KeraTypography.labelSmall(
+                              color: KeraColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: currentQty > 0
+                                  ? KeraColors.stockInBg
+                                  : KeraColors.stockOutBg,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: currentQty > 0
+                                    ? KeraColors.stockInText
+                                        .withValues(alpha: 0.3)
+                                    : KeraColors.stockOutText
+                                        .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              '${currentQty.toStringAsFixed(1)}$unit',
+                              style: KeraTypography.labelLarge(
+                                color: currentQty > 0
+                                    ? KeraColors.stockInText
+                                    : KeraColors.stockOutText,
+                              ).copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                // Action Segmented Button (Add, Remove, Adjust)
+                // SECTION 2: Adjustment Mode Selector (Add, Remove, Adjust)
                 SegmentedButton<_StockActionType>(
                   segments: [
                     ButtonSegment(
                       value: _StockActionType.add,
                       label: Text(
                         l10n.addStockPurchase,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       icon: const Icon(Icons.add_shopping_cart_rounded, size: 16),
                     ),
@@ -374,7 +527,8 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                       value: _StockActionType.remove,
                       label: Text(
                         l10n.removeStock,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       icon: const Icon(Icons.remove_circle_outline_rounded,
                           size: 16),
@@ -383,7 +537,8 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                       value: _StockActionType.adjust,
                       label: Text(
                         l10n.adjustStockCount,
-                        style: const TextStyle(fontSize: 12),
+                        style: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                       icon: const Icon(Icons.tune_rounded, size: 16),
                     ),
@@ -395,85 +550,260 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                       _quantityController.clear();
                     });
                   },
-                ),
-                const SizedBox(height: 16),
-
-                // Quantity Field with dynamic label
-                TextFormField(
-                  controller: _quantityController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                  ],
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: _selectedAction == _StockActionType.add
-                        ? l10n.quantityToAdd
-                        : _selectedAction == _StockActionType.remove
-                            ? l10n.quantityToRemove
-                            : l10n.countedQuantity,
-                    prefixIcon: Icon(
-                      _selectedAction == _StockActionType.add
-                          ? Icons.add_rounded
-                          : _selectedAction == _StockActionType.remove
-                              ? Icons.remove_rounded
-                              : Icons.format_list_numbered_rounded,
-                    ),
-                    suffixText: widget.part.unit,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        if (_selectedAction == _StockActionType.add) {
+                          return KeraColors.stockInBg;
+                        } else if (_selectedAction == _StockActionType.remove) {
+                          return KeraColors.stockOutBg;
+                        } else {
+                          return KeraColors.primaryNavyLight
+                              .withValues(alpha: 0.15);
+                        }
+                      }
+                      return KeraColors.surfacePure;
+                    }),
+                    foregroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        if (_selectedAction == _StockActionType.add) {
+                          return KeraColors.stockInText;
+                        } else if (_selectedAction == _StockActionType.remove) {
+                          return KeraColors.stockOutText;
+                        } else {
+                          return KeraColors.primaryNavy;
+                        }
+                      }
+                      return KeraColors.textSecondary;
+                    }),
                   ),
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return l10n.negativeNumberError;
-                    }
-                    final numVal = double.tryParse(val.trim());
-                    if (numVal == null) {
-                      return l10n.negativeNumberError;
-                    }
-                    if (_selectedAction != _StockActionType.adjust &&
-                        numVal <= 0) {
-                      return l10n.negativeNumberError;
-                    }
-                    return null;
-                  },
-                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 14),
+
+                // SECTION 3: Quantity Stepper Engine (Stitch Screen 21)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: KeraColors.surfaceCanvas,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: KeraColors.outlineBorder),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          // Decrement Button
+                          IconButton.filled(
+                            style: IconButton.styleFrom(
+                              backgroundColor: KeraColors.surfaceContainerHigh,
+                              foregroundColor: KeraColors.primaryNavy,
+                              minimumSize: const Size(48, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            icon: const Icon(Icons.remove_rounded, size: 24),
+                            onPressed: () {
+                              final cur = double.tryParse(
+                                      _quantityController.text.trim()) ??
+                                  0.0;
+                              if (cur > 0) {
+                                _applyQuickQuantity(-1);
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Quantity Text Field with Dynamic Label
+                          Expanded(
+                            child: TextFormField(
+                              controller: _quantityController,
+                              keyboardType: const TextInputType.numberWithOptions(
+                                  decimal: true),
+                              textAlign: TextAlign.center,
+                              style: KeraTypography.numericStat(
+                                color: KeraColors.textPrimary,
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*')),
+                              ],
+                              decoration: InputDecoration(
+                                labelText: _selectedAction == _StockActionType.add
+                                    ? l10n.quantityToAdd
+                                    : _selectedAction == _StockActionType.remove
+                                        ? l10n.quantityToRemove
+                                        : l10n.countedQuantity,
+                                labelStyle: const TextStyle(fontSize: 13),
+                                prefixText: _selectedAction == _StockActionType.add
+                                    ? '+ '
+                                    : _selectedAction == _StockActionType.remove
+                                        ? '− '
+                                        : '= ',
+                                prefixStyle: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20,
+                                  color: _selectedAction == _StockActionType.add
+                                      ? KeraColors.stockInText
+                                      : _selectedAction ==
+                                              _StockActionType.remove
+                                          ? KeraColors.stockOutText
+                                          : KeraColors.actionBlue,
+                                ),
+                                suffixText: widget.part.unit,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(
+                                      color: KeraColors.outlineBorder),
+                                ),
+                                filled: true,
+                                fillColor: KeraColors.surfacePure,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 10),
+                              ),
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) {
+                                  return l10n.negativeNumberError;
+                                }
+                                final numVal = double.tryParse(val.trim());
+                                if (numVal == null) {
+                                  return l10n.negativeNumberError;
+                                }
+                                if (_selectedAction != _StockActionType.adjust &&
+                                    numVal <= 0) {
+                                  return l10n.negativeNumberError;
+                                }
+                                return null;
+                              },
+                              onChanged: (_) => setState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Increment Button
+                          IconButton.filled(
+                            style: IconButton.styleFrom(
+                              backgroundColor: KeraColors.actionBlue,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(48, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            icon: const Icon(Icons.add_rounded, size: 24),
+                            onPressed: () => _applyQuickQuantity(1),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Quick Increment Chips (+1, +5, +10, +25)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildQuickChip('+1', 1),
+                          _buildQuickChip('+5', 5),
+                          _buildQuickChip('+10', 10),
+                          _buildQuickChip('+25', 25),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Before ➔ Delta ➔ After Impact Flow Card
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: projectedStock < 0
+                              ? KeraColors.stockOutBg
+                              : KeraColors.surfacePure,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: projectedStock < 0
+                                ? KeraColors.stockOutText.withValues(alpha: 0.3)
+                                : KeraColors.outlineBorder,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'የነበረው / Current',
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.textSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  '${currentQty.toStringAsFixed(1)} ${widget.part.unit ?? 'pcs'}',
+                                  style: KeraTypography.labelLarge(
+                                    color: KeraColors.textPrimary,
+                                  ).copyWith(fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                            const Icon(
+                              Icons.trending_flat_rounded,
+                              color: KeraColors.actionBlue,
+                              size: 24,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'አዲሱ ክምችት / Result',
+                                  style: KeraTypography.labelSmall(
+                                    color: projectedStock < 0
+                                        ? KeraColors.error
+                                        : KeraColors.stockInText,
+                                  ).copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                Text(
+                                  '${projectedStock.toStringAsFixed(1)} ${widget.part.unit ?? 'pcs'}',
+                                  style: KeraTypography.labelLarge(
+                                    color: projectedStock < 0
+                                        ? KeraColors.error
+                                        : KeraColors.stockInText,
+                                  ).copyWith(fontWeight: FontWeight.w800),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
 
                 // Real-time calculation preview for remove or adjust
                 if (_selectedAction == _StockActionType.remove) ...[
-                  Builder(
-                    builder: (context) {
-                      final inputQty =
-                          double.tryParse(_quantityController.text.trim()) ?? 0.0;
-                      final projected = currentQty - inputQty;
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: projected < 0
-                              ? colorScheme.errorContainer.withValues(alpha: 0.3)
-                              : colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: projectedStock < 0
+                          ? colorScheme.errorContainer.withValues(alpha: 0.3)
+                          : KeraColors.surfaceContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(l10n.runningBalance),
+                        Text(
+                          '${projectedStock.toStringAsFixed(1)}$unit',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: projectedStock < 0
+                                ? colorScheme.error
+                                : colorScheme.onSurface,
+                          ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(l10n.runningBalance),
-                            Text(
-                              '${projected.toStringAsFixed(1)}$unit',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: projected < 0
-                                    ? colorScheme.error
-                                    : colorScheme.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -481,16 +811,12 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                 if (_selectedAction == _StockActionType.adjust) ...[
                   Builder(
                     builder: (context) {
-                      final counted =
-                          double.tryParse(_quantityController.text.trim()) ??
-                              currentQty;
-                      final delta = counted - currentQty;
+                      final delta = inputQty - currentQty;
                       return Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest
-                              .withValues(alpha: 0.3),
+                          color: KeraColors.surfaceContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -502,7 +828,7 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: delta >= 0
-                                    ? Colors.green.shade700
+                                    ? KeraColors.stockInText
                                     : colorScheme.error,
                               ),
                             ),
@@ -513,6 +839,26 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                   ),
                   const SizedBox(height: 12),
                 ],
+
+                // SECTION 4: Reason Presets (Stitch Screen 21)
+                Text(
+                  'የማስተካከያ ምክንያት / Reason Presets',
+                  style: KeraTypography.labelSmall(
+                    color: KeraColors.textSecondary,
+                  ).copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _buildReasonChip('አዲስ የተገዛ ዕቃ (Purchase Restock)'),
+                    _buildReasonChip('የቆጠራ ልዩነት (Audit Discrepancy)'),
+                    _buildReasonChip('የተበላሸ / የተሰበረ (Damaged)'),
+                    _buildReasonChip('የደንበኛ ተመላሽ (Customer Return)'),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
                 // Unit Cost field (optional)
                 TextFormField(
@@ -526,6 +872,13 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                     labelText: l10n.unitCost,
                     prefixIcon: const Icon(Icons.attach_money_rounded),
                     suffixText: 'ETB',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: KeraColors.outlineBorder),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -538,29 +891,79 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
                     labelText: l10n.reasonOrNote,
                     hintText: l10n.reasonOrNoteHint,
                     prefixIcon: const Icon(Icons.note_alt_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: KeraColors.outlineBorder),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
-                // Submit Button
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          _selectedAction == _StockActionType.add
-                              ? l10n.addStockPurchase
-                              : _selectedAction == _StockActionType.remove
-                                  ? l10n.removeStock
-                                  : l10n.adjustStockCount,
+                // Submit and Cancel Action Row
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: OutlinedButton(
+                        onPressed:
+                            _isSubmitting ? null : () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: const BorderSide(
+                              color: KeraColors.outlineBorder),
                         ),
+                        child: Text(
+                          l10n.cancel,
+                          style: KeraTypography.labelLarge(
+                            color: KeraColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              _selectedAction == _StockActionType.remove
+                                  ? KeraColors.error
+                                  : KeraColors.actionBlue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                _selectedAction == _StockActionType.add
+                                    ? l10n.addStockPurchase
+                                    : _selectedAction == _StockActionType.remove
+                                        ? l10n.removeStock
+                                        : l10n.adjustStockCount,
+                                style: KeraTypography.labelLarge(
+                                  color: Colors.white,
+                                ).copyWith(fontWeight: FontWeight.w700),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -569,10 +972,49 @@ class _UpdateStockDialogState extends ConsumerState<UpdateStockDialog> {
       ),
     );
   }
-}
 
-extension on TextEditingController {
-  void disposeDispose() {
-    dispose();
+  Widget _buildQuickChip(String label, double value) {
+    return InkWell(
+      onTap: () => _applyQuickQuantity(value),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: KeraColors.surfacePure,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: KeraColors.outlineBorder),
+        ),
+        child: Text(
+          label,
+          style: KeraTypography.labelMedium(
+            color: KeraColors.actionBlue,
+          ).copyWith(fontWeight: FontWeight.w700),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReasonChip(String preset) {
+    final isSelected = _noteController.text.trim() == preset;
+    return ChoiceChip(
+      label: Text(
+        preset,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          color: isSelected ? Colors.white : KeraColors.textPrimary,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: KeraColors.primaryNavy,
+      backgroundColor: KeraColors.surfaceCanvas,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+        side: BorderSide(
+          color: isSelected ? KeraColors.primaryNavy : KeraColors.outlineBorder,
+        ),
+      ),
+      onSelected: (_) => _selectReasonPreset(preset),
+    );
   }
 }

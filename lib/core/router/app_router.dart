@@ -14,6 +14,7 @@ import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
@@ -67,7 +68,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final user = authState.value;
       final isAuthenticated = user != null;
-      final isAuthRoute = location == '/login' || location == '/register';
+      final isAuthRoute =
+          location == '/login' || location == '/register' || location == '/welcome';
 
       // Unauthenticated users are redirected to /login
       if (!isAuthenticated) {
@@ -124,6 +126,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/',
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/welcome',
+        name: 'welcome',
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/login',

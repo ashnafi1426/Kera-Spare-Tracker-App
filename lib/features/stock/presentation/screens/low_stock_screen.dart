@@ -3,24 +3,91 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../parts/domain/models/part_item.dart';
 import '../dialogs/update_stock_dialog.dart';
 import '../providers/stock_providers.dart';
 
-/// Screen listing all spare parts that are currently at or below their low stock threshold.
-class LowStockScreen extends ConsumerWidget {
+enum _LowStockFilter { all, outOfStock, lowStock }
+
+/// Stitch Screen 20: Stock Overview & Low Stock Alerts.
+///
+/// Features deep Navy industrial header, real-time sync status pill,
+/// Bento metric summary strip (total alerts, out-of-stock SKUs, low-stock SKUs),
+/// filter chips, high-contrast alert cards with shelf locations and threshold ratios,
+/// and direct Update Stock quick-action modal integration.
+class LowStockScreen extends ConsumerStatefulWidget {
   const LowStockScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LowStockScreen> createState() => _LowStockScreenState();
+}
+
+class _LowStockScreenState extends ConsumerState<LowStockScreen> {
+  _LowStockFilter _selectedFilter = _LowStockFilter.all;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
     final lowStockAsync = ref.watch(lowStockPartsStreamProvider);
 
     return Scaffold(
+      backgroundColor: KeraColors.surfaceCanvas,
       appBar: AppBar(
-        title: Text(l10n.lowStockListTitle),
+        backgroundColor: KeraColors.primaryNavy,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.lowStockListTitle,
+              style: KeraTypography.headlineSmall(color: Colors.white)
+                  .copyWith(fontWeight: FontWeight.w700),
+            ),
+            Text(
+              l10n.lowStockListDesc,
+              style: KeraTypography.labelSmall(
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          // Network Sync Status Pill (Stitch Screen 20)
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(KeraRadii.full),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF89F5E7),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'የተገናኘ',
+                  style: KeraTypography.labelSmall(
+                    color: const Color(0xFF89F5E7),
+                  ).copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: lowStockAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -33,21 +100,33 @@ class LowStockScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Colors.green.withValues(alpha: 0.15),
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: const BoxDecoration(
+                        color: KeraColors.stockInBg,
+                        shape: BoxShape.circle,
+                      ),
                       child: const Icon(
                         Icons.check_circle_outline_rounded,
-                        size: 40,
-                        color: Colors.green,
+                        size: 48,
+                        color: KeraColors.stockInText,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(
                       l10n.noLowStockItems,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: KeraTypography.headlineSmall(
+                        color: KeraColors.textPrimary,
+                      ).copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'ሁሉም መለዋወጫዎች ከተገቢው የክምችት መጠን በላይ ናቸው።',
+                      textAlign: TextAlign.center,
+                      style: KeraTypography.bodyMedium(
+                        color: KeraColors.textSecondary,
                       ),
                     ),
                   ],
@@ -56,16 +135,215 @@ class LowStockScreen extends ConsumerWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            itemCount: parts.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final part = parts[index];
-              return _LowStockPartCard(part: part);
-            },
+          final outOfStockList =
+              parts.where((p) => p.cachedQuantity <= 0).toList();
+          final lowStockList =
+              parts.where((p) => p.cachedQuantity > 0).toList();
+
+          final filteredParts = _selectedFilter == _LowStockFilter.outOfStock
+              ? outOfStockList
+              : _selectedFilter == _LowStockFilter.lowStock
+                  ? lowStockList
+                  : parts;
+
+          return Column(
+            children: [
+              // Bento Metric Strip (Stitch Screen 20)
+              Container(
+                color: KeraColors.surfacePure,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        // Out-of-stock Bento Tile
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: KeraColors.stockOutBg,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: KeraColors.stockOutText
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'ያለቀባቸው',
+                                      style: KeraTypography.labelSmall(
+                                        color: KeraColors.stockOutText,
+                                      ).copyWith(fontWeight: FontWeight.w700),
+                                    ),
+                                    const Icon(
+                                      Icons.report_problem_rounded,
+                                      size: 16,
+                                      color: KeraColors.stockOutText,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${outOfStockList.length} SKUs',
+                                  style: KeraTypography.numericMedium(
+                                    color: KeraColors.stockOutText,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Out of Stock',
+                                  style: KeraTypography.bodySmall(
+                                    color: KeraColors.stockOutText
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+
+                        // Low-stock Bento Tile
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: KeraColors.stockLowBg,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: KeraColors.stockLowText
+                                    .withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'አነስተኛ ክምችት',
+                                      style: KeraTypography.labelSmall(
+                                        color: KeraColors.stockLowText,
+                                      ).copyWith(fontWeight: FontWeight.w700),
+                                    ),
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 16,
+                                      color: KeraColors.stockLowText,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${lowStockList.length} SKUs',
+                                  style: KeraTypography.numericMedium(
+                                    color: KeraColors.stockLowText,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Low Stock Alert',
+                                  style: KeraTypography.bodySmall(
+                                    color: KeraColors.stockLowText
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Quick Filter Chips Row
+                    Row(
+                      children: [
+                        _buildFilterChip(
+                          label: 'ሁሉም / All (${parts.length})',
+                          isSelected: _selectedFilter == _LowStockFilter.all,
+                          onTap: () => setState(
+                              () => _selectedFilter = _LowStockFilter.all),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          label: 'ያለቀ (${outOfStockList.length})',
+                          isSelected:
+                              _selectedFilter == _LowStockFilter.outOfStock,
+                          onTap: () => setState(() =>
+                              _selectedFilter = _LowStockFilter.outOfStock),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          label: 'አነስተኛ (${lowStockList.length})',
+                          isSelected:
+                              _selectedFilter == _LowStockFilter.lowStock,
+                          onTap: () => setState(() =>
+                              _selectedFilter = _LowStockFilter.lowStock),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Parts List
+              Expanded(
+                child: ListView.separated(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: filteredParts.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
+                  itemBuilder: (context, index) {
+                    final part = filteredParts[index];
+                    return _LowStockPartCard(part: part);
+                  },
+                ),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? KeraColors.primaryNavy
+              : KeraColors.surfaceContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? KeraColors.primaryNavy
+                : KeraColors.outlineBorder,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : KeraColors.textPrimary,
+          ),
+        ),
       ),
     );
   }
@@ -79,38 +357,46 @@ class _LowStockPartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
-
     final hasPhoto =
         part.photoLocalPath != null && File(part.photoLocalPath!).existsSync();
     final threshold = part.lowStockLevel ?? 5.0;
     final isOutOfStock = part.cachedQuantity <= 0;
+    final location = part.customLocation ?? part.locationName ?? '';
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
+    return Container(
+      decoration: BoxDecoration(
+        color: KeraColors.surfacePure,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
           color: isOutOfStock
-              ? colorScheme.error.withValues(alpha: 0.5)
-              : Colors.orange.withValues(alpha: 0.5),
+              ? KeraColors.stockOutText.withValues(alpha: 0.3)
+              : KeraColors.stockLowText.withValues(alpha: 0.3),
         ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08172B4D),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         onTap: () => context.push('/parts/${part.id}'),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-              // Thumbnail / Icon
+              // Thumbnail / Icon with OEM genuine badge
               Container(
-                width: 54,
-                height: 54,
+                width: 58,
+                height: 58,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
+                  color: isOutOfStock
+                      ? KeraColors.stockOutBg
+                      : KeraColors.surfaceContainer,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: KeraColors.outlineBorder),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasPhoto
@@ -119,8 +405,12 @@ class _LowStockPartCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       )
                     : Icon(
-                        Icons.warning_amber_rounded,
-                        color: isOutOfStock ? colorScheme.error : Colors.orange,
+                        isOutOfStock
+                            ? Icons.error_outline_rounded
+                            : Icons.warning_amber_rounded,
+                        color: isOutOfStock
+                            ? KeraColors.stockOutText
+                            : KeraColors.stockLowText,
                         size: 28,
                       ),
               ),
@@ -133,52 +423,74 @@ class _LowStockPartCard extends StatelessWidget {
                   children: [
                     Text(
                       part.displayName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: KeraTypography.titleMedium(
+                        color: KeraColors.textPrimary,
+                      ).copyWith(fontWeight: FontWeight.w700),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (part.partNumber != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        part.partNumber!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: isOutOfStock
-                                ? colorScheme.errorContainer.withValues(alpha: 0.5)
-                                : Colors.orange.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
+                        if (part.partNumber != null)
+                          Text(
+                            part.partNumber!,
+                            style: KeraTypography.bodySmall(
+                              color: KeraColors.textSecondary,
+                            ).copyWith(fontFamily: 'monospace'),
                           ),
-                          child: Text(
-                            '${part.cachedQuantity.toStringAsFixed(0)} / ${threshold.toStringAsFixed(0)} ${part.unit ?? ''}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isOutOfStock
-                                  ? colorScheme.error
-                                  : Colors.orange.shade900,
+                        if (part.partNumber != null && location.isNotEmpty)
+                          const Text(' • ',
+                              style:
+                                  TextStyle(color: KeraColors.textMuted)),
+                        if (location.isNotEmpty)
+                          Text(
+                            location,
+                            style: KeraTypography.bodySmall(
+                              color: const Color(0xFF92400E),
                             ),
                           ),
-                        ),
                       ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Threshold ratio pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isOutOfStock
+                            ? KeraColors.stockOutBg
+                            : KeraColors.stockLowBg,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${part.cachedQuantity.toStringAsFixed(0)} / ${threshold.toStringAsFixed(0)} ${part.unit ?? ''}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isOutOfStock
+                              ? KeraColors.stockOutText
+                              : KeraColors.stockLowText,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
 
+              const SizedBox(width: 8),
+
               // Quick Action Button: Update Stock
               IconButton.filledTonal(
+                style: IconButton.styleFrom(
+                  backgroundColor: isOutOfStock
+                      ? KeraColors.stockOutBg
+                      : KeraColors.actionBlueTint,
+                  foregroundColor: isOutOfStock
+                      ? KeraColors.stockOutText
+                      : KeraColors.actionBlue,
+                  minimumSize: const Size(44, 44),
+                ),
                 icon: const Icon(Icons.add_shopping_cart_rounded, size: 20),
                 tooltip: l10n.updateStock,
                 onPressed: () => UpdateStockDialog.show(context, part),

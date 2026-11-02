@@ -1703,4 +1703,58 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get adminVersionHelper => 'አስገዳጅ የሆነው ዝቅተኛ የመተግበሪያ ስሪት (ለምሳሌ 1.0.0)';
+
+  @override
+  String get dashboardTab => 'ዳሽቦርድ';
+
+  @override
+  String get dashboardOverview => 'የንግድ ማጠቃለያ';
+
+  @override
+  String get activeSkus => 'መለዋወጫ ዓይነቶች';
+
+  @override
+  String get totalQuantityPcs => 'ጠቅላላ ክምችት';
+
+  @override
+  String get todayRevenue => 'የዛሬ ገቢ';
+
+  @override
+  String get estProfit => 'የተጣራ ትርፍ';
+
+  @override
+  String get lowStockAlert => 'አነስተኛ ክምችት';
+
+  @override
+  String get outOfStockAlert => 'ያለቁ ዕቃዎች';
+
+  @override
+  String get quickActions => 'ፈጣን ተግባራት';
+
+  @override
+  String get addPartAction => '+ አዲስ ዕቃ';
+
+  @override
+  String get newSaleAction => 'ሽያጭ መዝግብ';
+
+  @override
+  String get restockAction => 'ክምችት አድስ';
+
+  @override
+  String get scannerAction => 'ባርኮድ ቃኝ';
+
+  @override
+  String get salesTrends => 'የሽያጭ ሂደት';
+
+  @override
+  String get bestSellers => 'ተፈላጊ መለዋወጫዎች';
+
+  @override
+  String get recentTransactions => 'የቅርብ ሽያጮች';
+
+  @override
+  String get offlineModeActive => 'ከመስመር ውጭ ይሰራል';
+
+  @override
+  String get retrySync => 'አሁን ሞክር';
 }

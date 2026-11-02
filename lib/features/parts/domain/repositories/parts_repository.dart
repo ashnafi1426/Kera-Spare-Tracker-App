@@ -40,7 +40,6 @@ abstract class PartsRepository {
     double? lowStockLevel,
     double? initialQuantity,
   });
-
   /// Updates an existing spare part. Enqueues update mutation to sync_queue.
   Future<Result<PartItem>> updatePart({
     required String ownerId,

@@ -1,20 +1,30 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/design/widgets/kera_product_card.dart';
+import '../../../../core/design/widgets/kera_status_badge.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/announcement_banner_widget.dart';
 import '../../../../core/widgets/maintenance_banner_widget.dart';
 import '../../../../core/widgets/suspended_account_banner_widget.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/inventory_providers.dart';
+import '../providers/parts_providers.dart';
 import '../widgets/inventory_filter_sheet.dart';
 
-/// Main Inventory catalog screen with instant debounced DB search,
-/// lazy pagination for 5,000+ parts, multi-criteria filters, and test seeder.
+/// Stitch Screen 12: Inventory Overview (የዕቃዎች ዝርዝር).
+///
+/// Features deep Navy industrial header, live sync indicator, Bento summary
+/// metrics strip (valuation, in-stock, low-stock, out-of-stock), debounced search,
+/// multi-criteria filter chips, list/grid view toggle, performant lazy pagination,
+/// and complete empty states (Screen 18 & 19).
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
 
@@ -26,6 +36,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
+  bool _isGridView = false;
 
   @override
   void initState() {
@@ -125,49 +136,245 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     }
   }
 
+  void _showBarcodeScannerModal() {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.qr_code_scanner_rounded, color: KeraColors.actionBlue),
+            const SizedBox(width: 8),
+            Text(
+              'የባርኮድ / OEM ፍለጋ',
+              style: KeraTypography.titleSmall(),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'የመለዋወጫ ባርኮድ ወይም የኦሪጅናል ቁጥር (OEM Part #) ያስገቡ ወይም በካሜራ ይቃኙ:',
+              style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: textController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'e.g. 1R-0716, 202-0120...',
+                prefixIcon: Icon(Icons.numbers_rounded),
+                border: OutlineInputBorder(borderRadius: KeraRadii.borderInput),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('ሰርዝ'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final query = textController.text.trim();
+              Navigator.pop(ctx);
+              if (query.isNotEmpty) {
+                _searchController.text = query;
+                ref.read(inventoryFilterProvider.notifier).setQuery(query);
+              }
+            },
+            child: const Text('ፈልግ'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
     final colorScheme = context.colorScheme;
 
     final filter = ref.watch(inventoryFilterProvider);
     final state = ref.watch(inventoryListProvider);
+    final authUser = ref.watch(authControllerProvider).value;
+    final partsStream = ref.watch(partsStreamProvider);
+    final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
+
+    // Calculate inventory metrics from live stream or paged state
+    final allParts = partsStream.value ?? state.items;
+    double totalValuation = 0.0;
+    int inStockCount = 0;
+    int lowStockCount = 0;
+    int outOfStockCount = 0;
+
+    for (final p in allParts) {
+      final price = p.sellingPrice ?? p.purchasePrice ?? 0.0;
+      totalValuation += price * p.cachedQuantity;
+      if (p.isOutOfStock || p.cachedQuantity <= 0) {
+        outOfStockCount++;
+      } else if (p.isLowStock) {
+        lowStockCount++;
+      } else {
+        inStockCount++;
+      }
+    }
+
+    final totalPartsCount = partsStream.value?.length ?? state.totalCount;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+      backgroundColor: KeraColors.surfaceCanvas,
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'inventory_screen_fab',
+        onPressed: () => context.push('/parts/add'),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.add),
+        backgroundColor: KeraColors.actionBlue,
+        foregroundColor: KeraColors.textWhite,
+      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
           children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(20),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.cover,
+            // 1. Navy Industrial App Header (Stitch Screen 12)
+            _buildNavyHeader(
+              context: context,
+              authUser: authUser,
+              pendingSync: pendingSync,
+              l10n: l10n,
+              filter: filter,
+            ),
+
+            // System Alert Banners
+            const MaintenanceBannerWidget(),
+            const SuspendedAccountBannerWidget(),
+            const AnnouncementBannerWidget(),
+
+            // 2. Bento Valuation & Quick Filter Metrics Strip
+            _buildBentoMetricsStrip(
+              totalValuation: totalValuation,
+              totalCount: totalPartsCount,
+              inStockCount: inStockCount,
+              lowStockCount: lowStockCount,
+              outOfStockCount: outOfStockCount,
+              activeStockFilter: filter.stockFilter,
+              l10n: l10n,
+            ),
+
+            // 3. Search and Barcode Scan Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+              child: _buildSearchBar(l10n),
+            ),
+
+            // 4. Quick Stock Chips & Controls (List/Grid & Filter)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              child: _buildFilterChipsRow(filter, state, l10n, colorScheme),
+            ),
+            const Divider(height: 8, color: KeraColors.outlineBorder),
+
+            // 5. Main Paginated Inventory List or Grid View
+            Expanded(
+              child: RefreshIndicator(
+                color: KeraColors.actionBlue,
+                onRefresh: () =>
+                    ref.read(inventoryListProvider.notifier).refresh(),
+                child: _buildInventoryBody(context, state, filter, l10n),
               ),
             ),
-            const SizedBox(width: 10),
-            Text(l10n.inventoryTab),
           ],
         ),
-        actions: [
-          // Filter button with badge
+      ),
+    );
+  }
+
+  Widget _buildNavyHeader({
+    required BuildContext context,
+    required dynamic authUser,
+    required int pendingSync,
+    required dynamic l10n,
+    required InventoryFilter filter,
+  }) {
+    return Container(
+      color: KeraColors.primaryNavy,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 8,
+        bottom: 12,
+        left: 16,
+        right: 12,
+      ),
+      child: Row(
+        children: [
+          // Store Logo / Industrial Icon
+          Container(
+            width: 38,
+            height: 38,
+            decoration: const BoxDecoration(
+              color: KeraColors.primaryNavyDark,
+              borderRadius: KeraRadii.borderMicro,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.precision_manufacturing_rounded,
+                color: KeraColors.tealAccent,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Title & Store Subtitle
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'ኬራ ስፔር',
+                      style: KeraTypography.titleMedium(color: KeraColors.textWhite).copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Sync Pill Status
+                    if (pendingSync > 0)
+                      KeraStatusBadge.syncPending(count: pendingSync)
+                    else
+                      KeraStatusBadge.synced(),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  authUser?.businessName ?? l10n.inventoryTab,
+                  style: KeraTypography.bodySmall(color: Colors.white70),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // Barcode Scan Action Button
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
+            tooltip: l10n.scannerAction,
+            onPressed: _showBarcodeScannerModal,
+          ),
+
+          // Filter Button with Badge
           Stack(
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.filter_list_rounded),
+                icon: const Icon(Icons.filter_list_rounded, color: Colors.white),
                 tooltip: l10n.filter,
                 onPressed: () => InventoryFilterSheet.show(context),
               ),
@@ -176,21 +383,20 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   top: 8,
                   right: 8,
                   child: Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: KeraColors.actionBlue,
                       shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.surface, width: 2),
                     ),
                   ),
                 ),
             ],
           ),
 
-          // Debug & Seeder Menu
+          // Seeder / Debug Menu
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded),
+            icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
             onSelected: (val) {
               if (val == 'seed') {
                 _handleSeedParts();
@@ -203,7 +409,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 value: 'seed',
                 child: Row(
                   children: [
-                    Icon(Icons.speed_rounded, color: colorScheme.primary, size: 20),
+                    const Icon(Icons.speed_rounded, color: KeraColors.actionBlue, size: 20),
                     const SizedBox(width: 12),
                     Text(l10n.seedParts),
                   ],
@@ -213,8 +419,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 value: 'clear_seed',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_sweep_rounded,
-                        color: colorScheme.error, size: 20),
+                    const Icon(Icons.delete_sweep_rounded, color: KeraColors.error, size: 20),
                     const SizedBox(width: 12),
                     Text(l10n.clearTestParts),
                   ],
@@ -224,98 +429,263 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'inventory_screen_fab',
-        onPressed: () => context.push('/parts/add'),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.add),
-      ),
-      body: Column(
-        children: [
-          const MaintenanceBannerWidget(),
-          const SuspendedAccountBannerWidget(),
-          const AnnouncementBannerWidget(),
-          // 1. Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded),
-                        onPressed: _onClearSearch,
-                      )
-                    : null,
-                filled: true,
-                fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
+    );
+  }
 
-          // 2. Quick Stock Status Chips & Count Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildQuickStockChip(StockFilter.all, l10n.filterAll, filter.stockFilter),
-                        const SizedBox(width: 6),
-                        _buildQuickStockChip(StockFilter.inStock, l10n.filterInStock, filter.stockFilter),
-                        const SizedBox(width: 6),
-                        _buildQuickStockChip(StockFilter.lowStock, l10n.filterLowStock, filter.stockFilter),
-                        const SizedBox(width: 6),
-                        _buildQuickStockChip(StockFilter.outOfStock, l10n.filterOutOfStock, filter.stockFilter),
-                      ],
+  Widget _buildBentoMetricsStrip({
+    required double totalValuation,
+    required int totalCount,
+    required int inStockCount,
+    required int lowStockCount,
+    required int outOfStockCount,
+    required StockFilter activeStockFilter,
+    required dynamic l10n,
+  }) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      child: Column(
+        children: [
+          // Top Row: Total Valuation & Parts Count Pill
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.account_balance_wallet_outlined,
+                      size: 16, color: KeraColors.textSecondary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'ጠቅላላ የክምችት ዋጋ:',
+                    style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${totalValuation.toStringAsFixed(0)} ብር',
+                    style: KeraTypography.numericCompact(color: KeraColors.textPrimary).copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
                     ),
                   ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: const BoxDecoration(
+                  color: KeraColors.surfaceMuted,
+                  borderRadius: KeraRadii.borderMicro,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.totalPartsCount(state.totalCount),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                child: Text(
+                  '$totalCount ዕቃዎች',
+                  style: KeraTypography.labelSmall(color: KeraColors.primaryNavy).copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const Divider(height: 12),
+          const SizedBox(height: 8),
 
-          // 3. Main Paginated List
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(inventoryListProvider.notifier).refresh(),
-              child: _buildListContent(context, state, filter),
-            ),
+          // 4-Column Metric Grid
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricTile(
+                  label: 'ጠቅላላ',
+                  count: totalCount,
+                  isSelected: activeStockFilter == StockFilter.all,
+                  accentColor: KeraColors.actionBlue,
+                  onTap: () => ref
+                      .read(inventoryFilterProvider.notifier)
+                      .setStockFilter(StockFilter.all),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildMetricTile(
+                  label: 'በክምችት',
+                  count: inStockCount,
+                  isSelected: activeStockFilter == StockFilter.inStock,
+                  accentColor: KeraColors.stockInText,
+                  onTap: () => ref
+                      .read(inventoryFilterProvider.notifier)
+                      .setStockFilter(StockFilter.inStock),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildMetricTile(
+                  label: 'አነስተኛ',
+                  count: lowStockCount,
+                  isSelected: activeStockFilter == StockFilter.lowStock,
+                  accentColor: KeraColors.stockLowText,
+                  onTap: () => ref
+                      .read(inventoryFilterProvider.notifier)
+                      .setStockFilter(StockFilter.lowStock),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _buildMetricTile(
+                  label: 'ያለቀባቸው',
+                  count: outOfStockCount,
+                  isSelected: activeStockFilter == StockFilter.outOfStock,
+                  accentColor: KeraColors.stockOutText,
+                  onTap: () => ref
+                      .read(inventoryFilterProvider.notifier)
+                      .setStockFilter(StockFilter.outOfStock),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickStockChip(
+  Widget _buildMetricTile({
+    required String label,
+    required int count,
+    required bool isSelected,
+    required Color accentColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: KeraRadii.borderMicro,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? accentColor.withValues(alpha: 0.12) : KeraColors.surfaceMuted,
+          borderRadius: KeraRadii.borderMicro,
+          border: Border.all(
+            color: isSelected ? accentColor : KeraColors.outlineBorder,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              '$count',
+              style: KeraTypography.numericCompact(
+                color: isSelected ? accentColor : KeraColors.textPrimary,
+              ).copyWith(fontWeight: FontWeight.w700, fontSize: 14),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: KeraTypography.labelSmall(
+                color: isSelected ? accentColor : KeraColors.textSecondary,
+              ).copyWith(fontSize: 10, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(dynamic l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: KeraRadii.borderInput,
+        border: Border.all(color: KeraColors.outlineBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        style: KeraTypography.bodyMedium(),
+        decoration: InputDecoration(
+          hintText: l10n.searchHint,
+          hintStyle: KeraTypography.bodyMedium(color: KeraColors.textMuted),
+          prefixIcon: const Icon(Icons.search_rounded, color: KeraColors.textSecondary),
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 20, color: KeraColors.textSecondary),
+                  onPressed: _onClearSearch,
+                ),
+              IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded,
+                    size: 20, color: KeraColors.actionBlue),
+                tooltip: 'Scan barcode',
+                onPressed: _showBarcodeScannerModal,
+              ),
+            ],
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          border: const OutlineInputBorder(
+            borderRadius: KeraRadii.borderInput,
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChipsRow(
+    InventoryFilter filter,
+    InventoryListState state,
+    dynamic l10n,
+    ColorScheme colorScheme,
+  ) {
+    return Row(
+      children: [
+        // Horizontal scrollable quick chips
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStockFilterChip(StockFilter.all, l10n.filterAll, filter.stockFilter),
+                const SizedBox(width: 6),
+                _buildStockFilterChip(StockFilter.inStock, l10n.filterInStock, filter.stockFilter),
+                const SizedBox(width: 6),
+                _buildStockFilterChip(StockFilter.lowStock, l10n.filterLowStock, filter.stockFilter),
+                const SizedBox(width: 6),
+                _buildStockFilterChip(StockFilter.outOfStock, l10n.filterOutOfStock, filter.stockFilter),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+
+        // Grid / List View Toggle Button
+        IconButton(
+          icon: Icon(
+            _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+            color: KeraColors.textSecondary,
+            size: 20,
+          ),
+          tooltip: _isGridView ? 'List view' : 'Grid view',
+          visualDensity: VisualDensity.compact,
+          onPressed: () => setState(() => _isGridView = !_isGridView),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStockFilterChip(
     StockFilter filterValue,
     String label,
     StockFilter activeFilter,
   ) {
     final isSelected = filterValue == activeFilter;
-    final colorScheme = context.colorScheme;
-
     return FilterChip(
       selected: isSelected,
       label: Text(label),
@@ -323,26 +693,31 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ref.read(inventoryFilterProvider.notifier).setStockFilter(filterValue);
       },
       visualDensity: VisualDensity.compact,
+      backgroundColor: Colors.white,
+      selectedColor: KeraColors.primaryNavy,
+      shape: const RoundedRectangleBorder(
+        borderRadius: KeraRadii.borderMicro,
+        side: BorderSide(color: KeraColors.outlineBorder),
+      ),
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: isSelected ? colorScheme.onPrimaryContainer : null,
+        color: isSelected ? Colors.white : KeraColors.textPrimary,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 
-  Widget _buildListContent(
+  Widget _buildInventoryBody(
     BuildContext context,
     InventoryListState state,
     InventoryFilter filter,
+    dynamic l10n,
   ) {
-    final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
-
     if (state.isLoading && state.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: KeraColors.actionBlue),
+      );
     }
 
     if (state.errorMessage != null && state.items.isEmpty) {
@@ -352,15 +727,24 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline_rounded,
-                  size: 48, color: colorScheme.error),
+              const Icon(Icons.error_outline_rounded,
+                  size: 48, color: KeraColors.error),
               const SizedBox(height: 12),
-              Text(state.errorMessage!, textAlign: TextAlign.center),
+              Text(
+                state.errorMessage!,
+                textAlign: TextAlign.center,
+                style: KeraTypography.bodyMedium(),
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: () =>
                     ref.read(inventoryListProvider.notifier).refresh(),
-                child: Text(l10n.retry),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(l10n.retry),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: KeraColors.actionBlue,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),
@@ -372,67 +756,43 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       final isFiltered = filter.hasActiveFilters ||
           (_searchController.text.trim().isNotEmpty);
 
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isFiltered
-                      ? Icons.search_off_rounded
-                      : Icons.inventory_2_outlined,
-                  size: 40,
-                  color: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                isFiltered ? l10n.noFilteredPartsTitle : l10n.noPartsFound,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isFiltered ? l10n.noFilteredPartsDesc : l10n.noPartsDesc,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (isFiltered)
-                OutlinedButton.icon(
-                  onPressed: () {
-                    _onClearSearch();
-                    ref.read(inventoryFilterProvider.notifier).resetFilters();
-                  },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(l10n.resetFilters),
-                )
-              else
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/parts/add'),
-                  icon: const Icon(Icons.add_rounded),
-                  label: Text(l10n.add),
-                ),
-            ],
-          ),
-        ),
-      );
+      if (isFiltered) {
+        // Stitch Screen 19: Search Results Empty State
+        return _buildSearchEmptyState(l10n);
+      } else {
+        // Stitch Screen 18: Fresh Store Empty Inventory State
+        return _buildStoreEmptyState(l10n);
+      }
     }
 
-    // High performance list with pagination indicator
+    // High performance list or grid with pagination indicator
     final itemCount = state.items.length + (state.hasMore ? 1 : 0);
+
+    if (_isGridView) {
+      return GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.72,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          if (index >= state.items.length) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+            );
+          }
+          final part = state.items[index];
+          return _buildProductCard(part, isGrid: true);
+        },
+      );
+    }
 
     return ListView.separated(
       controller: _scrollController,
@@ -448,165 +808,148 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
           );
         }
-
         final part = state.items[index];
-        return _PartCard(part: part);
+        return _buildProductCard(part, isGrid: false);
       },
     );
   }
-}
 
-/// Performant part card component with photo thumbnail, stock badges, and pricing.
-class _PartCard extends StatelessWidget {
-  final PartItem part;
+  Widget _buildProductCard(PartItem part, {required bool isGrid}) {
+    return KeraProductCard(
+      isGrid: isGrid,
+      title: part.displayName,
+      partNumber: part.partNumber,
+      brandName: part.brandName,
+      shelfLocation: part.customLocation,
+      photoPath: part.photoLocalPath,
+      price: part.sellingPrice,
+      currencySymbol: 'ብር',
+      stockQuantity: part.cachedQuantity,
+      unit: part.unit,
+      isLowStock: part.isLowStock,
+      isOutOfStock: part.isOutOfStock,
+      outOfStockLabel: 'ያለቀ',
+      onTap: () async {
+        final result = await context.push('/parts/${part.id}');
+        if (result == true && mounted) {
+          final container = ProviderScope.containerOf(context);
+          await container.read(inventoryListProvider.notifier).refresh();
+        }
+      },
+    );
+  }
 
-  const _PartCard({required this.part});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
-
-    final hasPhoto = part.photoLocalPath != null &&
-        File(part.photoLocalPath!).existsSync();
-
-    return Card(
-      elevation: 0.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            width: 50,
-            height: 50,
-            color: colorScheme.surfaceContainerHighest,
-            child: hasPhoto
-                ? Image.file(
-                    File(part.photoLocalPath!),
-                    fit: BoxFit.cover,
-                    cacheWidth: 100,
-                  )
-                : Icon(
-                    Icons.build_circle_outlined,
-                    color: colorScheme.primary,
-                  ),
-          ),
-        ),
-        title: Text(
-          part.displayName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Row(
-            children: [
-              if (part.partNumber != null && part.partNumber!.isNotEmpty) ...[
-                Flexible(
-                  child: Text(
-                    '#${part.partNumber}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              if (part.brandName != null && part.brandName!.isNotEmpty)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    part.brandName!,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-        trailing: Column(
+  /// Stitch Screen 18: Empty Inventory State (ባዶ መጋዘን)
+  Widget _buildStoreEmptyState(dynamic l10n) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            if (part.sellingPrice != null)
-              Text(
-                '${part.sellingPrice!.toStringAsFixed(0)} ብር',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                  color: colorScheme.primary,
-                ),
+            Container(
+              width: 90,
+              height: 90,
+              decoration: const BoxDecoration(
+                color: KeraColors.surfaceMuted,
+                shape: BoxShape.circle,
               ),
-            const SizedBox(height: 4),
-            _buildStockBadge(context, part, l10n, colorScheme),
+              child: const Icon(
+                Icons.inventory_2_outlined,
+                size: 46,
+                color: KeraColors.primaryNavy,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'ባዶ መጋዘን (Inventory Empty)',
+              style: KeraTypography.titleMedium().copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'በመጋዘንዎ ውስጥ ምንም የተመዘገበ መለዋወጫ ዕቃ የለም። አዲስ ዕቃ በመመዝገብ ወይም የሙከራ ዕቃዎችን በመጫን ይጀምሩ።',
+              textAlign: TextAlign.center,
+              style: KeraTypography.bodyMedium(color: KeraColors.textSecondary),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => context.push('/parts/add'),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.add),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: KeraColors.actionBlue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: _handleSeedParts,
+                  icon: const Icon(Icons.speed_rounded),
+                  label: const Text('የናሙና ዕቃዎች ጫን'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-        onTap: () async {
-          final result = await context.push('/parts/${part.id}');
-          if (result == true && context.mounted) {
-            // Refresh list if part was updated or deleted
-            final container = ProviderScope.containerOf(context);
-            await container.read(inventoryListProvider.notifier).refresh();
-          }
-        },
       ),
     );
   }
 
-  Widget _buildStockBadge(
-    BuildContext context,
-    PartItem part,
-    dynamic l10n,
-    ColorScheme colorScheme,
-  ) {
-    final Color badgeBg;
-    final Color badgeText;
-    final String label;
-
-    if (part.isOutOfStock) {
-      badgeBg = colorScheme.error.withValues(alpha: 0.15);
-      badgeText = colorScheme.error;
-      label = l10n.outOfStock;
-    } else if (part.isLowStock) {
-      badgeBg = Colors.orange.withValues(alpha: 0.18);
-      badgeText = Colors.orange.shade900;
-      label = '${l10n.lowStock}: ${part.cachedQuantity.toStringAsFixed(0)}';
-    } else {
-      badgeBg = Colors.green.withValues(alpha: 0.15);
-      badgeText = Colors.green.shade800;
-      label = '${part.cachedQuantity.toStringAsFixed(0)} ${part.unit ?? ''}'.trim();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-      decoration: BoxDecoration(
-        color: badgeBg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: badgeText,
+  /// Stitch Screen 19: Search Results Empty State (የዕቃዎች ፍለጋ ውጤቶች)
+  Widget _buildSearchEmptyState(dynamic l10n) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: KeraColors.surfaceMuted,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 40,
+                color: KeraColors.actionBlue,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.noFilteredPartsTitle,
+              style: KeraTypography.titleMedium().copyWith(fontWeight: FontWeight.w700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.noFilteredPartsDesc,
+              textAlign: TextAlign.center,
+              style: KeraTypography.bodyMedium(color: KeraColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: () {
+                _onClearSearch();
+                ref.read(inventoryFilterProvider.notifier).resetFilters();
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(l10n.resetFilters),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: KeraColors.actionBlue,
+                side: const BorderSide(color: KeraColors.actionBlue),
+              ),
+            ),
+          ],
         ),
       ),
     );

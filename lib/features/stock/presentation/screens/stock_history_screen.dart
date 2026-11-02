@@ -1,19 +1,24 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../data/local/tables/enums.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
+import '../../domain/models/stock_movement_item.dart';
 import '../providers/stock_providers.dart';
 
-
-/// Screen displaying the append-only stock movement ledger for a specific spare part.
+/// Stitch Screen 22, 24 & 25: Stock Movement History & Product Ledger.
 ///
-/// Shows timestamp, movement type badge, quantity change, unit cost,
-/// optional note, and accurately calculated chronological running balance.
-/// Also features an integrity check action to recalculate cached quantity from the ledger.
+/// Features deep Navy industrial header, real-time sync pill, ledger integrity
+/// recalculation action, part showcase banner, category/movement filter chips
+/// with live counts, and a timeline audit feed with vertical connector line,
+/// colored node bullets, and running balances.
 class StockHistoryScreen extends ConsumerStatefulWidget {
   final String partId;
 
@@ -28,6 +33,7 @@ class StockHistoryScreen extends ConsumerStatefulWidget {
 
 class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
   bool _isRecalculating = false;
+  MovementType? _selectedFilterType;
 
   Future<void> _recalculateStock() async {
     final l10n = context.l10n;
@@ -59,23 +65,77 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = context.theme;
-    final colorScheme = context.colorScheme;
     final partAsync = ref.watch(partByIdProvider(widget.partId));
-    final movementsAsync = ref.watch(partMovementsStreamProvider(widget.partId));
+    final movementsAsync =
+        ref.watch(partMovementsStreamProvider(widget.partId));
 
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
     return Scaffold(
+      backgroundColor: KeraColors.surfaceCanvas,
       appBar: AppBar(
-        title: Text(l10n.stockMovementHistory),
+        backgroundColor: KeraColors.primaryNavy,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.stockMovementHistory,
+              style: KeraTypography.headlineSmall(color: Colors.white)
+                  .copyWith(fontWeight: FontWeight.w700),
+            ),
+            Text(
+              'የእንቅስቃሴ ታሪክ • Audit Ledger',
+              style: KeraTypography.labelSmall(
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
         actions: [
+          // Live Synced Pill
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(KeraRadii.full),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF89F5E7),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  'የተገናኘ',
+                  style: KeraTypography.labelSmall(
+                    color: const Color(0xFF89F5E7),
+                  ).copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          // Recalculate Button
           IconButton(
             icon: _isRecalculating
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const Icon(Icons.sync_rounded),
             tooltip: l10n.recalculateStock,
@@ -85,20 +145,45 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
       ),
       body: Column(
         children: [
-          // Part Information Header
+          // Part Information Header Banner
           partAsync.when(
             data: (part) {
               if (part == null) return const SizedBox.shrink();
+              final hasPhoto = part.photoLocalPath != null &&
+                  File(part.photoLocalPath!).existsSync();
+              final location = part.customLocation ?? part.locationName ?? '';
+
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: KeraColors.surfacePure,
+                  border: Border(
+                    bottom: BorderSide(color: KeraColors.outlineBorder),
+                  ),
+                ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      backgroundColor: colorScheme.primaryContainer,
-                      child: Icon(Icons.inventory_2_outlined,
-                          color: colorScheme.primary),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: KeraColors.surfaceContainer,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: KeraColors.outlineBorder),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: hasPhoto
+                          ? Image.file(
+                              File(part.photoLocalPath!),
+                              fit: BoxFit.cover,
+                            )
+                          : const Icon(
+                              Icons.inventory_2_outlined,
+                              color: KeraColors.primaryNavy,
+                              size: 24,
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -107,17 +192,36 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                         children: [
                           Text(
                             part.displayName,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: KeraTypography.titleMedium(
+                              color: KeraColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (part.partNumber != null)
-                            Text(
-                              part.partNumber!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              if (part.partNumber != null)
+                                Text(
+                                  part.partNumber!,
+                                  style: KeraTypography.bodySmall(
+                                    color: KeraColors.textSecondary,
+                                  ).copyWith(fontFamily: 'monospace'),
+                                ),
+                              if (part.partNumber != null &&
+                                  location.isNotEmpty)
+                                const Text(' • ',
+                                    style: TextStyle(
+                                        color: KeraColors.textMuted)),
+                              if (location.isNotEmpty)
+                                Text(
+                                  location,
+                                  style: KeraTypography.bodySmall(
+                                    color: const Color(0xFF92400E),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -126,17 +230,34 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                       children: [
                         Text(
                           l10n.currentStock,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                          style: KeraTypography.labelSmall(
+                            color: KeraColors.textSecondary,
                           ),
                         ),
-                        Text(
-                          '${part.cachedQuantity.toStringAsFixed(1)} ${part.unit ?? ''}',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
                             color: part.cachedQuantity > 0
-                                ? Colors.green.shade800
-                                : colorScheme.error,
+                                ? KeraColors.stockInBg
+                                : KeraColors.stockOutBg,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: part.cachedQuantity > 0
+                                  ? KeraColors.stockInText
+                                      .withValues(alpha: 0.3)
+                                  : KeraColors.stockOutText
+                                      .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Text(
+                            '${part.cachedQuantity.toStringAsFixed(1)} ${part.unit ?? ''}',
+                            style: KeraTypography.labelLarge(
+                              color: part.cachedQuantity > 0
+                                  ? KeraColors.stockInText
+                                  : KeraColors.stockOutText,
+                            ).copyWith(fontWeight: FontWeight.w800),
                           ),
                         ),
                       ],
@@ -152,7 +273,8 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
           // Movements Ledger List
           Expanded(
             child: movementsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () =>
+                  const Center(child: CircularProgressIndicator()),
               error: (err, _) => Center(child: Text(err.toString())),
               data: (movements) {
                 if (movements.isEmpty) {
@@ -162,25 +284,32 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.receipt_long_rounded,
-                            size: 64,
-                            color: colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.4),
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: KeraColors.surfaceContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.receipt_long_rounded,
+                              size: 40,
+                              color: KeraColors.textMuted,
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             l10n.noMovementsTitle,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: KeraTypography.headlineSmall(
+                              color: KeraColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             l10n.noMovementsDesc,
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                            style: KeraTypography.bodyMedium(
+                              color: KeraColors.textSecondary,
                             ),
                           ),
                         ],
@@ -189,124 +318,399 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                   );
                 }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  itemCount: movements.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final item = movements[index];
-                    final isPositive = item.quantityChange > 0;
-                    final isNeutral = item.quantityChange == 0;
+                // Filtered movements based on selected chip
+                final filtered = _selectedFilterType == null
+                    ? movements
+                    : movements
+                        .where((m) => m.type == _selectedFilterType)
+                        .toList();
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Movement Type Indicator Avatar
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: _getMovementBgColor(
-                                item.type, colorScheme),
-                            child: Icon(
-                              _getMovementIcon(item.type),
-                              size: 18,
-                              color: _getMovementTextColor(
-                                  item.type, colorScheme),
+                final purchaseCount = movements
+                    .where((m) =>
+                        m.type == MovementType.purchase ||
+                        m.type == MovementType.initial)
+                    .length;
+                final saleCount = movements
+                    .where((m) => m.type == MovementType.sale)
+                    .length;
+                final adjCount = movements
+                    .where((m) => m.type == MovementType.adjustment)
+                    .length;
+                final retCount = movements
+                    .where((m) => m.type == MovementType.returned)
+                    .length;
+
+                return Column(
+                  children: [
+                    // Horizontal Filter Chips Row (Stitch Screen 24)
+                    Container(
+                      color: KeraColors.surfacePure,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip(
+                              label: 'ሁሉም (All)',
+                              count: movements.length,
+                              isSelected: _selectedFilterType == null,
+                              onTap: () => setState(
+                                  () => _selectedFilterType = null),
                             ),
-                          ),
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 8),
+                            _buildFilterChip(
+                              label: 'የገቡ (+Restock)',
+                              count: purchaseCount,
+                              isSelected: _selectedFilterType ==
+                                  MovementType.purchase,
+                              onTap: () => setState(() =>
+                                  _selectedFilterType =
+                                      MovementType.purchase),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildFilterChip(
+                              label: 'የተሸጡ (-Sales)',
+                              count: saleCount,
+                              isSelected:
+                                  _selectedFilterType == MovementType.sale,
+                              onTap: () => setState(
+                                  () => _selectedFilterType = MovementType.sale),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildFilterChip(
+                              label: 'ማስተካከያ (Adj)',
+                              count: adjCount,
+                              isSelected: _selectedFilterType ==
+                                  MovementType.adjustment,
+                              onTap: () => setState(() =>
+                                  _selectedFilterType =
+                                      MovementType.adjustment),
+                            ),
+                            if (retCount > 0) ...[
+                              const SizedBox(width: 8),
+                              _buildFilterChip(
+                                label: 'ተመላሽ (Return)',
+                                count: retCount,
+                                isSelected: _selectedFilterType ==
+                                    MovementType.returned,
+                                onTap: () => setState(() =>
+                                    _selectedFilterType =
+                                        MovementType.returned),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
 
-                          // Type & Note & Date
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    // Timeline Audit Feed
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final item = filtered[index];
+                          final isPositive = item.quantityChange > 0;
+                          final isNeutral = item.quantityChange == 0;
+                          final isLast = index == filtered.length - 1;
+
+                          return IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      _getMovementTypeName(item.type, l10n),
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    if (item.unitCost != null) ...[
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        '(@ ${item.unitCost!.toStringAsFixed(2)} ብር)',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: colorScheme.onSurfaceVariant,
+                                // Vertical Connector Line & Bullet Node (Stitch Screen 22)
+                                SizedBox(
+                                  width: 28,
+                                  child: Stack(
+                                    alignment: Alignment.topCenter,
+                                    children: [
+                                      // Vertical line
+                                      if (!isLast)
+                                        Positioned(
+                                          top: 18,
+                                          bottom: 0,
+                                          child: Container(
+                                            width: 2,
+                                            color: KeraColors.outlineVariant,
+                                          ),
+                                        ),
+                                      // Node bullet
+                                      Container(
+                                        width: 14,
+                                        height: 14,
+                                        margin: const EdgeInsets.only(top: 14),
+                                        decoration: BoxDecoration(
+                                          color: KeraColors.surfacePure,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: _getBulletColor(item.type),
+                                            width: 2.5,
+                                          ),
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            width: 4,
+                                            height: 4,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  _getBulletColor(item.type),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
-                                  ],
-                                ),
-                                if (item.note != null &&
-                                    item.note!.trim().isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    item.note!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurface,
-                                    ),
                                   ),
-                                ],
-                                const SizedBox(height: 4),
-                                Text(
-                                  dateFormat.format(item.movedAt),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 8),
+
+                                // Timeline Entry Card
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: KeraColors.surfacePure,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: KeraColors.outlineBorder),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Color(0x08172B4D),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Top Row: Type name & Delta badge
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  _getMovementIcon(item.type),
+                                                  size: 16,
+                                                  color: _getBulletColor(
+                                                      item.type),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  _getMovementTypeName(
+                                                      item.type, l10n),
+                                                  style: KeraTypography
+                                                      .titleSmall(
+                                                    color:
+                                                        KeraColors.textPrimary,
+                                                  ).copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
+                                                if (item.unitCost != null) ...[
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '(@ ${item.unitCost!.toStringAsFixed(2)} ብር)',
+                                                    style: KeraTypography
+                                                        .bodySmall(
+                                                      color: KeraColors
+                                                          .textSecondary,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            // Delta Badge
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: isPositive
+                                                    ? KeraColors.stockInBg
+                                                    : isNeutral
+                                                        ? KeraColors
+                                                            .surfaceContainer
+                                                        : KeraColors.stockOutBg,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                '${isPositive ? '+' : ''}${item.quantityChange.toStringAsFixed(1)} pcs',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: isPositive
+                                                      ? KeraColors.stockInText
+                                                      : isNeutral
+                                                          ? KeraColors
+                                                              .textSecondary
+                                                          : KeraColors
+                                                              .stockOutText,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        // Note if present
+                                        if (item.note != null &&
+                                            item.note!.trim().isNotEmpty) ...[
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            item.note!,
+                                            style: KeraTypography.bodySmall(
+                                              color: KeraColors.textPrimary,
+                                            ),
+                                          ),
+                                        ],
+
+                                        const SizedBox(height: 8),
+
+                                        // Bottom Row: Date & Running Balance
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.access_time_rounded,
+                                                  size: 13,
+                                                  color: KeraColors.textMuted,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  dateFormat
+                                                      .format(item.movedAt),
+                                                  style: KeraTypography
+                                                      .labelSmall(
+                                                    color: KeraColors
+                                                        .textSecondary,
+                                                  ),
+                                                ),
+                                                if (item.referenceId !=
+                                                    null) ...[
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '#${item.referenceId}',
+                                                    style: KeraTypography
+                                                        .labelSmall(
+                                                      color:
+                                                          KeraColors.textMuted,
+                                                    ).copyWith(
+                                                        fontFamily:
+                                                            'monospace'),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            if (item.runningBalance !=
+                                                null) ...[
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: KeraColors
+                                                      .surfaceContainer,
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  '${l10n.runningBalance}: ${item.runningBalance!.toStringAsFixed(1)}',
+                                                  style: KeraTypography
+                                                      .labelSmall(
+                                                    color: KeraColors
+                                                        .textSecondary,
+                                                  ).copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-
-                          // Quantity Change & Running Balance
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '${isPositive ? '+' : ''}${item.quantityChange.toStringAsFixed(1)}',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: isPositive
-                                      ? Colors.green.shade700
-                                      : isNeutral
-                                          ? colorScheme.onSurfaceVariant
-                                          : colorScheme.error,
-                                ),
-                              ),
-                              if (item.runningBalance != null) ...[
-                                const SizedBox(height: 2),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.surfaceContainerHighest,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '${l10n.runningBalance}: ${item.runningBalance!.toStringAsFixed(1)}',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 );
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required int count,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? KeraColors.primaryNavy
+              : KeraColors.surfaceContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? KeraColors.primaryNavy
+                : KeraColors.outlineBorder,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? Colors.white : KeraColors.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : KeraColors.surfacePure,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.white : KeraColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -341,31 +745,17 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
     }
   }
 
-  Color _getMovementBgColor(MovementType type, ColorScheme colorScheme) {
+  Color _getBulletColor(MovementType type) {
     switch (type) {
       case MovementType.purchase:
       case MovementType.initial:
-        return Colors.green.withValues(alpha: 0.15);
+        return KeraColors.stockInText;
       case MovementType.sale:
-        return Colors.blue.withValues(alpha: 0.15);
+        return KeraColors.stockOutText;
       case MovementType.adjustment:
-        return Colors.orange.withValues(alpha: 0.15);
+        return const Color(0xFFD97706);
       case MovementType.returned:
-        return Colors.purple.withValues(alpha: 0.15);
-    }
-  }
-
-  Color _getMovementTextColor(MovementType type, ColorScheme colorScheme) {
-    switch (type) {
-      case MovementType.purchase:
-      case MovementType.initial:
-        return Colors.green.shade800;
-      case MovementType.sale:
-        return Colors.blue.shade800;
-      case MovementType.adjustment:
-        return Colors.orange.shade800;
-      case MovementType.returned:
-        return Colors.purple.shade800;
+        return const Color(0xFF7C3AED);
     }
   }
 }

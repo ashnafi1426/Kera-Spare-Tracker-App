@@ -1754,4 +1754,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adminVersionHelper =>
       'Current minimum required semver version (e.g. 1.0.0)';
+
+  @override
+  String get dashboardTab => 'Dashboard';
+
+  @override
+  String get dashboardOverview => 'Business Overview';
+
+  @override
+  String get activeSkus => 'Active SKUs';
+
+  @override
+  String get totalQuantityPcs => 'Total Quantity (pcs)';
+
+  @override
+  String get todayRevenue => 'Today\'s Revenue';
+
+  @override
+  String get estProfit => 'Estimated Profit';
+
+  @override
+  String get lowStockAlert => 'Low-Stock Alerts';
+
+  @override
+  String get outOfStockAlert => 'Out of Stock';
+
+  @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get addPartAction => '+ Part';
+
+  @override
+  String get newSaleAction => 'New Sale';
+
+  @override
+  String get restockAction => 'Restock';
+
+  @override
+  String get scannerAction => 'Scanner';
+
+  @override
+  String get salesTrends => 'Sales Trends';
+
+  @override
+  String get bestSellers => 'Best Sellers';
+
+  @override
+  String get recentTransactions => 'Recent Transactions';
+
+  @override
+  String get offlineModeActive => 'Offline Mode Active';
+
+  @override
+  String get retrySync => 'Retry Sync';
 }
