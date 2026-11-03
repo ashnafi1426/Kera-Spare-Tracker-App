@@ -509,8 +509,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   Row(
                                     children: [
                                       Text(
-                                        'የማመሳሰል ሁኔታ',
-                                        style: KeraTypography.titleSmall(),
+                                        context.tr('የማመሳሰል ሁኔታ', 'Sync Status'),
+                                        style: KeraTypography.titleSmall(color: context.textPrimaryColor),
                                       ),
                                       const SizedBox(width: 8),
                                       Container(
@@ -527,8 +527,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         ),
                                         child: Text(
                                           isSynced
-                                              ? '100% Synced'
-                                              : '$pendingCount Queued',
+                                              ? context.tr('የተመሳሰለ', 'Synced')
+                                              : context.tr('$pendingCount ያልተላከ', '$pendingCount Queued'),
                                           style: KeraTypography.labelSmall(
                                             color: isSynced
                                                 ? KeraColors.stockInText
@@ -540,25 +540,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ),
                                   Text(
                                     lastOnline == null
-                                        ? 'የመጨረሻ ማመሳሰል፡ አልተገናኘም'
-                                        : 'የመጨረሻ ማመሳሰል፡ ዛሬ 11:42 AM',
+                                        ? context.tr('የመጨረሻ ማመሳሰል፡ አልተገናኘም', 'Last sync: Not connected')
+                                        : context.tr('የመጨረሻ ማመሳሰል፡ ዛሬ 11:42 AM', 'Last sync: Today 11:42 AM'),
                                     style: KeraTypography.bodySmall(
-                                      color: KeraColors.textSecondary,
+                                      color: context.textSecondaryColor,
                                     ),
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                          const Icon(
+                          Icon(
                             Icons.chevron_right_rounded,
-                            color: KeraColors.textMuted,
+                            color: context.textMutedColor,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 10),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -566,17 +566,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Expanded(
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.storage_rounded,
                                 size: 16,
-                                color: KeraColors.textMuted,
+                                color: context.textMutedColor,
                               ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
-                                  'ከመስመር ውጭ ዳታ (SQLite)',
+                                  context.tr('ከመስመር ውጭ ዳታ (SQLite)', 'Offline Database (SQLite)'),
                                   style: KeraTypography.bodySmall(
-                                    color: KeraColors.textSecondary,
+                                    color: context.textSecondaryColor,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -586,7 +586,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '1,482 ዕቃዎች • 4.2 MB',
+                          context.tr('1,482 ዕቃዎች • 4.2 MB', '1,482 items • 4.2 MB'),
                           style: KeraTypography.labelSmall(
                             color: KeraColors.actionBlue,
                           ),
@@ -608,7 +608,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onPressed: () {
                           ref.read(syncPushServiceProvider).pushPendingQueue();
                           context.showSnackBar(
-                            'ማመሳሰል ተጀምሯል... (Syncing with server)',
+                            context.tr('ማመሳሰል ተጀምሯል...', 'Syncing with server...'),
                           );
                         },
                         icon: const Icon(Icons.sync_rounded, size: 18),
@@ -632,9 +632,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
@@ -642,35 +642,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.file_download_outlined,
                       titleAm: 'የዕቃዎች ዝርዝር ኤክስፖርት',
                       titleEn: '/ Export Inventory CSV',
-                      subtitle: 'የመጋዘን ካታሎግ በExcel/CSV ፎርማት',
+                      subtitle: 'የመጋዘን ካታሎግ በExcel/CSV ፎርማት / Inventory catalog in CSV/Excel',
                       onTap: user == null
                           ? null
                           : () => _handleExportInventory(context, user.ownerId),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.receipt_long_outlined,
                       titleAm: 'የሽያጭ ሪፖርት ኤክስፖርት',
                       titleEn: '/ Export Sales CSV',
-                      subtitle: 'የተጠናቀቁ ሽያጮች ዝርዝር በCSV',
+                      subtitle: 'የተጠናቀቁ ሽያጮች ዝርዝር በCSV / Completed sales records in CSV',
                       onTap: user == null
                           ? null
                           : () => _handleExportSales(context, user.ownerId),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.backup_rounded,
-                      titleAm: 'የዳታቤዝ መጠባበቂያ (Backup)',
-                      titleEn: '/ Backup SQLite',
-                      subtitle: 'ሙሉውን የአካባቢ ዳታ ወደ ፋይል ያስቀምጡ',
+                      titleAm: 'የዳታቤዝ መጠባበቂያ',
+                      titleEn: '/ Database Backup',
+                      subtitle: 'ሙሉውን የአካባቢ ዳታ ወደ ፋይል ያስቀምጡ / Export full local DB to file',
                       onTap: () => _handleBackupDatabase(context),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.settings_backup_restore_rounded,
-                      titleAm: 'ዳታቤዝ መልስ (Restore)',
-                      titleEn: '/ Restore SQLite',
-                      subtitle: 'የተቀመጠ የመጠባበቂያ ፋይል ይመልሱ',
+                      titleAm: 'ዳታቤዝ መልስ',
+                      titleEn: '/ Restore Database',
+                      subtitle: 'የተቀመጠ የመጠባበቂያ ፋይል ይመልሱ / Restore database from saved file',
                       onTap: () => _confirmRestoreDatabase(context),
                     ),
                   ],
@@ -687,16 +687,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
                     _buildSettingsRow(
                       icon: Icons.directions_car_rounded,
-                      titleAm: 'ስለ ኬራ መከታተያ / About Kera',
-                      titleEn: '',
+                      titleAm: 'ስለ ኬራ መከታተያ',
+                      titleEn: '/ About Kera Tracker',
                       subtitle: 'v2.4.0 Build 142 • Addis Ababa',
                       onTap: () {
                         context.showSnackBar(
@@ -704,27 +704,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         );
                       },
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.support_agent_rounded,
                       titleAm: 'የደንበኛ እገዛ እና ድጋፍ',
-                      titleEn: '/ Support',
-                      subtitle: 'Telegram & Phone direct support (8100)',
+                      titleEn: '/ Customer Support',
+                      subtitle: 'Telegram እና የስልክ ድጋፍ (8100) / Direct Phone & Telegram (8100)',
                       onTap: () {
                         context.showSnackBar(
-                          'ድጋፍ: 8100 ወይም @KeraSupportBot',
+                          context.tr('ድጋፍ: 8100 ወይም @KeraSupportBot', 'Support: 8100 or @KeraSupportBot'),
                         );
                       },
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.policy_rounded,
                       titleAm: 'የግላዊነት ፖሊሲ እና ውሎች',
-                      titleEn: '/ Privacy & Terms',
-                      subtitle: 'Privacy Policy & Terms of Service',
+                      titleEn: '/ Privacy Policy & Terms',
+                      subtitle: 'የአጠቃቀም ደንቦች እና ፖሊሲ / Privacy Policy & Terms of Service',
                       onTap: () {
                         context.showSnackBar(
-                          'የግላዊነት ፖሊሲ በቅርቡ ይዘመናል',
+                          context.tr('የግላዊነት ፖሊሲ በቅርቡ ይዘመናል', 'Privacy policy updating soon'),
                         );
                       },
                     ),
@@ -737,38 +737,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Section: የፈተና መሳሪያዎች (Benchmark & Developer Tools)
               ExpansionTile(
                 tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-                leading: const Icon(Icons.speed_rounded, color: KeraColors.primaryNavy),
+                leading: Icon(Icons.speed_rounded, color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
                 title: Text(
-                  'የሙከራ መሳሪያዎች (Benchmark Tools)',
-                  style: KeraTypography.titleSmall(),
+                  context.tr('የሙከራ መሳሪያዎች', 'Benchmark & Developer Tools'),
+                  style: KeraTypography.titleSmall(color: context.textPrimaryColor),
                 ),
                 subtitle: Text(
-                  'ዕቃዎችን በብዛት ለመሙላት እና ለማፅዳት',
-                  style: KeraTypography.labelSmall(color: KeraColors.textMuted),
+                  context.tr('ዕቃዎችን በብዛት ለመሙላት እና ለማፅዳት', 'Populate sample inventory and bulk actions'),
+                  style: KeraTypography.labelSmall(color: context.textMutedColor),
                 ),
                 children: [
                   ListTile(
                     leading: const Icon(Icons.add_chart_rounded, color: KeraColors.actionBlue),
-                    title: const Text('2,000 የሙከራ ዕቃዎችን ሙላ (Seed Test Parts)'),
+                    title: Text(context.tr('2,000 የሙከራ ዕቃዎችን ሙላ', 'Seed 2,000 Test Parts')),
                     onTap: () async {
-                      context.showSnackBar('ዕቃዎችን የመሙላት ሂደት ተጀምሯል...');
+                      context.showSnackBar(context.tr('ዕቃዎችን የመሙላት ሂደት ተጀምሯል...', 'Seeding parts in progress...'));
                       final success = await ref
                           .read(inventoryListProvider.notifier)
                           .seedTestParts(count: 2000);
                       if (context.mounted) {
                         if (success) {
-                          context.showSnackBar('2,000 ዕቃዎች በተሳካ ሁኔታ ተሞልተዋል');
+                          context.showSnackBar(context.tr('2,000 ዕቃዎች በተሳካ ሁኔታ ተሞልተዋል', 'Successfully seeded 2,000 parts'));
                         } else {
-                          context.showSnackBar('ዕቃዎችን መሙላት አልተሳካም', isError: true);
+                          context.showSnackBar(context.tr('ዕቃዎችን መሙላት አልተሳካም', 'Failed to seed parts'), isError: true);
                         }
                       }
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.delete_sweep_rounded, color: KeraColors.error),
-                    title: const Text(
-                      'የሙከራ ዕቃዎችን አፅዳ (Clear Test Parts)',
-                      style: TextStyle(color: KeraColors.error),
+                    title: Text(
+                      context.tr('የሙከራ ዕቃዎችን አፅዳ', 'Clear Test Parts'),
+                      style: const TextStyle(color: KeraColors.error),
                     ),
                     onTap: () => _confirmClearParts(context),
                   ),
@@ -794,7 +794,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onPressed: () => _handleLogout(context),
                   icon: const Icon(Icons.logout_rounded, size: 20),
                   label: Text(
-                    'ከመለያ ውጣ (Sign Out / Logout)',
+                    context.tr('ከመለያ ውጣ', 'Sign Out'),
                     style: KeraTypography.titleSmall(color: KeraColors.error),
                   ),
                 ),
