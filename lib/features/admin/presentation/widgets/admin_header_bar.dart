@@ -76,7 +76,7 @@ class AdminHeaderBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (actions != null) ...actions!,
+                  if (actions != null) ...?actions,
                 ],
               ),
 

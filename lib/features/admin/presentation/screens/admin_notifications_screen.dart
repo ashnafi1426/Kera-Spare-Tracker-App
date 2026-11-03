@@ -87,7 +87,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
                     child: Image.asset(
                       'assets/images/logo.png',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.settings_suggest_rounded,
                         color: AdminColors.headerNavy,
                         size: 20,

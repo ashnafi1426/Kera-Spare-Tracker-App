@@ -197,7 +197,7 @@ class _AdminOwnerDetailsScreenState
       if (!mounted) return;
       if (res.isSuccess) {
         context.pop();
-        ref.read(adminOwnersProvider.notifier).loadOwners();
+        await ref.read(adminOwnersProvider.notifier).loadOwners();
       }
     }
   }
@@ -315,7 +315,7 @@ class _AdminOwnerDetailsScreenState
                     child: Image.asset(
                       'assets/images/logo.png',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
+                      errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.settings_suggest_rounded,
                         color: AdminColors.headerNavy,
                         size: 20,
