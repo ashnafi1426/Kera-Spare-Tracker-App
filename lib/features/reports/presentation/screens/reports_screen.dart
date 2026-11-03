@@ -9,6 +9,7 @@ import '../../../../core/design/design.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../domain/models/chart_point.dart';
 import '../../domain/models/report_period.dart';
 import '../providers/reports_providers.dart';
@@ -46,19 +47,7 @@ class ReportsScreen extends ConsumerWidget {
         titleSpacing: 16,
         title: Row(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.analytics_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
+            const KeraLogoWidget(size: 36, borderRadius: 8),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -179,9 +168,9 @@ class ReportsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: KeraColors.surfaceCanvas,
+                  color: context.cardCanvasColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: KeraColors.outlineBorder),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Row(
                   children: [
@@ -191,13 +180,14 @@ class ReportsScreen extends ConsumerWidget {
                         children: [
                           Text(
                             context.tr('የሪፖርቶች ማጠቃለያ', 'Reports Overview'),
-                            style: KeraTypography.titleSmall()
-                                .copyWith(fontWeight: FontWeight.bold),
+                            style: KeraTypography.titleSmall(
+                              color: context.textPrimaryColor,
+                            ).copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             context.tr('የፋይናንስ እና ንግድ ጤንነት', 'Financial Health & Metrics'),
                             style: KeraTypography.labelSmall(
-                              color: KeraColors.textSecondary,
+                              color: context.textSecondaryColor,
                             ),
                           ),
                         ],
@@ -205,8 +195,8 @@ class ReportsScreen extends ConsumerWidget {
                     ),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: KeraColors.primaryNavy,
-                        side: const BorderSide(color: KeraColors.outlineBorder),
+                        foregroundColor: context.textPrimaryColor,
+                        side: BorderSide(color: context.borderColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -549,11 +539,11 @@ class ReportsScreen extends ConsumerWidget {
                 data: (points) {
                   return Card(
                     elevation: 0,
-                    color: KeraColors.surfacePure,
+                    color: context.cardBg,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(
-                        color: KeraColors.outlineBorder,
+                      side: BorderSide(
+                        color: context.borderColor,
                       ),
                     ),
                     child: Padding(
@@ -634,41 +624,46 @@ class ReportsScreen extends ConsumerWidget {
               // 5. Deep-Dive Analytic Module Cards (Stitch Screens 2, 3, 4, 5)
               Text(
                 context.tr('ዝርዝር ሪፖርቶች', 'Analytic Modules'),
-                style: KeraTypography.titleSmall()
-                    .copyWith(fontWeight: FontWeight.bold),
+                style: KeraTypography.titleSmall(
+                  color: context.textPrimaryColor,
+                ).copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               _buildModuleCard(
+                context: context,
                 icon: Icons.query_stats_rounded,
-                iconColor: KeraColors.primaryNavy,
-                iconBg: KeraColors.surfaceContainer,
+                iconColor: context.isDark ? KeraColors.actionBlue : KeraColors.primaryNavy,
+                iconBg: context.isDark ? const Color(0xFF1E3A5F) : KeraColors.surfaceContainer,
                 title: context.tr('የሽያጭ ሪፖርት', 'Sales Analytics'),
                 subtitle: context.tr('የገቢ ሂደት እና የክፍያ ዓይነቶች', 'Revenue Velocity & Payment Breakdown'),
                 onTap: () => SalesAnalyticsSheet.show(context),
               ),
               const SizedBox(height: 8),
               _buildModuleCard(
+                context: context,
                 icon: Icons.payments_rounded,
-                iconColor: Colors.green.shade800,
-                iconBg: Colors.green.shade50,
+                iconColor: Colors.green.shade700,
+                iconBg: context.isDark ? const Color(0xFF163824) : Colors.green.shade50,
                 title: context.tr('የትርፍ እና ወጪ ሪፖርት', 'Profit & Margins'),
                 subtitle: context.tr('የትርፍ ህዳግ እና የግዢ ወጪ ትንተና', 'P&L Waterfall & Direct COGS Analysis'),
                 onTap: () => ProfitReportsSheet.show(context),
               ),
               const SizedBox(height: 8),
               _buildModuleCard(
+                context: context,
                 icon: Icons.inventory_2_rounded,
-                iconColor: Colors.teal.shade800,
-                iconBg: Colors.teal.shade50,
+                iconColor: Colors.teal.shade700,
+                iconBg: context.isDark ? const Color(0xFF133836) : Colors.teal.shade50,
                 title: context.tr('የመጋዘን ክምችት ሪፖርት', 'Inventory Health'),
                 subtitle: context.tr('የጠቅላላ ክምችት ካፒታል እና ሁኔታ', 'Total Capital Locked & Health Breakdown'),
                 onTap: () => InventoryReportsSheet.show(context),
               ),
               const SizedBox(height: 8),
               _buildModuleCard(
+                context: context,
                 icon: Icons.leaderboard_rounded,
-                iconColor: Colors.amber.shade900,
-                iconBg: Colors.amber.shade50,
+                iconColor: Colors.amber.shade700,
+                iconBg: context.isDark ? const Color(0xFF3B2D15) : Colors.amber.shade50,
                 title: context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best Sellers'),
                 subtitle: context.tr('በሽያጭ ቀዳሚ የሆኑ 10 ዕቃዎች', 'Top 10 Moving Products Leaderboard'),
                 onTap: () => BestSellersSheet.show(context),
@@ -685,11 +680,11 @@ class ReportsScreen extends ConsumerWidget {
                 data: (parts) {
                   return Card(
                     elevation: 0,
-                    color: KeraColors.surfacePure,
+                    color: context.cardBg,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(
-                        color: KeraColors.outlineBorder,
+                      side: BorderSide(
+                        color: context.borderColor,
                       ),
                     ),
                     child: Padding(
@@ -848,11 +843,11 @@ class ReportsScreen extends ConsumerWidget {
                       // Total Stock Value
                       Card(
                         elevation: 0,
-                        color: KeraColors.surfaceCanvas,
+                        color: context.cardBg,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: const BorderSide(
-                            color: KeraColors.outlineBorder,
+                          side: BorderSide(
+                            color: context.borderColor,
                           ),
                         ),
                         child: Padding(
@@ -912,14 +907,14 @@ class ReportsScreen extends ConsumerWidget {
                       Card(
                         elevation: 0,
                         color: valuation.lowStockCount > 0
-                            ? Colors.amber.shade50
-                            : KeraColors.surfaceCanvas,
+                            ? (context.isDark ? const Color(0xFF38290E) : Colors.amber.shade50)
+                            : context.cardBg,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(
                             color: valuation.lowStockCount > 0
-                                ? Colors.amber.shade300
-                                : KeraColors.outlineBorder,
+                                ? (context.isDark ? Colors.amber.shade700 : Colors.amber.shade300)
+                                : context.borderColor,
                           ),
                         ),
                         child: Padding(
@@ -1007,12 +1002,14 @@ class ReportsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isWarning ? KeraColors.warningAmberBg : KeraColors.surfaceCanvas,
+        color: isWarning
+            ? (context.isDark ? const Color(0xFF3B2D15) : KeraColors.warningAmberBg)
+            : context.cardCanvasColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isWarning
               ? KeraColors.warningAmberBorder
-              : KeraColors.outlineBorder,
+              : context.borderColor,
         ),
       ),
       child: Column(
@@ -1026,8 +1023,8 @@ class ReportsScreen extends ConsumerWidget {
                   title,
                   style: KeraTypography.labelSmall(
                     color: isWarning
-                        ? KeraColors.warningAmber
-                        : KeraColors.textSecondary,
+                        ? (context.isDark ? Colors.amber.shade300 : KeraColors.warningAmber)
+                        : context.textSecondaryColor,
                   ).copyWith(fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1044,8 +1041,8 @@ class ReportsScreen extends ConsumerWidget {
               value,
               style: KeraTypography.headlineSmall(
                 color: isWarning
-                    ? KeraColors.warningAmber
-                    : KeraColors.textPrimary,
+                    ? (context.isDark ? Colors.amber.shade300 : KeraColors.warningAmber)
+                    : context.textPrimaryColor,
               ).copyWith(fontWeight: FontWeight.w800),
             ),
           ),
@@ -1054,8 +1051,8 @@ class ReportsScreen extends ConsumerWidget {
             subtitle,
             style: KeraTypography.labelSmall(
               color: isWarning
-                  ? Colors.brown.shade800
-                  : KeraColors.textMuted,
+                  ? (context.isDark ? Colors.amber.shade200 : Colors.brown.shade800)
+                  : context.textMutedColor,
             ).copyWith(fontSize: 10),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1066,6 +1063,7 @@ class ReportsScreen extends ConsumerWidget {
   }
 
   Widget _buildModuleCard({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
@@ -1079,9 +1077,9 @@ class ReportsScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: KeraColors.surfaceCanvas,
+          color: context.cardCanvasColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KeraColors.outlineBorder),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           children: [
@@ -1101,20 +1099,21 @@ class ReportsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: KeraTypography.labelMedium()
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: KeraTypography.labelMedium(
+                      color: context.textPrimaryColor,
+                    ).copyWith(fontWeight: FontWeight.bold),
                   ),
                   Text(
                     subtitle,
                     style: KeraTypography.bodySmall(
-                      color: KeraColors.textSecondary,
+                      color: context.textSecondaryColor,
                     ).copyWith(fontSize: 11),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: KeraColors.textSecondary),
+            Icon(Icons.chevron_right_rounded,
+                color: context.textSecondaryColor),
           ],
         ),
       ),

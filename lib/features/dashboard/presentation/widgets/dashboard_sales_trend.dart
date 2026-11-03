@@ -74,13 +74,13 @@ class DashboardSalesTrend extends StatelessWidget {
                       context.tr('የሽያጭ ሂደት', 'Sales Trend'),
                       style: KeraTypography.titleMedium().copyWith(
                         fontWeight: FontWeight.bold,
-                        color: KeraColors.textPrimary,
+                        color: context.textPrimaryColor,
                       ),
                     ),
                     Text(
                       context.tr('የገቢ እና ትርፍ ሁኔታ', 'Revenue & performance insights'),
                       style: KeraTypography.labelSmall().copyWith(
-                        color: KeraColors.textSecondary,
+                        color: context.textSecondaryColor,
                       ),
                     ),
                   ],
@@ -91,7 +91,7 @@ class DashboardSalesTrend extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: KeraColors.borderNeutral,
+                  color: context.cardCanvasColor,
                   borderRadius: BorderRadius.circular(KeraRadii.xs),
                 ),
                 child: Row(
@@ -127,7 +127,7 @@ class DashboardSalesTrend extends StatelessWidget {
               vertical: KeraSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: KeraColors.surfaceSubtle,
+              color: context.cardCanvasColor,
               borderRadius: BorderRadius.circular(KeraRadii.xs),
             ),
             child: Row(
@@ -138,7 +138,7 @@ class DashboardSalesTrend extends StatelessWidget {
                     Text(
                       '${context.tr("ጠቅላላ ገቢ", "Period Revenue")}: ',
                       style: KeraTypography.labelSmall().copyWith(
-                        color: KeraColors.textSecondary,
+                        color: context.textSecondaryColor,
                       ),
                     ),
                     Text(
@@ -285,14 +285,16 @@ class _PeriodTab extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (context.isDark ? KeraColors.actionBlue : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(KeraRadii.xs),
           boxShadow: isSelected
-              ? const [
+              ? [
                   BoxShadow(
-                    color: Color(0x0C000000),
+                    color: context.isDark ? Colors.black26 : const Color(0x0C000000),
                     blurRadius: 2,
-                    offset: Offset(0, 1),
+                    offset: const Offset(0, 1),
                   ),
                 ]
               : null,
@@ -302,8 +304,8 @@ class _PeriodTab extends StatelessWidget {
           style: KeraTypography.labelSmall().copyWith(
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             color: isSelected
-                ? KeraColors.primaryNavy
-                : KeraColors.textSecondary,
+                ? (context.isDark ? Colors.white : KeraColors.primaryNavy)
+                : context.textSecondaryColor,
             fontSize: 11,
           ),
         ),

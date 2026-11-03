@@ -42,7 +42,7 @@ class DashboardBestSellers extends StatelessWidget {
                     context.tr('ተፈላጊ መለዋወጫዎች', 'Top Selling Parts'),
                     style: KeraTypography.titleMedium().copyWith(
                       fontWeight: FontWeight.bold,
-                      color: KeraColors.textPrimary,
+                      color: context.textPrimaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -50,7 +50,7 @@ class DashboardBestSellers extends StatelessWidget {
                   Text(
                     context.tr('በሽያጭ ብዛት ቀዳሚ የሆኑ', 'Highest volume moving parts'),
                     style: KeraTypography.labelSmall().copyWith(
-                      color: KeraColors.textSecondary,
+                      color: context.textSecondaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -84,7 +84,7 @@ class DashboardBestSellers extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: KeraSpacing.xs),
               child: Material(
-                color: KeraColors.surfaceCard,
+                color: context.cardBg,
                 borderRadius: BorderRadius.circular(KeraRadii.md),
                 child: InkWell(
                   onTap: onItemTap != null ? () => onItemTap!(item) : null,
@@ -96,7 +96,7 @@ class DashboardBestSellers extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(KeraRadii.md),
-                      border: Border.all(color: KeraColors.borderVariant),
+                      border: Border.all(color: context.borderColor),
                     ),
                     child: Row(
                       children: [
@@ -107,7 +107,7 @@ class DashboardBestSellers extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: index == 0
                                 ? const Color(0xFFFEF3C7)
-                                : KeraColors.surfaceSubtle,
+                                : context.cardCanvasColor,
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,
@@ -118,7 +118,7 @@ class DashboardBestSellers extends StatelessWidget {
                               fontSize: 11,
                               color: index == 0
                                   ? const Color(0xFFB45309)
-                                  : KeraColors.textSecondary,
+                                  : context.textSecondaryColor,
                             ),
                           ),
                         ),
@@ -133,7 +133,7 @@ class DashboardBestSellers extends StatelessWidget {
                                 item.partName,
                                 style: KeraTypography.bodyMedium().copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: KeraColors.textPrimary,
+                                  color: context.textPrimaryColor,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -150,7 +150,7 @@ class DashboardBestSellers extends StatelessWidget {
                               '${item.quantitySold} $soldUnit',
                               style: KeraTypography.labelSmall().copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: KeraColors.textPrimary,
+                                color: context.textPrimaryColor,
                               ),
                             ),
                             Text(

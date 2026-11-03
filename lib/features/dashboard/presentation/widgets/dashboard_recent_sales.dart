@@ -63,7 +63,7 @@ class DashboardRecentSales extends StatelessWidget {
                     context.tr('የቅርብ ሽያጮች', 'Recent Sales'),
                     style: KeraTypography.titleMedium().copyWith(
                       fontWeight: FontWeight.bold,
-                      color: KeraColors.textPrimary,
+                      color: context.textPrimaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -71,7 +71,7 @@ class DashboardRecentSales extends StatelessWidget {
                   Text(
                     context.tr('የቅርብ የደንበኛ ሽያጭ መዝገቦች', 'Latest recorded customer checkouts'),
                     style: KeraTypography.labelSmall().copyWith(
-                      color: KeraColors.textSecondary,
+                      color: context.textSecondaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -87,7 +87,7 @@ class DashboardRecentSales extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: KeraSpacing.xs),
               child: Material(
-                color: KeraColors.surfaceCard,
+                color: context.cardBg,
                 borderRadius: BorderRadius.circular(KeraRadii.md),
                 child: InkWell(
                   onTap: onSaleTap != null ? () => onSaleTap!(sale) : null,
@@ -99,7 +99,7 @@ class DashboardRecentSales extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(KeraRadii.md),
-                      border: Border.all(color: KeraColors.borderVariant),
+                      border: Border.all(color: context.borderColor),
                     ),
                     child: Row(
                       children: [
@@ -128,7 +128,7 @@ class DashboardRecentSales extends StatelessWidget {
                                 sale.receiptNumber ?? sale.id.substring(0, 8),
                                 style: KeraTypography.bodyMedium().copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: KeraColors.textPrimary,
+                                  color: context.textPrimaryColor,
                                   fontFamily: 'monospace',
                                 ),
                                 maxLines: 1,
@@ -139,7 +139,7 @@ class DashboardRecentSales extends StatelessWidget {
                                   Text(
                                     _formatTime(context, sale.soldAt),
                                     style: KeraTypography.labelSmall().copyWith(
-                                      color: KeraColors.textSecondary,
+                                      color: context.textSecondaryColor,
                                       fontSize: 10,
                                     ),
                                   ),
@@ -150,14 +150,16 @@ class DashboardRecentSales extends StatelessWidget {
                                       vertical: 1,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: KeraColors.borderNeutral,
+                                      color: context.cardCanvasColor,
                                       borderRadius: BorderRadius.circular(3),
                                     ),
                                     child: Text(
                                       _getPaymentMethodLabel(context, sale.paymentMethod),
                                       style: KeraTypography.labelSmall().copyWith(
                                         fontSize: 9,
-                                        color: KeraColors.primaryNavy,
+                                        color: context.isDark
+                                            ? Colors.white70
+                                            : KeraColors.primaryNavy,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -175,13 +177,13 @@ class DashboardRecentSales extends StatelessWidget {
                               CurrencyFormatter.formatEtb(sale.totalAmount),
                               style: KeraTypography.labelLarge().copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: KeraColors.textPrimary,
+                                color: context.textPrimaryColor,
                               ),
                             ),
                             Text(
                               '${sale.items.length} $itemsUnit',
                               style: KeraTypography.labelSmall().copyWith(
-                                color: KeraColors.textSecondary,
+                                color: context.textSecondaryColor,
                                 fontSize: 10,
                               ),
                             ),

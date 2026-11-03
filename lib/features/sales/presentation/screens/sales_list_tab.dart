@@ -7,6 +7,7 @@ import '../../../../core/design/design.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
 import '../providers/sales_providers.dart';
 
@@ -63,37 +64,45 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
     final dayHeaderFormat = DateFormat('EEEE, MMM d, yyyy');
 
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         backgroundColor: KeraColors.primaryNavy,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              l10n.navSales,
-              style: KeraTypography.headlineSmall(color: Colors.white)
-                  .copyWith(fontWeight: FontWeight.w700),
-            ),
-            Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: KeraColors.tealAccent,
-                    shape: BoxShape.circle,
+            const KeraLogoWidget(size: 34, borderRadius: 6),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.navSales,
+                    style: KeraTypography.headlineSmall(color: Colors.white)
+                        .copyWith(fontWeight: FontWeight.w700),
                   ),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  context.tr('የሽያጭ ታሪክ • ኬራ ዞን 4', 'Sales History • Kera Hub'),
-                  style: KeraTypography.labelSmall(
-                    color: Colors.white.withValues(alpha: 0.7),
+                  Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: KeraColors.tealAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        context.tr('የሽያጭ ታሪክ • ኬራ ዞን 4', 'Sales History • Kera Hub'),
+                        style: KeraTypography.labelSmall(
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -240,10 +249,16 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: KeraColors.outlineBorder),
-                  boxShadow: const [KeraColors.shadowLevel1],
+                  border: Border.all(color: context.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.isDark ? Colors.black26 : const Color(0x0D172B4D),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -267,13 +282,13 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: KeraColors.surfaceCanvas,
+                            color: context.cardCanvasColor,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             '${allSales.length} ${context.tr("ግብይቶች", "sales")}',
                             style: KeraTypography.labelSmall(
-                              color: KeraColors.textPrimary,
+                              color: context.textPrimaryColor,
                             ).copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -287,14 +302,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                         Text(
                           CurrencyFormatter.formatEtb(totalRevenue),
                           style: KeraTypography.headlineSmall(
-                            color: KeraColors.primaryNavy,
+                            color: context.textPrimaryColor,
                           ).copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           l10n.totalRevenue,
                           style: KeraTypography.labelSmall(
-                            color: KeraColors.textSecondary,
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ],
@@ -309,11 +324,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
-                              color: KeraColors.surfaceCanvas,
+                              color: context.cardCanvasColor,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                  color: KeraColors.outlineBorder
-                                      .withValues(alpha: 0.6)),
+                              border: Border.all(color: context.borderColor),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,7 +340,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                       child: Text(
                                         '${l10n.totalProfit} (Net)',
                                         style: KeraTypography.labelSmall(
-                                          color: KeraColors.textSecondary,
+                                          color: context.textSecondaryColor,
                                         ).copyWith(fontSize: 10),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -342,14 +355,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                   child: Text(
                                     '+${CurrencyFormatter.formatEtb(totalProfit)}',
                                     style: KeraTypography.labelLarge(
-                                      color: Colors.green.shade800,
+                                      color: Colors.green.shade700,
                                     ).copyWith(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Text(
                                   '~${margin.toStringAsFixed(1)}% ${context.tr("የትርፍ መጠን", "net margin")}',
                                   style: KeraTypography.labelSmall(
-                                    color: KeraColors.textMuted,
+                                    color: context.textMutedColor,
                                   ).copyWith(fontSize: 10),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -367,26 +380,24 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
-                              color: KeraColors.surfaceCanvas,
+                              color: context.cardCanvasColor,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                  color: KeraColors.outlineBorder
-                                      .withValues(alpha: 0.6)),
+                              border: Border.all(color: context.borderColor),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.inventory_2_outlined,
+                                    Icon(Icons.inventory_2_outlined,
                                         size: 14,
-                                        color: KeraColors.textSecondary),
+                                        color: context.textSecondaryColor),
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
                                         context.tr('የተሸጡ ዕቃዎች', 'Units Sold'),
                                         style: KeraTypography.labelSmall(
-                                          color: KeraColors.textSecondary,
+                                          color: context.textSecondaryColor,
                                         ).copyWith(fontSize: 10),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -398,13 +409,13 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                 Text(
                                   '${totalUnits.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
                                   style: KeraTypography.labelLarge(
-                                    color: KeraColors.primaryNavy,
+                                    color: context.textPrimaryColor,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   context.tr('100% ኦሪጅናል ስፔር', '100% Genuine'),
                                   style: KeraTypography.labelSmall(
-                                    color: KeraColors.textMuted,
+                                    color: context.textMutedColor,
                                   ).copyWith(fontSize: 10),
                                 ),
                               ],
@@ -443,14 +454,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     : null,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.cardBg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: KeraColors.outlineBorder),
+                  borderSide: BorderSide(color: context.borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: KeraColors.outlineBorder),
+                  borderSide: BorderSide(color: context.borderColor),
                 ),
               ),
               onChanged: (val) {
@@ -553,7 +564,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                               Text(
                                 dayHeaderFormat.format(group.date),
                                 style: KeraTypography.labelLarge(
-                                  color: KeraColors.primaryNavy,
+                                  color: context.textPrimaryColor,
                                 ).copyWith(fontWeight: FontWeight.w800),
                               ),
                               Container(
@@ -562,15 +573,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: context.cardBg,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: KeraColors.outlineBorder),
+                                  border: Border.all(color: context.borderColor),
                                 ),
                                 child: Text(
                                   '${l10n.dayTotal}: ${CurrencyFormatter.formatEtb(group.totalAmount)}',
                                   style: KeraTypography.labelSmall(
-                                    color: KeraColors.primaryNavy,
+                                    color: context.textPrimaryColor,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -583,12 +593,10 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                           return Card(
                             margin: const EdgeInsets.only(bottom: 10),
                             elevation: 0,
-                            color: Colors.white,
+                            color: context.cardBg,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
-                              side: const BorderSide(
-                                color: KeraColors.outlineBorder,
-                              ),
+                              side: BorderSide(color: context.borderColor),
                             ),
                             child: InkWell(
                               borderRadius: BorderRadius.circular(14),
@@ -614,7 +622,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                                   style: KeraTypography
                                                       .labelLarge(
                                                     color:
-                                                        KeraColors.primaryNavy,
+                                                        context.textPrimaryColor,
                                                   ).copyWith(
                                                       fontWeight:
                                                           FontWeight.w800),
@@ -701,19 +709,17 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                                         vertical: 2),
                                                 decoration: BoxDecoration(
                                                   color:
-                                                      KeraColors.surfaceCanvas,
+                                                      context.cardCanvasColor,
                                                   borderRadius:
                                                       BorderRadius.circular(6),
                                                   border: Border.all(
-                                                      color: KeraColors
-                                                          .outlineBorder),
+                                                      color: context.borderColor),
                                                 ),
                                                 child: Text(
                                                   sale.paymentMethod!,
                                                   style: KeraTypography
                                                       .labelSmall(
-                                                    color: KeraColors
-                                                        .textSecondary,
+                                                    color: context.textSecondaryColor,
                                                   ).copyWith(fontSize: 11),
                                                 ),
                                               ),
@@ -734,7 +740,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                             sale.totalAmount,
                                           ),
                                           style: KeraTypography.titleSmall(
-                                            color: KeraColors.primaryNavy,
+                                            color: context.textPrimaryColor,
                                           ).copyWith(
                                               fontWeight: FontWeight.w900),
                                         ),
