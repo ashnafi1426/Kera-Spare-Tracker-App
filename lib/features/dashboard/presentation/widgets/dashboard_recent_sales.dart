@@ -26,7 +26,10 @@ class DashboardRecentSales extends StatelessWidget {
     return '$hour:$minute $period';
   }
 
-  String _getPaymentMethodLabel(BuildContext context, String method) {
+  String _getPaymentMethodLabel(BuildContext context, String? method) {
+    if (method == null || method.isEmpty) {
+      return context.tr('ጥሬ ገንዘብ', 'Cash');
+    }
     switch (method.toUpperCase()) {
       case 'CASH':
         return context.tr('ጥሬ ገንዘብ', 'Cash');
@@ -134,7 +137,7 @@ class DashboardRecentSales extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    _formatTime(context, sale.createdAt),
+                                    _formatTime(context, sale.soldAt),
                                     style: KeraTypography.labelSmall().copyWith(
                                       color: KeraColors.textSecondary,
                                       fontSize: 10,
@@ -164,7 +167,6 @@ class DashboardRecentSales extends StatelessWidget {
                             ],
                           ),
                         ),
-
                         // Items & Amount
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,

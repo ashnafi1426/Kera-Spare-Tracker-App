@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
@@ -87,7 +88,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  'የሽያጭ ታሪክ • Kera Zone 4',
+                  context.tr('የሽያጭ ታሪክ • ኬራ ዞን 4', 'Sales History • Kera Hub'),
                   style: KeraTypography.labelSmall(
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -97,18 +98,63 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
           ],
         ),
         actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final isAmharic = context.isAmharic;
+              return InkWell(
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(
+                        Locale(isAmharic ? 'en' : 'am'),
+                      );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.language_rounded,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAmharic ? 'English' : 'አማርኛ',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.download_rounded),
-            tooltip: 'Export CSV / Excel',
+            tooltip: context.tr('ሪፖርት አውርድ', 'Export Report'),
             onPressed: () {
-              context.showSnackBar('የሽያጭ ሪፖርት ወደ ኤክሴል ተልኳል / Report Exported');
+              context.showSnackBar(
+                context.tr(
+                  'የሽያጭ ሪፖርት በተሳካ ሁኔታ ተዘጋጅቷል',
+                  'Sales report exported successfully',
+                ),
+              );
             },
           ),
           IconButton(
             icon: const Icon(Icons.sync_rounded),
-            tooltip: 'Sync Status',
+            tooltip: context.tr('የማመሳሰል ሁኔታ', 'Sync Status'),
             onPressed: () {
-              context.showSnackBar('ሽያጮች ተመሳስለዋል / All Sales Synced');
+              context.showSnackBar(
+                context.tr('ሁሉም ሽያጮች ተመሳስለዋል', 'All sales synced'),
+              );
             },
           ),
           const SizedBox(width: 4),
@@ -140,21 +186,21 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
               child: Row(
                 children: [
                   _buildTimeSegmentButton(
-                    label: 'ዛሬ (Today)',
+                    label: context.tr('ዛሬ', 'Today'),
                     isSelected: selectedFilter == DateRangeType.today,
                     onTap: () => ref
                         .read(salesHistoryDateFilterProvider.notifier)
                         .setFilter(DateRangeType.today),
                   ),
                   _buildTimeSegmentButton(
-                    label: 'ሳምንት (Week)',
+                    label: context.tr('ሳምንት', 'Week'),
                     isSelected: selectedFilter == DateRangeType.thisWeek,
                     onTap: () => ref
                         .read(salesHistoryDateFilterProvider.notifier)
                         .setFilter(DateRangeType.thisWeek),
                   ),
                   _buildTimeSegmentButton(
-                    label: 'ወር (Month)',
+                    label: context.tr('ወር', 'Month'),
                     isSelected: selectedFilter == DateRangeType.thisMonth,
                     onTap: () => ref
                         .read(salesHistoryDateFilterProvider.notifier)
@@ -164,7 +210,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     label: selectedFilter == DateRangeType.custom &&
                             ref.watch(salesHistoryCustomRangeProvider) != null
                         ? '${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.start)} - ${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.end)}'
-                        : 'ብጁ (Custom)',
+                        : context.tr('ብጁ', 'Custom'),
                     isSelected: selectedFilter == DateRangeType.custom,
                     onTap: _pickCustomRange,
                   ),
@@ -210,7 +256,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                 size: 18, color: KeraColors.actionBlue),
                             const SizedBox(width: 6),
                             Text(
-                              'የዕለቱ የሂሳብ ማጠቃለያ / Sales Audit',
+                              context.tr('የሽያጭ ማጠቃለያ', 'Sales Audit Summary'),
                               style: KeraTypography.labelSmall(
                                 color: KeraColors.textSecondary,
                               ).copyWith(fontWeight: FontWeight.bold),
@@ -225,7 +271,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${allSales.length} ግብይቶች',
+                            '${allSales.length} ${context.tr("ግብይቶች", "sales")}',
                             style: KeraTypography.labelSmall(
                               color: KeraColors.textPrimary,
                             ).copyWith(fontWeight: FontWeight.bold),
@@ -301,7 +347,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                   ),
                                 ),
                                 Text(
-                                  '~${margin.toStringAsFixed(1)}% የማርጂን ተመን',
+                                  '~${margin.toStringAsFixed(1)}% ${context.tr("የትርፍ መጠን", "net margin")}',
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.textMuted,
                                   ).copyWith(fontSize: 10),
@@ -338,7 +384,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        'የተሸጡ እቃዎች',
+                                        context.tr('የተሸጡ ዕቃዎች', 'Units Sold'),
                                         style: KeraTypography.labelSmall(
                                           color: KeraColors.textSecondary,
                                         ).copyWith(fontSize: 10),
@@ -350,13 +396,13 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${totalUnits.toStringAsFixed(0)} pcs',
+                                  '${totalUnits.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
                                   style: KeraTypography.labelLarge(
                                     color: KeraColors.primaryNavy,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  '100% ኦሪጅናል ስፔር',
+                                  context.tr('100% ኦሪጅናል ስፔር', '100% Genuine'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.textMuted,
                                   ).copyWith(fontSize: 10),
@@ -422,15 +468,15 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildSyncChip('ሁሉም (All)', 'all', null),
+                _buildSyncChip(context.tr('ሁሉም', 'All'), 'all', null),
                 const SizedBox(width: 8),
                 _buildSyncChip(
-                    'የተመሳሰሉ (Synced)', 'synced', KeraColors.success),
+                    context.tr('የተመሳሰሉ', 'Synced'), 'synced', KeraColors.success),
                 const SizedBox(width: 8),
                 _buildSyncChip(
-                    'በወረፋ (Pending)', 'pending', KeraColors.warningAmber),
+                    context.tr('በወረፋ', 'Pending'), 'pending', KeraColors.warningAmber),
                 const SizedBox(width: 8),
-                _buildSyncChip('ስህተት (Failed)', 'failed', KeraColors.errorRed),
+                _buildSyncChip(context.tr('ያልተሳኩ', 'Failed'), 'failed', KeraColors.errorRed),
               ],
             ),
           ),
@@ -586,7 +632,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                             ),
                                             const SizedBox(height: 3),
                                             Text(
-                                              '${sale.items.length} ዕቃዎች ${sale.notes != null && sale.notes!.isNotEmpty ? "• ${sale.notes!}" : ""}',
+                                              '${sale.items.length} ${context.tr("ዕቃዎች", "items")}${sale.notes != null && sale.notes!.isNotEmpty ? " • ${sale.notes!}" : ""}',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: KeraTypography.bodySmall(
@@ -619,7 +665,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                               ),
                                               const SizedBox(width: 4),
                                               Text(
-                                                'የተመሳሰለ (Synced)',
+                                                context.tr('የተመሳሰለ', 'Synced'),
                                                 style: KeraTypography.labelSmall(
                                                   color: KeraColors.stockInText,
                                                 ).copyWith(

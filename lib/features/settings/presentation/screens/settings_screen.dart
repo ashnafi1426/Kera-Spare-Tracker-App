@@ -59,13 +59,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         foregroundColor: Colors.white,
         elevation: 1,
         title: Text(
-          'ቅንብሮች / Settings',
+          context.tr('ቅንብሮች', 'Settings'),
           style: KeraTypography.titleMedium(color: Colors.white),
         ),
         actions: [
+          // Language toggle pill
+          Consumer(
+            builder: (context, ref, _) {
+              final isAmharic = context.isAmharic;
+              return InkWell(
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(
+                        Locale(isAmharic ? 'en' : 'am'),
+                      );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.language_rounded,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAmharic ? 'English' : 'አማርኛ',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 6),
+
           // Network Sync Status Pill
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
               color: Colors.white.withAlpha(20),
@@ -85,7 +126,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  isSynced ? 'የተገናኘ / Synced' : '$pendingCount በመጠባበቅ ላይ',
+                  isSynced
+                      ? context.tr('የተገናኘ', 'Synced')
+                      : '$pendingCount ${context.tr("በመጠባበቅ ላይ", "pending")}',
                   style: KeraTypography.labelSmall(color: Colors.white),
                 ),
                 const SizedBox(width: 4),
@@ -965,13 +1008,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required IconData icon,
     required String title,
   }) {
+    String displayTitle = title;
+    if (title.contains(' / ')) {
+      final parts = title.split(' / ');
+      displayTitle = context.isAmharic ? parts[0].trim() : parts[1].trim();
+    }
     return Row(
       children: [
         Icon(icon, size: 16, color: KeraColors.actionBlue),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            title,
+            displayTitle,
             style: KeraTypography.labelSmall(color: KeraColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -991,6 +1039,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Widget? trailingWidget,
     VoidCallback? onTap,
   }) {
+    final cleanEn = titleEn.startsWith('/')
+        ? titleEn.substring(1).trim()
+        : titleEn.trim();
+    final displayTitle = context.isAmharic
+        ? titleAm
+        : (cleanEn.isNotEmpty ? cleanEn : titleAm);
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -1015,28 +1070,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          titleAm,
-                          style: KeraTypography.titleSmall(),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (titleEn.isNotEmpty) ...[
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            titleEn,
-                            style: KeraTypography.bodySmall(
-                              color: KeraColors.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    displayTitle,
+                    style: KeraTypography.titleSmall(),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(

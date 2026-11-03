@@ -57,3 +57,4 @@ final localeControllerProvider =
 
 /// Backward-compatible alias for localeControllerProvider.
 final localeNotifierProvider = localeControllerProvider;
+final localeProvider = localeControllerProvider;

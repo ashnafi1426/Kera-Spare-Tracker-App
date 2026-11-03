@@ -138,15 +138,6 @@ class DashboardBestSellers extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              if (item.partNumber.isNotEmpty)
-                                Text(
-                                  item.partNumber,
-                                  style: KeraTypography.labelSmall().copyWith(
-                                    color: KeraColors.textSecondary,
-                                    fontSize: 10,
-                                    fontFamily: 'monospace',
-                                  ),
-                                ),
                             ],
                           ),
                         ),

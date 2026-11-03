@@ -745,7 +745,7 @@ class ReportsScreen extends ConsumerWidget {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: min(parts.length, 5),
-                              separatorBuilder: (_, __) =>
+                              separatorBuilder: (_, _) =>
                                   const Divider(height: 12),
                               itemBuilder: (context, index) {
                                 final p = parts[index];
@@ -936,7 +936,7 @@ class ReportsScreen extends ConsumerWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      l10n.lowStockAlerts,
+                                      context.tr('አነስተኛ ክምችት ማስጠንቀቂያ', 'Low Stock Alerts'),
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         color: valuation.lowStockCount > 0
                                             ? Colors.amber.shade900

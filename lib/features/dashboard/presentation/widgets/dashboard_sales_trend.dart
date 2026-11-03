@@ -171,10 +171,10 @@ class DashboardSalesTrend extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.bar_chart_rounded,
                     size: 36,
-                    color: KeraColors.textTertiary,
+                    color: KeraColors.textMuted,
                   ),
                   const SizedBox(height: 6),
                   Text(
