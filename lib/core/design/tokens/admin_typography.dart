@@ -8,14 +8,30 @@ class AdminTypography {
 
   static const String fontNotoSans = 'NotoSansEthiopic';
 
-  // Static getters for standard dark theme admin styling
-  static TextStyle get h1 => title(true);
-  static TextStyle get h2 => title(true).copyWith(fontSize: 18);
-  static TextStyle get h3 => sectionHeader(true);
-  static TextStyle get bodyLarge => body(true).copyWith(fontSize: 15);
-  static TextStyle get bodyMedium => body(true);
-  static TextStyle get caption => captionOf(true);
-  static TextStyle get captionMedium => captionMediumOf(true);
+  // Static getters for standard light theme admin styling
+  static TextStyle get h1 => title(false);
+  static TextStyle get h2 => title(false).copyWith(fontSize: 18);
+  static TextStyle get h3 => sectionHeader(false);
+  static TextStyle get bodyLarge => body(false).copyWith(fontSize: 15);
+  static TextStyle get bodyMedium => body(false);
+  static TextStyle get caption => captionOf(false);
+  static TextStyle get captionMedium => captionMediumOf(false);
+
+  // White text styles for Navy App Bars & Headers
+  static TextStyle get headerTitle => const TextStyle(
+        fontFamily: fontNotoSans,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        letterSpacing: -0.2,
+      );
+
+  static TextStyle get headerSubtitle => const TextStyle(
+        fontFamily: fontNotoSans,
+        fontSize: 13,
+        fontWeight: FontWeight.w400,
+        color: AdminColors.headerTextSecondary,
+      );
 
   // Dynamic theme methods
   static TextStyle title(bool isDark) => TextStyle(

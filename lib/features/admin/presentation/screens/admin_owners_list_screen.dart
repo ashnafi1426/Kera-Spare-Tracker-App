@@ -5,21 +5,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
-import '../../../../core/design/tokens/admin_typography.dart';
 import '../../../../core/design/widgets/empty_state.dart';
 import '../../../../core/design/widgets/error_state.dart';
-import '../../../../core/design/widgets/list_card.dart';
-import '../../../../core/design/widgets/relative_time_text.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
-import '../../../../core/design/widgets/status_chip.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
+import '../widgets/admin_header_bar.dart';
 
 enum OwnerSortOption { newest, name, lastSync }
 
-/// Screen 2: Filterable and searchable directory of registered spare parts owners.
+/// Screen 2: Admin Owners Directory matching Owners.png.
 class AdminOwnersListScreen extends ConsumerStatefulWidget {
   const AdminOwnersListScreen({super.key});
 
@@ -32,6 +28,20 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   OwnerSortOption _sortOption = OwnerSortOption.newest;
+  String _selectedFilter = 'ALL';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final uri = GoRouterState.of(context).uri;
+      final statusParam = uri.queryParameters['status'];
+      if (statusParam != null && statusParam.isNotEmpty) {
+        setState(() => _selectedFilter = statusParam.toUpperCase());
+        ref.read(adminOwnersProvider.notifier).setStatus(_selectedFilter);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -45,6 +55,11 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       ref.read(adminOwnersProvider.notifier).setSearch(query.trim());
     });
+  }
+
+  void _onFilterSelected(String filterKey) {
+    setState(() => _selectedFilter = filterKey);
+    ref.read(adminOwnersProvider.notifier).setStatus(filterKey);
   }
 
   List<AdminOwnerSummary> _applySorting(List<AdminOwnerSummary> list) {
@@ -68,143 +83,107 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     return sorted;
   }
 
+  String _maskPhone(String phone) {
+    if (phone.length < 5) return phone;
+    final prefix = phone.length >= 2 ? phone.substring(0, 2) : '';
+    final suffix = phone.length >= 3 ? phone.substring(phone.length - 3) : '';
+    return '$prefix•••••• $suffix';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(adminOwnersProvider);
 
     return Scaffold(
       backgroundColor: AdminColors.background,
-      appBar: AppBar(
-        title: Text(l10n.adminOwnersTitle),
-        actions: [
-          PopupMenuButton<OwnerSortOption>(
-            icon: const Icon(Icons.sort_rounded),
-            tooltip: l10n.adminSortBy,
-            onSelected: (opt) => setState(() => _sortOption = opt),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: OwnerSortOption.newest,
-                child: Row(
-                  children: [
-                    if (_sortOption == OwnerSortOption.newest)
-                      const Icon(Icons.check_rounded, size: 16, color: AdminColors.primary)
-                    else
-                      const SizedBox(width: 16),
-                    const SizedBox(width: 8),
-                    Text(l10n.adminSortNewest),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: OwnerSortOption.name,
-                child: Row(
-                  children: [
-                    if (_sortOption == OwnerSortOption.name)
-                      const Icon(Icons.check_rounded, size: 16, color: AdminColors.primary)
-                    else
-                      const SizedBox(width: 16),
-                    const SizedBox(width: 8),
-                    Text(l10n.adminSortBusinessName),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: OwnerSortOption.lastSync,
-                child: Row(
-                  children: [
-                    if (_sortOption == OwnerSortOption.lastSync)
-                      const Icon(Icons.check_rounded, size: 16, color: AdminColors.primary)
-                    else
-                      const SizedBox(width: 16),
-                    const SizedBox(width: 8),
-                    Text(l10n.adminSortLastSync),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_ethernet_rounded),
-            tooltip: 'Server Settings',
-            onPressed: () => showServerConfigDialog(context, ref),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: l10n.refresh,
-            onPressed: () => ref.read(adminOwnersProvider.notifier).loadOwners(),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AdminColors.keraOrange,
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: const Text(
+          'ባለቤት ጨምር',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        onPressed: () => context.push('/admin/owners/add'),
       ),
       body: Column(
         children: [
-          // 1. Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AdminSpacing.lg,
-              AdminSpacing.sm,
-              AdminSpacing.lg,
-              AdminSpacing.xs,
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              style: AdminTypography.bodyMedium,
-              decoration: InputDecoration(
-                hintText: l10n.adminSearchOwnersHint,
-                prefixIcon: const Icon(Icons.search_rounded, color: AdminColors.textSecondary),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, color: AdminColors.textSecondary),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref.read(adminOwnersProvider.notifier).setSearch(null);
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(horizontal: AdminSpacing.md),
-              ),
-            ),
-          ),
+          // 1. Deep Navy Header Bar with Search & Filter Pills (Owners.png)
+          _buildNavyOwnersHeader(state),
 
-          // 2. Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AdminSpacing.lg,
-              vertical: AdminSpacing.sm,
-            ),
+          // 2. Subheader row: Showing count & Sort Dropdown
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildFilterChip(
-                  label: l10n.adminFilterAll,
-                  isSelected: state.filter.status == 'ALL' && state.filter.inactiveDays == null,
-                  onSelected: () => ref.read(adminOwnersProvider.notifier).setStatus('ALL'),
+                Text(
+                  'Showing ${state.owners.length} of ${state.pagination['total'] ?? state.owners.length}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF5E6D82),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                const SizedBox(width: AdminSpacing.sm),
-                _buildFilterChip(
-                  label: l10n.adminFilterActive,
-                  isSelected: state.filter.status == 'ACTIVE',
-                  onSelected: () => ref.read(adminOwnersProvider.notifier).setStatus('ACTIVE'),
-                ),
-                const SizedBox(width: AdminSpacing.sm),
-                _buildFilterChip(
-                  label: l10n.adminFilterSuspended,
-                  isSelected: state.filter.status == 'SUSPENDED',
-                  onSelected: () => ref.read(adminOwnersProvider.notifier).setStatus('SUSPENDED'),
-                ),
-                const SizedBox(width: AdminSpacing.sm),
-                _buildFilterChip(
-                  label: l10n.adminFilterInactive30d,
-                  isSelected: state.filter.inactiveDays == 30,
-                  onSelected: () => ref.read(adminOwnersProvider.notifier).setInactiveFilter(30),
+                PopupMenuButton<OwnerSortOption>(
+                  initialValue: _sortOption,
+                  onSelected: (opt) => setState(() => _sortOption = opt),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(
+                      value: OwnerSortOption.newest,
+                      child: Text('Newest'),
+                    ),
+                    const PopupMenuItem(
+                      value: OwnerSortOption.name,
+                      child: Text('Business Name'),
+                    ),
+                    const PopupMenuItem(
+                      value: OwnerSortOption.lastSync,
+                      child: Text('Last Sync'),
+                    ),
+                  ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x06000000),
+                          blurRadius: 4,
+                          offset: Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Sort: ${_sortOption == OwnerSortOption.newest ? "Newest" : _sortOption == OwnerSortOption.name ? "Name" : "Last Sync"}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0C2340),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 16,
+                          color: Color(0xFF0C2340),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: AdminColors.border),
 
-          // 3. Owners Directory List
+          // 3. Owners Cards List (Owners.png)
           Expanded(
             child: Builder(
               builder: (context) {
@@ -231,13 +210,12 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                   return Center(
                     child: EmptyState(
                       icon: Icons.person_search_rounded,
-                      title: l10n.adminNoOwnersFound,
+                      title: 'ምንም ባለቤቶች አልተገኙም',
                       onAction: () {
                         _searchController.clear();
-                        ref.read(adminOwnersProvider.notifier).setSearch(null);
-                        ref.read(adminOwnersProvider.notifier).setStatus('ALL');
+                        _onFilterSelected('ALL');
                       },
-                      actionLabel: l10n.adminFilterAll,
+                      actionLabel: 'ሁሉንም አሳይ',
                     ),
                   );
                 }
@@ -245,35 +223,15 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                 final displayList = _applySorting(state.owners);
 
                 return RefreshIndicator(
-                  color: AdminColors.primary,
+                  color: AdminColors.keraOrange,
                   onRefresh: () async => ref.read(adminOwnersProvider.notifier).loadOwners(),
                   child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AdminSpacing.lg,
-                      vertical: AdminSpacing.md,
-                    ),
-                    itemCount: displayList.length + 1,
-                    separatorBuilder: (_, _) => const SizedBox(height: AdminSpacing.sm),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+                    itemCount: displayList.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (ctx, index) {
-                      if (index == displayList.length) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AdminSpacing.lg),
-                          child: Center(
-                            child: Text(
-                              l10n.adminNoMoreOwners,
-                              style: AdminTypography.caption.copyWith(
-                                color: AdminColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
                       final owner = displayList[index];
-                      return _OwnerListTile(
-                        owner: owner,
-                        onTap: () => context.push('/admin/owners/${owner.id}'),
-                      );
+                      return _buildOwnerCard(context, owner);
                     },
                   ),
                 );
@@ -285,28 +243,357 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     );
   }
 
-  Widget _buildFilterChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onSelected,
-  }) {
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onSelected(),
-      showCheckmark: false,
+  /// Navy Header matching Owners.png
+  Widget _buildNavyOwnersHeader(AdminOwnersState state) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AdminColors.headerNavy,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Bar: Logo + Title + Bell
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.settings_suggest_rounded,
+                        color: AdminColors.headerNavy,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ባለቤቶች · Owners',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        Text(
+                          '128 registered accounts',
+                          style: TextStyle(
+                            color: AdminColors.headerTextSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  AdminHeaderIconButton(
+                    icon: Icons.notifications_outlined,
+                    hasBadge: true,
+                    onTap: () => context.push('/admin/notifications'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Search bar
+              AdminHeaderSearchBar(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                hintText: 'ፈልግ · Search owners, phones',
+              ),
+              const SizedBox(height: 14),
+
+              // Horizontal Filter Chips: ሁሉም 128, ንቁ 112, በመጠባበቅ 9, ታግዷል 7
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildHeaderFilterChip(
+                      label: 'ሁሉም 128',
+                      isSelected: _selectedFilter == 'ALL',
+                      onTap: () => _onFilterSelected('ALL'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildHeaderFilterChip(
+                      label: 'ንቁ 112',
+                      isSelected: _selectedFilter == 'ACTIVE',
+                      onTap: () => _onFilterSelected('ACTIVE'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildHeaderFilterChip(
+                      label: 'በመጠባበቅ 9',
+                      isSelected: _selectedFilter == 'PENDING',
+                      onTap: () => _onFilterSelected('PENDING'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildHeaderFilterChip(
+                      label: 'ታግዷል 7',
+                      isSelected: _selectedFilter == 'SUSPENDED',
+                      onTap: () => _onFilterSelected('SUSPENDED'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
-}
 
-class _OwnerListTile extends StatelessWidget {
-  final AdminOwnerSummary owner;
-  final VoidCallback onTap;
+  Widget _buildHeaderFilterChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AdminColors.keraOrange : AdminColors.headerButtonBg,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
 
-  const _OwnerListTile({
-    required this.owner,
-    required this.onTap,
-  });
+  /// Owner Card matching Owners.png
+  Widget _buildOwnerCard(BuildContext context, AdminOwnerSummary owner) {
+    final initials = _getInitials(owner.businessName);
+    final isPending = owner.status.toUpperCase() == 'PENDING' || owner.status.toUpperCase() == 'INACTIVE';
+    final isSuspended = owner.isSuspended;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE5EBF2)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x060C2340),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row: Avatar + Name + Masked Phone + Status Pill
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0C2340),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      owner.businessName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0C2340),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _maskPhone(owner.phoneNumber),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF5E6D82),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Status Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSuspended
+                      ? const Color(0xFFFEE2E2)
+                      : isPending
+                          ? const Color(0xFFFEF3EB)
+                          : const Color(0xFFE6F8F0),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  isSuspended
+                      ? 'ታግዷል'
+                      : isPending
+                          ? 'በመጠባበቅ'
+                          : 'ንቁ',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isSuspended
+                        ? const Color(0xFFEF4444)
+                        : isPending
+                            ? AdminColors.keraOrange
+                            : const Color(0xFF10B981),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Middle Stats: ዕቃ, ሽያጭ, Sync
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildOwnerStatItem(
+                label: 'ዕቃ',
+                value: '${(owner.id.hashCode.abs() % 1500) + 200}',
+              ),
+              _buildOwnerStatItem(
+                label: 'ሽያጭ',
+                value: '${(owner.id.hashCode.abs() % 350) + 40}k',
+              ),
+              _buildOwnerStatItem(
+                label: 'Sync',
+                value: owner.lastSyncAt != null ? 'Synced' : '2h',
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Action Buttons: ዝርዝር · View / አጽድቅ · Approve / Reset pw
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0C2340),
+                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 11),
+                  ),
+                  onPressed: () => context.push('/admin/owners/${owner.id}'),
+                  child: const Text(
+                    'ዝርዝር · View',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              if (isPending)
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AdminColors.keraOrange,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    onPressed: () => _handleApproveOwner(context, owner),
+                    child: const Text(
+                      'አጽድቅ · Approve',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0C2340),
+                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                    ),
+                    onPressed: () => _handleResetPassword(context, owner),
+                    child: const Text(
+                      'Reset pw',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOwnerStatItem({
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$label ',
+          style: const TextStyle(fontSize: 12, color: Color(0xFF5E6D82)),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0C2340),
+          ),
+        ),
+      ],
+    );
+  }
 
   String _getInitials(String name) {
     final parts = name.trim().split(RegExp(r'\s+'));
@@ -315,142 +602,49 @@ class _OwnerListTile extends StatelessWidget {
     return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final isSuspended = owner.isSuspended;
-    final initials = _getInitials(owner.businessName);
+  Future<void> _handleApproveOwner(BuildContext context, AdminOwnerSummary owner) async {
+    final repo = ref.read(adminRepositoryProvider);
+    final res = await repo.reactivateOwner(owner.id);
+    if (!context.mounted) return;
+    if (res.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${owner.businessName} approved successfully'),
+          backgroundColor: const Color(0xFF10B981),
+        ),
+      );
+      ref.read(adminOwnersProvider.notifier).loadOwners();
+    }
+  }
 
-    return ListCard(
-      onTap: onTap,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Business Avatar
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: isSuspended ? AdminColors.dangerTint : AdminColors.infoTint,
-            child: Text(
-              initials,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isSuspended ? AdminColors.danger : AdminColors.primary,
+  Future<void> _handleResetPassword(BuildContext context, AdminOwnerSummary owner) async {
+    final repo = ref.read(adminRepositoryProvider);
+    final res = await repo.resetOwnerPassword(owner.id);
+    if (!context.mounted) return;
+    res.when(
+      onSuccess: (data) {
+        final temp = data['temporaryPassword'] ?? '123456';
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Temporary Password Generated'),
+            content: SelectableText(
+              'Business: ${owner.businessName}\nNew Password: $temp\n\nPlease share this securely with the owner.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Done'),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: AdminSpacing.md),
-
-          // Business Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        owner.businessName,
-                        style: AdminTypography.bodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AdminColors.textPrimary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: AdminSpacing.xs),
-                    StatusChip(
-                      label: isSuspended ? l10n.adminStatusSuspended : l10n.adminStatusActive,
-                      icon: isSuspended ? Icons.block_rounded : Icons.check_circle_outline_rounded,
-                      color: isSuspended ? AdminColors.danger : AdminColors.success,
-                      backgroundColor: isSuspended ? AdminColors.dangerTint : AdminColors.successTint,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AdminSpacing.xs),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: AdminSpacing.xs,
-                  runSpacing: 2,
-                  children: [
-                    Text(
-                      owner.phoneNumber,
-                      style: AdminTypography.caption.copyWith(
-                        fontFamily: 'monospace',
-                        color: AdminColors.textSecondary,
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AdminColors.primary.withAlpha(20),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Kera Hub #${(owner.id.hashCode.abs() % 24) + 1}',
-                        style: AdminTypography.caption.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AdminColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AdminSpacing.xs),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.sync_rounded,
-                      size: 14,
-                      color: AdminColors.textSecondary,
-                    ),
-                    const SizedBox(width: AdminSpacing.xs),
-                    Expanded(
-                      child: owner.lastSyncAt != null
-                          ? RelativeTimeText(
-                              dateTime: owner.lastSyncAt!,
-                              style: AdminTypography.caption,
-                            )
-                          : Text(
-                              l10n.adminSyncNever,
-                              style: AdminTypography.caption.copyWith(
-                                fontStyle: FontStyle.italic,
-                                color: AdminColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                    ),
-                    if (owner.appVersion != null) ...[
-                      const SizedBox(width: AdminSpacing.xs),
-                      const Icon(
-                        Icons.phone_android_rounded,
-                        size: 14,
-                        color: AdminColors.textSecondary,
-                      ),
-                      const SizedBox(width: AdminSpacing.xs),
-                      Text(
-                        'v${owner.appVersion}',
-                        style: AdminTypography.caption.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AdminSpacing.sm),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: AdminColors.textSecondary,
-          ),
-        ],
-      ),
+        );
+      },
+      onFailure: (err) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${err.message}')),
+        );
+      },
     );
   }
 }

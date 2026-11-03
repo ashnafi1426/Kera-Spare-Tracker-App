@@ -9,6 +9,12 @@ import '../../features/admin/presentation/screens/admin_global_catalog_screen.da
 import '../../features/admin/presentation/screens/admin_owner_details_screen.dart';
 import '../../features/admin/presentation/screens/admin_owners_list_screen.dart';
 import '../../features/admin/presentation/screens/admin_settings_screen.dart';
+import '../../features/admin/presentation/screens/admin_add_owner_screen.dart';
+import '../../features/admin/presentation/screens/admin_backup_screen.dart';
+import '../../features/admin/presentation/screens/admin_notifications_screen.dart';
+import '../../features/admin/presentation/screens/admin_plans_screen.dart';
+import '../../features/admin/presentation/screens/admin_reports_screen.dart';
+import '../../features/admin/presentation/screens/admin_sync_monitor_screen.dart';
 import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
@@ -295,6 +301,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const AdminOwnersListScreen(),
           ),
           GoRoute(
+            path: '/admin/owners/add',
+            name: 'admin-owners-add',
+            builder: (context, state) => const AdminAddOwnerScreen(),
+          ),
+          GoRoute(
             path: '/admin/owners/:id',
             name: 'admin-owner-details',
             builder: (context, state) => AdminOwnerDetailsScreen(
@@ -319,6 +330,62 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin/account',
             name: 'admin-account',
+            builder: (context, state) => const AdminAccountScreen(),
+          ),
+          GoRoute(
+            path: '/admin/reports',
+            name: 'admin-reports',
+            builder: (context, state) => const AdminReportsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/sync',
+            name: 'admin-sync-monitor',
+            builder: (context, state) => const AdminSyncMonitorScreen(),
+          ),
+          GoRoute(
+            path: '/admin/notifications',
+            name: 'admin-notifications',
+            builder: (context, state) => const AdminNotificationsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/plans',
+            name: 'admin-plans',
+            builder: (context, state) => const AdminPlansScreen(),
+          ),
+          GoRoute(
+            path: '/admin/backup',
+            name: 'admin-backup',
+            builder: (context, state) => const AdminBackupScreen(),
+          ),
+          GoRoute(
+            path: '/admin/owners/add',
+            name: 'admin-owners-add',
+            builder: (context, state) => const AdminAddOwnerScreen(),
+          ),
+          GoRoute(
+            path: '/admin/reports',
+            name: 'admin-reports',
+            builder: (context, state) => const AdminReportsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/sync',
+            name: 'admin-sync-monitor',
+            builder: (context, state) => const AdminSyncMonitorScreen(),
+          ),
+          GoRoute(
+            path: '/admin/notifications',
+            name: 'admin-notifications',
+            builder: (context, state) => const AdminNotificationsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/plans',
+            name: 'admin-plans',
+            builder: (context, state) => const AdminPlansScreen(),
+          ),
+          GoRoute(
+            path: '/admin/backup',
+            name: 'admin-backup',
+            builder: (context, state) => const AdminBackupScreen(),
             builder: (context, state) => const AdminAccountScreen(),
           ),
         ],

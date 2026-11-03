@@ -70,9 +70,15 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
   int _getSelectedIndex() {
     if (widget.currentRoute.startsWith('/admin/owners')) return 1;
     if (widget.currentRoute.startsWith('/admin/catalog')) return 2;
-    if (widget.currentRoute.startsWith('/admin/settings')) return 3;
-    if (widget.currentRoute.startsWith('/admin/audit-logs')) return 4;
-    if (widget.currentRoute.startsWith('/admin/account')) return 5;
+    if (widget.currentRoute.startsWith('/admin/settings') ||
+        widget.currentRoute.startsWith('/admin/audit-logs') ||
+        widget.currentRoute.startsWith('/admin/account') ||
+        widget.currentRoute.startsWith('/admin/reports') ||
+        widget.currentRoute.startsWith('/admin/sync') ||
+        widget.currentRoute.startsWith('/admin/backup') ||
+        widget.currentRoute.startsWith('/admin/plans')) {
+      return 3;
+    }
     return 0; // /admin
   }
 
@@ -89,12 +95,6 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
         break;
       case 3:
         context.go('/admin/settings');
-        break;
-      case 4:
-        context.go('/admin/audit-logs');
-        break;
-      case 5:
-        context.go('/admin/account');
         break;
     }
   }
@@ -207,78 +207,44 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
             ),
           )
         : Scaffold(
-            appBar: AppBar(
-              title: Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      fit: BoxFit.cover,
-                    ),
+            backgroundColor: AdminColors.background,
+            body: widget.child,
+            bottomNavigationBar: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                ),
+              ),
+              child: NavigationBar(
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                indicatorColor: const Color(0xFF1E3557).withValues(alpha: 0.12),
+                selectedIndex: selectedIndex > 3 ? 3 : selectedIndex,
+                onDestinationSelected: (idx) => _onDestinationSelected(context, idx),
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_outlined, color: AdminColors.lightTextSecondary),
+                    selectedIcon: Icon(Icons.home_rounded, color: AdminColors.headerNavy),
+                    label: 'ዳሽቦርድ',
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.adminPortalTitle,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  NavigationDestination(
+                    icon: Icon(Icons.people_outline_rounded, color: AdminColors.lightTextSecondary),
+                    selectedIcon: Icon(Icons.people_alt_rounded, color: AdminColors.headerNavy),
+                    label: 'ባለቤቶች',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.sell_outlined, color: AdminColors.lightTextSecondary),
+                    selectedIcon: Icon(Icons.sell_rounded, color: AdminColors.headerNavy),
+                    label: 'ብራንዶች',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.wb_sunny_outlined, color: AdminColors.lightTextSecondary),
+                    selectedIcon: Icon(Icons.wb_sunny_rounded, color: AdminColors.headerNavy),
+                    label: 'ቅንብሮች',
                   ),
                 ],
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.settings_ethernet_rounded),
-                  tooltip: 'Server Settings',
-                  onPressed: () => showServerConfigDialog(context, ref),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child: LanguageSegmentedSwitch(),
-                ),
-              ],
-            ),
-            body: widget.child,
-            bottomNavigationBar: NavigationBar(
-              selectedIndex: selectedIndex > 4 ? 4 : selectedIndex,
-              onDestinationSelected: (idx) {
-                if (idx == 4) {
-                  // More / Settings & Account modal or navigation
-                  _showMobileMoreMenu(context, l10n);
-                } else {
-                  _onDestinationSelected(context, idx);
-                }
-              },
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.dashboard_outlined),
-                  selectedIcon: const Icon(Icons.dashboard_rounded),
-                  label: l10n.adminDashboard,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.people_outline_rounded),
-                  selectedIcon: const Icon(Icons.people_alt_rounded),
-                  label: l10n.adminOwners,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.category_outlined),
-                  selectedIcon: const Icon(Icons.category_rounded),
-                  label: l10n.adminCatalog,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.settings_outlined),
-                  selectedIcon: const Icon(Icons.settings_suggest_rounded),
-                  label: l10n.adminSettings,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.more_horiz_rounded),
-                  selectedIcon: const Icon(Icons.more_horiz_rounded),
-                  label: l10n.adminMore,
-                ),
-              ],
             ),
           );
 
@@ -287,53 +253,6 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
       onPointerDown: _onUserInteraction,
       onPointerMove: _onUserInteraction,
       child: scaffold,
-    );
-  }
-
-  void _showMobileMoreMenu(BuildContext context, AppLocalizations l10n) {
-
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.history_edu_rounded),
-                  title: Text(l10n.adminAuditLogs),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    context.go('/admin/audit-logs');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings_ethernet_rounded),
-                  title: const Text('Server Connection'),
-                  subtitle: const Text('Configure IP / Port for API connectivity'),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    showServerConfigDialog(context, ref);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.manage_accounts_rounded),
-                  title: Text(l10n.adminAccount),
-                  onTap: () {
-                    Navigator.of(ctx).pop();
-                    context.go('/admin/account');
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
