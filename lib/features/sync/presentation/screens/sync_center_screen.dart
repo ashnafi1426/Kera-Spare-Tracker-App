@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../data/local/tables/enums.dart';
 import '../providers/sync_providers.dart';
 
@@ -16,6 +18,7 @@ class SyncCenterScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = context.theme;
+    final isAmharic = context.isAmharic;
     final queueItemsAsync = ref.watch(syncQueueItemsStreamProvider);
     final pendingCountAsync = ref.watch(pendingSyncCountStreamProvider);
     final isOnlineAsync = ref.watch(isOnlineStreamProvider);
@@ -26,31 +29,81 @@ class SyncCenterScreen extends ConsumerWidget {
     final pendingCount = pendingCountAsync.value ?? 0;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         backgroundColor: KeraColors.primaryNavyDark,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'የዳታ ማመሳከሪያ ማዕከል',
-              style: KeraTypography.titleMedium(color: Colors.white)
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'Sync Center & Outbox Queue',
-              style: KeraTypography.labelSmall(
-                color: Colors.white.withValues(alpha: 0.7),
-              ).copyWith(fontSize: 10),
+            const KeraLogoWidget(size: 34, borderRadius: 6),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr('የዳታ ማመሳከሪያ ማዕከል', 'Sync Center'),
+                    style: KeraTypography.titleMedium(color: Colors.white)
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    context.tr('ኬራ ስፔር • የዳታ ማስተላለፊያ እና ወረፋ', 'Kera Spare • Outbox Queue & Cloud Sync'),
+                    style: KeraTypography.labelSmall(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ).copyWith(fontSize: 10),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
+          // One-tap Language Toggle Pill
+          Consumer(
+            builder: (context, ref, _) {
+              return InkWell(
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(
+                        Locale(isAmharic ? 'en' : 'am'),
+                      );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.language_rounded,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAmharic ? 'English' : 'አማርኛ',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 6),
+
           // Online / Offline Status Pill
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isOnline
                   ? const Color(0xFF00322D)
@@ -77,7 +130,9 @@ class SyncCenterScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  isOnline ? 'በመስመር ላይ / Online' : 'ከመስመር ውጭ / Offline',
+                  isOnline
+                      ? context.tr('በመስመር ላይ', 'Online')
+                      : context.tr('ከመስመር ውጭ', 'Offline'),
                   style: KeraTypography.labelSmall(
                     color: isOnline ? Colors.white : KeraColors.warningAmber,
                   ).copyWith(fontSize: 10, fontWeight: FontWeight.bold),
@@ -102,7 +157,7 @@ class SyncCenterScreen extends ConsumerWidget {
                 gradient: LinearGradient(
                   colors: isOnline
                       ? [KeraColors.primaryNavyDark, KeraColors.primaryNavy]
-                      : [Colors.blueGrey.shade900, Colors.blueGrey.shade800],
+                      : [const Color(0xFF1E293B), const Color(0xFF0F172A)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -135,8 +190,8 @@ class SyncCenterScreen extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Text(
                             isOnline
-                                ? 'የዳታ ማስተላለፊያ ዝግጁ ነው'
-                                : 'ከመስመር ውጭ (Offline Mode)',
+                                ? context.tr('የዳታ ማስተላለፊያ ዝግጁ ነው', 'Cloud Sync Ready')
+                                : context.tr('ከመስመር ውጭ ይሰራል', 'Offline Mode Active'),
                             style: KeraTypography.labelMedium(
                               color: Colors.white,
                             ).copyWith(fontWeight: FontWeight.bold),
@@ -153,7 +208,9 @@ class SyncCenterScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          '$pendingCount Pending',
+                          pendingCount > 0
+                              ? context.tr('$pendingCount በመጠባበቅ ላይ', '$pendingCount Pending')
+                              : context.tr('ተመሳስሏል', 'Synced'),
                           style: KeraTypography.labelSmall(
                             color: Colors.black87,
                           ).copyWith(fontWeight: FontWeight.w800),
@@ -164,14 +221,23 @@ class SyncCenterScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Text(
                     pendingCount > 0
-                        ? '$pendingCount የዳታ ለውጦች አልተላኩም'
-                        : 'ሁሉም የቅርብ ለውጦች ወደ ሰርቨር ተመሳክረዋል',
+                        ? context.tr(
+                            '$pendingCount የዳታ ለውጦች ወደ ሰርቨር አልተላኩም',
+                            '$pendingCount changes waiting to sync',
+                          )
+                        : context.tr(
+                            'ሁሉም የቅርብ ለውጦች ወደ ሰርቨር ተመሳክረዋል',
+                            'All changes are fully synced to the server',
+                          ),
                     style: KeraTypography.titleMedium(color: Colors.white)
                         .copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ሁሉም ለውጦች በስልክዎ (SQLite) ውስጥ በሰላም ተቀምጠዋል። ኢንተርኔት ሲገኝ በራሱ ይላካል።',
+                    context.tr(
+                      'ሁሉም መረጃዎች በስልክዎ (SQLite) ውስጥ በሰላም ተቀምጠዋል። ኢንተርኔት ሲገኝ በራሱ ይላካል።',
+                      'All local sales and parts are securely stored in SQLite and will push automatically when connected.',
+                    ),
                     style: KeraTypography.bodySmall(
                       color: Colors.white.withValues(alpha: 0.8),
                     ).copyWith(fontSize: 11),
@@ -203,12 +269,12 @@ class SyncCenterScreen extends ConsumerWidget {
                                     if (context.mounted) {
                                       if (success) {
                                         context.showSnackBar(
-                                          'የዳታ ማመሳሰል በተሳካ ሁኔታ ተጠናቋል / Sync Complete',
+                                          context.tr('የዳታ ማመሳሰል በተሳካ ሁኔታ ተጠናቋል', 'Data sync completed successfully'),
                                         );
                                       } else {
                                         context.showSnackBar(
                                           pushState.lastError ??
-                                              'ማመሳሰል አልተሳካም / Sync Failed',
+                                              context.tr('ማመሳሰል አልተሳካም', 'Sync failed, will retry'),
                                           isError: true,
                                         );
                                       }
@@ -226,8 +292,8 @@ class SyncCenterScreen extends ConsumerWidget {
                                 : const Icon(Icons.sync_rounded, size: 20),
                             label: Text(
                               pushState.isPushing
-                                  ? 'በማመሳሰል ላይ...'
-                                  : 'አሁን ሞክር / Sync Now',
+                                  ? context.tr('በማመሳሰል ላይ...', 'Syncing...')
+                                  : context.tr('አሁን አመሳስል', 'Sync Now'),
                               style: KeraTypography.labelMedium(
                                 color: Colors.white,
                               ).copyWith(fontWeight: FontWeight.bold),
@@ -242,7 +308,7 @@ class SyncCenterScreen extends ConsumerWidget {
                           foregroundColor: Colors.white,
                         ),
                         icon: const Icon(Icons.analytics_outlined),
-                        tooltip: 'Diagnostics',
+                        tooltip: context.tr('የሰርቨር ምርመራ', 'Diagnostics'),
                         onPressed: () => context.push('/sync/diagnostics'),
                       ),
                     ],
@@ -258,9 +324,11 @@ class SyncCenterScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: KeraColors.warningAmberBg,
+                  color: context.isDark ? const Color(0xFF38290E) : KeraColors.warningAmberBg,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: KeraColors.warningAmberBorder),
+                  border: Border.all(
+                    color: context.isDark ? Colors.amber.shade700 : KeraColors.warningAmberBorder,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -272,15 +340,21 @@ class SyncCenterScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${conflicts.length} የዳታ ግጭት ተገኝቷል (Conflict Alert)',
+                            context.tr(
+                              '${conflicts.length} የዳታ ግጭት ተገኝቷል',
+                              '${conflicts.length} Data Conflicts Detected',
+                            ),
                             style: KeraTypography.labelMedium(
                               color: KeraColors.warningAmber,
                             ).copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            'በስልክዎ እና በሰርቨሩ መካከል ልዩነት ተፈጥሯል። እባክዎ ውሳኔ ይስጡ።',
+                            context.tr(
+                              'በስልክዎ እና በሰርቨሩ መካከል ልዩነት ተፈጥሯል። እባክዎ ውሳኔ ይስጡ።',
+                              'Discrepancies found between local and server data. Please review.',
+                            ),
                             style: KeraTypography.bodySmall(
-                              color: Colors.brown.shade800,
+                              color: context.isDark ? Colors.amber.shade200 : Colors.brown.shade800,
                             ).copyWith(fontSize: 11),
                           ),
                         ],
@@ -294,7 +368,7 @@ class SyncCenterScreen extends ConsumerWidget {
                             horizontal: 10, vertical: 6),
                       ),
                       onPressed: () => context.push('/sync/conflicts'),
-                      child: const Text('ፍታ / Resolve'),
+                      child: Text(context.tr('ፍታ', 'Resolve')),
                     ),
                   ],
                 ),
@@ -307,14 +381,15 @@ class SyncCenterScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'ያልተላኩ መረጃዎች ዝርዝር',
-                  style: KeraTypography.titleSmall()
-                      .copyWith(fontWeight: FontWeight.bold),
+                  context.tr('ያልተላኩ መረጃዎች ዝርዝር', 'Outbox Categories'),
+                  style: KeraTypography.titleSmall(
+                    color: context.textPrimaryColor,
+                  ).copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Pending Categories',
+                  context.tr('በወረፋ ላይ ያሉ', 'Pending Queue'),
                   style: KeraTypography.bodySmall(
-                    color: KeraColors.textSecondary,
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ],
@@ -352,9 +427,12 @@ class SyncCenterScreen extends ConsumerWidget {
                       context,
                       icon: Icons.point_of_sale_rounded,
                       iconColor: KeraColors.actionBlue,
-                      title: 'ያልተላኩ ሽያጮች (Offline Sales)',
-                      subtitle: '${salesItems.length} ደረሰኞች በመጠባበቅ ላይ',
-                      countText: '${salesItems.length} ደረሰኞች',
+                      title: context.tr('ያልተላኩ ሽያጮች', 'Offline Sales'),
+                      subtitle: context.tr(
+                        '${salesItems.length} ደረሰኞች በመጠባበቅ ላይ',
+                        '${salesItems.length} receipts awaiting upload',
+                      ),
+                      countText: '${salesItems.length}',
                       onTap: () => context.push('/sync/offline'),
                     ),
                     const SizedBox(height: 8),
@@ -362,27 +440,36 @@ class SyncCenterScreen extends ConsumerWidget {
                       context,
                       icon: Icons.new_label_rounded,
                       iconColor: Colors.teal.shade700,
-                      title: 'አዲስ የተመዘገቡ ዕቃዎች (New Parts)',
-                      subtitle: '${partsItems.length} አዳዲስ መለዋወጫዎች በስልክ ተመዝግበዋል',
-                      countText: '${partsItems.length} አዳዲስ',
+                      title: context.tr('አዲስ የተመዘገቡ ዕቃዎች', 'New Parts'),
+                      subtitle: context.tr(
+                        '${partsItems.length} አዳዲስ መለዋወጫዎች በስልክ ተመዝግበዋል',
+                        '${partsItems.length} parts created locally',
+                      ),
+                      countText: '${partsItems.length}',
                     ),
                     const SizedBox(height: 8),
                     _buildCategoryCard(
                       context,
                       icon: Icons.warehouse_rounded,
                       iconColor: Colors.orange.shade800,
-                      title: 'የክምችት ማስተካከያዎች (Stock Movements)',
-                      subtitle: '${stockItems.length} የክምችት ጭማሪ እና ቅነሳ እንቅስቃሴዎች',
-                      countText: '${stockItems.length} እንቅስቃሴዎች',
+                      title: context.tr('የክምችት ማስተካከያዎች', 'Stock Movements'),
+                      subtitle: context.tr(
+                        '${stockItems.length} የክምችት ጭማሪ እና ቅነሳ እንቅስቃሴዎች',
+                        '${stockItems.length} stock restocks & adjustments',
+                      ),
+                      countText: '${stockItems.length}',
                     ),
                     const SizedBox(height: 8),
                     _buildCategoryCard(
                       context,
                       icon: Icons.price_change_rounded,
                       iconColor: Colors.purple.shade700,
-                      title: 'የተሻሻሉ መረጃዎች (Metadata & Price Edits)',
-                      subtitle: '${updateItems.length} የዋጋ እና ዝርዝር ማሻሻያዎች',
-                      countText: '${updateItems.length} ማሻሻያ',
+                      title: context.tr('የተሻሻሉ መረጃዎች', 'Price & Metadata Edits'),
+                      subtitle: context.tr(
+                        '${updateItems.length} የዋጋ እና ዝርዝር ማሻሻያዎች',
+                        '${updateItems.length} catalog updates',
+                      ),
+                      countText: '${updateItems.length}',
                     ),
                   ],
                 );
@@ -396,24 +483,27 @@ class SyncCenterScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _buildActionPill(
+                    context,
                     icon: Icons.offline_bolt_rounded,
-                    label: 'ከመስመር ውጭ\nዳሽቦርድ',
+                    label: context.tr('ከመስመር ውጭ\nዳሽቦርድ', 'Offline\nDashboard'),
                     onTap: () => context.push('/sync/offline'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildActionPill(
+                    context,
                     icon: Icons.compare_arrows_rounded,
-                    label: 'የዳታ ግጭት\nመፍቻ ገጽ',
+                    label: context.tr('የዳታ ግጭት\nመፍቻ', 'Conflict\nResolver'),
                     onTap: () => context.push('/sync/conflicts'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildActionPill(
+                    context,
                     icon: Icons.dns_rounded,
-                    label: 'የሰርቨር እና\nዲያግኖስቲክስ',
+                    label: context.tr('የሰርቨር\nምርመራ', 'Server\nDiagnostics'),
                     onTap: () => context.push('/sync/diagnostics'),
                   ),
                 ),
@@ -426,9 +516,9 @@ class SyncCenterScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: KeraColors.surfaceCanvas,
+                color: context.cardCanvasColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: KeraColors.outlineBorder),
+                border: Border.all(color: context.borderColor),
               ),
               child: Row(
                 children: [
@@ -442,13 +532,16 @@ class SyncCenterScreen extends ConsumerWidget {
                         Text(
                           'Addis Central Server • SQLite Cache Valid',
                           style: KeraTypography.labelSmall(
-                            color: KeraColors.primaryNavy,
+                            color: context.textPrimaryColor,
                           ).copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'የአካባቢ ዳታቤዝ (Drift SQLite) ጤናማ እና የተጠበቀ ነው',
+                          context.tr(
+                            'የአካባቢ ዳታቤዝ (Drift SQLite) ጤናማ እና የተጠበቀ ነው',
+                            'Local database (Drift SQLite) is healthy and protected',
+                          ),
                           style: KeraTypography.bodySmall(
-                            color: KeraColors.textSecondary,
+                            color: context.textSecondaryColor,
                           ).copyWith(fontSize: 10),
                         ),
                       ],
@@ -478,9 +571,9 @@ class SyncCenterScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: KeraColors.surfaceCanvas,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KeraColors.outlineBorder),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           children: [
@@ -500,15 +593,16 @@ class SyncCenterScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: KeraTypography.labelMedium()
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: KeraTypography.labelMedium(
+                      color: context.textPrimaryColor,
+                    ).copyWith(fontWeight: FontWeight.bold),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     subtitle,
                     style: KeraTypography.bodySmall(
-                      color: KeraColors.textSecondary,
+                      color: context.textSecondaryColor,
                     ).copyWith(fontSize: 11),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -519,14 +613,14 @@ class SyncCenterScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: KeraColors.surfaceContainerHigh,
+                color: context.isDark ? const Color(0xFF1E3A5F) : KeraColors.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 countText,
                 style: KeraTypography.labelSmall(
-                  color: KeraColors.primaryNavy,
-                ).copyWith(fontWeight: FontWeight.bold, fontSize: 10),
+                  color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy,
+                ).copyWith(fontWeight: FontWeight.bold, fontSize: 11),
               ),
             ),
           ],
@@ -535,7 +629,8 @@ class SyncCenterScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionPill({
+  Widget _buildActionPill(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -546,9 +641,9 @@ class SyncCenterScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         decoration: BoxDecoration(
-          color: KeraColors.surfaceCanvas,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KeraColors.outlineBorder),
+          border: Border.all(color: context.borderColor),
         ),
         child: Column(
           children: [
@@ -557,7 +652,9 @@ class SyncCenterScreen extends ConsumerWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: KeraTypography.labelSmall().copyWith(
+              style: KeraTypography.labelSmall(
+                color: context.textPrimaryColor,
+              ).copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 10,
               ),
@@ -568,4 +665,3 @@ class SyncCenterScreen extends ConsumerWidget {
     );
   }
 }
-

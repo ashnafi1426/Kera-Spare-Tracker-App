@@ -229,7 +229,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final totalPartsCount = partsStream.value?.length ?? state.totalCount;
 
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
@@ -487,7 +487,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required dynamic l10n,
   }) {
     return Container(
-      color: Colors.white,
+      color: context.cardBg,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Column(
         children: [
@@ -502,12 +502,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   const SizedBox(width: 6),
                   Text(
                     context.tr('ጠቅላላ ዋጋ:', 'Total Value:'),
-                    style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+                    style: KeraTypography.bodySmall(color: context.textSecondaryColor),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     '${totalValuation.toStringAsFixed(0)} ${context.tr("ብር", "ETB")}',
-                    style: KeraTypography.numericCompact(color: KeraColors.textPrimary).copyWith(
+                    style: KeraTypography.numericCompact(color: context.textPrimaryColor).copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -516,13 +516,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: const BoxDecoration(
-                  color: KeraColors.surfaceMuted,
+                decoration: BoxDecoration(
+                  color: context.cardCanvasColor,
                   borderRadius: KeraRadii.borderMicro,
                 ),
                 child: Text(
                   '$totalCount ${context.tr("ዕቃዎች", "Items")}',
-                  style: KeraTypography.labelSmall(color: KeraColors.primaryNavy).copyWith(
+                  style: KeraTypography.labelSmall(color: context.textPrimaryColor).copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -536,6 +536,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             children: [
               Expanded(
                 child: _buildMetricTile(
+                  context,
                   label: context.tr('ጠቅላላ', 'All'),
                   count: totalCount,
                   isSelected: activeStockFilter == StockFilter.all,
@@ -548,6 +549,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
+                  context,
                   label: context.tr('በክምችት', 'In Stock'),
                   count: inStockCount,
                   isSelected: activeStockFilter == StockFilter.inStock,
@@ -560,6 +562,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
+                  context,
                   label: context.tr('አነስተኛ', 'Low Stock'),
                   count: lowStockCount,
                   isSelected: activeStockFilter == StockFilter.lowStock,
@@ -572,6 +575,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
+                  context,
                   label: context.tr('ያለቀባቸው', 'Out of Stock'),
                   count: outOfStockCount,
                   isSelected: activeStockFilter == StockFilter.outOfStock,
@@ -588,7 +592,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  Widget _buildMetricTile({
+  Widget _buildMetricTile(
+    BuildContext context, {
     required String label,
     required int count,
     required bool isSelected,
@@ -601,10 +606,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         decoration: BoxDecoration(
-          color: isSelected ? accentColor.withValues(alpha: 0.12) : KeraColors.surfaceMuted,
+          color: isSelected ? accentColor.withValues(alpha: 0.12) : context.cardCanvasColor,
           borderRadius: KeraRadii.borderMicro,
           border: Border.all(
-            color: isSelected ? accentColor : KeraColors.outlineBorder,
+            color: isSelected ? accentColor : context.borderColor,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -613,14 +618,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             Text(
               '$count',
               style: KeraTypography.numericCompact(
-                color: isSelected ? accentColor : KeraColors.textPrimary,
+                color: isSelected ? accentColor : context.textPrimaryColor,
               ).copyWith(fontWeight: FontWeight.w700, fontSize: 14),
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: KeraTypography.labelSmall(
-                color: isSelected ? accentColor : KeraColors.textSecondary,
+                color: isSelected ? accentColor : context.textSecondaryColor,
               ).copyWith(fontSize: 10, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -635,24 +640,24 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget _buildSearchBar(dynamic l10n) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: KeraRadii.borderInput,
-        border: Border.all(color: KeraColors.outlineBorder),
-        boxShadow: const [
+        border: Border.all(color: context.borderColor),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: context.isDark ? Colors.black26 : const Color(0x08000000),
             blurRadius: 4,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
-        style: KeraTypography.bodyMedium(),
+        style: KeraTypography.bodyMedium(color: context.textPrimaryColor),
         decoration: InputDecoration(
           hintText: l10n.searchHint,
-          hintStyle: KeraTypography.bodyMedium(color: KeraColors.textMuted),
+          hintStyle: KeraTypography.bodyMedium(color: context.textMutedColor),
           prefixIcon: const Icon(Icons.search_rounded, color: KeraColors.textSecondary),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
@@ -671,7 +676,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ],
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: context.cardBg,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           border: const OutlineInputBorder(

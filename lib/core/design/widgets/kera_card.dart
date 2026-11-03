@@ -9,8 +9,8 @@ class KeraCard extends StatelessWidget {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
-  final Color backgroundColor;
-  final Color borderColor;
+  final Color? backgroundColor;
+  final Color? borderColor;
   final double borderWidth;
   final BorderRadius borderRadius;
 
@@ -20,21 +20,35 @@ class KeraCard extends StatelessWidget {
     this.onTap,
     this.padding = KeraSpacing.cardPadding,
     this.margin,
-    this.backgroundColor = KeraColors.surfacePure,
-    this.borderColor = KeraColors.outlineBorder,
+    this.backgroundColor,
+    this.borderColor,
     this.borderWidth = 1.0,
     this.borderRadius = KeraRadii.borderCard,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resolvedBg = backgroundColor ??
+        (isDark ? KeraColors.darkCard : KeraColors.surfacePure);
+    final resolvedBorder = borderColor ??
+        (isDark ? KeraColors.darkBorder : KeraColors.outlineBorder);
+
     final cardContent = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: resolvedBg,
         borderRadius: borderRadius,
-        border: Border.all(color: borderColor, width: borderWidth),
-        boxShadow: const [KeraColors.shadowLevel1],
+        border: Border.all(color: resolvedBorder, width: borderWidth),
+        boxShadow: isDark
+            ? [
+                const BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 2,
+                  offset: Offset(0, 1),
+                )
+              ]
+            : const [KeraColors.shadowLevel1],
       ),
       child: child,
     );

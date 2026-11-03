@@ -41,3 +41,4 @@ class KeraLogoWidget extends StatelessWidget {
     );
   }
 }
+

@@ -334,20 +334,20 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
-                            color: KeraColors.surfaceCanvas,
+                            color: context.cardCanvasColor,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: KeraColors.outlineBorder),
+                            border: Border.all(color: context.borderColor),
                           ),
                           child: Row(
                             children: [
                               CircleAvatar(
                                 radius: 14,
                                 backgroundColor:
-                                    KeraColors.surfaceContainerHighest,
+                                    context.isDark ? const Color(0xFF1E3A5F) : KeraColors.surfaceContainerHighest,
                                 child: Text(
                                   '#$rank',
                                   style: KeraTypography.labelSmall(
-                                    color: KeraColors.textPrimary,
+                                    color: context.textPrimaryColor,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -358,13 +358,14 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                   children: [
                                     Text(
                                       part.partName,
-                                      style: KeraTypography.labelMedium()
-                                          .copyWith(fontWeight: FontWeight.w600),
+                                      style: KeraTypography.labelMedium(
+                                        color: context.textPrimaryColor,
+                                      ).copyWith(fontWeight: FontWeight.w600),
                                     ),
                                     Text(
                                       '${CurrencyFormatter.formatQuantity(part.quantitySold)} ${context.tr("ተሽጧል", "units sold")}',
                                       style: KeraTypography.bodySmall(
-                                        color: KeraColors.textSecondary,
+                                        color: context.textSecondaryColor,
                                       ).copyWith(fontSize: 11),
                                     ),
                                   ],
@@ -373,7 +374,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                               Text(
                                 CurrencyFormatter.formatEtb(part.totalRevenue),
                                 style: KeraTypography.labelMedium(
-                                  color: KeraColors.primaryNavy,
+                                  color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy,
                                 ).copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],

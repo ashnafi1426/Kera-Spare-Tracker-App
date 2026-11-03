@@ -254,9 +254,9 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: KeraColors.surfaceCanvas,
+                    color: context.cardCanvasColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: KeraColors.outlineBorder),
+                    border: Border.all(color: context.borderColor),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -355,10 +355,10 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? KeraColors.actionBlue.withValues(alpha: 0.08)
-              : KeraColors.surfaceCanvas,
+              : context.cardCanvasColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? KeraColors.actionBlue : KeraColors.outlineBorder,
+            color: isSelected ? KeraColors.actionBlue : context.borderColor,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -404,14 +404,14 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
       selected: isSelected,
       label: Text(label),
       labelStyle: KeraTypography.labelSmall(
-        color: isSelected ? Colors.white : KeraColors.textPrimary,
+        color: isSelected ? Colors.white : context.textPrimaryColor,
       ).copyWith(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
       selectedColor: KeraColors.actionBlue,
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.cardCanvasColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: isSelected ? KeraColors.actionBlue : KeraColors.outlineBorder,
+          color: isSelected ? KeraColors.actionBlue : context.borderColor,
         ),
       ),
       onSelected: (selected) {
@@ -435,10 +435,10 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? KeraColors.actionBlue.withValues(alpha: 0.08)
-              : KeraColors.surfaceCanvas,
+              : context.cardCanvasColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? KeraColors.actionBlue : KeraColors.outlineBorder,
+            color: isSelected ? KeraColors.actionBlue : context.borderColor,
             width: isSelected ? 1.5 : 1,
           ),
         ),

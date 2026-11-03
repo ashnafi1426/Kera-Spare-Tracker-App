@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/design.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../data/local/app_database.dart';
 import '../providers/sync_providers.dart';
 
@@ -55,19 +56,28 @@ class OfflineDashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: KeraColors.primaryNavyDark,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'ኬራ ስፔር / Kera Spare',
-              style: KeraTypography.titleMedium(color: Colors.white)
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'ከመስመር ውጭ ዳሽቦርድ / Offline Dashboard',
-              style: KeraTypography.labelSmall(
-                color: Colors.white.withValues(alpha: 0.7),
-              ).copyWith(fontSize: 10),
+            const KeraLogoWidget(size: 34, borderRadius: 6),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr('ከመስመር ውጭ ዳሽቦርድ', 'Offline Dashboard'),
+                    style: KeraTypography.titleMedium(color: Colors.white)
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    context.tr('ኬራ ስፔር • የዳታ ማመሳሰል ሁኔታ', 'Kera Spare • Pending Sync Queue'),
+                    style: KeraTypography.labelSmall(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ).copyWith(fontSize: 10),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

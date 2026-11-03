@@ -265,9 +265,9 @@ class SalesAnalyticsSheet extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: KeraColors.surfaceCanvas,
+                        color: context.cardCanvasColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: KeraColors.outlineBorder),
+                        border: Border.all(color: context.borderColor),
                       ),
                       child: Column(
                         children: [

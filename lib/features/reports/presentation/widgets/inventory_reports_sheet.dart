@@ -149,9 +149,9 @@ class InventoryReportsSheet extends ConsumerWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: KeraColors.surfaceCanvas,
+                            color: context.cardCanvasColor,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: KeraColors.outlineBorder),
+                            border: Border.all(color: context.borderColor),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

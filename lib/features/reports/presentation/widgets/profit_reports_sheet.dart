@@ -123,9 +123,9 @@ class ProfitReportsSheet extends ConsumerWidget {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: KeraColors.surfaceCanvas,
+                        color: context.cardCanvasColor,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: KeraColors.outlineBorder),
+                        border: Border.all(color: context.borderColor),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,9 +287,9 @@ class ProfitReportsSheet extends ConsumerWidget {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: KeraColors.surfaceCanvas,
+                            color: context.cardCanvasColor,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: KeraColors.outlineBorder),
+                            border: Border.all(color: context.borderColor),
                           ),
                           child: Row(
                             children: [

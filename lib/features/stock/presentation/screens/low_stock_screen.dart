@@ -7,6 +7,7 @@ import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../parts/domain/models/part_item.dart';
 import '../dialogs/update_stock_dialog.dart';
 import '../providers/stock_providers.dart';
@@ -35,23 +36,31 @@ class _LowStockScreenState extends ConsumerState<LowStockScreen> {
     final lowStockAsync = ref.watch(lowStockPartsStreamProvider);
 
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         backgroundColor: KeraColors.primaryNavy,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              l10n.lowStockListTitle,
-              style: KeraTypography.headlineSmall(color: Colors.white)
-                  .copyWith(fontWeight: FontWeight.w700),
-            ),
-            Text(
-              l10n.lowStockListDesc,
-              style: KeraTypography.labelSmall(
-                color: Colors.white.withValues(alpha: 0.7),
+            const KeraLogoWidget(size: 34, borderRadius: 6),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.lowStockListTitle,
+                    style: KeraTypography.headlineSmall(color: Colors.white)
+                        .copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    l10n.lowStockListDesc,
+                    style: KeraTypography.labelSmall(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
