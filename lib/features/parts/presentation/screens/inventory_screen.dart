@@ -6,9 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_product_card.dart';
-import '../../../../core/design/widgets/kera_status_badge.dart';
-import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/announcement_banner_widget.dart';
 import '../../../../core/widgets/maintenance_banner_widget.dart';
@@ -18,7 +15,6 @@ import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/inventory_providers.dart';
 import '../providers/parts_providers.dart';
-import '../widgets/inventory_filter_sheet.dart';
 
 /// Stitch Screen 12: Inventory Overview (የዕቃዎች ዝርዝር).
 ///
@@ -37,7 +33,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
-  bool _isGridView = false;
+  final bool _isGridView = false;
 
   @override
   void initState() {
@@ -100,42 +96,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     }
   }
 
-  Future<void> _handleClearTestParts() async {
-    final l10n = context.l10n;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.clearTestParts),
-        content: Text(l10n.clearTestPartsConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-              foregroundColor: Theme.of(ctx).colorScheme.onError,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      final success =
-          await ref.read(inventoryListProvider.notifier).clearTestParts();
-      if (!mounted) return;
-      if (success) {
-        context.showSnackBar(l10n.clearTestPartsSuccess);
-      } else {
-        context.showSnackBar('Failed to clear test parts', isError: true);
-      }
-    }
-  }
 
   void _showBarcodeScannerModal() {
     final textController = TextEditingController();
@@ -207,42 +167,22 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final partsStream = ref.watch(partsStreamProvider);
     final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
 
-    // Calculate inventory metrics from live stream or paged state
-    final allParts = partsStream.value ?? state.items;
-    double totalValuation = 0.0;
-    int inStockCount = 0;
-    int lowStockCount = 0;
-    int outOfStockCount = 0;
-
-    for (final p in allParts) {
-      final price = p.sellingPrice ?? p.purchasePrice ?? 0.0;
-      totalValuation += price * p.cachedQuantity;
-      if (p.isOutOfStock || p.cachedQuantity <= 0) {
-        outOfStockCount++;
-      } else if (p.isLowStock) {
-        lowStockCount++;
-      } else {
-        inStockCount++;
-      }
-    }
-
-    final totalPartsCount = partsStream.value?.length ?? state.totalCount;
-
     return Scaffold(
-      backgroundColor: context.scaffoldBg,
-      floatingActionButton: FloatingActionButton.extended(
+      backgroundColor: const Color(0xFFF4F7FB),
+      floatingActionButton: FloatingActionButton(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.add),
-        backgroundColor: KeraColors.actionBlue,
-        foregroundColor: KeraColors.textWhite,
+        backgroundColor: const Color(0xFFF58220),
+        foregroundColor: Colors.white,
+        elevation: 3,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add_rounded, size: 32),
       ),
       body: SafeArea(
         top: false,
         child: Column(
           children: [
-            // 1. Navy Industrial App Header (Stitch Screen 12)
+            // 1. Navy Industrial App Header (2 Inventory.png)
             _buildNavyHeader(
               context: context,
               authUser: authUser,
@@ -256,29 +196,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             const SuspendedAccountBannerWidget(),
             const AnnouncementBannerWidget(),
 
-            // 2. Bento Valuation & Quick Filter Metrics Strip
-            _buildBentoMetricsStrip(
-              totalValuation: totalValuation,
-              totalCount: totalPartsCount,
-              inStockCount: inStockCount,
-              lowStockCount: lowStockCount,
-              outOfStockCount: outOfStockCount,
-              activeStockFilter: filter.stockFilter,
-              l10n: l10n,
-            ),
-
-            // 3. Search and Barcode Scan Bar
+            // Quick Filter Chips Row (2 Inventory.png)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-              child: _buildSearchBar(l10n),
-            ),
-
-            // 4. Quick Stock Chips & Controls (List/Grid & Filter)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
               child: _buildFilterChipsRow(filter, state, l10n, colorScheme),
             ),
-            const Divider(height: 8, color: KeraColors.outlineBorder),
 
             // 5. Main Paginated Inventory List or Grid View
             Expanded(
@@ -302,387 +224,196 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required dynamic l10n,
     required InventoryFilter filter,
   }) {
+    final businessName = authUser?.businessName ?? 'ተስፋዬ እና ልጆቹ';
+    final partsCount = ref.watch(inventoryListProvider).items.length;
+
     return Container(
-      color: KeraColors.primaryNavy,
+      color: const Color(0xFF0C2340),
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
-        bottom: 12,
+        bottom: 16,
         left: 16,
-        right: 12,
+        right: 16,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Store Logo / Industrial Icon
-          Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(
-              color: KeraColors.primaryNavyDark,
-              borderRadius: KeraRadii.borderMicro,
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              'assets/images/logo.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.precision_manufacturing_rounded,
-                color: KeraColors.tealAccent,
-                size: 22,
+          // Top Row: Logo + Business Name + Subtitle (2 Inventory.png)
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.settings_suggest_rounded,
+                    color: Color(0xFF0C2340),
+                    size: 24,
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Title & Store Subtitle
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.tr('ኬራ ስፔር', 'Kera Spare'),
-                      style: KeraTypography.titleMedium(color: KeraColors.textWhite).copyWith(
-                        fontWeight: FontWeight.w700,
+                      businessName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(
+                      'ከራ · Kera Spare Tracker',
+                      style: TextStyle(
+                        color: Color(0xFFA5B4CB),
+                        fontSize: 12,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // Sync Pill Status
-                    if (pendingSync > 0)
-                      KeraStatusBadge.syncPending(count: pendingSync)
-                    else
-                      KeraStatusBadge.synced(),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  authUser?.businessName ?? l10n.inventoryTab,
-                  style: KeraTypography.bodySmall(color: Colors.white70),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-
-          // Language toggle pill
-          Consumer(
-            builder: (context, ref, _) {
-              final isAmharic = context.isAmharic;
-              return InkWell(
-                onTap: () {
-                  ref.read(localeProvider.notifier).setLocale(
-                        Locale(isAmharic ? 'en' : 'am'),
-                      );
-                },
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white12,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.language_rounded,
-                          size: 13, color: Colors.white),
-                      const SizedBox(width: 4),
-                      Text(
-                        isAmharic ? 'English' : 'አማርኛ',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-
-          // Barcode Scan Action Button
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),
-            tooltip: l10n.scannerAction,
-            onPressed: _showBarcodeScannerModal,
-          ),
-
-          // Filter Button with Badge
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.filter_list_rounded, color: Colors.white),
-                tooltip: l10n.filter,
-                onPressed: () => InventoryFilterSheet.show(context),
-              ),
-              if (filter.hasActiveFilters)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: KeraColors.actionBlue,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          // Seeder / Debug Menu
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
-            onSelected: (val) {
-              if (val == 'seed') {
-                _handleSeedParts();
-              } else if (val == 'clear_seed') {
-                _handleClearTestParts();
-              }
-            },
-            itemBuilder: (ctx) => [
-              PopupMenuItem(
-                value: 'seed',
-                child: Row(
-                  children: [
-                    const Icon(Icons.speed_rounded, color: KeraColors.actionBlue, size: 20),
-                    const SizedBox(width: 12),
-                    Text(l10n.seedParts),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'clear_seed',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_sweep_rounded, color: KeraColors.error, size: 20),
-                    const SizedBox(width: 12),
-                    Text(l10n.clearTestParts),
                   ],
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
+          const SizedBox(height: 16),
 
-  Widget _buildBentoMetricsStrip({
-    required double totalValuation,
-    required int totalCount,
-    required int inStockCount,
-    required int lowStockCount,
-    required int outOfStockCount,
-    required StockFilter activeStockFilter,
-    required dynamic l10n,
-  }) {
-    return Container(
-      color: context.cardBg,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Column(
-        children: [
-          // Top Row: Total Valuation & Parts Count Pill
+          // Title Row: ዕቃዎች & count on left, Sync & Export on right
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.account_balance_wallet_outlined,
-                      size: 16, color: KeraColors.textSecondary),
-                  const SizedBox(width: 6),
-                  Text(
-                    context.tr('ጠቅላላ ዋጋ:', 'Total Value:'),
-                    style: KeraTypography.bodySmall(color: context.textSecondaryColor),
+                  const Text(
+                    'ዕቃዎች',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(width: 6),
                   Text(
-                    '${totalValuation.toStringAsFixed(0)} ${context.tr("ብር", "ETB")}',
-                    style: KeraTypography.numericCompact(color: context.textPrimaryColor).copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                    '$partsCount ዕቃዎች',
+                    style: const TextStyle(
+                      color: Color(0xFFA5B4CB),
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: context.cardCanvasColor,
-                  borderRadius: KeraRadii.borderMicro,
-                ),
-                child: Text(
-                  '$totalCount ${context.tr("ዕቃዎች", "Items")}',
-                  style: KeraTypography.labelSmall(color: context.textPrimaryColor).copyWith(
-                    fontWeight: FontWeight.w700,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3557),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      pendingSync == 0 ? 'ተመሳስሏል' : 'ያልተመሳሰለ $pendingSync',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Exporting CSV...')),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.white54),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.download_rounded, color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'ወደ ውጭ ላክ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 14),
 
-          // 4-Column Metric Grid
-          Row(
-            children: [
-              Expanded(
-                child: _buildMetricTile(
-                  context,
-                  label: context.tr('ጠቅላላ', 'All'),
-                  count: totalCount,
-                  isSelected: activeStockFilter == StockFilter.all,
-                  accentColor: KeraColors.actionBlue,
-                  onTap: () => ref
-                      .read(inventoryFilterProvider.notifier)
-                      .setStockFilter(StockFilter.all),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _buildMetricTile(
-                  context,
-                  label: context.tr('በክምችት', 'In Stock'),
-                  count: inStockCount,
-                  isSelected: activeStockFilter == StockFilter.inStock,
-                  accentColor: KeraColors.stockInText,
-                  onTap: () => ref
-                      .read(inventoryFilterProvider.notifier)
-                      .setStockFilter(StockFilter.inStock),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _buildMetricTile(
-                  context,
-                  label: context.tr('አነስተኛ', 'Low Stock'),
-                  count: lowStockCount,
-                  isSelected: activeStockFilter == StockFilter.lowStock,
-                  accentColor: KeraColors.stockLowText,
-                  onTap: () => ref
-                      .read(inventoryFilterProvider.notifier)
-                      .setStockFilter(StockFilter.lowStock),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _buildMetricTile(
-                  context,
-                  label: context.tr('ያለቀባቸው', 'Out of Stock'),
-                  count: outOfStockCount,
-                  isSelected: activeStockFilter == StockFilter.outOfStock,
-                  accentColor: KeraColors.stockOutText,
-                  onTap: () => ref
-                      .read(inventoryFilterProvider.notifier)
-                      .setStockFilter(StockFilter.outOfStock),
-                ),
-              ),
-            ],
-          ),
+          // Search Bar: ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ
+          _buildSearchBar(l10n),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMetricTile(
-    BuildContext context, {
-    required String label,
-    required int count,
-    required bool isSelected,
-    required Color accentColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: KeraRadii.borderMicro,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? accentColor.withValues(alpha: 0.12) : context.cardCanvasColor,
-          borderRadius: KeraRadii.borderMicro,
-          border: Border.all(
-            color: isSelected ? accentColor : context.borderColor,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(
-              '$count',
-              style: KeraTypography.numericCompact(
-                color: isSelected ? accentColor : context.textPrimaryColor,
-              ).copyWith(fontWeight: FontWeight.w700, fontSize: 14),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: KeraTypography.labelSmall(
-                color: isSelected ? accentColor : context.textSecondaryColor,
-              ).copyWith(fontSize: 10, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }
 
   Widget _buildSearchBar(dynamic l10n) {
     return Container(
+      height: 46,
       decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: KeraRadii.borderInput,
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
           BoxShadow(
-            color: context.isDark ? Colors.black26 : const Color(0x08000000),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
+            color: Color(0x14000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
-        style: KeraTypography.bodyMedium(color: context.textPrimaryColor),
+        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
         decoration: InputDecoration(
-          hintText: l10n.searchHint,
-          hintStyle: KeraTypography.bodyMedium(color: context.textMutedColor),
-          prefixIcon: const Icon(Icons.search_rounded, color: KeraColors.textSecondary),
+          hintText: 'ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ',
+          hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 20),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_searchController.text.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 20, color: KeraColors.textSecondary),
+                  icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
                   onPressed: _onClearSearch,
                 ),
               IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded,
-                    size: 20, color: KeraColors.actionBlue),
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18, color: Color(0xFF64748B)),
                 tooltip: 'Scan barcode',
                 onPressed: _showBarcodeScannerModal,
               ),
             ],
           ),
-          filled: true,
-          fillColor: context.cardBg,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          border: const OutlineInputBorder(
-            borderRadius: KeraRadii.borderInput,
-            borderSide: BorderSide.none,
-          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     );
@@ -694,67 +425,97 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     dynamic l10n,
     ColorScheme colorScheme,
   ) {
-    return Row(
-      children: [
-        // Horizontal scrollable quick chips
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildStockFilterChip(StockFilter.all, l10n.filterAll, filter.stockFilter),
-                const SizedBox(width: 6),
-                _buildStockFilterChip(StockFilter.inStock, l10n.filterInStock, filter.stockFilter),
-                const SizedBox(width: 6),
-                _buildStockFilterChip(StockFilter.lowStock, l10n.filterLowStock, filter.stockFilter),
-                const SizedBox(width: 6),
-                _buildStockFilterChip(StockFilter.outOfStock, l10n.filterOutOfStock, filter.stockFilter),
-              ],
-            ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildPillChip(
+            label: 'ሁሉም',
+            isSelected: filter.stockFilter == StockFilter.all && filter.brandId == null,
+            onTap: () {
+              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.all);
+            },
           ),
-        ),
-        const SizedBox(width: 6),
-
-        // Grid / List View Toggle Button
-        IconButton(
-          icon: Icon(
-            _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-            color: KeraColors.textSecondary,
-            size: 20,
+          const SizedBox(width: 8),
+          _buildPillChip(
+            label: 'CAT',
+            isSelected: filter.query?.toLowerCase() == 'cat',
+            onTap: () {
+              _searchController.text = 'CAT';
+              ref.read(inventoryFilterProvider.notifier).setQuery('CAT');
+            },
           ),
-          tooltip: _isGridView ? 'List view' : 'Grid view',
-          visualDensity: VisualDensity.compact,
-          onPressed: () => setState(() => _isGridView = !_isGridView),
-        ),
-      ],
+          const SizedBox(width: 8),
+          _buildPillChip(
+            label: 'Doosan',
+            isSelected: filter.query?.toLowerCase() == 'doosan',
+            onTap: () {
+              _searchController.text = 'Doosan';
+              ref.read(inventoryFilterProvider.notifier).setQuery('Doosan');
+            },
+          ),
+          const SizedBox(width: 8),
+          _buildPillChip(
+            label: 'SANY',
+            isSelected: filter.query?.toLowerCase() == 'sany',
+            onTap: () {
+              _searchController.text = 'SANY';
+              ref.read(inventoryFilterProvider.notifier).setQuery('SANY');
+            },
+          ),
+          const SizedBox(width: 8),
+          _buildPillChip(
+            label: 'ሊያልቅ ነው',
+            isSelected: filter.stockFilter == StockFilter.lowStock,
+            isWarningPill: true,
+            onTap: () {
+              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.lowStock);
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildStockFilterChip(
-    StockFilter filterValue,
-    String label,
-    StockFilter activeFilter,
-  ) {
-    final isSelected = filterValue == activeFilter;
-    return FilterChip(
-      selected: isSelected,
-      label: Text(label),
-      onSelected: (_) {
-        ref.read(inventoryFilterProvider.notifier).setStockFilter(filterValue);
-      },
-      visualDensity: VisualDensity.compact,
-      backgroundColor: Colors.white,
-      selectedColor: KeraColors.primaryNavy,
-      shape: const RoundedRectangleBorder(
-        borderRadius: KeraRadii.borderMicro,
-        side: BorderSide(color: KeraColors.outlineBorder),
+  Widget _buildPillChip({
+    required String label,
+    required bool isSelected,
+    bool isWarningPill = false,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF0C2340)
+              : isWarningPill
+                  ? const Color(0xFFFEF3C7)
+                  : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF0C2340)
+                : isWarningPill
+                    ? const Color(0xFFFDE68A)
+                    : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            color: isSelected
+                ? Colors.white
+                : isWarningPill
+                    ? const Color(0xFFD97706)
+                    : const Color(0xFF0C2340),
+          ),
+        ),
       ),
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: isSelected ? Colors.white : KeraColors.textPrimary,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 
@@ -865,20 +626,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildProductCard(PartItem part, {required bool isGrid}) {
-    return KeraProductCard(
-      isGrid: isGrid,
-      title: part.displayName,
-      partNumber: part.partNumber,
-      brandName: part.brandName,
-      shelfLocation: part.customLocation,
-      photoPath: part.photoLocalPath,
-      price: part.sellingPrice,
-      currencySymbol: context.tr('ብር', 'ETB'),
-      stockQuantity: part.cachedQuantity,
-      unit: part.unit,
-      isLowStock: part.isLowStock,
-      isOutOfStock: part.isOutOfStock,
-      outOfStockLabel: context.tr('ያለቀ', 'Out of Stock'),
+    final isOutOfStock = part.isOutOfStock || part.cachedQuantity <= 0;
+    final isLowStock = !isOutOfStock && (part.isLowStock || part.cachedQuantity <= 5);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
       onTap: () async {
         final result = await context.push('/parts/${part.id}');
         if (result == true && mounted) {
@@ -886,6 +638,129 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           await container.read(inventoryListProvider.notifier).refresh();
         }
       },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5EBF2)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x060C2340),
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left: Squircle Icon Box (2 Inventory.png)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.inventory_2_outlined,
+                color: Color(0xFF5E6D82),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Middle: Name, Number & Brand, Location
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    part.displayName,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0C2340),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'ቁጥር ${part.partNumber ?? '-'} · ${part.brandName ?? 'CAT'}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF5E6D82),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    part.customLocation ?? 'ሸልፍ 1',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF5E6D82),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Right: Price, Quantity, Status Badge
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${(part.sellingPrice ?? 1200).toStringAsFixed(0)} ETB',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0C2340),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${part.cachedQuantity.toStringAsFixed(0)} ፍሬ',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF5E6D82),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: isOutOfStock
+                        ? const Color(0xFFFEE2E2)
+                        : isLowStock
+                            ? const Color(0xFFFEF3C7)
+                            : const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isOutOfStock
+                        ? 'አልቋል'
+                        : isLowStock
+                            ? 'ሊያልቅ ነው'
+                            : 'በቂ',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isOutOfStock
+                          ? const Color(0xFFDC2626)
+                          : isLowStock
+                              ? const Color(0xFFD97706)
+                              : const Color(0xFF16A34A),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1008,3 +883,4 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 }
+

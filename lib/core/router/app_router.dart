@@ -386,7 +386,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/admin/backup',
             name: 'admin-backup',
             builder: (context, state) => const AdminBackupScreen(),
-            builder: (context, state) => const AdminAccountScreen(),
           ),
         ],
       ),

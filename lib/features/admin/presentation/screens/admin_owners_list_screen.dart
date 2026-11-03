@@ -613,7 +613,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
           backgroundColor: const Color(0xFF10B981),
         ),
       );
-      ref.read(adminOwnersProvider.notifier).loadOwners();
+      await ref.read(adminOwnersProvider.notifier).loadOwners();
     }
   }
 

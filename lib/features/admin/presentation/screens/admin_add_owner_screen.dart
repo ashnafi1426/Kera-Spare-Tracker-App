@@ -52,6 +52,7 @@ class _AdminAddOwnerScreenState extends ConsumerState<AdminAddOwnerScreen> {
 
       // Invalidate owners list
       await ref.read(adminOwnersProvider.notifier).loadOwners();
+      if (!mounted) return;
       context.pop();
     } catch (e) {
       if (!mounted) return;

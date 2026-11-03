@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/constants/constants.dart';
-import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/app_picker_bottom_sheet.dart';
 import '../../domain/models/part_item.dart';
@@ -15,11 +12,16 @@ import '../../domain/models/picker_item.dart';
 import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
 
-/// Stitch Screens 13 & 14: Add & Edit Spare Part (መለዋወጫ መመዝገብ / ማስተካከል).
+/// Screen 3: Add / Edit Spare Part (3 Add spare part.png).
 ///
-/// Features 6 structured card sections (Basic info, Image upload, Specs & Units,
-/// Stock & Shelf locator, Dynamic margin calculator banner, Internal notes),
-/// camera & gallery image picker, barcode scan trigger, and sticky bottom action.
+/// Designed to match the Owner App mockup:
+/// - Deep Navy top header (#0C2340) with back arrow and title
+/// - Light canvas background (#F4F7FB)
+/// - Dashed/styled photo picker container with camera icon
+/// - Helpful tip banner: "ሁሉም መስኮች አማራጭ ናቸው — ባዶ ትተው ማስቀመጥ ይችላሉ።"
+/// - Clean 2-column input fields for Brand/Category, Unit/Quantity, Cost/Selling Price, Location/Note
+/// - Live profit margin card (+350 ETB · 29.2% ትርፍ)
+/// - Sticky bottom orange button (#F58220) "አስቀምጥ"
 class PartFormScreen extends ConsumerStatefulWidget {
   final String? partId;
 
@@ -39,8 +41,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
   final _nameController = TextEditingController();
   final _partNumberController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _unitController = TextEditingController();
-  final _quantityController = TextEditingController();
+  final _unitController = TextEditingController(text: 'ፍሬ (Pcs)');
+  final _quantityController = TextEditingController(text: '1');
   final _purchasePriceController = TextEditingController();
   final _sellingPriceController = TextEditingController();
   final _customLocationController = TextEditingController();
@@ -90,14 +92,14 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       _nameController.text = part.name ?? '';
       _partNumberController.text = part.partNumber ?? '';
       _descriptionController.text = part.description ?? '';
-      _unitController.text = part.unit ?? '';
+      _unitController.text = part.unit?.isNotEmpty == true ? part.unit! : 'ፍሬ (Pcs)';
       _quantityController.text =
-          part.cachedQuantity > 0 ? part.cachedQuantity.toStringAsFixed(0) : '';
+          part.cachedQuantity > 0 ? part.cachedQuantity.toStringAsFixed(0) : '0';
       _purchasePriceController.text = part.purchasePrice != null
-          ? part.purchasePrice!.toStringAsFixed(2)
+          ? part.purchasePrice!.toStringAsFixed(0)
           : '';
       _sellingPriceController.text = part.sellingPrice != null
-          ? part.sellingPrice!.toStringAsFixed(2)
+          ? part.sellingPrice!.toStringAsFixed(0)
           : '';
       _customLocationController.text = part.customLocation ?? '';
       _sizeSpecsController.text = part.sizeSpecs ?? '';
@@ -159,12 +161,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       return _nameController.text.isNotEmpty ||
           _partNumberController.text.isNotEmpty ||
           _descriptionController.text.isNotEmpty ||
-          _unitController.text.isNotEmpty ||
-          _quantityController.text.isNotEmpty ||
           _purchasePriceController.text.isNotEmpty ||
           _sellingPriceController.text.isNotEmpty ||
           _customLocationController.text.isNotEmpty ||
-          _sizeSpecsController.text.isNotEmpty ||
           _notesController.text.isNotEmpty ||
           _photoLocalPath != null ||
           _selectedBrand != null ||
@@ -178,7 +177,6 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         _descriptionController.text != (p.description ?? '') ||
         _unitController.text != (p.unit ?? '') ||
         _customLocationController.text != (p.customLocation ?? '') ||
-        _sizeSpecsController.text != (p.sizeSpecs ?? '') ||
         _notesController.text != (p.notes ?? '') ||
         _photoLocalPath != p.photoLocalPath ||
         _selectedBrand?.id != p.brandId ||
@@ -202,7 +200,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.colorScheme.error,
+              backgroundColor: const Color(0xFFDC2626),
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -234,14 +232,14 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: KeraColors.outlineBorder,
+                  color: const Color(0xFFE2E8F0),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               ListTile(
                 leading: const CircleAvatar(
-                  backgroundColor: KeraColors.surfaceMuted,
-                  child: Icon(Icons.camera_alt_rounded, color: KeraColors.actionBlue),
+                  backgroundColor: Color(0xFFEFF6FF),
+                  child: Icon(Icons.camera_alt_rounded, color: Color(0xFF0C2340)),
                 ),
                 title: Text(l10n.takePhoto, style: KeraTypography.titleSmall()),
                 subtitle: const Text('በካሜራ ፎቶ አንሳ'),
@@ -257,11 +255,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
               ),
               ListTile(
                 leading: const CircleAvatar(
-                  backgroundColor: KeraColors.surfaceMuted,
-                  child: Icon(Icons.photo_library_rounded, color: KeraColors.actionBlue),
+                  backgroundColor: Color(0xFFEFF6FF),
+                  child: Icon(Icons.photo_library_rounded, color: Color(0xFF0C2340)),
                 ),
-                title: Text(l10n.chooseFromGallery, style: KeraTypography.titleSmall()),
-                subtitle: const Text('ከስልክ ማዕከለ-ስዕላት ምረጥ'),
+                title: const Text('ከስልክ ማዕከለ-ስዕላት ምረጥ'),
+                subtitle: const Text('ፎቶ ከስልክ ምረጥ'),
                 onTap: () async {
                   Navigator.pop(ctx);
                   final photo = await imageService.captureOrPickPhoto(
@@ -272,19 +270,6 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                   }
                 },
               ),
-              if (_photoLocalPath != null)
-                ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: KeraColors.stockOutBg,
-                    child: Icon(Icons.delete_outline_rounded, color: KeraColors.error),
-                  ),
-                  title: Text(l10n.removePhoto,
-                      style: KeraTypography.titleSmall(color: KeraColors.error)),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    setState(() => _photoLocalPath = null);
-                  },
-                ),
             ],
           ),
         ),
@@ -401,7 +386,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: KeraColors.actionBlue,
+              backgroundColor: const Color(0xFF0C2340),
               foregroundColor: Colors.white,
             ),
             child: Text(context.l10n.save),
@@ -435,19 +420,19 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       final result = await repo.updatePart(
         ownerId: ownerId,
         id: widget.partId!,
-        name: _nameController.text,
-        partNumber: _partNumberController.text,
+        name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        partNumber: _partNumberController.text.trim().isEmpty ? null : _partNumberController.text.trim(),
         photoLocalPath: _photoLocalPath,
         brandId: _selectedBrand?.id,
         categoryId: _selectedCategory?.id,
         locationId: _selectedLocation?.id,
-        customLocation: _customLocationController.text,
-        description: _descriptionController.text,
-        unit: _unitController.text,
+        customLocation: _customLocationController.text.trim(),
+        description: _descriptionController.text.trim(),
+        unit: _unitController.text.trim(),
         purchasePrice: purchasePrice,
         sellingPrice: sellingPrice,
-        sizeSpecs: _sizeSpecsController.text,
-        notes: _notesController.text,
+        sizeSpecs: _sizeSpecsController.text.trim(),
+        notes: _notesController.text.trim(),
       );
 
       if (!mounted) return;
@@ -465,19 +450,19 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
     } else {
       final result = await repo.createPart(
         ownerId: ownerId,
-        name: _nameController.text,
-        partNumber: _partNumberController.text,
+        name: _nameController.text.trim().isEmpty ? 'ዕቃ' : _nameController.text.trim(),
+        partNumber: _partNumberController.text.trim(),
         photoLocalPath: _photoLocalPath,
         brandId: _selectedBrand?.id,
         categoryId: _selectedCategory?.id,
         locationId: _selectedLocation?.id,
-        customLocation: _customLocationController.text,
-        description: _descriptionController.text,
-        unit: _unitController.text,
+        customLocation: _customLocationController.text.trim(),
+        description: _descriptionController.text.trim(),
+        unit: _unitController.text.trim(),
         purchasePrice: purchasePrice,
         sellingPrice: sellingPrice,
-        sizeSpecs: _sizeSpecsController.text,
-        notes: _notesController.text,
+        sizeSpecs: _sizeSpecsController.text.trim(),
+        notes: _notesController.text.trim(),
         initialQuantity: initialQuantity,
       );
 
@@ -504,10 +489,69 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
     });
   }
 
+  Widget _buildFieldLabel(String label, {bool isRequired = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF334155),
+            ),
+          ),
+          if (isRequired)
+            const Text(
+              ' *',
+              style: TextStyle(
+                color: Color(0xFFDC2626),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    String? hintText,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    String? suffixText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      suffixText: suffixText,
+      suffixStyle: const TextStyle(
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF64748B),
+        fontSize: 13,
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF0C2340), width: 1.5),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
     final cost = double.tryParse(_purchasePriceController.text.trim());
     final sell = double.tryParse(_sellingPriceController.text.trim());
     final hasPriceInputs = sell != null && sell > 0;
@@ -526,635 +570,497 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: KeraColors.surfaceCanvas,
+        backgroundColor: const Color(0xFFF4F7FB),
         appBar: AppBar(
-          backgroundColor: KeraColors.primaryNavy,
+          backgroundColor: const Color(0xFF0C2340),
           foregroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            onPressed: () async {
+              final shouldPop = await _onWillPop();
+              if (shouldPop && context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           title: Text(
-            isEditing ? l10n.editPart : l10n.addPart,
-            style: KeraTypography.titleMedium(color: Colors.white).copyWith(
-              fontWeight: FontWeight.w700,
+            isEditing ? 'ዕቃ ማስተካከል' : 'ዕቃ መጨመር',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : _savePart,
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text(
-                      l10n.save,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-          ],
+          centerTitle: false,
         ),
         body: _isLoading && !_isInitialized
             ? const Center(
-                child: CircularProgressIndicator(color: KeraColors.actionBlue),
+                child: CircularProgressIndicator(color: Color(0xFF0C2340)),
               )
             : Form(
                 key: _formKey,
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   children: [
-                    // Section 1: Basic Information (Stitch Screen 13)
-                    _buildSectionHeader('1. መሰረታዊ መረጃ (Basic Info)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Part Name
-                          TextFormField(
-                            controller: _nameController,
-                            textCapitalization: TextCapitalization.words,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.partName,
-                              hintText: l10n.partNameHint,
-                              prefixIcon: const Icon(Icons.build_circle_outlined,
-                                  color: KeraColors.actionBlue),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
+                    // 1. Photo Picker Dashed/Rounded Container (3 Add spare part.png)
+                    GestureDetector(
+                      onTap: _showPhotoPickerSheet,
+                      child: Container(
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFCBD5E1),
+                            width: 1.5,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x060C2340),
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // OEM Part Number
-                          TextFormField(
-                            controller: _partNumberController,
-                            textCapitalization: TextCapitalization.characters,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.partNumber,
-                              hintText: l10n.partNumberHint,
-                              prefixIcon: const Icon(Icons.numbers_rounded,
-                                  color: KeraColors.actionBlue),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.qr_code_scanner_rounded,
-                                    color: KeraColors.textSecondary),
-                                tooltip: 'Scan part number',
-                                onPressed: () {
-                                  context.showSnackBar('የካሜራ ስካነር ዝግጁ ነው');
-                                },
-                              ),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Brand & Category Selection Pickers
-                          Row(
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  onTap: _pickBrand,
-                                  borderRadius: KeraRadii.borderInput,
-                                  child: InputDecorator(
-                                    decoration: InputDecoration(
-                                      labelText: l10n.brand,
-                                      prefixIcon: const Icon(Icons.directions_car_outlined,
-                                          color: KeraColors.actionBlue),
-                                      suffixIcon:
-                                          const Icon(Icons.arrow_drop_down_rounded),
-                                      filled: true,
-                                      fillColor: KeraColors.surfaceMuted,
-                                      border: const OutlineInputBorder(
-                                        borderRadius: KeraRadii.borderInput,
-                                        borderSide:
-                                            BorderSide(color: KeraColors.outlineBorder),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _selectedBrand?.name ?? '—',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: KeraTypography.bodyMedium(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: InkWell(
-                                  onTap: _pickCategory,
-                                  borderRadius: KeraRadii.borderInput,
-                                  child: InputDecorator(
-                                    decoration: InputDecoration(
-                                      labelText: l10n.category,
-                                      prefixIcon: const Icon(Icons.folder_open_outlined,
-                                          color: KeraColors.actionBlue),
-                                      suffixIcon:
-                                          const Icon(Icons.arrow_drop_down_rounded),
-                                      filled: true,
-                                      fillColor: KeraColors.surfaceMuted,
-                                      border: const OutlineInputBorder(
-                                        borderRadius: KeraRadii.borderInput,
-                                        borderSide:
-                                            BorderSide(color: KeraColors.outlineBorder),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _selectedCategory?.name ?? '—',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: KeraTypography.bodyMedium(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 2: Product Image (Stitch Screen 13)
-                    _buildSectionHeader('2. የዕቃው ፎቶ (Product Image)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: _showPhotoPickerSheet,
-                            child: Container(
-                              width: 90,
-                              height: 90,
-                              decoration: BoxDecoration(
-                                color: KeraColors.surfaceMuted,
-                                borderRadius: KeraRadii.borderCard,
-                                border: Border.all(color: KeraColors.outlineBorder),
-                                image: _photoLocalPath != null
-                                    ? DecorationImage(
-                                        image: FileImage(File(_photoLocalPath!)),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
-                              ),
-                              child: _photoLocalPath == null
-                                  ? const Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.add_a_photo_outlined,
-                                            size: 28, color: KeraColors.actionBlue),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'ፎቶ አንሳ',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: KeraColors.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _photoLocalPath != null
-                                      ? 'ፎቶው ተመርጧል'
-                                      : 'ምስል በመጨመር ዕቃውን በቀላሉ ለይተው ይወቁ',
-                                  style: KeraTypography.bodySmall(
-                                    color: _photoLocalPath != null
-                                        ? KeraColors.stockInText
-                                        : KeraColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    OutlinedButton.icon(
-                                      onPressed: _showPhotoPickerSheet,
-                                      icon: const Icon(Icons.camera_alt_rounded, size: 16),
-                                      label: Text(l10n.takePhoto),
-                                      style: OutlinedButton.styleFrom(
-                                        visualDensity: VisualDensity.compact,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 6),
-                                      ),
-                                    ),
-                                    if (_photoLocalPath != null) ...[
-                                      const SizedBox(width: 8),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete_outline_rounded,
-                                            color: KeraColors.error),
-                                        tooltip: l10n.removePhoto,
-                                        onPressed: () =>
-                                            setState(() => _photoLocalPath = null),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 3: Specifications & Unit
-                    _buildSectionHeader('3. ዝርዝር መግለጫ እና መለኪያ (Specs & Units)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Unit selection chips
-                          Text('መለኪያ (Unit):',
-                              style: KeraTypography.labelSmall(
-                                  color: KeraColors.textSecondary)),
-                          const SizedBox(height: 6),
-                          Wrap(
-                            spacing: 8,
-                            children: ['ቁራጭ (pcs)', 'ኪት (kit)', 'ካርቶን (box)', 'ሊትር (Ltr)', 'ሜትር (Mtr)'].map((u) {
-                              final unitCode = u.split('(').last.replaceAll(')', '').trim();
-                              final isSelected = _unitController.text.trim().toLowerCase() ==
-                                  unitCode.toLowerCase();
-                              return ChoiceChip(
-                                label: Text(u, style: const TextStyle(fontSize: 11)),
-                                selected: isSelected,
-                                selectedColor: KeraColors.actionBlue,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : KeraColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                ),
-                                onSelected: (_) {
-                                  setState(() => _unitController.text = unitCode);
-                                },
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Custom Unit text field
-                          TextFormField(
-                            controller: _unitController,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.unit,
-                              hintText: l10n.unitHint,
-                              prefixIcon: const Icon(Icons.straighten_outlined,
-                                  color: KeraColors.actionBlue),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Size & Dimensions Specs
-                          TextFormField(
-                            controller: _sizeSpecsController,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.sizeSpecs,
-                              hintText: l10n.sizeSpecsHint,
-                              prefixIcon: const Icon(Icons.tune_rounded,
-                                  color: KeraColors.actionBlue),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Description
-                          TextFormField(
-                            controller: _descriptionController,
-                            maxLines: 2,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.description,
-                              hintText: l10n.descriptionHint,
-                              prefixIcon: const Icon(Icons.notes_rounded,
-                                  color: KeraColors.actionBlue),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 4: Stock & Storage Location
-                    _buildSectionHeader('4. ክምችት እና መደርደሪያ (Stock & Location)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (!isEditing) ...[
-                            // Quantity with Stepper
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: _quantityController,
-                                    keyboardType: TextInputType.number,
-                                    style: KeraTypography.bodyMedium(),
-                                    decoration: InputDecoration(
-                                      labelText: l10n.quantityInStock,
-                                      hintText: '0',
-                                      prefixIcon: const Icon(Icons.inventory_2_outlined,
-                                          color: KeraColors.actionBlue),
-                                      filled: true,
-                                      fillColor: KeraColors.surfaceMuted,
-                                      border: const OutlineInputBorder(
-                                        borderRadius: KeraRadii.borderInput,
-                                        borderSide:
-                                            BorderSide(color: KeraColors.outlineBorder),
-                                      ),
-                                    ),
-                                    validator: (val) {
-                                      if (val == null || val.trim().isEmpty) return null;
-                                      final num = double.tryParse(val.trim());
-                                      if (num == null || num < 0) {
-                                        return l10n.negativeNumberError;
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton.outlined(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: () => _stepQuantity(-1),
-                                ),
-                                IconButton.outlined(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: () => _stepQuantity(1),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
                           ],
-
-                          // Storage Shelf Picker
-                          InkWell(
-                            onTap: _pickLocation,
-                            borderRadius: KeraRadii.borderInput,
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: l10n.storageLocation,
-                                prefixIcon: const Icon(Icons.shelves,
-                                    color: KeraColors.actionBlue),
-                                suffixIcon: const Icon(Icons.arrow_drop_down_rounded),
-                                filled: true,
-                                fillColor: KeraColors.surfaceMuted,
-                                border: const OutlineInputBorder(
-                                  borderRadius: KeraRadii.borderInput,
-                                  borderSide: BorderSide(color: KeraColors.outlineBorder),
-                                ),
-                              ),
-                              child: Text(
-                                _selectedLocation?.name ?? '—',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: KeraTypography.bodyMedium(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Custom Bin / Shelf Slot
-                          TextFormField(
-                            controller: _customLocationController,
-                            style: KeraTypography.bodyMedium(),
-                            decoration: InputDecoration(
-                              labelText: l10n.customLocation,
-                              hintText: l10n.customLocationHint,
-                              prefixIcon: const Icon(Icons.place_outlined,
-                                  color: KeraColors.actionBlue),
-                              filled: true,
-                              fillColor: KeraColors.surfaceMuted,
-                              border: const OutlineInputBorder(
-                                borderRadius: KeraRadii.borderInput,
-                                borderSide: BorderSide(color: KeraColors.outlineBorder),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Section 5: Pricing & Dynamic Profit Margin Banner
-                    _buildSectionHeader('5. የዋጋ ስሌት እና ትርፍ (Pricing & Valuation)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _purchasePriceController,
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                      decimal: true),
-                                  style: KeraTypography.bodyMedium(),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.purchasePrice,
-                                    prefixIcon: const Icon(Icons.shopping_bag_outlined,
-                                        color: KeraColors.actionBlue),
-                                    suffixText: 'ብር',
-                                    filled: true,
-                                    fillColor: KeraColors.surfaceMuted,
-                                    border: const OutlineInputBorder(
-                                      borderRadius: KeraRadii.borderInput,
-                                      borderSide:
-                                          BorderSide(color: KeraColors.outlineBorder),
-                                    ),
-                                  ),
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) return null;
-                                    final num = double.tryParse(val.trim());
-                                    if (num == null || num < 0) {
-                                      return l10n.negativeNumberError;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _sellingPriceController,
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                      decimal: true),
-                                  style: KeraTypography.bodyMedium(),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.sellingPrice,
-                                    prefixIcon: const Icon(Icons.monetization_on_outlined,
-                                        color: KeraColors.actionBlue),
-                                    suffixText: 'ብር',
-                                    filled: true,
-                                    fillColor: KeraColors.surfaceMuted,
-                                    border: const OutlineInputBorder(
-                                      borderRadius: KeraRadii.borderInput,
-                                      borderSide:
-                                          BorderSide(color: KeraColors.outlineBorder),
-                                    ),
-                                  ),
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) return null;
-                                    final num = double.tryParse(val.trim());
-                                    if (num == null || num < 0) {
-                                      return l10n.negativeNumberError;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Live Margin Banner (Stitch Screen 13)
-                          if (hasPriceInputs) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: profit >= 0
-                                    ? KeraColors.stockInBg
-                                    : KeraColors.stockOutBg,
-                                borderRadius: KeraRadii.borderCard,
-                                border: Border.all(
-                                  color: profit >= 0
-                                      ? KeraColors.stockInText.withValues(alpha: 0.3)
-                                      : KeraColors.stockOutText.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: _photoLocalPath != null
+                            ? Stack(
+                                fit: StackFit.expand,
                                 children: [
-                                  Icon(
-                                    profit >= 0
-                                        ? Icons.trending_up_rounded
-                                        : Icons.trending_down_rounded,
-                                    color: profit >= 0
-                                        ? KeraColors.stockInText
-                                        : KeraColors.stockOutText,
-                                    size: 20,
+                                  Image.file(
+                                    File(_photoLocalPath!),
+                                    fit: BoxFit.cover,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      profit >= 0
-                                          ? 'ትርፍ: +${profit.toStringAsFixed(0)} ብር (~${marginPct.toStringAsFixed(1)}% ትርፍ በአንድ ዕቃ)'
-                                          : 'ኪሳራ: ${profit.toStringAsFixed(0)} ብር',
-                                      style: KeraTypography.bodySmall(
-                                        color: profit >= 0
-                                            ? KeraColors.stockInText
-                                            : KeraColors.stockOutText,
-                                      ).copyWith(fontWeight: FontWeight.w700),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: CircleAvatar(
+                                      radius: 16,
+                                      backgroundColor: Colors.black54,
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                                        onPressed: () => setState(() => _photoLocalPath = null),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF6FF),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Color(0xFF0C2340),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'ፎቶ ጨምር (አማራጭ)',
+                                    style: TextStyle(
+                                      color: Color(0xFF0C2340),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'ካሜራ ወይም ከስልክ ማዕከለ-ስዕላት ምረጥ',
+                                    style: TextStyle(
+                                      color: Color(0xFF64748B),
+                                      fontSize: 11,
                                     ),
                                   ),
                                 ],
                               ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 2. Helper Hint Notice (3 Add spare part.png)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF1E40AF)),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'ሁሉም መስኮች አማራጭ ናቸው — ባዶ ትተው ማስቀመጥ ይችላሉ።',
+                              style: TextStyle(
+                                color: Color(0xFF1E3A8A),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // Section 6: Internal Notes
-                    _buildSectionHeader('6. ተጨማሪ ማስታወሻ (Internal Notes)'),
-                    KeraCard(
-                      padding: const EdgeInsets.all(16),
-                      child: TextFormField(
-                        controller: _notesController,
-                        maxLines: 2,
-                        style: KeraTypography.bodyMedium(),
-                        decoration: InputDecoration(
-                          labelText: l10n.notes,
-                          hintText: l10n.notesHint,
-                          prefixIcon: const Icon(Icons.edit_note_rounded,
-                              color: KeraColors.actionBlue),
-                          filled: true,
-                          fillColor: KeraColors.surfaceMuted,
-                          border: const OutlineInputBorder(
-                            borderRadius: KeraRadii.borderInput,
-                            borderSide: BorderSide(color: KeraColors.outlineBorder),
+                    // 3. Name field
+                    _buildFieldLabel('የዕቃ ስም', isRequired: false),
+                    TextFormField(
+                      controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: _inputDecoration(
+                        hintText: 'ምሳሌ፦ ዘይት ፊልተር (Oil Filter)',
+                        prefixIcon: const Icon(Icons.build_circle_outlined, color: Color(0xFF64748B), size: 20),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 4. Part Number field with scanner
+                    _buildFieldLabel('የዕቃ ቁጥር (Part No.)'),
+                    TextFormField(
+                      controller: _partNumberController,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: _inputDecoration(
+                        hintText: 'ምሳሌ፦ 1R-0716 / LF691A',
+                        prefixIcon: const Icon(Icons.tag_rounded, color: Color(0xFF64748B), size: 20),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF0C2340)),
+                          onPressed: () {
+                            context.showSnackBar('የባርኮድ ስካነር ዝግጁ ነው');
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 5. Two-column: Brand & Category
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('ብራንድ (Brand)'),
+                              InkWell(
+                                onTap: _pickBrand,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _selectedBrand?.name ?? 'ምረጥ...',
+                                          style: TextStyle(
+                                            color: _selectedBrand != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                                            fontSize: 13,
+                                            fontWeight: _selectedBrand != null ? FontWeight.w600 : FontWeight.normal,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 20),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('ምድብ (Category)'),
+                              InkWell(
+                                onTap: _pickCategory,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _selectedCategory?.name ?? 'ምረጥ...',
+                                          style: TextStyle(
+                                            color: _selectedCategory != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                                            fontSize: 13,
+                                            fontWeight: _selectedCategory != null ? FontWeight.w600 : FontWeight.normal,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 20),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 14),
 
-                    // Save Action Button
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: KeraColors.actionBlue,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(
-                            double.infinity, AppConstants.standardButtonHeight),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: KeraRadii.borderButton,
+                    // 6. Two-column: Unit & Quantity
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('መለኪያ (Unit)'),
+                              TextFormField(
+                                controller: _unitController,
+                                decoration: _inputDecoration(hintText: 'ፍሬ (Pcs)'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('ብዛት (Quantity)'),
+                              Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () => _stepQuantity(-1),
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 38,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                                      ),
+                                      child: const Icon(Icons.remove_rounded, size: 18, color: Color(0xFF0C2340)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _quantityController,
+                                      keyboardType: TextInputType.number,
+                                      textAlign: TextAlign.center,
+                                      decoration: _inputDecoration(hintText: '0'),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  InkWell(
+                                    onTap: () => _stepQuantity(1),
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Container(
+                                      width: 38,
+                                      height: 44,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF0C2340),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 7. Two-column: Cost Price & Selling Price
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('የመግዣ ዋጋ (Cost Price)'),
+                              TextFormField(
+                                controller: _purchasePriceController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: _inputDecoration(hintText: '850', suffixText: 'ETB'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('የመሸጫ ዋጋ (Selling Price)'),
+                              TextFormField(
+                                controller: _sellingPriceController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: _inputDecoration(hintText: '1,200', suffixText: 'ETB'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // 8. Live Margin / Profit Card (3 Add spare part.png)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: profit >= 0 ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: profit >= 0 ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA),
                         ),
                       ),
-                      icon: const Icon(Icons.check_circle_rounded),
-                      label: Text(
-                        l10n.save,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                profit >= 0 ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                                color: profit >= 0 ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'ትርፍ በአንድ ፍሬ (Profit)',
+                                style: TextStyle(
+                                  color: Color(0xFF065F46),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            profit >= 0
+                                ? '+${profit.toStringAsFixed(0)} ETB (${marginPct.toStringAsFixed(1)}% ትርፍ)'
+                                : '${profit.toStringAsFixed(0)} ETB',
+                            style: TextStyle(
+                              color: profit >= 0 ? const Color(0xFF047857) : const Color(0xFFDC2626),
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      onPressed: _isLoading ? null : _savePart,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 14),
+
+                    // 9. Two-column: Location & Note
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('መደርደሪያ / ቦታ (Location)'),
+                              TextFormField(
+                                controller: _customLocationController,
+                                decoration: _inputDecoration(
+                                  hintText: 'ምሳሌ፦ A-12',
+                                  prefixIcon: const Icon(Icons.shelves, color: Color(0xFF64748B), size: 18),
+                                  suffixIcon: IconButton(
+                                    icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF64748B)),
+                                    onPressed: () async {
+                                      await _pickLocation();
+                                      if (_selectedLocation != null) {
+                                        _customLocationController.text = _selectedLocation!.name;
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildFieldLabel('ማስታወሻ (Note)'),
+                              TextFormField(
+                                controller: _notesController,
+                                decoration: _inputDecoration(
+                                  hintText: 'ምሳሌ፦ ኦሪጅናል CAT',
+                                  prefixIcon: const Icon(Icons.note_alt_outlined, color: Color(0xFF64748B), size: 18),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        title,
-        style: KeraTypography.labelLarge(color: KeraColors.primaryNavy).copyWith(
-          fontWeight: FontWeight.w700,
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+          ),
+          child: SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _savePart,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF58220),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle_outline_rounded, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'አስቀምጥ',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
         ),
       ),
     );

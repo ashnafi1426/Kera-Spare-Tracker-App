@@ -7,7 +7,6 @@ import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_header_bar.dart';
 import '../widgets/admin_metric_tile.dart';

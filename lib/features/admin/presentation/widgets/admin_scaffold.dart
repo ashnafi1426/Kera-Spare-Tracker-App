@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
