@@ -1,5 +1,5 @@
 import prisma from '../../config/db.js';
-import { countTotalParts, countTotalSales } from './adminStatsService.js';
+import { countTotalParts, countTotalSales, getTotalSalesRevenueAndProfit } from './adminStatsService.js';
 
 export async function getDashboardMetrics() {
   const now = new Date();
@@ -18,7 +18,7 @@ export async function getDashboardMetrics() {
     versionGroups,
     totalParts,
     totalSales,
-    salesAggregate,
+    salesMetrics,
   ] = await Promise.all([
     prisma.user.count({ where: baseOwnerFilter }),
     prisma.user.count({
@@ -66,19 +66,16 @@ export async function getDashboardMetrics() {
     }),
     countTotalParts(),
     countTotalSales(),
-    prisma.sale.aggregate({
-      where: { deletedAt: null },
-      _sum: { totalAmount: true, totalProfit: true },
-    }),
+    getTotalSalesRevenueAndProfit(),
   ]);
 
-  const appVersionDistribution = {};
-  versionGroups.forEach((g) => {
-    appVersionDistribution[g.appVersion || 'unknown'] = g._count.id;
-  });
+  const appVersionDistribution = versionGroups.map((g) => ({
+    version: g.appVersion || 'unknown',
+    count: g._count.id,
+  }));
 
-  const totalRevenue = Number(salesAggregate._sum?.totalAmount || 0);
-  const totalProfit = Number(salesAggregate._sum?.totalProfit || 0);
+  const totalRevenue = salesMetrics.totalRevenue;
+  const totalProfit = salesMetrics.totalProfit;
 
   return {
     totalOwners,

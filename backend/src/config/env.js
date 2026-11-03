@@ -12,7 +12,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_MINUTES: z.coerce.number().int().positive().default(43200), // 30 days (1 month)
   REFRESH_TOKEN_DAYS: z.coerce.number().int().positive().default(90),
   OFFLINE_MAX_DAYS: z.coerce.number().int().positive().default(90),
-  JWT_ADMIN_ACCESS_EXPIRES_IN: z.string().default('30d'),
+  JWT_ADMIN_ACCESS_EXPIRES_IN: z.string().default('10m'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(4).max(16).default(10),
   CORS_ORIGIN: z.string().default('*'),
   ADMIN_CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:5000,http://localhost:8080'),

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/db.js';
 import { NotFoundError, BadRequestError, ConflictError } from '../../utils/errors.js';
-import { getOwnerItemCounts } from './adminStatsService.js';
+import { getOwnerItemCounts, getOwnersCountsMap } from './adminStatsService.js';
 import * as auditLogService from './auditLogService.js';
 
 /**
@@ -85,12 +85,6 @@ export async function listUsers({
         disabledAt: true,
         suspendedAt: true,
         suspendedReason: true,
-        _count: {
-          select: {
-            spareParts: { where: { deletedAt: null } },
-            sales: { where: { deletedAt: null } },
-          },
-        },
       },
       orderBy: { [sortField]: orderDirection },
       take: limitNum,
@@ -98,13 +92,16 @@ export async function listUsers({
     }),
   ]);
 
+  const ownerIds = users.map((u) => u.id);
+  const countsMap = await getOwnersCountsMap(ownerIds);
+
   const formattedUsers = users.map((u) => ({
     ...u,
     phone: u.phoneNumber,
     photoUrl: u.photoUrl || null,
     thumbnailUrl: u.photoUrl || null,
-    partsCount: u._count?.spareParts ?? 0,
-    salesCount: u._count?.sales ?? 0,
+    partsCount: countsMap[u.id]?.partsCount ?? 0,
+    salesCount: countsMap[u.id]?.salesCount ?? 0,
     plan: null,
     expiry: null,
   }));
