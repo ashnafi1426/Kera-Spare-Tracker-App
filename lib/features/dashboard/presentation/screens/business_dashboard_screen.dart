@@ -40,7 +40,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     final pendingSync = metrics?.pendingSyncCount ?? 5;
     final totalSales = metrics != null && metrics.todayRevenue > 0 ? metrics.todayRevenue : 128400.0;
     final estimatedProfit = metrics != null && metrics.todayProfit > 0 ? metrics.todayProfit : 34200.0;
-    final salesCount = 18;
+    const salesCount = 18;
     final costAmount = totalSales - estimatedProfit > 0 ? totalSales - estimatedProfit : 94200.0;
 
     return Scaffold(

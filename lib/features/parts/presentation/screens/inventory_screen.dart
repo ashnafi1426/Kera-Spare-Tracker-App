@@ -14,7 +14,6 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/inventory_providers.dart';
-import '../providers/parts_providers.dart';
 
 /// Stitch Screen 12: Inventory Overview (የዕቃዎች ዝርዝር).
 ///
@@ -164,7 +163,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final filter = ref.watch(inventoryFilterProvider);
     final state = ref.watch(inventoryListProvider);
     final authUser = ref.watch(authControllerProvider).value;
-    final partsStream = ref.watch(partsStreamProvider);
     final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
 
     return Scaffold(
