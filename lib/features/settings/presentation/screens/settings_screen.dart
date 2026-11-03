@@ -9,6 +9,7 @@ import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
@@ -53,14 +54,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             : '+251 911 458 920');
 
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
         backgroundColor: KeraColors.primaryNavy,
         foregroundColor: Colors.white,
         elevation: 1,
-        title: Text(
-          context.tr('ቅንብሮች', 'Settings'),
-          style: KeraTypography.titleMedium(color: Colors.white),
+        title: Row(
+          children: [
+            const KeraLogoWidget(size: 34, borderRadius: 6),
+            const SizedBox(width: 10),
+            Text(
+              context.tr('ቅንብሮች', 'Settings'),
+              style: KeraTypography.titleMedium(color: Colors.white),
+            ),
+          ],
         ),
         actions: [
           // Language toggle pill
@@ -172,9 +179,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
@@ -182,7 +189,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.badge_outlined,
                       titleAm: 'የንግድ መረጃ',
                       titleEn: '/ Business Profile',
-                      subtitle: 'ስም፣ አድራሻ፣ ሎጎ እና ስልክ ቁጥር',
+                      subtitle: 'ስም፣ አድራሻ፣ ሎጎ እና ስልክ ቁጥር / Name, address, logo & phone',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -205,7 +212,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'የተሟላ / Done',
+                              context.tr('የተሟላ', 'Done'),
                               style: KeraTypography.labelSmall(
                                 color: KeraColors.stockInText,
                               ),
@@ -215,7 +222,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       onTap: () => context.push('/settings/profile'),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.account_circle_outlined,
                       titleAm: 'የባለቤት መገለጫ',
@@ -223,12 +230,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: '$ownerName • $phone',
                       onTap: () => context.push('/settings/profile'),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.lock_reset_rounded,
                       titleAm: 'ደህንነት እና የይለፍ ቃል',
-                      titleEn: '/ Security',
-                      subtitle: 'የይለፍ ቃል፣ ገቢር ስልኮች እና ፒን ቁጥር',
+                      titleEn: '/ Security & Password',
+                      subtitle: 'የይለፍ ቃል፣ ገቢር ስልኮች እና ፒን ቁጥር / Password, active devices & PIN',
                       onTap: () => context.push('/settings/security'),
                     ),
                   ],
@@ -245,9 +252,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
@@ -256,7 +263,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.translate_rounded,
                       titleAm: 'ቋንቋ',
                       titleEn: '/ Language',
-                      subtitle: 'የአሰራር ቋንቋ ይምረጡ',
+                      subtitle: 'የአሰራር ቋንቋ ይምረጡ / Choose interface language',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -268,8 +275,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         child: Text(
                           currentLocale.languageCode == 'am'
-                              ? 'አማርኛ (Amharic)'
-                              : 'English (US)',
+                              ? 'አማርኛ'
+                              : 'English',
                           style: KeraTypography.labelSmall(
                             color: KeraColors.actionBlue,
                           ),
@@ -277,43 +284,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       onTap: () => context.push('/settings/language'),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     // Theme
                     _buildSettingsRow(
                       icon: Icons.light_mode_outlined,
                       titleAm: 'ገጽታ',
                       titleEn: '/ Theme',
-                      subtitle: 'የቀን እና የሌሊት ገጽታ',
+                      subtitle: 'የቀን እና የሌሊት ገጽታ / Day and night color theme',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: KeraColors.surfaceContainerLow,
+                          color: context.cardCanvasColor,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           switch (currentThemeMode) {
-                            ThemeMode.light => 'ፈካ ያለ (Light)',
-                            ThemeMode.dark => 'ጨለማ (Dark)',
-                            ThemeMode.system => 'ስርዓት (System)',
+                            ThemeMode.light => context.tr('ፈካ ያለ', 'Light'),
+                            ThemeMode.dark => context.tr('ጨለማ', 'Dark'),
+                            ThemeMode.system => context.tr('ስርዓት', 'System'),
                           },
                           style: KeraTypography.labelSmall(
-                            color: KeraColors.textSecondary,
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ),
                       onTap: () =>
                           _showThemeModeDialog(context, currentThemeMode),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     // Notifications
                     _buildSettingsRow(
                       icon: Icons.notifications_active_outlined,
                       titleAm: 'ማሳወቂያዎች',
                       titleEn: '/ Alerts',
-                      subtitle: 'የክምችት እና የሽያጭ ማንቂያዎች',
+                      subtitle: 'የክምችት እና የሽያጭ ማንቂያዎች / Stock and sales notifications',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -324,7 +331,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          '4 ነቅተዋል (Active)',
+                          context.tr('4 ነቅተዋል', '4 Active'),
                           style: KeraTypography.labelSmall(
                             color: KeraColors.warning,
                           ),
@@ -346,9 +353,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
@@ -358,7 +365,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       iconColor: KeraColors.warning,
                       titleAm: 'አነስተኛ ክምችት ማስጠንቀቂያ',
                       titleEn: '/ Low Stock Threshold',
-                      subtitle: 'ዕቃ ሊያልቅ ሲል የሚላክበት ገደብ',
+                      subtitle: 'ዕቃ ሊያልቅ ሲል የሚላክበት ገደብ / Alert threshold before running out',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -377,59 +384,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       onTap: () => _showThresholdDialog(context),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.straighten_rounded,
                       titleAm: 'ነባሪ መለኪያ',
                       titleEn: '/ Default Unit',
-                      subtitle: 'ለተመዘገቡ አዳዲስ መለዋወጫዎች',
+                      subtitle: 'ለተመዘገቡ አዳዲስ መለዋወጫዎች / Unit for newly registered items',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: KeraColors.surfaceContainerLow,
+                          color: context.cardCanvasColor,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'ቁራጭ (Pcs)',
+                          context.tr('ቁራጭ', 'Pcs'),
                           style: KeraTypography.labelSmall(
-                            color: KeraColors.textPrimary,
+                            color: context.textPrimaryColor,
                           ),
                         ),
                       ),
                       onTap: () {
-                        context.showSnackBar('ነባሪ መለኪያ: ቁራጭ (Pcs)');
+                        context.showSnackBar(context.tr('ነባሪ መለኪያ: ቁራጭ', 'Default Unit: Pcs'));
                       },
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.sort_rounded,
                       titleAm: 'ነባሪ ቅደም ተከተል',
                       titleEn: '/ Sorting',
-                      subtitle: 'የካታሎግ ቅደም ተከተል ማሳያ',
+                      subtitle: 'የካታሎግ ቅደም ተከተል ማሳያ / Catalog display order',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: KeraColors.surfaceContainerLow,
+                          color: context.cardCanvasColor,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          'ከፍተኛ ተፈላጊ',
+                          context.tr('ከፍተኛ ተፈላጊ', 'Popular'),
                           style: KeraTypography.labelSmall(
-                            color: KeraColors.textPrimary,
+                            color: context.textPrimaryColor,
                           ),
                         ),
                       ),
                       onTap: () {
-                        context.showSnackBar('ነባሪ ቅደም ተከተል: ከፍተኛ ተፈላጊ');
+                        context.showSnackBar(context.tr('ነባሪ ቅደም ተከተል: ከፍተኛ ተፈላጊ', 'Default sorting: Most Popular'));
                       },
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     // Sub-routes for Brands, Categories, Locations
                     _buildSettingsRow(
                       icon: Icons.branding_watermark_outlined,
@@ -438,20 +445,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: 'Toyota, Isuzu, Caterpillar, Nissan...',
                       onTap: () => context.push('/settings/brands'),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.category_outlined,
                       titleAm: 'ምድቦች',
                       titleEn: '/ Categories',
-                      subtitle: 'ሞተር፣ ፍሬን፣ ኤሌክትሪክ፣ ሰስፔንሽን...',
+                      subtitle: 'ሞተር፣ ፍሬን፣ ኤሌክትሪክ፣ ሰስፔንሽን... / Engine, brakes, electrical...',
                       onTap: () => context.push('/settings/categories'),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 1, color: context.borderColor),
                     _buildSettingsRow(
                       icon: Icons.shelves,
                       titleAm: 'መጋዘን እና መደርደሪያዎች',
                       titleEn: '/ Shelves & Locations',
-                      subtitle: 'የመደብር እና መጋዘን መደርደሪያ ኮዶች',
+                      subtitle: 'የመደብር እና መጋዘን መደርደሪያ ኮዶች / Store & warehouse shelf codes',
                       onTap: () => context.push('/settings/locations'),
                     ),
                   ],
@@ -469,9 +476,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(KeraSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.cardBg,
                   borderRadius: KeraRadii.borderCard,
-                  border: Border.all(color: KeraColors.borderVariant),
+                  border: Border.all(color: context.borderColor),
                 ),
                 child: Column(
                   children: [
@@ -843,12 +850,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(KeraSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: KeraRadii.borderCard,
-        border: Border.all(color: KeraColors.borderVariant),
+        border: Border.all(color: context.borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(5),
+            color: context.isDark ? Colors.black26 : Colors.black.withAlpha(5),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -861,20 +868,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: KeraColors.primaryNavy,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.precision_manufacturing_rounded,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
+              const KeraLogoWidget(size: 56, borderRadius: 12),
               Positioned(
                 bottom: -4,
                 right: -4,
@@ -1020,7 +1014,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Expanded(
           child: Text(
             displayTitle,
-            style: KeraTypography.labelSmall(color: KeraColors.textSecondary),
+            style: KeraTypography.labelSmall(color: context.textSecondaryColor),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -1046,6 +1040,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ? titleAm
         : (cleanEn.isNotEmpty ? cleanEn : titleAm);
 
+    String displaySubtitle = subtitle;
+    if (subtitle.contains(' / ')) {
+      final parts = subtitle.split(' / ');
+      displaySubtitle = context.isAmharic ? parts[0].trim() : parts[1].trim();
+    }
+
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -1056,12 +1056,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconBg ?? KeraColors.surfaceContainerLow,
+                color: iconBg ?? (context.isDark ? const Color(0xFF1E3A5F) : KeraColors.surfaceContainerLow),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? KeraColors.primaryNavy,
+                color: iconColor ?? (context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
                 size: 20,
               ),
             ),
@@ -1072,14 +1072,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Text(
                     displayTitle,
-                    style: KeraTypography.titleSmall(),
+                    style: KeraTypography.titleSmall(color: context.textPrimaryColor),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    subtitle,
+                    displaySubtitle,
                     style: KeraTypography.labelSmall(
-                      color: KeraColors.textMuted,
+                      color: context.textMutedColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1091,9 +1091,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               trailingWidget,
               const SizedBox(width: 8),
             ],
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: KeraColors.textMuted,
+              color: context.textMutedColor,
               size: 20,
             ),
           ],
