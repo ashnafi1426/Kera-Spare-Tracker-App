@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../design/tokens/kera_colors.dart';
-import '../design/tokens/kera_radii.dart';
 
 /// Standard branded Kera Spare logo widget used across headers.
 ///

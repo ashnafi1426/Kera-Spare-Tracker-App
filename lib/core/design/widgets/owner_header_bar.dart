@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../tokens/admin_colors.dart';
+import '../tokens/admin_colors.dart';
 
 /// Reusable deep navy header for Kera Spare Tracker Owner App screens.
 /// Matches 1 Dashboard.png, 2 Inventory.png, 3 Add spare part.png,
@@ -97,7 +97,7 @@ class OwnerHeaderBar extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (actions != null) ...actions!,
+                  ...?actions,
                 ],
               ),
 
@@ -185,10 +185,11 @@ class OwnerSearchBar extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
           const SizedBox(width: 6),
         ],
       ),
     );
   }
 }
+

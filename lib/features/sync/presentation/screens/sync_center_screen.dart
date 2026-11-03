@@ -17,7 +17,6 @@ class SyncCenterScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = context.theme;
     final isAmharic = context.isAmharic;
     final queueItemsAsync = ref.watch(syncQueueItemsStreamProvider);
     final pendingCountAsync = ref.watch(pendingSyncCountStreamProvider);
