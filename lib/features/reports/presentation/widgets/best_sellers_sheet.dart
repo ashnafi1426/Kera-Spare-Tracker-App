@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../providers/reports_providers.dart';
 
@@ -72,7 +73,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'ከፍተኛ ተፈላጊ ዕቃዎች / Best Sellers',
+                              context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best Sellers'),
                               style: KeraTypography.titleMedium()
                                   .copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -82,7 +83,10 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                         ],
                       ),
                       Text(
-                        'Sales Velocity & Turnover Ranking',
+                        context.tr(
+                          'የሽያጭ ፍጥነት እና ደረጃ ዝርዝር',
+                          'Sales Velocity & Turnover Ranking',
+                        ),
                         style: KeraTypography.bodySmall(
                           color: KeraColors.textSecondary,
                         ),
@@ -121,7 +125,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                               size: 48, color: KeraColors.textMuted),
                           const SizedBox(height: 12),
                           Text(
-                            'በዚህ የጊዜ ገደብ የተሸጡ እቃዎች የሉም',
+                            context.tr('በዚህ የጊዜ ገደብ የተሸጡ ዕቃዎች የሉም', 'No items sold in this period'),
                             style: KeraTypography.bodyLarge(
                               color: KeraColors.textSecondary,
                             ),
@@ -150,7 +154,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                     Row(
                       children: [
                         Text(
-                          'ደረጃ ማውጫ:',
+                          context.tr('ደረጃ ማውጫ:', 'Rank by:'),
                           style: KeraTypography.labelSmall(
                             color: KeraColors.textSecondary,
                           ).copyWith(fontWeight: FontWeight.bold),
@@ -158,7 +162,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                         const SizedBox(width: 8),
                         ChoiceChip(
                           selected: _sortType == 0,
-                          label: const Text('በብዛት (Sold)'),
+                          label: Text(context.tr('በብዛት', 'By Units')),
                           labelStyle: KeraTypography.labelSmall(
                             color: _sortType == 0
                                 ? Colors.white
@@ -170,7 +174,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                         const SizedBox(width: 6),
                         ChoiceChip(
                           selected: _sortType == 1,
-                          label: const Text('በገቢ (Revenue)'),
+                          label: Text(context.tr('በገቢ', 'By Revenue')),
                           labelStyle: KeraTypography.labelSmall(
                             color: _sortType == 1
                                 ? Colors.white
@@ -225,7 +229,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                         size: 16, color: Colors.black87),
                                     const SizedBox(width: 4),
                                     Text(
-                                      '#1 TOP SELLER',
+                                      '#1 ${context.tr("ቀዳሚ ተፈላጊ", "TOP SELLER")}',
                                       style: KeraTypography.labelSmall(
                                         color: Colors.black87,
                                       ).copyWith(fontWeight: FontWeight.w900),
@@ -241,7 +245,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'ከፍተኛ ተፈላጊ',
+                                  context.tr('ከፍተኛ ተፈላጊ', 'Top Velocity'),
                                   style: KeraTypography.labelSmall(
                                     color: Colors.white,
                                   ).copyWith(fontSize: 10),
@@ -265,13 +269,13 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'የተሸጠ ብዛት',
+                                      context.tr('የተሸጠ ብዛት', 'Units Sold'),
                                       style: KeraTypography.labelSmall(
                                         color: Colors.white70,
                                       ),
                                     ),
                                     Text(
-                                      '${CurrencyFormatter.formatQuantity(topPart.quantitySold)} pcs',
+                                      '${CurrencyFormatter.formatQuantity(topPart.quantitySold)} ${context.tr("ፍሬ", "pcs")}',
                                       style: KeraTypography.titleMedium(
                                         color: Colors.white,
                                       ).copyWith(fontWeight: FontWeight.bold),
@@ -284,7 +288,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'ጠቅላላ ገቢ',
+                                      context.tr('ጠቅላላ ገቢ', 'Total Revenue'),
                                       style: KeraTypography.labelSmall(
                                         color: Colors.white70,
                                       ),
@@ -313,7 +317,10 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                     // Ranks #2 through #10
                     if (runnerUps.isNotEmpty) ...[
                       Text(
-                        'ተከታይ ተፈላጊ ክፍሎች (Ranks #2 - #${sorted.length})',
+                        context.tr(
+                          'ተከታይ ተፈላጊ ክፍሎች (#2 - #${sorted.length})',
+                          'Runner-up Parts (#2 - #${sorted.length})',
+                        ),
                         style: KeraTypography.titleSmall()
                             .copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -355,7 +362,7 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                                           .copyWith(fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      '${CurrencyFormatter.formatQuantity(part.quantitySold)} ዩኒት ተሽጧል',
+                                      '${CurrencyFormatter.formatQuantity(part.quantitySold)} ${context.tr("ተሽጧል", "units sold")}',
                                       style: KeraTypography.bodySmall(
                                         color: KeraColors.textSecondary,
                                       ).copyWith(fontSize: 11),
@@ -398,14 +405,17 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'የንግድ ግንዛቤ / Merchant Insight',
+                                  context.tr('የንግድ ግንዛቤ', 'Merchant Insight'),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.actionBlue,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'ከፍተኛ ተፈላጊ ዕቃዎች ክምችት እንዳያልቅ ቀድመው ከጅምላ አቅራቢዎች ጋር ይዘዙ።',
+                                  context.tr(
+                                    'ከፍተኛ ተፈላጊ ዕቃዎች ክምችት እንዳያልቅ ቀድመው ከጅምላ አቅራቢዎች ጋር ይዘዙ።',
+                                    'Order high-velocity items early from suppliers to prevent stockouts.',
+                                  ),
                                   style: KeraTypography.bodySmall(
                                     color: KeraColors.textPrimary,
                                   ).copyWith(fontSize: 11),
@@ -426,4 +436,3 @@ class _BestSellersSheetState extends ConsumerState<BestSellersSheet> {
     );
   }
 }
-

@@ -8,6 +8,7 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/design/widgets/kera_product_card.dart';
 import '../../../../core/design/widgets/kera_status_badge.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/announcement_banner_widget.dart';
 import '../../../../core/widgets/maintenance_banner_widget.dart';
@@ -146,7 +147,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             const Icon(Icons.qr_code_scanner_rounded, color: KeraColors.actionBlue),
             const SizedBox(width: 8),
             Text(
-              'የባርኮድ / OEM ፍለጋ',
+              context.tr('የባርኮድ / OEM ፍለጋ', 'Barcode & OEM Search'),
               style: KeraTypography.titleSmall(),
             ),
           ],
@@ -156,7 +157,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'የመለዋወጫ ባርኮድ ወይም የኦሪጅናል ቁጥር (OEM Part #) ያስገቡ ወይም በካሜራ ይቃኙ:',
+              context.tr(
+                'የመለዋወጫ ባርኮድ ወይም የኦሪጅናል ቁጥር (OEM Part #) ያስገቡ ወይም በካሜራ ይቃኙ:',
+                'Enter part barcode or OEM part number, or scan with camera:',
+              ),
               style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
             ),
             const SizedBox(height: 12),
@@ -174,7 +178,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('ሰርዝ'),
+            child: Text(context.tr('ሰርዝ', 'Cancel')),
           ),
           ElevatedButton(
             onPressed: () {
@@ -185,7 +189,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 ref.read(inventoryFilterProvider.notifier).setQuery(query);
               }
             },
-            child: const Text('ፈልግ'),
+            child: Text(context.tr('ፈልግ', 'Search')),
           ),
         ],
       ),
@@ -338,7 +342,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 Row(
                   children: [
                     Text(
-                      'ኬራ ስፔር',
+                      context.tr('ኬራ ስፔር', 'Kera Spare'),
                       style: KeraTypography.titleMedium(color: KeraColors.textWhite).copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -361,6 +365,47 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ],
             ),
           ),
+
+          // Language toggle pill
+          Consumer(
+            builder: (context, ref, _) {
+              final isAmharic = context.isAmharic;
+              return InkWell(
+                onTap: () {
+                  ref.read(localeProvider.notifier).setLocale(
+                        Locale(isAmharic ? 'en' : 'am'),
+                      );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.language_rounded,
+                          size: 13, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        isAmharic ? 'English' : 'አማርኛ',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 4),
 
           // Barcode Scan Action Button
           IconButton(
@@ -456,12 +501,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       size: 16, color: KeraColors.textSecondary),
                   const SizedBox(width: 6),
                   Text(
-                    'ጠቅላላ የክምችት ዋጋ:',
+                    context.tr('ጠቅላላ ዋጋ:', 'Total Value:'),
                     style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${totalValuation.toStringAsFixed(0)} ብር',
+                    '${totalValuation.toStringAsFixed(0)} ${context.tr("ብር", "ETB")}',
                     style: KeraTypography.numericCompact(color: KeraColors.textPrimary).copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -476,7 +521,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   borderRadius: KeraRadii.borderMicro,
                 ),
                 child: Text(
-                  '$totalCount ዕቃዎች',
+                  '$totalCount ${context.tr("ዕቃዎች", "Items")}',
                   style: KeraTypography.labelSmall(color: KeraColors.primaryNavy).copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -491,7 +536,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             children: [
               Expanded(
                 child: _buildMetricTile(
-                  label: 'ጠቅላላ',
+                  label: context.tr('ጠቅላላ', 'All'),
                   count: totalCount,
                   isSelected: activeStockFilter == StockFilter.all,
                   accentColor: KeraColors.actionBlue,
@@ -503,7 +548,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
-                  label: 'በክምችት',
+                  label: context.tr('በክምችት', 'In Stock'),
                   count: inStockCount,
                   isSelected: activeStockFilter == StockFilter.inStock,
                   accentColor: KeraColors.stockInText,
@@ -515,7 +560,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
-                  label: 'አነስተኛ',
+                  label: context.tr('አነስተኛ', 'Low Stock'),
                   count: lowStockCount,
                   isSelected: activeStockFilter == StockFilter.lowStock,
                   accentColor: KeraColors.stockLowText,
@@ -527,7 +572,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildMetricTile(
-                  label: 'ያለቀባቸው',
+                  label: context.tr('ያለቀባቸው', 'Out of Stock'),
                   count: outOfStockCount,
                   isSelected: activeStockFilter == StockFilter.outOfStock,
                   accentColor: KeraColors.stockOutText,
@@ -823,12 +868,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       shelfLocation: part.customLocation,
       photoPath: part.photoLocalPath,
       price: part.sellingPrice,
-      currencySymbol: 'ብር',
+      currencySymbol: context.tr('ብር', 'ETB'),
       stockQuantity: part.cachedQuantity,
       unit: part.unit,
       isLowStock: part.isLowStock,
       isOutOfStock: part.isOutOfStock,
-      outOfStockLabel: 'ያለቀ',
+      outOfStockLabel: context.tr('ያለቀ', 'Out of Stock'),
       onTap: () async {
         final result = await context.push('/parts/${part.id}');
         if (result == true && mounted) {
@@ -862,13 +907,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'ባዶ መጋዘን (Inventory Empty)',
+              context.tr('ባዶ መጋዘን', 'Inventory Empty'),
               style: KeraTypography.titleMedium().copyWith(fontWeight: FontWeight.w700),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'በመጋዘንዎ ውስጥ ምንም የተመዘገበ መለዋወጫ ዕቃ የለም። አዲስ ዕቃ በመመዝገብ ወይም የሙከራ ዕቃዎችን በመጫን ይጀምሩ።',
+              context.tr(
+                'በመጋዘንዎ ውስጥ ምንም የተመዘገበ መለዋወጫ ዕቃ የለም። አዲስ ዕቃ በመመዝገብ ወይም የሙከራ ዕቃዎችን በመጫን ይጀምሩ።',
+                'There are no spare parts recorded in your inventory. Start by adding a part or loading sample data.',
+              ),
               textAlign: TextAlign.center,
               style: KeraTypography.bodyMedium(color: KeraColors.textSecondary),
             ),
@@ -890,7 +938,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 OutlinedButton.icon(
                   onPressed: _handleSeedParts,
                   icon: const Icon(Icons.speed_rounded),
-                  label: const Text('የናሙና ዕቃዎች ጫን'),
+                  label: Text(context.tr('የናሙና ዕቃዎች ጫን', 'Load Sample Parts')),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
 
@@ -66,7 +67,7 @@ class InventoryReportsSheet extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'የመጋዘን ክምችት ሪፖርት / Inventory Health',
+                              context.tr('የመጋዘን ክምችት ሪፖርት', 'Inventory Health'),
                               style: KeraTypography.titleMedium()
                                   .copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -76,7 +77,10 @@ class InventoryReportsSheet extends ConsumerWidget {
                         ],
                       ),
                       Text(
-                        'Stock Capital, Health Status & Reorder Alerts',
+                        context.tr(
+                          'የክምችት ካፒታል፣ የጤንነት ሁኔታ እና ማስጠንቀቂያዎች',
+                          'Stock Capital, Health Status & Reorder Alerts',
+                        ),
                         style: KeraTypography.bodySmall(
                           color: KeraColors.textSecondary,
                         ),
@@ -118,7 +122,8 @@ class InventoryReportsSheet extends ConsumerWidget {
                     for (final p in parts) {
                       final qty = p.cachedQuantity;
                       totalUnits += qty;
-                      final cost = p.purchasePrice ?? (p.sellingPrice != null ? p.sellingPrice! * 0.75 : 0.0);
+                      final cost = p.purchasePrice ??
+                          (p.sellingPrice != null ? p.sellingPrice! * 0.75 : 0.0);
                       totalCostCapital += qty * cost;
                       totalRetailValue += qty * (p.sellingPrice ?? 0.0);
 
@@ -155,13 +160,13 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'ጠቅላላ ብዛት / Total Units',
+                                    context.tr('ጠቅላላ ብዛት', 'Total Units'),
                                     style: KeraTypography.labelSmall(
                                       color: KeraColors.textSecondary,
                                     ),
                                   ),
                                   Text(
-                                    '${totalUnits.toStringAsFixed(0)} pcs',
+                                    '${totalUnits.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
                                     style: KeraTypography.titleMedium(
                                       color: KeraColors.primaryNavy,
                                     ).copyWith(fontWeight: FontWeight.bold),
@@ -177,13 +182,13 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'የመለዋወጫ አይነቶች / SKUs',
+                                    context.tr('የመለዋወጫ ዓይነቶች', 'Product SKUs'),
                                     style: KeraTypography.labelSmall(
                                       color: KeraColors.textSecondary,
                                     ),
                                   ),
                                   Text(
-                                    '${parts.length} SKUs',
+                                    '${parts.length} ${context.tr("ዓይነቶች", "SKUs")}',
                                     style: KeraTypography.titleMedium(
                                       color: KeraColors.primaryNavy,
                                     ).copyWith(fontWeight: FontWeight.bold),
@@ -207,7 +212,10 @@ class InventoryReportsSheet extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'የክምችት ግምት / VALUATION AT RETAIL',
+                                context.tr(
+                                  'የክምችት ግምት (በመሸጫ ዋጋ)',
+                                  'INVENTORY VALUATION AT RETAIL',
+                                ),
                                 style: KeraTypography.labelSmall(
                                   color: Colors.white70,
                                 ).copyWith(letterSpacing: 1),
@@ -230,10 +238,11 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'በግዢ ዋጋ (Cost Capital)',
+                                          context.tr('በግዢ ዋጋ', 'Cost Capital'),
                                           style: KeraTypography.labelSmall(
                                             color: Colors.white70,
                                           ),
@@ -254,10 +263,11 @@ class InventoryReportsSheet extends ConsumerWidget {
                                   ),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'የሚጠበቅ ትርፍ (Unrealized)',
+                                          context.tr('የሚጠበቅ ትርፍ', 'Unrealized Profit'),
                                           style: KeraTypography.labelSmall(
                                             color: Colors.white70,
                                           ),
@@ -285,7 +295,7 @@ class InventoryReportsSheet extends ConsumerWidget {
 
                         // Stock Health Breakdown
                         Text(
-                          'የክምችት ጤንነት / Stock Health',
+                          context.tr('የክምችት ጤንነት', 'Stock Health Status'),
                           style: KeraTypography.titleSmall()
                               .copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -297,8 +307,8 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 color: KeraColors.stockInBg,
                                 textColor: KeraColors.stockInText,
                                 icon: Icons.check_circle_rounded,
-                                label: 'ደህና ክምችት',
-                                count: '$healthyCount SKUs',
+                                label: context.tr('ደህና ክምችት', 'Healthy'),
+                                count: '$healthyCount ${context.tr("ዓይነቶች", "SKUs")}',
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -307,8 +317,8 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 color: KeraColors.stockLowBg,
                                 textColor: KeraColors.stockLowText,
                                 icon: Icons.warning_amber_rounded,
-                                label: 'አነስተኛ (≤5)',
-                                count: '$lowStockCount SKUs',
+                                label: context.tr('አነስተኛ (≤5)', 'Low (≤5)'),
+                                count: '$lowStockCount ${context.tr("ዓይነቶች", "SKUs")}',
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -317,8 +327,8 @@ class InventoryReportsSheet extends ConsumerWidget {
                                 color: KeraColors.stockOutBg,
                                 textColor: KeraColors.stockOutText,
                                 icon: Icons.cancel_rounded,
-                                label: 'ያለቀባቸው (0)',
-                                count: '$outOfStockCount SKUs',
+                                label: context.tr('ያለቀባቸው (0)', 'Out of Stock'),
+                                count: '$outOfStockCount ${context.tr("ዓይነቶች", "SKUs")}',
                               ),
                             ),
                           ],
@@ -344,13 +354,19 @@ class InventoryReportsSheet extends ConsumerWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'አስቸኳይ ትእዛዝ የሚያስፈልጋቸው መለዋወጫዎች',
+                                        context.tr(
+                                          'አስቸኳይ ትእዛዝ የሚያስፈልጋቸው መለዋወጫዎች',
+                                          'Items Requiring Urgent Reorder',
+                                        ),
                                         style: KeraTypography.labelSmall(
                                           color: KeraColors.warningAmber,
                                         ).copyWith(fontWeight: FontWeight.bold),
                                       ),
                                       Text(
-                                        '$lowStockCount አነስተኛ እና $outOfStockCount ያለቀባቸው ክፍሎች አሉ',
+                                        context.tr(
+                                          '$lowStockCount አነስተኛ እና $outOfStockCount ያለቀባቸው ክፍሎች አሉ',
+                                          '$lowStockCount low stock and $outOfStockCount out-of-stock items',
+                                        ),
                                         style: KeraTypography.bodySmall(
                                           color: Colors.brown.shade800,
                                         ).copyWith(fontSize: 11),
@@ -364,7 +380,7 @@ class InventoryReportsSheet extends ConsumerWidget {
                                     context.push('/stock/low-stock');
                                   },
                                   child: Text(
-                                    'እይ →',
+                                    context.tr('እይ →', 'View →'),
                                     style: KeraTypography.labelSmall(
                                       color: KeraColors.primaryNavy,
                                     ).copyWith(fontWeight: FontWeight.bold),
@@ -423,4 +439,3 @@ class InventoryReportsSheet extends ConsumerWidget {
     );
   }
 }
-

@@ -45,14 +45,17 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
 
     final formatName = ['PDF', 'Excel (.xlsx)', 'CSV'][_selectedFormat];
     final typeName = [
-      'የሽያጭ ማጠቃለያ (Sales)',
-      'የትርፍ እና ኪሳራ (P&L)',
-      'የክምችት ግምት (Inventory)',
-      'ከፍተኛ ተፈላጊ (Best Sellers)'
+      context.tr('የሽያጭ ማጠቃለያ', 'Sales Summary'),
+      context.tr('የትርፍ እና ኪሳራ', 'Profit & Loss'),
+      context.tr('የክምችት ግምት', 'Inventory Valuation'),
+      context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best Sellers')
     ][_selectedReportType];
 
     context.showSnackBar(
-      '$typeName $formatName ሪፖርት በተሳካ ሁኔታ ተዘጋጅቷል / Export Generated',
+      context.tr(
+        '$typeName $formatName ሪፖርት በተሳካ ሁኔታ ተዘጋጅቷል',
+        '$typeName $formatName export generated successfully',
+      ),
     );
   }
 
@@ -101,7 +104,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              'ማጣሪያ እና ሪፖርት ማውጫ',
+                              context.tr('ማጣሪያ እና ሪፖርት ማውጫ', 'Filters & Export Reports'),
                               style: KeraTypography.titleMedium()
                                   .copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -111,7 +114,10 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                         ],
                       ),
                       Text(
-                        'Kera Hub • Custom Data Filters & Downloads',
+                        context.tr(
+                          'ብጁ ማጣሪያዎች እና ማውረጃዎች',
+                          'Custom Data Filters & Downloads',
+                        ),
                         style: KeraTypography.bodySmall(
                           color: KeraColors.textSecondary,
                         ),
@@ -124,7 +130,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                 TextButton(
                   onPressed: _reset,
                   child: Text(
-                    'ዳግም አስጀምር',
+                    context.tr('ዳግም አስጀምር', 'Reset'),
                     style: KeraTypography.labelSmall(
                       color: KeraColors.actionBlue,
                     ).copyWith(fontWeight: FontWeight.bold),
@@ -145,57 +151,69 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
               padding: const EdgeInsets.all(16),
               children: [
                 // 1. Report Type
-                _buildSectionHeader('1. የሪፖርት ዓይነት / Report Type'),
+                _buildSectionHeader(context.tr('1. የሪፖርት ዓይነት', '1. Report Type')),
                 const SizedBox(height: 8),
                 _buildTypeTile(
                   index: 0,
                   icon: Icons.point_of_sale_rounded,
-                  title: 'የሽያጭ ማጠቃለያ (Sales Summary)',
-                  subtitle: 'Daily & monthly revenue and cashier ledger',
+                  title: context.tr('የሽያጭ ማጠቃለያ', 'Sales Summary'),
+                  subtitle: context.tr(
+                    'የዕለት እና የወር ገቢ እንዲሁም የገንዘብ ተቀባይ መዝገብ',
+                    'Daily & monthly revenue and cashier ledger',
+                  ),
                 ),
                 const SizedBox(height: 6),
                 _buildTypeTile(
                   index: 1,
                   icon: Icons.trending_up_rounded,
-                  title: 'የትርፍ እና ኪሳራ መግለጫ (Profit & Loss P&L)',
-                  subtitle: 'Revenue, COGS, gross margins, and net profits',
+                  title: context.tr('የትርፍ እና ኪሳራ መግለጫ', 'Profit & Loss (P&L)'),
+                  subtitle: context.tr(
+                    'ጠቅላላ ገቢ፣ የወጣባቸው ዋጋ እና የተጣራ ትርፍ',
+                    'Revenue, COGS, gross margins, and net profits',
+                  ),
                 ),
                 const SizedBox(height: 6),
                 _buildTypeTile(
                   index: 2,
                   icon: Icons.warehouse_rounded,
-                  title: 'የክምችት ግምት እና ጤንነት (Inventory Valuation)',
-                  subtitle: 'Total stock capital, healthy SKUs, and reorder alerts',
+                  title: context.tr('የክምችት ግምት እና ጤንነት', 'Inventory Valuation'),
+                  subtitle: context.tr(
+                    'ጠቅላላ የክምችት ካፒታል እና አስቸኳይ ትእዛዝ ጥሪዎች',
+                    'Total stock capital, healthy SKUs, and reorder alerts',
+                  ),
                 ),
                 const SizedBox(height: 6),
                 _buildTypeTile(
                   index: 3,
                   icon: Icons.leaderboard_rounded,
-                  title: 'ከፍተኛ ተፈላጊ ዕቃዎች (Best-Selling Products)',
-                  subtitle: 'Top 10 moving spare parts and category breakdown',
+                  title: context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best-Selling Products'),
+                  subtitle: context.tr(
+                    'በሽያጭ ቀዳሚ የሆኑ 10 ዕቃዎች ዝርዝር',
+                    'Top 10 moving spare parts and category breakdown',
+                  ),
                 ),
 
                 const SizedBox(height: 18),
 
                 // 2. Date Range
-                _buildSectionHeader('2. የቀን ክልል / Date Range'),
+                _buildSectionHeader(context.tr('2. የቀን ክልል', '2. Date Range')),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildRangeChip(0, 'ዛሬ (Today)'),
-                    _buildRangeChip(1, 'ትናንት (Yesterday)'),
-                    _buildRangeChip(2, 'በዚህ ሳምንት (Week)'),
-                    _buildRangeChip(3, 'በዚህ ወር (This Month)'),
-                    _buildRangeChip(4, 'ባለፉት 30 ቀናት (Past 30)'),
+                    _buildRangeChip(0, context.tr('ዛሬ', 'Today')),
+                    _buildRangeChip(1, context.tr('ትናንት', 'Yesterday')),
+                    _buildRangeChip(2, context.tr('በዚህ ሳምንት', 'This Week')),
+                    _buildRangeChip(3, context.tr('በዚህ ወር', 'This Month')),
+                    _buildRangeChip(4, context.tr('ባለፉት 30 ቀናት', 'Past 30 Days')),
                   ],
                 ),
 
                 const SizedBox(height: 18),
 
                 // 3. Export File Format
-                _buildSectionHeader('3. የፋይል ቅርጸት / Export Format'),
+                _buildSectionHeader(context.tr('3. የፋይል ቅርጸት', '3. Export Format')),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -204,7 +222,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                         index: 0,
                         icon: Icons.picture_as_pdf_rounded,
                         title: 'PDF Report',
-                        desc: 'Print & Share ready',
+                        desc: context.tr('ለህትመት ዝግጁ', 'Print & Share'),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -213,7 +231,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                         index: 1,
                         icon: Icons.table_chart_rounded,
                         title: 'Excel (.xlsx)',
-                        desc: 'Ledger spreadsheets',
+                        desc: context.tr('የስሌት ሰንጠረዥ', 'Spreadsheets'),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -222,7 +240,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                         index: 2,
                         icon: Icons.insert_drive_file_outlined,
                         title: 'CSV Data',
-                        desc: 'Raw SQLite tables',
+                        desc: context.tr('ጥሬ ውሂብ', 'Raw SQLite tables'),
                       ),
                     ),
                   ],
@@ -231,7 +249,7 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                 const SizedBox(height: 18),
 
                 // 4. Destination Shortcuts
-                _buildSectionHeader('4. ቀጥታ መላኪያ / Destination Shortcuts'),
+                _buildSectionHeader(context.tr('4. ፈጣን መላኪያ', '4. Direct Shortcuts')),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -243,10 +261,22 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildDestButton(Icons.save_alt_rounded, 'በስልክ አስቀምጥ\nDownloads'),
-                      _buildDestButton(Icons.near_me_rounded, 'ቴሌግራም\nTelegram'),
-                      _buildDestButton(Icons.chat_bubble_outline_rounded, 'ዋትስአፕ\nWhatsApp'),
-                      _buildDestButton(Icons.print_rounded, 'ደረሰኝ አትም\nPOS Print'),
+                      _buildDestButton(
+                        Icons.save_alt_rounded,
+                        context.tr('በስልክ አስቀምጥ', 'Downloads'),
+                      ),
+                      _buildDestButton(
+                        Icons.near_me_rounded,
+                        context.tr('ቴሌግራም', 'Telegram'),
+                      ),
+                      _buildDestButton(
+                        Icons.chat_bubble_outline_rounded,
+                        context.tr('ዋትስአፕ', 'WhatsApp'),
+                      ),
+                      _buildDestButton(
+                        Icons.print_rounded,
+                        context.tr('ደረሰኝ አትም', 'POS Print'),
+                      ),
                     ],
                   ),
                 ),
@@ -289,8 +319,8 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
                     : const Icon(Icons.download_rounded),
                 label: Text(
                   _isGenerating
-                      ? 'ሪፖርት በመዘጋጀት ላይ...'
-                      : 'ሪፖርት አውርድ / Generate Report',
+                      ? context.tr('ሪፖርት በመዘጋጀት ላይ...', 'Generating Report...')
+                      : context.tr('ሪፖርት አውርድ', 'Generate Report'),
                   style: KeraTypography.labelLarge(color: Colors.white)
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -466,4 +496,3 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
     );
   }
 }
-

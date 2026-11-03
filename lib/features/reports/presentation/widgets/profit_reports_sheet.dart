@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/design/design.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
 import '../providers/reports_providers.dart';
@@ -68,7 +69,7 @@ class ProfitReportsSheet extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'ትርፍ እና ወጪ ሪፖርት / Profit & Margins',
+                              context.tr('ትርፍ እና ወጪ ሪፖርት', 'Profit & Margins'),
                               style: KeraTypography.titleMedium()
                                   .copyWith(fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -78,7 +79,10 @@ class ProfitReportsSheet extends ConsumerWidget {
                         ],
                       ),
                       Text(
-                        'P&L Waterfall, Direct COGS & Net Margins',
+                        context.tr(
+                          'የትርፍ ህዳግ፣ የቀጥታ ዕቃዎች ወጪ እና ትርፍ ትንተና',
+                          'P&L Waterfall, Direct COGS & Net Margins',
+                        ),
                         style: KeraTypography.bodySmall(
                           color: KeraColors.textSecondary,
                         ),
@@ -127,7 +131,7 @@ class ProfitReportsSheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'የፋይናንስ ማጠቃለያ / Waterfall Summary',
+                            context.tr('የፋይናንስ ማጠቃለያ', 'Waterfall Summary'),
                             style: KeraTypography.labelSmall(
                               color: KeraColors.textSecondary,
                             ).copyWith(fontWeight: FontWeight.bold),
@@ -137,8 +141,9 @@ class ProfitReportsSheet extends ConsumerWidget {
                           // Step 1: Gross Revenue
                           _buildWaterfallRow(
                             stepNumber: '1',
-                            title: 'ጠቅላላ የሽያጭ ገቢ (Gross Revenue)',
-                            subtitle: '${summary.salesCount} የሽያጭ ደረሰኞች • 100%',
+                            title: context.tr('ጠቅላላ የሽያጭ ገቢ', 'Gross Revenue'),
+                            subtitle:
+                                '${summary.salesCount} ${context.tr("የሽያጭ ደረሰኞች", "sales receipts")} • 100%',
                             amount: CurrencyFormatter.formatEtb(revenue),
                             amountColor: KeraColors.primaryNavy,
                             isPositive: true,
@@ -151,8 +156,11 @@ class ProfitReportsSheet extends ConsumerWidget {
                           // Step 2: COGS
                           _buildWaterfallRow(
                             stepNumber: '2',
-                            title: 'የተሸጡ እቃዎች የወጣባቸው ዋጋ (COGS)',
-                            subtitle: 'Direct Inventory Cost • ${cogsPct.toStringAsFixed(1)}%',
+                            title: context.tr(
+                                'የተሸጡ ዕቃዎች የወጣባቸው ዋጋ (COGS)',
+                                'Cost of Goods Sold (COGS)'),
+                            subtitle:
+                                '${context.tr("የቀጥታ ክምችት ወጪ", "Direct Inventory Cost")} • ${cogsPct.toStringAsFixed(1)}%',
                             amount: '- ${CurrencyFormatter.formatEtb(cogs)}',
                             amountColor: KeraColors.errorRed,
                             isPositive: false,
@@ -165,8 +173,9 @@ class ProfitReportsSheet extends ConsumerWidget {
                           // Step 3: Net Profit
                           _buildWaterfallRow(
                             stepNumber: '3',
-                            title: 'የተጣራ ትርፍ (Gross Profit)',
-                            subtitle: 'Margin: ${margin.toStringAsFixed(1)}% (Target: 25%)',
+                            title: context.tr('የተጣራ ትርፍ', 'Gross Profit'),
+                            subtitle:
+                                '${context.tr("የትርፍ መጠን", "Margin")}: ${margin.toStringAsFixed(1)}% (${context.tr("ግብ", "Target")}: 25%)',
                             amount: '+ ${CurrencyFormatter.formatEtb(profit)}',
                             amountColor: Colors.green.shade800,
                             isPositive: true,
@@ -186,10 +195,13 @@ class ProfitReportsSheet extends ConsumerWidget {
                   error: (err, _) => const SizedBox.shrink(),
                   data: (parts) {
                     final missingCostParts = parts
-                        .where((p) => p.purchasePrice == null || p.purchasePrice! <= 0)
+                        .where((p) =>
+                            p.purchasePrice == null || p.purchasePrice! <= 0)
                         .toList();
 
-                    if (missingCostParts.isEmpty) return const SizedBox.shrink();
+                    if (missingCostParts.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
 
                     return Container(
                       padding: const EdgeInsets.all(12),
@@ -209,14 +221,20 @@ class ProfitReportsSheet extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${missingCostParts.length} የተመዘገቡ እቃዎች የግዢ ዋጋ የላቸውም!',
+                                  context.tr(
+                                    '${missingCostParts.length} የተመዘገቡ ዕቃዎች የግዢ ዋጋ የላቸውም!',
+                                    '${missingCostParts.length} recorded items are missing cost price!',
+                                  ),
                                   style: KeraTypography.labelSmall(
                                     color: KeraColors.warningAmber,
                                   ).copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'Missing Cost Price Notice: ለእነዚህ እቃዎች ትክክለኛ ትርፍ አልተሰላም። ትክክለኛ ትርፍ ለማወቅ እባክዎ በዕቃዎች ዝርዝር ላይ የግዢ ዋጋ ያስገቡ።',
+                                  context.tr(
+                                    'ማስታወቂያ፡ ለእነዚህ ዕቃዎች ትክክለኛ ትርፍ አልተሰላም። ትክክለኛ ትርፍ ለማወቅ እባክዎ በዕቃዎች ዝርዝር ላይ የግዢ ዋጋ ያስገቡ።',
+                                    'Notice: Accurate profit cannot be computed for these items. Please update their purchase cost in Inventory.',
+                                  ),
                                   style: KeraTypography.bodySmall(
                                     color: Colors.brown.shade900,
                                   ).copyWith(fontSize: 11),
@@ -234,7 +252,7 @@ class ProfitReportsSheet extends ConsumerWidget {
 
                 // 3. Top Profit Drivers
                 Text(
-                  'እቃዎች በትርፍ አስተዋጽኦ / Top Profit Drivers',
+                  context.tr('ዕቃዎች በትርፍ አስተዋጽኦ', 'Top Profit Drivers'),
                   style: KeraTypography.titleSmall()
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -253,7 +271,8 @@ class ProfitReportsSheet extends ConsumerWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: Center(
                           child: Text(
-                            'በዚህ የጊዜ ገደብ የተሸጡ እቃዎች የሉም',
+                            context.tr('በዚህ የጊዜ ገደብ የተሸጡ ዕቃዎች የሉም',
+                                'No items sold in this period'),
                             style: KeraTypography.bodyMedium(
                               color: KeraColors.textSecondary,
                             ),
@@ -295,7 +314,7 @@ class ProfitReportsSheet extends ConsumerWidget {
                                           .copyWith(fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      '${CurrencyFormatter.formatQuantity(part.quantitySold)} ዩኒት ተሽጧል',
+                                      '${CurrencyFormatter.formatQuantity(part.quantitySold)} ${context.tr("ፍሬ ተሽጧል", "units sold")}',
                                       style: KeraTypography.bodySmall(
                                         color: KeraColors.textSecondary,
                                       ).copyWith(fontSize: 11),
@@ -379,4 +398,3 @@ class ProfitReportsSheet extends ConsumerWidget {
     );
   }
 }
-
