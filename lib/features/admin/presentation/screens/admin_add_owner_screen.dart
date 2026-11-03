@@ -51,7 +51,7 @@ class _AdminAddOwnerScreenState extends ConsumerState<AdminAddOwnerScreen> {
       );
 
       // Invalidate owners list
-      ref.read(adminOwnersProvider.notifier).loadOwners();
+      await ref.read(adminOwnersProvider.notifier).loadOwners();
       context.pop();
     } catch (e) {
       if (!mounted) return;
@@ -167,7 +167,7 @@ class _AdminAddOwnerScreenState extends ConsumerState<AdminAddOwnerScreen> {
                           ),
                           Switch(
                             value: _approveNow,
-                            activeColor: const Color(0xFF0C2340),
+                            activeThumbColor: const Color(0xFF0C2340),
                             onChanged: (val) => setState(() => _approveNow = val),
                           ),
                         ],
@@ -266,7 +266,7 @@ class _AdminAddOwnerScreenState extends ConsumerState<AdminAddOwnerScreen> {
                 child: Image.asset(
                   'assets/images/logo.png',
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (context, error, stackTrace) => const Icon(
                     Icons.settings_suggest_rounded,
                     color: AdminColors.headerNavy,
                     size: 20,
