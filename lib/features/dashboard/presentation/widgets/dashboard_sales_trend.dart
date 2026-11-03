@@ -48,14 +48,14 @@ class DashboardSalesTrend extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KeraSpacing.md),
       decoration: BoxDecoration(
-        color: KeraColors.surfaceCard,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(KeraRadii.md),
-        border: Border.all(color: KeraColors.borderVariant),
-        boxShadow: const [
+        border: Border.all(color: context.borderColor),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x06000000),
+            color: context.isDark ? Colors.black26 : const Color(0x06000000),
             blurRadius: 4,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
       ),

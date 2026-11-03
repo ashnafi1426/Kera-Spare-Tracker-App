@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../design/tokens/kera_colors.dart';
 
 /// Convenient BuildContext extensions for localization and theme access.
 extension LocalizationX on BuildContext {
@@ -21,6 +22,33 @@ extension LocalizationX on BuildContext {
 
   /// Convenient accessor for current ColorScheme.
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
+
+  /// Returns true if dark mode is active.
+  bool get isDark => theme.brightness == Brightness.dark;
+
+  /// Surface color for cards and elevated panels.
+  Color get surfaceColor => isDark ? KeraColors.darkCard : KeraColors.surfacePure;
+
+  /// Card background color (theme aware).
+  Color get cardBg => isDark ? KeraColors.darkCard : Colors.white;
+
+  /// Scaffold and general canvas background color (theme aware).
+  Color get scaffoldBg => theme.scaffoldBackgroundColor;
+
+  /// Sub-container / tile canvas background color (theme aware).
+  Color get cardCanvasColor => isDark ? KeraColors.darkCardElevated : KeraColors.surfaceCanvas;
+
+  /// Outline / border color (theme aware).
+  Color get borderColor => isDark ? KeraColors.darkBorder : KeraColors.outlineBorder;
+
+  /// Primary high-contrast text color (theme aware).
+  Color get textPrimaryColor => isDark ? KeraColors.darkTextPrimary : KeraColors.textPrimary;
+
+  /// Secondary subtitle text color (theme aware).
+  Color get textSecondaryColor => isDark ? KeraColors.darkTextSecondary : KeraColors.textSecondary;
+
+  /// Muted / placeholder text color (theme aware).
+  Color get textMutedColor => isDark ? KeraColors.darkTextMuted : KeraColors.textMuted;
 
   /// Convenient accessor for MediaQuery size.
   Size get screenSize => MediaQuery.sizeOf(this);

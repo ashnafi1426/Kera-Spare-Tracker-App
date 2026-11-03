@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/widgets/kera_skeleton_loader.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
@@ -56,7 +57,7 @@ class BusinessDashboardScreen extends ConsumerWidget {
     final phoneNumber = user?.phoneNumber;
 
     return Scaffold(
-      backgroundColor: KeraColors.backgroundLight,
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: RefreshIndicator(
           color: KeraColors.actionBlue,
@@ -93,9 +94,14 @@ class BusinessDashboardScreen extends ConsumerWidget {
                     onRetrySync: () {
                       ref.invalidate(pendingSyncCountProvider);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('የዳታ ማመሳሰል በመሞከር ላይ... (Retrying Sync)'),
-                          duration: Duration(seconds: 2),
+                        SnackBar(
+                          content: Text(
+                            context.tr(
+                              'የዳታ ማመሳሰል በመሞከር ላይ...',
+                              'Retrying sync...',
+                            ),
+                          ),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     },

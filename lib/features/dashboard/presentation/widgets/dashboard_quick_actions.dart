@@ -5,14 +5,6 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
-
-/// 4-column quick action grid matching Stitch Screen 7.
-///
-/// Direct access to critical workflows:
-/// 1. + Part (አዲስ ዕቃ)
-/// 2. New Sale (ሽያጭ መዝግብ)
-/// 3. Restock (ክምችት አድስ)
-/// 4. Scanner (ባርኮድ ቃኝ)
 class DashboardQuickActions extends StatelessWidget {
   final VoidCallback onAddPart;
   final VoidCallback onNewSale;
@@ -35,14 +27,13 @@ class DashboardQuickActions extends StatelessWidget {
         Text(
           context.tr('ፈጣን ተግባራት', 'Quick Actions'),
           style: KeraTypography.titleMedium().copyWith(
-            color: KeraColors.textPrimary,
+            color: context.textPrimaryColor,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: KeraSpacing.sm),
         Row(
           children: [
-            // Action 1: Add Part
             Expanded(
               child: _QuickActionButton(
                 label: context.tr('አዲስ ዕቃ', 'Add Part'),
@@ -113,7 +104,7 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: KeraColors.surfaceCard,
+      color: context.cardBg,
       borderRadius: BorderRadius.circular(KeraRadii.md),
       child: InkWell(
         onTap: onTap,
@@ -126,12 +117,12 @@ class _QuickActionButton extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KeraRadii.md),
-            border: Border.all(color: KeraColors.borderVariant),
-            boxShadow: const [
+            border: Border.all(color: context.borderColor),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x06000000),
+                color: context.isDark ? Colors.black26 : const Color(0x06000000),
                 blurRadius: 2,
-                offset: Offset(0, 1),
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -153,7 +144,7 @@ class _QuickActionButton extends StatelessWidget {
                 style: KeraTypography.labelSmall().copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 11,
-                  color: KeraColors.textPrimary,
+                  color: context.textPrimaryColor,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,

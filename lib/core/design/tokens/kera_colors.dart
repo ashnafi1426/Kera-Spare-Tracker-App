@@ -162,5 +162,39 @@ class KeraColors {
     blurRadius: 15,
     offset: Offset(0, 10),
   );
+
+  // --- Dark Theme Tokens ---
+  static const Color darkCanvas = Color(0xFF0E1621);
+  static const Color darkCard = Color(0xFF152233);
+  static const Color darkCardElevated = Color(0xFF1C2C42);
+  static const Color darkBorder = Color(0xFF2A3B52);
+  static const Color darkTextPrimary = Color(0xFFEAF0F7);
+  static const Color darkTextSecondary = Color(0xFF9FB0C3);
+  static const Color darkTextMuted = Color(0xFF64748B);
+
+  // --- Theme-Aware Dynamic Color Resolvers ---
+  /// Resolves card surface color based on brightness.
+  static Color surface(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCard : surfacePure;
+
+  /// Resolves scaffold canvas background color based on brightness.
+  static Color canvas(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCanvas : surfaceCanvas;
+
+  /// Resolves container/tile surface color based on brightness.
+  static Color container(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCardElevated : surfaceCanvas;
+
+  /// Resolves border outline color based on brightness.
+  static Color border(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkBorder : outlineBorder;
+
+  /// Resolves primary text color based on brightness.
+  static Color text(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkTextPrimary : textPrimary;
+
+  /// Resolves secondary subtitle text color based on brightness.
+  static Color textSubtle(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : textSecondary;
 }
 

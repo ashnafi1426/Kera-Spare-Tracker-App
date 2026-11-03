@@ -7,6 +7,7 @@ import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 
 /// Top header banner for the business dashboard.
 ///
@@ -65,19 +66,7 @@ class DashboardHeader extends ConsumerWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: KeraRadii.borderMicro,
-                      ),
-                      child: const Icon(
-                        Icons.storefront_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
+                    const KeraLogoWidget(size: 36, borderRadius: 6),
                     const SizedBox(width: KeraSpacing.sm),
                     Flexible(
                       child: Text(

@@ -7,9 +7,8 @@ import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../providers/dashboard_providers.dart';
 
-/// 2x3 statistics bento grid matching Stitch Screen 7.
-///
-/// High-density overview of SKUs, stock levels, daily revenue, and inventory warnings.
+
+
 class DashboardMetricsGrid extends StatelessWidget {
   final BusinessDashboardMetrics metrics;
   final VoidCallback? onLowStockTap;
@@ -32,7 +31,6 @@ class DashboardMetricsGrid extends StatelessWidget {
     }
     return val is double && val % 1 != 0 ? val.toStringAsFixed(1) : val.toString();
   }
-
   String _formatCurrency(double val) {
     if (val >= 1000000) {
       return '${(val / 1000000).toStringAsFixed(2)}M';
@@ -57,7 +55,7 @@ class DashboardMetricsGrid extends StatelessWidget {
               child: Text(
                 context.tr('የንግድ ማጠቃለያ', 'Business Overview'),
                 style: KeraTypography.titleMedium().copyWith(
-                  color: KeraColors.textPrimary,
+                  color: context.textPrimaryColor,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -213,7 +211,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: KeraColors.surfaceCard,
+      color: context.cardBg,
       borderRadius: BorderRadius.circular(KeraRadii.md),
       child: InkWell(
         onTap: onTap,
@@ -222,12 +220,12 @@ class _MetricCard extends StatelessWidget {
           padding: const EdgeInsets.all(KeraSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(KeraRadii.md),
-            border: Border.all(color: KeraColors.borderVariant),
-            boxShadow: const [
+            border: Border.all(color: context.borderColor),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x06000000),
+                color: context.isDark ? Colors.black26 : const Color(0x06000000),
                 blurRadius: 4,
-                offset: Offset(0, 1),
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -282,7 +280,7 @@ class _MetricCard extends StatelessWidget {
                       value,
                       style: KeraTypography.headlineMedium().copyWith(
                         fontWeight: FontWeight.bold,
-                        color: valueColor ?? KeraColors.textPrimary,
+                        color: valueColor ?? context.textPrimaryColor,
                         fontSize: 22,
                       ),
                     ),
@@ -291,7 +289,7 @@ class _MetricCard extends StatelessWidget {
                       Text(
                         unit!,
                         style: KeraTypography.labelSmall().copyWith(
-                          color: KeraColors.textSecondary,
+                          color: context.textSecondaryColor,
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                         ),
@@ -308,7 +306,7 @@ class _MetricCard extends StatelessWidget {
                   Text(
                     title,
                     style: KeraTypography.labelSmall().copyWith(
-                      color: KeraColors.textPrimary,
+                      color: context.textPrimaryColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 11,
                     ),
@@ -318,7 +316,7 @@ class _MetricCard extends StatelessWidget {
                   Text(
                     subtitle,
                     style: KeraTypography.labelSmall().copyWith(
-                      color: KeraColors.textSecondary,
+                      color: context.textSecondaryColor,
                       fontSize: 10,
                     ),
                     maxLines: 1,
