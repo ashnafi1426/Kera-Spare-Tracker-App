@@ -29,7 +29,7 @@ class SplashScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
+                  Expanded(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
@@ -54,7 +54,7 @@ class SplashScreen extends StatelessWidget {
                           const SizedBox(width: 6),
                           Flexible(
                             child: Text(
-                              'አዲስ አበባ / KERA HUB',
+                              context.tr('አዲስ አበባ • ኬራ', 'Addis Ababa • Kera Hub'),
                               overflow: TextOverflow.ellipsis,
                               style: KeraTypography.labelSmall(color: KeraColors.textWhite).copyWith(
                                 letterSpacing: 0.5,

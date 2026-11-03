@@ -357,7 +357,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       iconBg: KeraColors.warningBg,
                       iconColor: KeraColors.warning,
                       titleAm: 'አነስተኛ ክምችት ማስጠንቀቂያ',
-                      titleEn: '',
+                      titleEn: '/ Low Stock Threshold',
                       subtitle: 'ዕቃ ሊያልቅ ሲል የሚላክበት ገደብ',
                       trailingWidget: Container(
                         padding: const EdgeInsets.symmetric(
@@ -606,7 +606,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                         icon: const Icon(Icons.sync_rounded, size: 18),
                         label: Text(
-                          'አሁን አመሳስል / Sync Now',
+                          context.tr('አሁን አመሳስል', 'Sync Now'),
                           style: KeraTypography.titleSmall(color: Colors.white),
                         ),
                       ),

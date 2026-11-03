@@ -294,34 +294,41 @@ class ReportsScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  l10n.totalRevenue,
-                                  style: KeraTypography.labelSmall(
-                                    color: Colors.white70,
-                                  ).copyWith(
-                                    letterSpacing: 1,
-                                    fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      l10n.totalRevenue,
+                                      style: KeraTypography.labelSmall(
+                                        color: Colors.white70,
+                                      ).copyWith(
+                                        letterSpacing: 1,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white12,
-                                    borderRadius: BorderRadius.circular(4),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white12,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      context.tr('ወቅታዊ', 'Current'),
+                                      style: KeraTypography.labelSmall(
+                                        color: KeraColors.tealAccent,
+                                      ).copyWith(fontSize: 10),
+                                    ),
                                   ),
-                                  child: Text(
-                                    context.tr('ወቅታዊ', 'Current Period'),
-                                    style: KeraTypography.labelSmall(
-                                      color: KeraColors.tealAccent,
-                                    ).copyWith(fontSize: 10),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
@@ -592,15 +599,19 @@ class ReportsScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                context.tr(
-                                  'የቀናት የሽያጭ እና ትርፍ ንፅፅር',
-                                  'Daily revenue vs profit comparison',
-                                ),
-                                style: KeraTypography.labelSmall(
-                                  color: KeraColors.textSecondary,
+                              Expanded(
+                                child: Text(
+                                  context.tr(
+                                    'የቀናት የሽያጭ እና ትርፍ ንፅፅር',
+                                    'Daily revenue vs profit',
+                                  ),
+                                  style: KeraTypography.labelSmall(
+                                    color: KeraColors.textSecondary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               InkWell(
                                 onTap: () => SalesAnalyticsSheet.show(context),
                                 child: Text(
@@ -706,7 +717,7 @@ class ReportsScreen extends ConsumerWidget {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        context.tr('በሽያጭ ቀዳሚ የሆኑ ዕቃዎች', 'Top Selling Auto Parts'),
+                                        context.tr('በሽያጭ ቀዳሚ የሆኑ ዕቃዎች', 'Top 5 Selling Parts'),
                                         style: KeraTypography.titleSmall()
                                             .copyWith(fontWeight: FontWeight.bold),
                                         maxLines: 1,
@@ -936,7 +947,7 @@ class ReportsScreen extends ConsumerWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      context.tr('አነስተኛ ክምችት ማስጠንቀቂያ', 'Low Stock Alerts'),
+                                      context.tr('አነስተኛ ክምችት ማስጠንቀቂያ', 'Low Stock Count'),
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         color: valuation.lowStockCount > 0
                                             ? Colors.amber.shade900
@@ -947,7 +958,7 @@ class ReportsScreen extends ConsumerWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       valuation.lowStockCount > 0
-                                          ? '${valuation.lowStockCount} ${context.tr("ዕቃዎች ሊያልቁ ነው (አስቸኳይ ማዘዝ)", "parts low in stock (reorder required)")}'
+                                          ? '${valuation.lowStockCount} ${context.tr("ዕቃዎች ሊያልቁ ነው (አስቸኳይ ማዘዝ)", "items at or below reorder limit")}'
                                           : context.tr('ክምችት በጥሩ ሁኔታ ላይ ነው', 'All parts sufficiently stocked'),
                                       style: theme.textTheme.bodySmall?.copyWith(
                                         color: valuation.lowStockCount > 0

@@ -72,7 +72,7 @@ void main() {
       await tester.pumpWidget(createSettingsWidget());
       await tester.pumpAndSettle();
 
-      expect(find.text('ቅንብሮች / Settings'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
       expect(find.text('Kera Diesel Heavy Spares'), findsOneWidget);
       expect(find.text('+251911223344'), findsOneWidget);
       expect(find.text('Kera Hub #14'), findsOneWidget);
@@ -87,25 +87,25 @@ void main() {
       await tester.pumpAndSettle();
 
       // Section 1
-      expect(find.text('መለያ እና ንግድ / Account & Business'), findsOneWidget);
-      expect(find.text('የንግድ መረጃ'), findsOneWidget);
-      expect(find.text('ደህንነት እና የይለፍ ቃል'), findsOneWidget);
+      expect(find.text('Account & Business'), findsOneWidget);
+      expect(find.text('Business Profile'), findsOneWidget);
+      expect(find.text('Security'), findsOneWidget);
 
       // Section 2
-      expect(find.text('ምርጫዎች እና አጠቃቀም / Preferences'), findsOneWidget);
-      expect(find.text('ቋንቋ'), findsOneWidget);
-      expect(find.text('ገጽታ'), findsOneWidget);
-      expect(find.text('ማሳወቂያዎች'), findsOneWidget);
+      expect(find.text('Preferences'), findsOneWidget);
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
+      expect(find.text('Alerts'), findsOneWidget);
 
       // Section 3
-      expect(find.text('የመጋዘን እና ዕቃዎች ቅንብር / Inventory Defaults'), findsOneWidget);
-      expect(find.text('አነስተኛ ክምችት ማስጠንቀቂያ'), findsOneWidget);
-      expect(find.text('ነባሪ መለኪያ'), findsOneWidget);
-      expect(find.text('ነባሪ ቅደም ተከተል'), findsOneWidget);
+      expect(find.text('Inventory Defaults'), findsOneWidget);
+      expect(find.text('Low Stock Threshold'), findsOneWidget);
+      expect(find.text('Default Unit'), findsOneWidget);
+      expect(find.text('Sorting'), findsOneWidget);
 
       // Section 4
-      expect(find.text('የዳታ ማመሳሰል / Cloud Sync & Storage'), findsOneWidget);
-      expect(find.text('አሁን አመሳስል / Sync Now'), findsOneWidget);
+      expect(find.text('Cloud Sync & Storage'), findsOneWidget);
+      expect(find.text('Sync Now'), findsOneWidget);
     });
 
     testWidgets('shows confirmation dialog when logging out with 0 pending changes', (tester) async {
