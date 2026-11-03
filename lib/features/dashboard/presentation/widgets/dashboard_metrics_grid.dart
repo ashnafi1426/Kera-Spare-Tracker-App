@@ -139,6 +139,7 @@ class DashboardMetricsGrid extends StatelessWidget {
               subtitle: context.tr('ህዳግ ~${metrics.profitMargin.toStringAsFixed(0)}%', 'Margin ~${metrics.profitMargin.toStringAsFixed(0)}%'),
               value: _formatCurrency(metrics.todayProfit),
               unit: currencyUnit,
+              trend: metrics.profitMargin > 0 ? '+${metrics.profitMargin.toStringAsFixed(0)}%' : null,
               icon: Icons.trending_up_rounded,
               iconColor: KeraColors.actionBlue,
               iconBgColor: KeraColors.borderNeutral,
