@@ -20,8 +20,18 @@ final adminDashboardProvider =
   );
 });
 
-/// Currently selected period for Admin reports: 'daily', 'weekly', 'monthly'.
-final adminReportPeriodProvider = StateProvider<String>((ref) => 'monthly');
+/// Notifier for currently selected period for Admin reports: 'daily', 'weekly', 'monthly'.
+class AdminReportPeriodNotifier extends Notifier<String> {
+  @override
+  String build() => 'monthly';
+
+  void setPeriod(String p) => state = p;
+}
+
+final adminReportPeriodProvider =
+    NotifierProvider<AdminReportPeriodNotifier, String>(
+  AdminReportPeriodNotifier.new,
+);
 
 /// Admin reports summary provider family based on period.
 final adminReportsProvider =

@@ -125,6 +125,19 @@ class MockAdminRepository implements AdminRepository {
     String? endDate,
   }) async =>
       throw UnimplementedError();
+
+  @override
+  Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'}) async =>
+      const Result.success(AdminReportSummary(
+        period: 'month',
+        totalRevenue: 0.0,
+        totalProfit: 0.0,
+        transactionsCount: 0,
+        activeOwnersCount: 0,
+        totalPartsCount: 0,
+        points: [],
+        topSellingItems: [],
+      ));
 }
 
 Widget buildTestScreen(AdminRepository repo, {Locale locale = const Locale('en')}) {

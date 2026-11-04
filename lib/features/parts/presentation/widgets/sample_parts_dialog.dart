@@ -71,7 +71,7 @@ class _SamplePartsDialogState extends ConsumerState<SamplePartsDialog> {
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: KeraColors.statusError,
+              backgroundColor: KeraColors.error,
               foregroundColor: Colors.white,
             ),
             child: Text(context.tr('ሁሉንም ሰርዝ', 'Delete All')),
@@ -185,13 +185,13 @@ class _SamplePartsDialogState extends ConsumerState<SamplePartsDialog> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: _deleteDemoParts,
-                    icon: const Icon(Icons.delete_sweep_rounded, size: 18, color: KeraColors.statusError),
+                    icon: const Icon(Icons.delete_sweep_rounded, size: 18, color: KeraColors.error),
                     label: Text(
                       context.tr('የሙከራ ዕቃዎችን ሰርዝ', 'Delete All Sample Data'),
-                      style: const TextStyle(color: KeraColors.statusError, fontSize: 13),
+                      style: const TextStyle(color: KeraColors.error, fontSize: 13),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: KeraColors.statusError),
+                      side: const BorderSide(color: KeraColors.error),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),

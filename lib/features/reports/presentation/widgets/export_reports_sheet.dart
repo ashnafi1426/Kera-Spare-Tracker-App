@@ -131,14 +131,14 @@ tr:nth-child(even) { background-color: #f9f9f9; }
 <p>Total Records: ${sales.length}</p>
 <table>
 <tr><th>Sale ID</th><th>Date</th><th>Amount (ETB)</th><th>Profit (ETB)</th><th>Payment Method</th></tr>
-${sales.map((s) => '<tr><td>${s.id.substring(0, 8)}</td><td>${DateFormat.yMd().add_jm().format(s.soldAt)}</td><td>${s.totalAmount}</td><td>${s.totalProfit}</td><td>${s.paymentMethod.name}</td></tr>').join('\n')}
+${sales.map((s) => '<tr><td>${s.id.length > 8 ? s.id.substring(0, 8) : s.id}</td><td>${DateFormat.yMd().add_jm().format(s.soldAt)}</td><td>${s.totalAmount}</td><td>${s.totalProfit}</td><td>${s.paymentMethod ?? "CASH"}</td></tr>').join('\n')}
 </table>
 </body>
 </html>''';
         } else {
           content = '\uFEFFSale ID,Date,Amount (ETB),Profit (ETB),Payment Method\n';
           for (final s in sales) {
-            content += '"${s.id}","${DateFormat.yMd().add_jm().format(s.soldAt)}",${s.totalAmount},${s.totalProfit},"${s.paymentMethod.name}"\n';
+            content += '"${s.id}","${DateFormat.yMd().add_jm().format(s.soldAt)}",${s.totalAmount},${s.totalProfit},"${s.paymentMethod ?? "CASH"}"\n';
           }
         }
       } else if (_selectedReportType == 1) {
@@ -148,6 +148,11 @@ ${sales.map((s) => '<tr><td>${s.id.substring(0, 8)}</td><td>${DateFormat.yMd().a
           startDate: start,
           endDate: end,
         );
+        final totalCost = (summary.totalRevenue - summary.totalProfit).clamp(0.0, double.infinity);
+        final margin = summary.totalRevenue > 0
+            ? ((summary.totalProfit / summary.totalRevenue) * 100).toStringAsFixed(1)
+            : '0.0';
+
         if (isHtml) {
           content = '''
 <!DOCTYPE html>
@@ -169,24 +174,24 @@ th { background-color: #0B2A5B; color: white; }
 <table>
 <tr><th>Metric</th><th>Amount (ETB)</th></tr>
 <tr><td>Total Revenue</td><td>${summary.totalRevenue}</td></tr>
-<tr><td>Total Cost (COGS)</td><td>${summary.totalCost}</td></tr>
+<tr><td>Total Cost (COGS)</td><td>$totalCost</td></tr>
 <tr><td><b>Gross Profit</b></td><td><b>${summary.totalProfit}</b></td></tr>
-<tr><td>Profit Margin</td><td>${summary.profitMargin.toStringAsFixed(1)}%</td></tr>
-<tr><td>Transaction Count</td><td>${summary.transactionCount}</td></tr>
+<tr><td>Profit Margin</td><td>$margin%</td></tr>
+<tr><td>Transaction Count</td><td>${summary.salesCount}</td></tr>
 </table>
 </body>
 </html>''';
         } else {
           content = '\uFEFFMetric,Value\n'
               'Total Revenue,${summary.totalRevenue}\n'
-              'Total Cost,${summary.totalCost}\n'
+              'Total Cost,$totalCost\n'
               'Gross Profit,${summary.totalProfit}\n'
-              'Profit Margin,${summary.profitMargin.toStringAsFixed(1)}%\n'
-              'Transaction Count,${summary.transactionCount}\n';
+              'Profit Margin,$margin%\n'
+              'Transaction Count,${summary.salesCount}\n';
         }
       } else if (_selectedReportType == 2) {
         // Inventory Valuation
-        final parts = await db.partsDao.getAllParts(ownerId);
+        final parts = await db.partsDao.getActiveParts(ownerId);
         if (isHtml) {
           content = '''
 <!DOCTYPE html>
@@ -208,14 +213,14 @@ tr:nth-child(even) { background-color: #f9f9f9; }
 <p>Total Items: ${parts.length}</p>
 <table>
 <tr><th>Part Name</th><th>Part Number</th><th>Quantity</th><th>Unit Buy</th><th>Unit Sell</th><th>Total Stock Value</th></tr>
-${parts.map((p) => '<tr><td>${p.nameEn.isNotEmpty ? p.nameEn : p.nameAm}</td><td>${p.partNumber}</td><td>${p.cachedQuantity}</td><td>${p.purchasePrice}</td><td>${p.sellingPrice}</td><td>${p.cachedQuantity * p.purchasePrice}</td></tr>').join('\n')}
+${parts.map((p) => '<tr><td>${p.name ?? ""}</td><td>${p.partNumber ?? "-"}</td><td>${p.cachedQuantity ?? 0}</td><td>${p.purchasePrice ?? 0}</td><td>${p.sellingPrice ?? 0}</td><td>${(p.cachedQuantity ?? 0) * (p.purchasePrice ?? 0)}</td></tr>').join('\n')}
 </table>
 </body>
 </html>''';
         } else {
           content = '\uFEFFPart Name,Part Number,Quantity,Unit Cost,Unit Sell,Total Value\n';
           for (final p in parts) {
-            content += '"${p.nameEn.isNotEmpty ? p.nameEn : p.nameAm}","${p.partNumber}",${p.cachedQuantity},${p.purchasePrice},${p.sellingPrice},${p.cachedQuantity * p.purchasePrice}\n';
+            content += '"${p.name ?? ""}","${p.partNumber ?? "-"}",${p.cachedQuantity ?? 0},${p.purchasePrice ?? 0},${p.sellingPrice ?? 0},${(p.cachedQuantity ?? 0) * (p.purchasePrice ?? 0)}\n';
           }
         }
       } else {
@@ -247,7 +252,7 @@ tr:nth-child(even) { background-color: #f9f9f9; }
 <p>Period: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}</p>
 <table>
 <tr><th>Rank</th><th>Part Name</th><th>Units Sold</th><th>Total Revenue (ETB)</th></tr>
-${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.partName}</td><td>${e.value.unitsSold}</td><td>${e.value.totalRevenue}</td></tr>').join('\n')}
+${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.partName}</td><td>${e.value.quantitySold}</td><td>${e.value.totalRevenue}</td></tr>').join('\n')}
 </table>
 </body>
 </html>''';
@@ -255,7 +260,7 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
           content = '\uFEFFRank,Part Name,Units Sold,Total Revenue\n';
           for (var i = 0; i < topParts.length; i++) {
             final t = topParts[i];
-            content += '#${i + 1},"${t.partName}",${t.unitsSold},${t.totalRevenue}\n';
+            content += '#${i + 1},"${t.partName}",${t.quantitySold},${t.totalRevenue}\n';
           }
         }
       }
@@ -266,7 +271,7 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
       setState(() => _isGenerating = false);
       Navigator.pop(context);
 
-      await SharePlus.shareXFiles(
+      await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Kera Spare Tracker - Report Export ($fileName)',
       );

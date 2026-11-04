@@ -7,7 +7,6 @@ import '../../providers/locale_provider.dart';
 import '../../utils/context_extensions.dart';
 import '../../widgets/kera_logo_widget.dart';
 import '../tokens/kera_colors.dart';
-import '../tokens/kera_typography.dart';
 
 /// Professional, real-world shared footer for both Owner and Admin areas.
 class KeraAppFooter extends ConsumerWidget {

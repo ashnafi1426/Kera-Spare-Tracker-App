@@ -18,6 +18,12 @@ class AppConstants {
   static const String fallbackSupportPhone = '+251911000000';
   static const String fallbackSupportTelegram = '@KeraSpareSupport';
 
+  /// Flag to enable sample test parts generator (controllable via --dart-define=ENABLE_DEMO_GENERATOR)
+  static const bool enableDemoGenerator = bool.fromEnvironment(
+    'ENABLE_DEMO_GENERATOR',
+    defaultValue: true,
+  );
+
   /// Default configurable brands for spare parts.
   static const List<String> defaultBrands = [
     'CAT',

@@ -23,7 +23,6 @@ import '../providers/parts_providers.dart';
 import '../widgets/inventory_filter_sheet.dart';
 import '../widgets/sample_parts_dialog.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
-import '../../../../core/design/widgets/kera_app_footer.dart';
 
 
 
@@ -772,7 +771,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             // Left: Squircle Part Image Thumbnail
             KeraPartImage(
               localPath: part.photoLocalPath,
-              photoUrl: part.photoUrl,
+              remoteUrl: part.photoUrl,
               width: 50,
               height: 50,
               borderRadius: 14,
@@ -917,7 +916,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(context.tr('ተመለስ', 'Cancel'))),
                         ElevatedButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: KeraColors.statusError),
+                          style: ElevatedButton.styleFrom(backgroundColor: KeraColors.error),
                           child: Text(context.tr('ሰርዝ', 'Delete')),
                         ),
                       ],
@@ -926,7 +925,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   if (confirmed == true && mounted) {
                     final res = await ref.read(partsRepositoryProvider).deletePart(
                       ownerId: ref.read(currentOwnerIdProvider),
-                      partId: part.id,
+                      id: part.id,
                     );
                     if (res.isSuccess && mounted) {
                       context.showSnackBar(context.tr('ዕቃው ተሰርዟል', 'Part deleted'));

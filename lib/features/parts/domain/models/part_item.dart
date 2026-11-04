@@ -63,6 +63,7 @@ class PartItem {
       ((lowStockLevel != null && cachedQuantity <= lowStockLevel!) ||
           cachedQuantity <= 5.0);
   bool get isInStock => !isOutOfStock && !isLowStock;
+  bool get isDemo => notes != null && (notes!.contains('[DEMO]') || notes!.contains('[TEST_SEED]'));
 
   /// Returns the estimated profit per unit (selling price - purchase price).
   double? get unitProfit {

@@ -78,6 +78,19 @@ class MockOwnerDetailsAdminRepository implements AdminRepository {
   Future<Result<dynamic>> updateSetting(String key, dynamic value) async => throw UnimplementedError();
   @override
   Future<Result<Map<String, dynamic>>> getAuditLogs({int page = 1, int limit = 50, String? action, String? targetUserId, String? adminId, String? startDate, String? endDate}) async => throw UnimplementedError();
+
+  @override
+  Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'}) async =>
+      const Result.success(AdminReportSummary(
+        period: 'month',
+        totalRevenue: 0.0,
+        totalProfit: 0.0,
+        transactionsCount: 0,
+        activeOwnersCount: 0,
+        totalPartsCount: 0,
+        points: [],
+        topSellingItems: [],
+      ));
 }
 
 Widget buildDetailsScreen(AdminRepository repo, {String ownerId = 'owner-test-1'}) {

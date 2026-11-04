@@ -355,7 +355,7 @@ class _AdminOwnerDetailsScreenState
                         const SizedBox(height: 20),
 
                         // Recent Sales Activity Card
-                        _buildRecentSalesCard(),
+                        _buildRecentSalesCard(details),
                         const SizedBox(height: 32),
                       ],
                     ),

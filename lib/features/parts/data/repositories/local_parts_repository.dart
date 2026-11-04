@@ -494,10 +494,9 @@ class LocalPartsRepository implements PartsRepository {
       // Enqueue sync items so sample parts sync normally
       for (final comp in companions) {
         await db.syncQueueDao.enqueue(
-          ownerId: ownerId,
-          entityType: 'spare_parts',
-          entityId: comp.id.value,
-          operation: 'CREATE',
+          tableName: 'spare_parts',
+          recordId: comp.id.value,
+          operation: SyncOperation.insert,
           payload: jsonEncode({
             'id': comp.id.value,
             'ownerId': ownerId,
