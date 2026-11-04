@@ -424,79 +424,25 @@ class LocalPartsRepository implements PartsRepository {
   @override
   Future<Result<int>> seedTestParts({
     required String ownerId,
-    int count = 2000,
+    int count = 25,
   }) async {
     try {
-      final brands = await (db.select(db.brands)
-            ..where((t) =>
-                (t.ownerId.equals(ownerId) | t.isDefault.equals(true)) &
-                t.deletedAt.isNull()))
-          .get();
-
-      final categories = await (db.select(db.categories)
-            ..where((t) => t.ownerId.equals(ownerId) & t.deletedAt.isNull()))
-          .get();
-
-      final locations = await (db.select(db.locations)
-            ..where((t) => t.ownerId.equals(ownerId) & t.deletedAt.isNull()))
-          .get();
-
-      final List<String> partNames = [
-        'Oil Filter High Efficiency',
-        'Air Filter Heavy Duty',
-        'Fuel Filter Secondary',
-        'Hydraulic Filter Return',
-        'Water Separator Element',
-        'Turbocharger Assembly',
-        'Cylinder Head Gasket',
-        'Piston Ring Set Standard',
-        'Crankshaft Main Bearing',
-        'Connecting Rod Bushing',
-        'Hydraulic Main Pump',
-        'Control Valve Spool',
-        'Boom Cylinder Seal Kit',
-        'Bucket Cylinder Seal Kit',
-        'Arm Cylinder Seal Kit',
-        'Brake Pad Heavy Duty',
-        'Brake Shoe Assembly',
-        'Brake Master Cylinder',
-        'Track Roller Single Flange',
-        'Carrier Roller Assembly',
-        'Alternator 24V 60A',
-        'Starter Motor 24V 7.5kW',
-        'Engine Stop Solenoid',
-        'Water Temperature Sensor',
-        'Oil Pressure Switch',
-        'Radiator Cooling Fan',
-        'Water Pump Heavy Duty',
-        'Thermostat 71C',
-        'Fan Belt Set',
-        'Tensioner Pulley',
-        'Fuel Injection Pump',
-        'Injector Nozzle Tip',
-        'Feed Pump Manual',
-        'Common Rail Sensor',
-        'Glow Plug 24V',
-        'Clutch Disc Assembly',
-        'Pressure Plate',
-        'Release Bearing',
-        'Universal Joint Cross',
-        'Drive Shaft Center Bearing',
-      ];
-
-      final List<String> partPrefixes = [
-        'CAT-1R',
-        'KOM-708',
-        'TOY-044',
-        'HOL-353',
-        'BOS-044',
-        'DON-P55',
-        'HIT-918',
-        'PER-U5P',
-        'CUM-328',
-        'DEN-101',
-        'ISU-897',
-        'MITS-ME',
+      final List<Map<String, String>> templateParts = [
+        {'nameAm': 'የዘይት ማጣሪያ', 'nameEn': 'Oil Filter Heavy Duty', 'brand': 'CAT', 'cat': 'Filters', 'shelf': 'Shelf 1', 'buy': '450', 'sell': '700'},
+        {'nameAm': 'የናፍጣ ማጣሪያ', 'nameEn': 'Fuel Filter Secondary', 'brand': 'CTP', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '650', 'sell': '950'},
+        {'nameAm': 'የሃይድሮሊክ ሲሊንደር ማሸጊያ', 'nameEn': 'Hydraulic Cylinder Seal Kit', 'brand': 'Hitachi', 'cat': 'Seals & Gaskets', 'shelf': 'Shelf 3', 'buy': '2400', 'sell': '3800'},
+        {'nameAm': 'የትራክ ሮለር', 'nameEn': 'Track Roller Assembly', 'brand': 'Doosan', 'cat': 'Undercarriage', 'shelf': 'Shelf 5', 'buy': '8500', 'sell': '12500'},
+        {'nameAm': 'የኢንጀክተር ኖዝል', 'nameEn': 'Fuel Injector Nozzle', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '3200', 'sell': '4900'},
+        {'nameAm': 'አልተርኔተር 24V', 'nameEn': 'Alternator 24V 60A', 'brand': 'Develon', 'cat': 'Electrical', 'shelf': 'Shelf 6', 'buy': '7200', 'sell': '11000'},
+        {'nameAm': 'እስጣርተር ሞተር', 'nameEn': 'Starter Motor 24V 7.5kW', 'brand': 'SANY', 'cat': 'Electrical', 'shelf': 'Shelf 2', 'buy': '11500', 'sell': '16800'},
+        {'nameAm': 'የፒስተን ሪንግ', 'nameEn': 'Piston Ring Set STD', 'brand': 'CTP', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '1800', 'sell': '2900'},
+        {'nameAm': 'የውሃ ፓምፕ', 'nameEn': 'Water Pump Assembly', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '5400', 'sell': '8200'},
+        {'nameAm': 'የባሊ ጥርስ', 'nameEn': 'Bucket Tooth Tiger', 'brand': 'SANY', 'cat': 'Undercarriage', 'shelf': 'Shelf 1', 'buy': '1200', 'sell': '1950'},
+        {'nameAm': 'የውጭ አየር ማጣሪያ', 'nameEn': 'Air Filter Outer Element', 'brand': 'Doosan', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '1100', 'sell': '1750'},
+        {'nameAm': 'ዋና ቤሪንግ ስብስብ', 'nameEn': 'Main Bearing Set Standard', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '3600', 'sell': '5500'},
+        {'nameAm': 'የሃይድሮሊክ ዋና ፓምፕ ቫልቭ', 'nameEn': 'Hydraulic Pump Relief Valve', 'brand': 'Hitachi', 'cat': 'Hydraulic', 'shelf': 'Shelf 1', 'buy': '4200', 'sell': '6400'},
+        {'nameAm': 'የፍሬን ዲስክ', 'nameEn': 'Brake Friction Disc', 'brand': 'Develon', 'cat': 'Hardware & Fasteners', 'shelf': 'Shelf 5', 'buy': '2100', 'sell': '3300'},
+        {'nameAm': 'የቀበቶ መወጠሪያ', 'nameEn': 'Fan Belt Tensioner Pulley', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 6', 'buy': '1450', 'sell': '2300'},
       ];
 
       final now = DateTime.now();
@@ -504,30 +450,22 @@ class LocalPartsRepository implements PartsRepository {
 
       for (var i = 0; i < count; i++) {
         final id = uuid.v4();
-        final nameBase = partNames[i % partNames.length];
-        final prefix = partPrefixes[i % partPrefixes.length];
-        final numberSuffix = (1000 + (i * 3) % 9000).toString();
-        final partNumber = '$prefix-$numberSuffix';
-        final name = '$nameBase #$i';
+        final template = templateParts[i % templateParts.length];
+        final name = '${template["nameAm"]} · ${template["nameEn"]} #${i + 1}';
+        final partNumber = '${template["brand"]}-${1000 + i * 11}';
 
-        final brandId = brands.isNotEmpty ? brands[i % brands.length].id : null;
-        final categoryId =
-            categories.isNotEmpty ? categories[i % categories.length].id : null;
-        final locationId =
-            locations.isNotEmpty ? locations[i % locations.length].id : null;
-
-        // Distribute stock: 10% out of stock (0), 20% low stock (<=5), 70% in stock (>5)
+        // Stock distribution: 10% out of stock (0), 20% low stock (1 to 4), 70% in stock (10 to 45)
         final double qty;
         if (i % 10 == 0) {
           qty = 0.0;
         } else if (i % 5 == 0) {
-          qty = ((i % 5) + 1).toDouble(); // 1 to 5
+          qty = ((i % 4) + 1).toDouble();
         } else {
-          qty = (6 + (i * 7) % 65).toDouble(); // 6 to 70
+          qty = (10 + (i * 3) % 36).toDouble();
         }
 
-        final purchasePrice = (500 + (i * 17) % 15000).toDouble();
-        final sellingPrice = (purchasePrice * 1.25).roundToDouble();
+        final purchasePrice = double.tryParse(template['buy'] ?? '500') ?? 500.0;
+        final sellingPrice = double.tryParse(template['sell'] ?? '800') ?? 800.0;
 
         companions.add(
           SparePartsCompanion(
@@ -535,19 +473,16 @@ class LocalPartsRepository implements PartsRepository {
             ownerId: Value(ownerId),
             name: Value(name),
             partNumber: Value(partNumber),
-            brandId: Value(brandId),
-            categoryId: Value(categoryId),
-            locationId: Value(locationId),
-            customLocation: Value('Spot ${(i % 20) + 1}'),
-            description: Value('High grade replacement component for $nameBase'),
+            customLocation: Value(template['shelf'] ?? 'Shelf 1'),
+            description: Value('Sample ${template["nameEn"]} replacement for heavy machinery'),
             unit: const Value('pcs'),
             purchasePrice: Value(purchasePrice),
             sellingPrice: Value(sellingPrice),
-            sizeSpecs: Value('Spec ${(i % 12) + 1}'),
-            notes: const Value('[TEST_SEED] Performance benchmark part'),
+            sizeSpecs: Value('Std OEM spec'),
+            notes: Value('[DEMO] Sample demo spare part #${i + 1}'),
             lowStockLevel: const Value(5.0),
             cachedQuantity: Value(qty),
-            createdAt: Value(now.subtract(Duration(minutes: i % 10000))),
+            createdAt: Value(now.subtract(Duration(minutes: i * 5))),
             updatedAt: Value(now),
             syncStatus: const Value(SyncStatus.pending),
           ),
@@ -555,6 +490,35 @@ class LocalPartsRepository implements PartsRepository {
       }
 
       await db.partsDao.batchInsertParts(companions);
+
+      // Enqueue sync items so sample parts sync normally
+      for (final comp in companions) {
+        await db.syncQueueDao.enqueue(
+          ownerId: ownerId,
+          entityType: 'spare_parts',
+          entityId: comp.id.value,
+          operation: 'CREATE',
+          payload: jsonEncode({
+            'id': comp.id.value,
+            'ownerId': ownerId,
+            'name': comp.name.value,
+            'nameAm': comp.name.value?.split('·').first.trim(),
+            'nameEn': comp.name.value?.split('·').last.trim(),
+            'partNumber': comp.partNumber.value,
+            'customLocation': comp.customLocation.value,
+            'unit': 'pcs',
+            'purchasePrice': comp.purchasePrice.value,
+            'sellingPrice': comp.sellingPrice.value,
+            'notes': comp.notes.value,
+            'isDemo': true,
+            'lowStockLevel': 5.0,
+            'cachedQuantity': comp.cachedQuantity.value,
+            'created_at': now.toIso8601String(),
+            'updated_at': now.toIso8601String(),
+          }),
+        );
+      }
+
       return Result.success(count);
     } catch (e) {
       return Result.failure(DatabaseFailure(

@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/widgets/dashboard_header_bar.dart';
+import '../../../../core/design/widgets/kera_app_footer.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
@@ -35,6 +38,17 @@ class BusinessDashboardScreen extends ConsumerStatefulWidget {
 
 class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScreen> {
   int _selectedPeriod = 0; // 0: ዛሬ, 1: ይህ ሳምንት, 2: ይህ ወር
+
+  String _getTimeGreeting(BuildContext context) {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return context.tr('መልካም ጥዋት', 'Good Morning');
+    } else if (hour >= 12 && hour < 17) {
+      return context.tr('መልካም ከሰዓት', 'Good Afternoon');
+    } else {
+      return context.tr('መልካም ምሽት', 'Good Evening');
+    }
+  }
 
   void _onPeriodChanged(int index) {
     setState(() => _selectedPeriod = index);
@@ -94,38 +108,103 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-              // 2. Offline / Sync Banner (1 Dashboard.png)
+              // 2. Post-Login Welcome Card (Issue 8)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2D2305) : const Color(0xFFFFFBEB),
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
-                    ),
+                  color: isDark ? const Color(0xFF102138) : AdminColors.headerNavy,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E385C) : Colors.transparent,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AdminColors.keraOrange,
-                        shape: BoxShape.circle,
+                    // Avatar
+                    KeraAvatarWidget(
+                      photoUrl: user?.avatarUrl,
+                      name: user?.businessName ?? 'Owner',
+                      radius: 24,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(width: 12),
+                    // Greeting & Business Name
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_getTimeGreeting(context)} 👋',
+                            style: const TextStyle(
+                              color: Color(0xFFA5B4CB),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            businessName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      context.tr(
-                        'ከመስመር ውጭ · $pendingSync ለውጦች በመጠባበቅ ላይ',
-                        'Offline · $pendingSync changes pending sync',
+                    // Live Sync Indicator Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: pendingSync == 0
+                            ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                            : AdminColors.keraOrange.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: pendingSync == 0
+                              ? const Color(0xFF10B981)
+                              : AdminColors.keraOrange,
+                        ),
                       ),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: pendingSync == 0
+                                  ? const Color(0xFF10B981)
+                                  : AdminColors.keraOrange,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            pendingSync == 0
+                                ? context.tr('ተመሳስሏል', 'Synced')
+                                : '$pendingSync ${context.tr("በመጠባበቅ", "Pending")}',
+                            style: TextStyle(
+                              color: pendingSync == 0
+                                  ? const Color(0xFF10B981)
+                                  : AdminColors.keraOrange,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -355,8 +434,8 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                           children: [
                             Text(
                               context.tr(
-                                '${metrics?.lowStockCount ?? 16} ዕቃዎች ሊያልቅ ነው',
-                                '${metrics?.lowStockCount ?? 16} items running low',
+                                '${metrics?.lowStockCount ?? 0} ዕቃዎች ሊያልቅ ነው',
+                                '${metrics?.lowStockCount ?? 0} items running low',
                               ),
                               style: TextStyle(
                                 fontSize: 15,
@@ -367,8 +446,8 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                             const SizedBox(height: 2),
                             Text(
                               context.tr(
-                                '${metrics?.outOfStockCount ?? 3} ዕቃዎች አልቀዋል',
-                                '${metrics?.outOfStockCount ?? 3} items out of stock',
+                                '${metrics?.outOfStockCount ?? 0} ዕቃዎች አልቀዋል',
+                                '${metrics?.outOfStockCount ?? 0} items out of stock',
                               ),
                               style: const TextStyle(
                                 fontSize: 12,
@@ -492,6 +571,8 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              const KeraAppFooter(),
               const SizedBox(height: 32),
             ],
           ),

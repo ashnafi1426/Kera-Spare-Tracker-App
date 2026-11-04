@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/constants.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -13,6 +14,7 @@ import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
+import '../../../parts/presentation/widgets/sample_parts_dialog.dart';
 import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../../sync/data/services/sync_push_service.dart';
 import '../../data/services/export_backup_service.dart';
@@ -786,46 +788,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               const SizedBox(height: KeraSpacing.lg),
 
-              // Section: የፈተና መሳሪያዎች (Benchmark & Developer Tools)
-              ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-                leading: Icon(Icons.speed_rounded, color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
-                title: Text(
-                  context.tr('የሙከራ መሳሪያዎች', 'Benchmark & Developer Tools'),
-                  style: KeraTypography.titleSmall(color: context.textPrimaryColor),
-                ),
-                subtitle: Text(
-                  context.tr('ዕቃዎችን በብዛት ለመሙላት እና ለማፅዳት', 'Populate sample inventory and bulk actions'),
-                  style: KeraTypography.labelSmall(color: context.textMutedColor),
-                ),
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.add_chart_rounded, color: KeraColors.actionBlue),
-                    title: Text(context.tr('2,000 የሙከራ ዕቃዎችን ሙላ', 'Seed 2,000 Test Parts')),
-                    onTap: () async {
-                      context.showSnackBar(context.tr('ዕቃዎችን የመሙላት ሂደት ተጀምሯል...', 'Seeding parts in progress...'));
-                      final success = await ref
-                          .read(inventoryListProvider.notifier)
-                          .seedTestParts(count: 2000);
-                      if (context.mounted) {
-                        if (success) {
-                          context.showSnackBar(context.tr('2,000 ዕቃዎች በተሳካ ሁኔታ ተሞልተዋል', 'Successfully seeded 2,000 parts'));
-                        } else {
-                          context.showSnackBar(context.tr('ዕቃዎችን መሙላት አልተሳካም', 'Failed to seed parts'), isError: true);
-                        }
-                      }
-                    },
+              // Section: የፈተና መሳሪያዎች (Sample Parts Generator)
+              if (AppConstants.enableDemoGenerator)
+                ExpansionTile(
+                  tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                  leading: Icon(Icons.speed_rounded, color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
+                  title: Text(
+                    context.tr('የሙከራ ዕቃዎች ማመንጫ', 'Generate Sample Parts'),
+                    style: KeraTypography.titleSmall(color: context.textPrimaryColor),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.delete_sweep_rounded, color: KeraColors.error),
-                    title: Text(
-                      context.tr('የሙከራ ዕቃዎችን አፅዳ', 'Clear Test Parts'),
-                      style: const TextStyle(color: KeraColors.error),
+                  subtitle: Text(
+                    context.tr('10, 25 ወይም 50 ናሙና ዕቃዎችን ይፍጠሩ', 'Generate 10, 25, or 50 demo parts'),
+                    style: KeraTypography.labelSmall(color: context.textMutedColor),
+                  ),
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.auto_awesome_rounded, color: KeraColors.brandOrange),
+                      title: Text(context.tr('የናሙና ዕቃዎች ማመንጫ ክፈት', 'Open Sample Parts Generator')),
+                      subtitle: Text(context.tr('CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY', 'CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY')),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => SamplePartsDialog.show(context),
                     ),
-                    onTap: () => _confirmClearParts(context),
-                  ),
-                ],
-              ),
+                    ListTile(
+                      leading: const Icon(Icons.delete_sweep_rounded, color: KeraColors.error),
+                      title: Text(
+                        context.tr('የሙከራ ዕቃዎችን አፅዳ', 'Delete All Sample Data'),
+                        style: const TextStyle(color: KeraColors.error),
+                      ),
+                      onTap: () => _confirmClearParts(context),
+                    ),
+                  ],
+                ),
 
               const SizedBox(height: KeraSpacing.lg),
 

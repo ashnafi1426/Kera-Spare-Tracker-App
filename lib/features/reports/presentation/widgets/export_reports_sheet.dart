@@ -1,12 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/design/design.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database_provider.dart';
+import '../../../parts/presentation/providers/metadata_providers.dart';
 
 /// Modal bottom sheet for filtering and exporting reports.
 ///
 /// Follows Google Stitch Screen 6 (Filters & Export Reports — ማጣሪያ እና ሪፖርት ማውጫ).
-class ExportReportsSheet extends StatefulWidget {
+class ExportReportsSheet extends ConsumerStatefulWidget {
   const ExportReportsSheet({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -19,10 +27,10 @@ class ExportReportsSheet extends StatefulWidget {
   }
 
   @override
-  State<ExportReportsSheet> createState() => _ExportReportsSheetState();
+  ConsumerState<ExportReportsSheet> createState() => _ExportReportsSheetState();
 }
 
-class _ExportReportsSheetState extends State<ExportReportsSheet> {
+class _ExportReportsSheetState extends ConsumerState<ExportReportsSheet> {
   int _selectedReportType = 0; // 0: Sales, 1: P&L, 2: Inventory, 3: Best Sellers
   int _selectedDateRange = 3; // 0: Today, 1: Yesterday, 2: Week, 3: Month, 4: Past 30
   int _selectedFormat = 0; // 0: PDF, 1: Excel, 2: CSV
@@ -36,27 +44,247 @@ class _ExportReportsSheetState extends State<ExportReportsSheet> {
     });
   }
 
+  (DateTime, DateTime) _resolveDateRange() {
+    final now = DateTime.now();
+    switch (_selectedDateRange) {
+      case 0: // Today
+        return (
+          DateTime(now.year, now.month, now.day, 0, 0, 0),
+          DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
+        );
+      case 1: // Yesterday
+        final y = now.subtract(const Duration(days: 1));
+        return (
+          DateTime(y.year, y.month, y.day, 0, 0, 0),
+          DateTime(y.year, y.month, y.day, 23, 59, 59, 999),
+        );
+      case 2: // Week
+        final offset = now.weekday - 1;
+        final mon = now.subtract(Duration(days: offset));
+        return (
+          DateTime(mon.year, mon.month, mon.day, 0, 0, 0),
+          DateTime(now.year, now.month, now.day, 23, 59, 59, 999),
+        );
+      case 3: // Month
+        return (
+          DateTime(now.year, now.month, 1, 0, 0, 0),
+          DateTime(now.year, now.month + 1, 0, 23, 59, 59, 999),
+        );
+      case 4: // Past 30
+      default:
+        return (
+          now.subtract(const Duration(days: 30)),
+          now,
+        );
+    }
+  }
+
   Future<void> _handleExport() async {
     setState(() => _isGenerating = true);
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    setState(() => _isGenerating = false);
-    Navigator.pop(context);
+    try {
+      final ownerId = ref.read(currentOwnerIdProvider);
+      final db = ref.read(appDatabaseProvider);
+      final (start, end) = _resolveDateRange();
+      final tempDir = await getTemporaryDirectory();
+      final timeStamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
 
-    final formatName = ['PDF', 'Excel (.xlsx)', 'CSV'][_selectedFormat];
-    final typeName = [
-      context.tr('የሽያጭ ማጠቃለያ', 'Sales Summary'),
-      context.tr('የትርፍ እና ኪሳራ', 'Profit & Loss'),
-      context.tr('የክምችት ግምት', 'Inventory Valuation'),
-      context.tr('ከፍተኛ ተፈላጊ ዕቃዎች', 'Best Sellers')
-    ][_selectedReportType];
+      final typeName = [
+        'sales_summary',
+        'profit_loss',
+        'inventory_valuation',
+        'best_sellers',
+      ][_selectedReportType];
 
-    context.showSnackBar(
-      context.tr(
-        '$typeName $formatName ሪፖርት በተሳካ ሁኔታ ተዘጋጅቷል',
-        '$typeName $formatName export generated successfully',
-      ),
-    );
+      final isHtml = _selectedFormat == 0;
+      final ext = isHtml ? 'html' : (_selectedFormat == 1 ? 'csv' : 'csv');
+      final fileName = 'kera_${typeName}_$timeStamp.$ext';
+      final file = File('${tempDir.path}/$fileName');
+
+      String content = '';
+
+      if (_selectedReportType == 0) {
+        // Sales Summary
+        final sales = await db.salesDao.getSalesByDateRange(
+          ownerId: ownerId,
+          startDate: start,
+          endDate: end,
+        );
+        if (isHtml) {
+          content = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kera Spare Tracker - Sales Summary</title>
+<style>
+body { font-family: sans-serif; margin: 20px; color: #0B2A5B; }
+h1 { color: #0B2A5B; border-bottom: 2px solid #F7931E; padding-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #0B2A5B; color: white; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+</head>
+<body>
+<h1>Kera Spare Tracker - Sales Summary</h1>
+<p>Period: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}</p>
+<p>Total Records: ${sales.length}</p>
+<table>
+<tr><th>Sale ID</th><th>Date</th><th>Amount (ETB)</th><th>Profit (ETB)</th><th>Payment Method</th></tr>
+${sales.map((s) => '<tr><td>${s.id.substring(0, 8)}</td><td>${DateFormat.yMd().add_jm().format(s.soldAt)}</td><td>${s.totalAmount}</td><td>${s.totalProfit}</td><td>${s.paymentMethod.name}</td></tr>').join('\n')}
+</table>
+</body>
+</html>''';
+        } else {
+          content = '\uFEFFSale ID,Date,Amount (ETB),Profit (ETB),Payment Method\n';
+          for (final s in sales) {
+            content += '"${s.id}","${DateFormat.yMd().add_jm().format(s.soldAt)}",${s.totalAmount},${s.totalProfit},"${s.paymentMethod.name}"\n';
+          }
+        }
+      } else if (_selectedReportType == 1) {
+        // Profit & Loss
+        final summary = await db.salesDao.getSalesSummary(
+          ownerId: ownerId,
+          startDate: start,
+          endDate: end,
+        );
+        if (isHtml) {
+          content = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kera Spare Tracker - Profit & Loss</title>
+<style>
+body { font-family: sans-serif; margin: 20px; color: #0B2A5B; }
+h1 { color: #0B2A5B; border-bottom: 2px solid #F7931E; padding-bottom: 8px; }
+table { width: 60%; border-collapse: collapse; margin-top: 16px; }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #0B2A5B; color: white; }
+</style>
+</head>
+<body>
+<h1>Kera Spare Tracker - Profit &amp; Loss Statement</h1>
+<p>Period: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}</p>
+<table>
+<tr><th>Metric</th><th>Amount (ETB)</th></tr>
+<tr><td>Total Revenue</td><td>${summary.totalRevenue}</td></tr>
+<tr><td>Total Cost (COGS)</td><td>${summary.totalCost}</td></tr>
+<tr><td><b>Gross Profit</b></td><td><b>${summary.totalProfit}</b></td></tr>
+<tr><td>Profit Margin</td><td>${summary.profitMargin.toStringAsFixed(1)}%</td></tr>
+<tr><td>Transaction Count</td><td>${summary.transactionCount}</td></tr>
+</table>
+</body>
+</html>''';
+        } else {
+          content = '\uFEFFMetric,Value\n'
+              'Total Revenue,${summary.totalRevenue}\n'
+              'Total Cost,${summary.totalCost}\n'
+              'Gross Profit,${summary.totalProfit}\n'
+              'Profit Margin,${summary.profitMargin.toStringAsFixed(1)}%\n'
+              'Transaction Count,${summary.transactionCount}\n';
+        }
+      } else if (_selectedReportType == 2) {
+        // Inventory Valuation
+        final parts = await db.partsDao.getAllParts(ownerId);
+        if (isHtml) {
+          content = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kera Spare Tracker - Inventory Valuation</title>
+<style>
+body { font-family: sans-serif; margin: 20px; color: #0B2A5B; }
+h1 { color: #0B2A5B; border-bottom: 2px solid #F7931E; padding-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #0B2A5B; color: white; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+</head>
+<body>
+<h1>Kera Spare Tracker - Inventory Valuation</h1>
+<p>Total Items: ${parts.length}</p>
+<table>
+<tr><th>Part Name</th><th>Part Number</th><th>Quantity</th><th>Unit Buy</th><th>Unit Sell</th><th>Total Stock Value</th></tr>
+${parts.map((p) => '<tr><td>${p.nameEn.isNotEmpty ? p.nameEn : p.nameAm}</td><td>${p.partNumber}</td><td>${p.cachedQuantity}</td><td>${p.purchasePrice}</td><td>${p.sellingPrice}</td><td>${p.cachedQuantity * p.purchasePrice}</td></tr>').join('\n')}
+</table>
+</body>
+</html>''';
+        } else {
+          content = '\uFEFFPart Name,Part Number,Quantity,Unit Cost,Unit Sell,Total Value\n';
+          for (final p in parts) {
+            content += '"${p.nameEn.isNotEmpty ? p.nameEn : p.nameAm}","${p.partNumber}",${p.cachedQuantity},${p.purchasePrice},${p.sellingPrice},${p.cachedQuantity * p.purchasePrice}\n';
+          }
+        }
+      } else {
+        // Best Sellers
+        final topParts = await db.salesDao.getTopSellingParts(
+          ownerId: ownerId,
+          startDate: start,
+          endDate: end,
+          limit: 25,
+        );
+        if (isHtml) {
+          content = '''
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Kera Spare Tracker - Best Sellers</title>
+<style>
+body { font-family: sans-serif; margin: 20px; color: #0B2A5B; }
+h1 { color: #0B2A5B; border-bottom: 2px solid #F7931E; padding-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #0B2A5B; color: white; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+</head>
+<body>
+<h1>Kera Spare Tracker - Best Selling Parts</h1>
+<p>Period: ${DateFormat.yMMMd().format(start)} - ${DateFormat.yMMMd().format(end)}</p>
+<table>
+<tr><th>Rank</th><th>Part Name</th><th>Units Sold</th><th>Total Revenue (ETB)</th></tr>
+${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.partName}</td><td>${e.value.unitsSold}</td><td>${e.value.totalRevenue}</td></tr>').join('\n')}
+</table>
+</body>
+</html>''';
+        } else {
+          content = '\uFEFFRank,Part Name,Units Sold,Total Revenue\n';
+          for (var i = 0; i < topParts.length; i++) {
+            final t = topParts[i];
+            content += '#${i + 1},"${t.partName}",${t.unitsSold},${t.totalRevenue}\n';
+          }
+        }
+      }
+
+      await file.writeAsString(content);
+
+      if (!mounted) return;
+      setState(() => _isGenerating = false);
+      Navigator.pop(context);
+
+      await SharePlus.shareXFiles(
+        [XFile(file.path)],
+        text: 'Kera Spare Tracker - Report Export ($fileName)',
+      );
+
+      if (mounted) {
+        context.showSnackBar(
+          context.tr('ሪፖርቱ በተሳካ ሁኔታ ተዘጋጅቷል', 'Report generated and exported successfully'),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGenerating = false);
+        context.showSnackBar(
+          context.tr('ሪፖርቱን ማዘጋጀት አልተቻለም', 'Failed to generate report: $e'),
+          isError: true,
+        );
+      }
+    }
   }
 
   @override

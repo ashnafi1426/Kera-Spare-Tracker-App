@@ -299,7 +299,8 @@ class PartsDao extends DatabaseAccessor<AppDatabase> with _$PartsDaoMixin {
   Future<int> deleteTestParts(String ownerId) {
     return (delete(spareParts)
           ..where((t) =>
-              t.ownerId.equals(ownerId) & t.notes.like('%[TEST_SEED]%')))
+              t.ownerId.equals(ownerId) &
+              (t.notes.like('%[DEMO]%') | t.notes.like('%[TEST_SEED]%'))))
         .go();
   }
 

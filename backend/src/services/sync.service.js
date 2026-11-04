@@ -147,7 +147,7 @@ export async function pushSyncData(userId, batch = []) {
               sellingPrice: data.sellingPrice !== undefined ? data.sellingPrice : (data.selling_price ?? null),
               notes: data.notes ?? null,
               sizeSpecs: data.sizeSpecs ?? data.size_specs ?? null,
-              isDemo: Boolean(data.isDemo ?? data.is_demo ?? false),
+              isDemo: Boolean(data.isDemo ?? data.is_demo ?? (typeof data.notes === 'string' && data.notes.includes('[DEMO]')) ?? false),
               deletedAt: data.deletedAt ? new Date(data.deletedAt) : null,
             };
 

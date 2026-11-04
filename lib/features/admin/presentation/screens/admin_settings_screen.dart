@@ -367,7 +367,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
       try {
         await ref.read(authControllerProvider.notifier).logout();
         if (mounted) {
-          context.go('/auth/login');
+          context.go('/login');
         }
       } catch (e) {
         if (mounted) {

@@ -21,13 +21,12 @@ import '../providers/inventory_providers.dart';
 import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
 import '../widgets/inventory_filter_sheet.dart';
+import '../widgets/sample_parts_dialog.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
+import '../../../../core/design/widgets/kera_app_footer.dart';
 
-/// Stitch Screen 12: Inventory Overview (የዕቃዎች ዝርዝር).
-///
-/// Features deep Navy industrial header, live sync indicator, Bento summary
-/// metrics strip (valuation, in-stock, low-stock, out-of-stock), debounced search,
-/// multi-criteria filter chips, list/grid view toggle, performant lazy pagination,
-/// and complete empty states (Screen 18 & 19).
+
+
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
 
@@ -87,19 +86,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     ref.read(inventoryFilterProvider.notifier).setQuery(null);
   }
 
-  Future<void> _handleSeedParts() async {
-    final l10n = context.l10n;
-    context.showSnackBar(l10n.seedingInProgress);
-
-    final success =
-        await ref.read(inventoryListProvider.notifier).seedTestParts(count: 2000);
-
-    if (!mounted) return;
-    if (success) {
-      context.showSnackBar(l10n.seedSuccess);
-    } else {
-      context.showSnackBar('Failed to seed parts', isError: true);
-    }
+  void _handleSeedParts() {
+    SamplePartsDialog.show(context);
   }
 
 
@@ -781,19 +769,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ),
         child: Row(
           children: [
-            // Left: Squircle Icon Box (2 Inventory.png)
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                Icons.inventory_2_outlined,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF5E6D82),
-                size: 24,
-              ),
+            // Left: Squircle Part Image Thumbnail
+            KeraPartImage(
+              localPath: part.photoLocalPath,
+              photoUrl: part.photoUrl,
+              width: 50,
+              height: 50,
+              borderRadius: 14,
             ),
             const SizedBox(width: 12),
 
@@ -802,19 +784,38 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    part.displayName,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimaryColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          part.displayName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: context.textPrimaryColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (part.isDemo)
+                        Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: KeraColors.brandOrange.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'DEMO',
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: KeraColors.brandOrange),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${context.tr("ቁጥር", "No.")} ${part.partNumber ?? '-'} · ${part.brandName ?? "CAT"}',
+                    '${context.tr("ቁጥር", "No.")} ${part.partNumber?.isNotEmpty == true ? part.partNumber : "-"} · ${part.brandName?.isNotEmpty == true ? part.brandName : ""}',
                     style: TextStyle(
                       fontSize: 12,
                       color: context.textSecondaryColor,
@@ -822,14 +823,22 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    part.customLocation ?? context.tr('ሸልፍ 1', 'Shelf 1'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.textSecondaryColor,
+                  if (part.customLocation != null && part.customLocation!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.place_outlined, size: 12, color: context.textSecondaryColor),
+                        const SizedBox(width: 2),
+                        Text(
+                          part.customLocation!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -840,7 +849,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${(part.sellingPrice ?? 1200).toStringAsFixed(0)} ETB',
+                  '${(part.sellingPrice ?? 0).toStringAsFixed(0)} ETB',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -883,6 +892,53 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     ),
                   ),
                 ),
+              ],
+            ),
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert_rounded, size: 18, color: context.textSecondaryColor),
+              onSelected: (val) async {
+                if (val == 'view') {
+                  final result = await context.push('/parts/${part.id}');
+                  if (result == true && mounted) {
+                    ref.read(inventoryListProvider.notifier).refresh();
+                  }
+                } else if (val == 'edit') {
+                  final result = await context.push('/parts/${part.id}/edit');
+                  if (result == true && mounted) {
+                    ref.read(inventoryListProvider.notifier).refresh();
+                  }
+                } else if (val == 'delete') {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(context.tr('ዕቃ ሰርዝ?', 'Delete Part?')),
+                      content: Text(context.tr('ይህን ዕቃ መሰረዝ እርግጠኛ ነዎት?', 'Are you sure you want to delete this part?')),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(context.tr('ተመለስ', 'Cancel'))),
+                        ElevatedButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: ElevatedButton.styleFrom(backgroundColor: KeraColors.statusError),
+                          child: Text(context.tr('ሰርዝ', 'Delete')),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true && mounted) {
+                    final res = await ref.read(partsRepositoryProvider).deletePart(
+                      ownerId: ref.read(currentOwnerIdProvider),
+                      partId: part.id,
+                    );
+                    if (res.isSuccess && mounted) {
+                      context.showSnackBar(context.tr('ዕቃው ተሰርዟል', 'Part deleted'));
+                      ref.read(inventoryListProvider.notifier).refresh();
+                    }
+                  }
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(value: 'view', child: Text(context.tr('ዝርዝር አሳይ', 'View Details'))),
+                PopupMenuItem(value: 'edit', child: Text(context.tr('አስተካክል', 'Edit'))),
+                PopupMenuItem(value: 'delete', child: Text(context.tr('ሰርዝ', 'Delete'), style: const TextStyle(color: Colors.red))),
               ],
             ),
           ],
