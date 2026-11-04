@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +10,10 @@ import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/design/widgets/confirm_dialog.dart';
 import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
+import '../../../../data/local/app_database.dart';
+import '../../../../data/local/database_provider.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_header_bar.dart';
 
@@ -30,6 +34,16 @@ class AdminOwnerDetailsScreen extends ConsumerStatefulWidget {
 class _AdminOwnerDetailsScreenState
     extends ConsumerState<AdminOwnerDetailsScreen> {
   final DateFormat _dateFormat = DateFormat('d MMM yyyy');
+  int _selectedTab = 0; // 0: Overview, 1: Inventory
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _stockFilter = 'ALL'; // ALL, IN_STOCK, LOW_STOCK, OUT_OF_STOCK
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   String _maskPhone(String phone) {
     if (phone.length < 5) return phone;
@@ -240,26 +254,113 @@ class _AdminOwnerDetailsScreenState
                 // 1. Navy Hero Header matching Owner detail.png
                 _buildNavyDetailHeader(context, owner, initials, isPending, isSuspended),
 
-                // 2. Action Controls & Stats Grid (Owner detail.png)
+                // 2. Segmented Navigation Tabs: Overview vs Inventory
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Action buttons row (Approve / Reset pw / Suspend / Delete)
-                      _buildActionButtons(owner, isPending, isSuspended),
-                      const SizedBox(height: 18),
-
-                      // 4 Stat Tiles (Parts, Sales, Revenue, Profit)
-                      _buildStatTiles(details),
-                      const SizedBox(height: 20),
-
-                      // Recent Sales Activity Card
-                      _buildRecentSalesCard(),
-                      const SizedBox(height: 32),
-                    ],
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedTab = 0),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedTab == 0
+                                    ? (context.isDark ? const Color(0xFF0F172A) : Colors.white)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                context.tr('አጠቃላይ መረጃ', 'Overview'),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedTab == 0
+                                      ? context.textPrimaryColor
+                                      : context.textSecondaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() => _selectedTab = 1);
+                              debugPrint('[Audit] Admin viewed inventory of owner: ${widget.ownerId}');
+                            },
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedTab == 1
+                                    ? (context.isDark ? const Color(0xFF0F172A) : Colors.white)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.inventory_2_outlined,
+                                    size: 16,
+                                    color: _selectedTab == 1
+                                        ? AdminColors.keraOrange
+                                        : context.textSecondaryColor,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    context.tr('የዕቃዎች ክምችት', 'Inventory'),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: _selectedTab == 1
+                                          ? context.textPrimaryColor
+                                          : context.textSecondaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+
+                // 3. Tab Body
+                if (_selectedTab == 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Action buttons row (Approve / Reset pw / Suspend / Delete)
+                        _buildActionButtons(owner, isPending, isSuspended),
+                        const SizedBox(height: 18),
+
+                        // 4 Stat Tiles (Parts, Sales, Revenue, Profit)
+                        _buildStatTiles(details),
+                        const SizedBox(height: 20),
+
+                        // Recent Sales Activity Card
+                        _buildRecentSalesCard(),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  )
+                else
+                  _buildOwnerInventoryTab(owner),
               ],
             ),
           );
@@ -676,19 +777,19 @@ class _AdminOwnerDetailsScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5EBF2)),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'ሽያጭ ታሪክ · Recent sales',
+          Text(
+            context.tr('ሽያጭ ታሪክ · Recent sales', 'Recent Sales Activity'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0C2340),
+              color: context.textPrimaryColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -714,18 +815,18 @@ class _AdminOwnerDetailsScreenState
                       children: [
                         Text(
                           item['title']!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0C2340),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           item['meta']!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF5E6D82),
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ],
@@ -734,8 +835,494 @@ class _AdminOwnerDetailsScreenState
                 ],
               ),
             ),
-            if (item != recentItems.last) const Divider(height: 12, color: Color(0xFFF1F5F9)),
+            if (item != recentItems.last) Divider(height: 12, color: context.borderColor),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusFilterChip(String key, String label) {
+    final isSelected = _stockFilter == key;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      selected: isSelected,
+      selectedColor: AdminColors.keraOrange,
+      labelStyle: TextStyle(color: isSelected ? Colors.white : context.textPrimaryColor),
+      onSelected: (_) => setState(() => _stockFilter = key),
+    );
+  }
+
+  /// Owner's Inventory Tab with Search, Status Filters, Thumbnails & View-only Modal
+  Widget _buildOwnerInventoryTab(dynamic owner) {
+    final db = ref.watch(appDatabaseProvider);
+    final partsStream = db.partsDao.watchActiveParts(widget.ownerId);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // View Only Banner
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: context.isDark ? const Color(0xFF3B2404) : const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AdminColors.keraOrange.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lock_outline_rounded, size: 18, color: AdminColors.keraOrange),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.tr(
+                      'የማየት ፍቃድ ብቻ (View Only) · አስተዳዳሪ ዕቃዎችን ማረም ወይም መሰረዝ አይችልም',
+                      'View Only (Admin Mode) · You cannot edit or delete this owner\'s parts',
+                    ),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: context.isDark ? const Color(0xFFFDBA74) : const Color(0xFF92400E),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Search Field
+          Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: context.cardBg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: context.borderColor),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+              style: TextStyle(fontSize: 13, color: context.textPrimaryColor),
+              decoration: InputDecoration(
+                hintText: context.tr('ዕቃ በስም ወይም በኦሪጅናል ቁጥር (OEM) ፈልግ...', 'Search part by name or OEM #...'),
+                hintStyle: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 16),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Stock Filter Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStatusFilterChip('ALL', context.tr('ሁሉም', 'All')),
+                const SizedBox(width: 8),
+                _buildStatusFilterChip('IN_STOCK', context.tr('በክምችት አለ', 'In Stock')),
+                const SizedBox(width: 8),
+                _buildStatusFilterChip('LOW_STOCK', context.tr('አነስተኛ ክምችት', 'Low Stock')),
+                const SizedBox(width: 8),
+                _buildStatusFilterChip('OUT_OF_STOCK', context.tr('አልቋል', 'Out of Stock')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Parts Stream List
+          StreamBuilder<List<SparePart>>(
+            stream: partsStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              final allParts = snapshot.data ?? [];
+              final filtered = allParts.where((p) {
+                final partName = p.name ?? '';
+                final matchQuery = _searchQuery.isEmpty ||
+                    partName.toLowerCase().contains(_searchQuery) ||
+                    (p.partNumber != null && p.partNumber!.toLowerCase().contains(_searchQuery));
+                if (!matchQuery) return false;
+
+                final qty = p.cachedQuantity ?? 0.0;
+                final threshold = p.lowStockLevel ?? 5.0;
+
+                if (_stockFilter == 'IN_STOCK') {
+                  return qty > threshold;
+                } else if (_stockFilter == 'LOW_STOCK') {
+                  return qty > 0 && qty <= threshold;
+                } else if (_stockFilter == 'OUT_OF_STOCK') {
+                  return qty <= 0;
+                }
+                return true;
+              }).toList();
+
+              if (filtered.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Column(
+                      children: [
+                        Icon(Icons.inventory_2_outlined, size: 48, color: context.textSecondaryColor),
+                        const SizedBox(height: 10),
+                        Text(
+                          context.tr('ምንም መለዋወጫ ዕቃ አልተገኘም', 'No spare parts found'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filtered.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
+                itemBuilder: (context, i) {
+                  final part = filtered[i];
+                  final qty = part.cachedQuantity ?? 0.0;
+                  final threshold = part.lowStockLevel ?? 5.0;
+                  final isOut = qty <= 0;
+                  final isLow = qty > 0 && qty <= threshold;
+
+                  return Material(
+                    color: context.cardBg,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(color: context.borderColor),
+                    ),
+                    child: InkWell(
+                      onTap: () => _showPartDetailModal(context, part),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            // Thumbnail Photo with Placeholder
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: context.borderColor),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: part.photoLocalPath != null &&
+                                      part.photoLocalPath!.isNotEmpty &&
+                                      File(part.photoLocalPath!).existsSync()
+                                  ? Image.file(File(part.photoLocalPath!), fit: BoxFit.cover)
+                                  : Icon(
+                                      Icons.precision_manufacturing_rounded,
+                                      size: 26,
+                                      color: context.textSecondaryColor,
+                                    ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Part Details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    part.name ?? context.tr('ያልተሰየመ መለዋወጫ', 'Unnamed Part'),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.textPrimaryColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${part.partNumber ?? '-'} · ${part.brandId ?? 'OEM'}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: context.textSecondaryColor,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (part.locationId != null && part.locationId!.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${context.tr('ቦታ', 'Loc')}: ${part.locationId}',
+                                      style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+                            // Price & Quantity
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${part.sellingPrice?.toStringAsFixed(0) ?? '-'} ETB',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.textPrimaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isOut
+                                        ? const Color(0xFFFEE2E2)
+                                        : (isLow ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7)),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    isOut
+                                        ? context.tr('አልቋል (0)', 'Out (0)')
+                                        : '${qty.toStringAsFixed(0)} ${context.tr('ፍሬ', 'pcs')}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: isOut
+                                          ? const Color(0xFFDC2626)
+                                          : (isLow ? const Color(0xFFD97706) : const Color(0xFF16A34A)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  /// Full-Screen / Modal Part Detail with Zoomable Photo and Stock History
+  void _showPartDetailModal(BuildContext context, SparePart part) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (_, scrollCtrl) => SingleChildScrollView(
+          controller: scrollCtrl,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: context.borderColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // View Only Badge
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      context.tr('የማየት ፍቃድ ብቻ (View Only)', 'View Only Mode'),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF92400E),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Zoomable Full Photo
+              if (part.photoLocalPath != null &&
+                  part.photoLocalPath!.isNotEmpty &&
+                  File(part.photoLocalPath!).existsSync()) ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    height: 220,
+                    width: double.infinity,
+                    color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                    child: InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 3.5,
+                      child: Image.file(File(part.photoLocalPath!), fit: BoxFit.contain),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    context.tr('ለማሳደግ በሁለት ጣት ይጎትቱ (Pinch to zoom)', 'Pinch to zoom photo'),
+                    style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Part Title and Details
+              Text(
+                part.name ?? context.tr('ያልተሰየመ መለዋወጫ', 'Unnamed Part'),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${context.tr('የኦሪጅናል ቁጥር (OEM)', 'OEM Part #')}: ${part.partNumber ?? '-'}',
+                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
+              ),
+              const SizedBox(height: 16),
+
+              // Specification Grid
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: context.borderColor),
+                ),
+                child: Column(
+                  children: [
+                    _buildModalSpecRow(context.tr('ብራንድ', 'Brand'), part.brandId ?? 'OEM'),
+                    _buildModalSpecRow(context.tr('ምድብ', 'Category'), part.categoryId ?? '-'),
+                    _buildModalSpecRow(context.tr('የመደርደሪያ ቦታ', 'Location'), part.locationId ?? '-'),
+                    _buildModalSpecRow(context.tr('የመሸጫ ዋጋ', 'Selling Price'), '${part.sellingPrice?.toStringAsFixed(0) ?? '-'} ETB'),
+                    if (part.purchasePrice != null)
+                      _buildModalSpecRow(context.tr('የግዢ ዋጋ', 'Cost Price'), '${part.purchasePrice!.toStringAsFixed(0)} ETB'),
+                    _buildModalSpecRow(context.tr('የአሁን ክምችት', 'Current Stock'), '${(part.cachedQuantity ?? 0.0).toStringAsFixed(0)} pcs'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Stock Movements History
+              Text(
+                context.tr('የክምችት ዝውውር ታሪክ · Stock Movement History', 'Stock Movement History'),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 10),
+              StreamBuilder<List<StockMovement>>(
+                stream: ref.watch(appDatabaseProvider).stockDao.watchMovementsForPart(part.id, widget.ownerId),
+                builder: (context, mvSnapshot) {
+                  final movements = mvSnapshot.data ?? [];
+                  if (movements.isEmpty) {
+                    return Text(
+                      context.tr('ምንም የዝውውር ታሪክ አልተገኘም', 'No stock movement records'),
+                      style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                    );
+                  }
+                  return Column(
+                    children: movements.take(5).map((m) {
+                      final isPositive = m.quantityChange > 0;
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          isPositive ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
+                          color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                        ),
+                        title: Text(
+                          m.type.name.toUpperCase(),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: context.textPrimaryColor),
+                        ),
+                        subtitle: Text(
+                          _dateFormat.format(m.movedAt),
+                          style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                        ),
+                        trailing: Text(
+                          '${isPositive ? '+' : ''}${m.quantityChange.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModalSpecRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 12, color: context.textSecondaryColor)),
+          Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textPrimaryColor)),
         ],
       ),
     );

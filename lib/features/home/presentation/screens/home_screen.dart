@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../dashboard/presentation/screens/business_dashboard_screen.dart';
 import '../../../parts/presentation/screens/inventory_screen.dart';
@@ -10,7 +10,7 @@ import '../../../sales/presentation/screens/sales_list_tab.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 
 /// Main container screen with bottom navigation for Dashboard, Inventory, Sales, Reports, and Settings.
-/// Faithfully updated to match Owner App designs.
+/// Supports dark mode and live bilingual (Amharic/English) translation.
 class HomeScreen extends ConsumerStatefulWidget {
   final int initialIndex;
 
@@ -34,10 +34,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final activeIconColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0C2340);
+    final inactiveIconColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF5E6D82);
+
     final tabs = [
       BusinessDashboardScreen(
         onSwitchToInventory: () => setState(() => _currentIndex = 1),
         onSwitchToSales: () => setState(() => _currentIndex = 2),
+        onSwitchToReports: () => setState(() => _currentIndex = 3),
       ),
       const InventoryScreen(),
       const SalesListTab(),
@@ -46,7 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: AdminColors.background,
+      backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
           const NeedsLoginBanner(),
@@ -62,45 +67,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
+        decoration: BoxDecoration(
+          color: context.cardBg,
           border: Border(
-            top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+            top: BorderSide(color: context.borderColor, width: 1.0),
           ),
         ),
         child: NavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: context.cardBg,
           surfaceTintColor: Colors.transparent,
-          indicatorColor: const Color(0xFF0C2340).withValues(alpha: 0.12),
+          indicatorColor: activeIconColor.withValues(alpha: 0.15),
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) {
             setState(() => _currentIndex = index);
           },
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined, color: Color(0xFF5E6D82)),
-              selectedIcon: Icon(Icons.home_rounded, color: Color(0xFF0C2340)),
-              label: 'ዳሽቦርድ',
+              icon: Icon(Icons.home_outlined, color: inactiveIconColor),
+              selectedIcon: Icon(Icons.home_rounded, color: activeIconColor),
+              label: context.tr('ዳሽቦርድ', 'Dashboard'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.inventory_2_outlined, color: Color(0xFF5E6D82)),
-              selectedIcon: Icon(Icons.inventory_2_rounded, color: Color(0xFF0C2340)),
-              label: 'ዕቃዎች',
+              icon: Icon(Icons.inventory_2_outlined, color: inactiveIconColor),
+              selectedIcon: Icon(Icons.inventory_2_rounded, color: activeIconColor),
+              label: context.tr('ዕቃዎች', 'Inventory'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined, color: Color(0xFF5E6D82)),
-              selectedIcon: Icon(Icons.receipt_long_rounded, color: Color(0xFF0C2340)),
-              label: 'ሽያጭ',
+              icon: Icon(Icons.receipt_long_outlined, color: inactiveIconColor),
+              selectedIcon: Icon(Icons.receipt_long_rounded, color: activeIconColor),
+              label: context.tr('ሽያጭ', 'Sales'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.bar_chart_outlined, color: Color(0xFF5E6D82)),
-              selectedIcon: Icon(Icons.bar_chart_rounded, color: Color(0xFF0C2340)),
-              label: 'ሪፖርት',
+              icon: Icon(Icons.bar_chart_outlined, color: inactiveIconColor),
+              selectedIcon: Icon(Icons.bar_chart_rounded, color: activeIconColor),
+              label: context.tr('ሪፖርት', 'Reports'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.settings_outlined, color: Color(0xFF5E6D82)),
-              selectedIcon: Icon(Icons.settings_rounded, color: Color(0xFF0C2340)),
-              label: 'ቅንብር',
+              icon: Icon(Icons.settings_outlined, color: inactiveIconColor),
+              selectedIcon: Icon(Icons.settings_rounded, color: activeIconColor),
+              label: context.tr('ቅንብር', 'Settings'),
             ),
           ],
         ),

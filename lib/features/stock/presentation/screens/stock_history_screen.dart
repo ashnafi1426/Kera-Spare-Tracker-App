@@ -71,9 +71,9 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
 
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: KeraColors.primaryNavy,
+        backgroundColor: context.isDark ? const Color(0xFF071322) : KeraColors.primaryNavy,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Column(
@@ -115,7 +115,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  'የተገናኘ',
+                  context.tr('የተገናኘ', 'Synced'),
                   style: KeraTypography.labelSmall(
                     color: const Color(0xFF89F5E7),
                   ).copyWith(fontWeight: FontWeight.w600),
@@ -156,10 +156,10 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                 width: double.infinity,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: const BoxDecoration(
-                  color: KeraColors.surfacePure,
+                decoration: BoxDecoration(
+                  color: context.cardBg,
                   border: Border(
-                    bottom: BorderSide(color: KeraColors.outlineBorder),
+                    bottom: BorderSide(color: context.borderColor),
                   ),
                 ),
                 child: Row(
@@ -168,9 +168,9 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: KeraColors.surfaceContainer,
+                        color: context.isDark ? const Color(0xFF132238) : KeraColors.surfaceContainer,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: KeraColors.outlineBorder),
+                        border: Border.all(color: context.borderColor),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: hasPhoto
@@ -343,7 +343,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                   children: [
                     // Horizontal Filter Chips Row (Stitch Screen 24)
                     Container(
-                      color: KeraColors.surfacePure,
+                      color: context.cardBg,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
                       child: SingleChildScrollView(
@@ -351,7 +351,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                         child: Row(
                           children: [
                             _buildFilterChip(
-                              label: 'ሁሉም (All)',
+                              label: context.tr('ሁሉም', 'All'),
                               count: movements.length,
                               isSelected: _selectedFilterType == null,
                               onTap: () => setState(
@@ -359,7 +359,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                             ),
                             const SizedBox(width: 8),
                             _buildFilterChip(
-                              label: 'የገቡ (+Restock)',
+                              label: context.tr('የገቡ', 'Restock'),
                               count: purchaseCount,
                               isSelected: _selectedFilterType ==
                                   MovementType.purchase,
@@ -369,7 +369,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                             ),
                             const SizedBox(width: 8),
                             _buildFilterChip(
-                              label: 'የተሸጡ (-Sales)',
+                              label: context.tr('የተሸጡ', 'Sales'),
                               count: saleCount,
                               isSelected:
                                   _selectedFilterType == MovementType.sale,
@@ -378,7 +378,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                             ),
                             const SizedBox(width: 8),
                             _buildFilterChip(
-                              label: 'ማስተካከያ (Adj)',
+                              label: context.tr('ማስተካከያ', 'Adjustment'),
                               count: adjCount,
                               isSelected: _selectedFilterType ==
                                   MovementType.adjustment,
@@ -389,7 +389,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                             if (retCount > 0) ...[
                               const SizedBox(width: 8),
                               _buildFilterChip(
-                                label: 'ተመላሽ (Return)',
+                                label: context.tr('ተመላሽ', 'Return'),
                                 count: retCount,
                                 isSelected: _selectedFilterType ==
                                     MovementType.returned,
@@ -431,7 +431,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                           bottom: 0,
                                           child: Container(
                                             width: 2,
-                                            color: KeraColors.outlineVariant,
+                                            color: context.isDark ? Colors.white24 : KeraColors.outlineVariant,
                                           ),
                                         ),
                                       // Node bullet
@@ -440,7 +440,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                         height: 14,
                                         margin: const EdgeInsets.only(top: 14),
                                         decoration: BoxDecoration(
-                                          color: KeraColors.surfacePure,
+                                          color: context.cardBg,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: _getBulletColor(item.type),
@@ -470,10 +470,10 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                     margin: const EdgeInsets.only(bottom: 12),
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: KeraColors.surfacePure,
+                                      color: context.cardBg,
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                          color: KeraColors.outlineBorder),
+                                          color: context.borderColor),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Color(0x08172B4D),
@@ -506,7 +506,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                   style: KeraTypography
                                                       .titleSmall(
                                                     color:
-                                                        KeraColors.textPrimary,
+                                                        context.textPrimaryColor,
                                                   ).copyWith(
                                                       fontWeight:
                                                           FontWeight.w700),
@@ -514,11 +514,11 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                 if (item.unitCost != null) ...[
                                                   const SizedBox(width: 6),
                                                   Text(
-                                                    '(@ ${item.unitCost!.toStringAsFixed(2)} ብር)',
+                                                    '(@ ${item.unitCost!.toStringAsFixed(2)} ETB)',
                                                     style: KeraTypography
                                                         .bodySmall(
-                                                      color: KeraColors
-                                                          .textSecondary,
+                                                      color: context
+                                                          .textSecondaryColor,
                                                     ),
                                                   ),
                                                 ],
@@ -534,8 +534,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                 color: isPositive
                                                     ? KeraColors.stockInBg
                                                     : isNeutral
-                                                        ? KeraColors
-                                                            .surfaceContainer
+                                                        ? (context.isDark ? const Color(0xFF132238) : KeraColors.surfaceContainer)
                                                         : KeraColors.stockOutBg,
                                                 borderRadius:
                                                     BorderRadius.circular(6),
@@ -548,8 +547,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                   color: isPositive
                                                       ? KeraColors.stockInText
                                                       : isNeutral
-                                                          ? KeraColors
-                                                              .textSecondary
+                                                          ? context.textSecondaryColor
                                                           : KeraColors
                                                               .stockOutText,
                                                 ),
@@ -565,7 +563,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                           Text(
                                             item.note!,
                                             style: KeraTypography.bodySmall(
-                                              color: KeraColors.textPrimary,
+                                              color: context.textPrimaryColor,
                                             ),
                                           ),
                                         ],
@@ -618,8 +616,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                         horizontal: 8,
                                                         vertical: 2),
                                                 decoration: BoxDecoration(
-                                                  color: KeraColors
-                                                      .surfaceContainer,
+                                                  color: context.isDark ? const Color(0xFF132238) : KeraColors.surfaceContainer,
                                                   borderRadius:
                                                       BorderRadius.circular(6),
                                                 ),
@@ -627,8 +624,8 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                                   '${l10n.runningBalance}: ${item.runningBalance!.toStringAsFixed(1)}',
                                                   style: KeraTypography
                                                       .labelSmall(
-                                                    color: KeraColors
-                                                        .textSecondary,
+                                                    color: context
+                                                        .textSecondaryColor,
                                                   ).copyWith(
                                                       fontWeight:
                                                           FontWeight.w700),
@@ -670,13 +667,13 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? KeraColors.primaryNavy
-              : KeraColors.surfaceContainer,
+              ? const Color(0xFFF7941D)
+              : (context.isDark ? const Color(0xFF132238) : KeraColors.surfaceContainer),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? KeraColors.primaryNavy
-                : KeraColors.outlineBorder,
+                ? const Color(0xFFF7941D)
+                : context.borderColor,
           ),
         ),
         child: Row(
@@ -687,7 +684,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : KeraColors.textPrimary,
+                color: isSelected ? Colors.white : context.textPrimaryColor,
               ),
             ),
             const SizedBox(width: 5),
@@ -696,7 +693,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.25)
-                    : KeraColors.surfacePure,
+                    : (context.isDark ? const Color(0xFF1E385C) : Colors.white),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -704,7 +701,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: isSelected ? Colors.white : KeraColors.textSecondary,
+                  color: isSelected ? Colors.white : context.textSecondaryColor,
                 ),
               ),
             ),

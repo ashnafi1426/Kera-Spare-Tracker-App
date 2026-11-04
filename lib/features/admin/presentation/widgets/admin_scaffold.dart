@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
@@ -206,41 +207,46 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
             ),
           )
         : Scaffold(
-            backgroundColor: AdminColors.background,
+            backgroundColor: context.scaffoldBg,
             body: widget.child,
             bottomNavigationBar: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: context.cardBg,
                 border: Border(
-                  top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                  top: BorderSide(color: context.borderColor, width: 1.0),
                 ),
               ),
               child: NavigationBar(
-                backgroundColor: Colors.white,
+                backgroundColor: context.cardBg,
                 surfaceTintColor: Colors.transparent,
-                indicatorColor: const Color(0xFF1E3557).withValues(alpha: 0.12),
+                indicatorColor: (context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy)
+                    .withValues(alpha: 0.15),
                 selectedIndex: selectedIndex > 3 ? 3 : selectedIndex,
                 onDestinationSelected: (idx) => _onDestinationSelected(context, idx),
-                destinations: const [
+                destinations: [
                   NavigationDestination(
-                    icon: Icon(Icons.home_outlined, color: AdminColors.lightTextSecondary),
-                    selectedIcon: Icon(Icons.home_rounded, color: AdminColors.headerNavy),
-                    label: 'ዳሽቦርድ',
+                    icon: Icon(Icons.home_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.home_rounded,
+                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
+                    label: context.tr('ዳሽቦርድ', 'Dashboard'),
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.people_outline_rounded, color: AdminColors.lightTextSecondary),
-                    selectedIcon: Icon(Icons.people_alt_rounded, color: AdminColors.headerNavy),
-                    label: 'ባለቤቶች',
+                    icon: Icon(Icons.people_outline_rounded, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.people_alt_rounded,
+                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
+                    label: context.tr('ባለቤቶች', 'Owners'),
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.sell_outlined, color: AdminColors.lightTextSecondary),
-                    selectedIcon: Icon(Icons.sell_rounded, color: AdminColors.headerNavy),
-                    label: 'ብራንዶች',
+                    icon: Icon(Icons.sell_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.sell_rounded,
+                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
+                    label: context.tr('ብራንዶች', 'Brands'),
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.wb_sunny_outlined, color: AdminColors.lightTextSecondary),
-                    selectedIcon: Icon(Icons.wb_sunny_rounded, color: AdminColors.headerNavy),
-                    label: 'ቅንብሮች',
+                    icon: Icon(Icons.settings_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.settings_rounded,
+                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
+                    label: context.tr('ቅንብሮች', 'Settings'),
                   ),
                 ],
               ),

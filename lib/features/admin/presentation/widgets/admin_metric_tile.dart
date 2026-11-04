@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/context_extensions.dart';
 
 /// Reusable metric card matching Dashboard.png and reports screens.
 class AdminMetricTile extends StatelessWidget {
@@ -24,6 +25,7 @@ class AdminMetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectiveBadgeColor = badgeColor ?? const Color(0xFF10B981);
+    final isDark = context.isDark;
 
     return InkWell(
       onTap: onTap,
@@ -31,14 +33,14 @@ class AdminMetricTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE5EBF2), width: 1.0),
-          boxShadow: const [
+          border: Border.all(color: context.borderColor, width: 1.0),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x060C2340),
+              color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
               blurRadius: 10,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -55,7 +57,7 @@ class AdminMetricTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3E6),
+                    color: isDark ? const Color(0xFF451A03) : const Color(0xFFFFF3E6),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -90,24 +92,24 @@ class AdminMetricTile extends StatelessWidget {
             // Number value
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0C2340),
+                color: context.textPrimaryColor,
                 letterSpacing: -0.5,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
-            // Bilingual label
+            // Subtitle label
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF5E6D82),
+                color: context.textSecondaryColor,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -118,4 +120,3 @@ class AdminMetricTile extends StatelessWidget {
     );
   }
 }
-

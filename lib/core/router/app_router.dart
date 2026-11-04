@@ -18,7 +18,9 @@ import '../../features/admin/presentation/screens/admin_sync_monitor_screen.dart
 import '../../features/admin/presentation/widgets/admin_scaffold.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/change_password_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/pending_approval_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -26,6 +28,7 @@ import '../../features/notifications/presentation/screens/notification_center_sc
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
+import '../../features/reports/presentation/screens/reports_screen.dart';
 import '../../features/sales/presentation/screens/new_sale_screen.dart';
 import '../../features/sales/presentation/screens/sale_details_screen.dart';
 import '../../features/sales/presentation/screens/sale_success_screen.dart';
@@ -83,8 +86,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       final user = authState.value;
       final isAuthenticated = user != null;
-      final isAuthRoute =
-          location == '/login' || location == '/register' || location == '/welcome';
+      final isAuthRoute = location == '/login' ||
+          location == '/register' ||
+          location == '/welcome' ||
+          location == '/forgot-password' ||
+          location == '/pending-approval';
 
       // Unauthenticated users are redirected to /login
       if (!isAuthenticated) {
@@ -153,6 +159,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/pending-approval',
+        name: 'pending-approval',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return PendingApprovalScreen(
+            businessName: extra?['businessName'] as String?,
+            phoneNumber: extra?['phoneNumber'] as String?,
+          );
+        },
+      ),
+      GoRoute(
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
@@ -161,6 +183,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/reports',
+        name: 'reports',
+        builder: (context, state) => const ReportsScreen(),
       ),
       GoRoute(
         path: '/initial-sync',

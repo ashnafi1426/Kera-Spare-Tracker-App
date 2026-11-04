@@ -13,9 +13,11 @@ import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
+import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../../sync/data/services/sync_push_service.dart';
 import '../../data/services/export_backup_service.dart';
 import '../providers/business_profile_provider.dart';
+import '../widgets/profile_photo_avatar.dart';
 
 /// Comprehensive Settings and Administration screen adhering to Google Stitch Screen 1.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -111,40 +113,76 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(width: 6),
 
-          // Network Sync Status Pill
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(20),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withAlpha(40)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
+          // Network Sync Status Pill (tap to sync independently anytime)
+          Tooltip(
+            message: isSynced
+                ? context.tr('ሁሉም መረጃዎች የተመሳሰሉ ናቸው', 'All data is synced')
+                : context.tr('አሁን ለማመሳሰል ይጫኑ', 'Tap to sync now'),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () async {
+                  context.showSnackBar(
+                    context.tr('ማመሳሰል ተጀምሯል...', 'Syncing with server...'),
+                  );
+                  final syncRes = await ref
+                      .read(syncPushServiceProvider)
+                      .pushPendingQueue();
+                  if (!context.mounted) return;
+                  if (syncRes.isSuccess) {
+                    final count = syncRes.valueOrNull ?? 0;
+                    context.showSnackBar(
+                      count > 0
+                          ? context.tr('$count መረጃዎች በተሳካ ሁኔታ ተመሳስለዋል', '$count items synced successfully')
+                          : context.tr('ሁሉም መረጃዎች የተመሳሰሉ ናቸው', 'All data is fully synced'),
+                    );
+                  } else {
+                    context.showSnackBar(
+                      context.tr(
+                        'ማመሳሰል አልተሳካም: ${syncRes.failureOrNull?.message ?? ""}',
+                        'Sync failed: ${syncRes.failureOrNull?.message ?? ""}',
+                      ),
+                      isError: true,
+                    );
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSynced ? KeraColors.stockInText : KeraColors.warning,
+                    color: Colors.white.withAlpha(20),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withAlpha(40)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isSynced ? KeraColors.stockInText : KeraColors.warning,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isSynced
+                            ? context.tr('የተገናኘ', 'Synced')
+                            : '$pendingCount ${context.tr("በመጠባበቅ ላይ", "pending")}',
+                        style: KeraTypography.labelSmall(color: Colors.white),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.sync_rounded,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  isSynced
-                      ? context.tr('የተገናኘ', 'Synced')
-                      : '$pendingCount ${context.tr("በመጠባበቅ ላይ", "pending")}',
-                  style: KeraTypography.labelSmall(color: Colors.white),
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.sync_rounded,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -241,6 +279,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: KeraSpacing.lg),
+
+              // Section 1b: App Lock & PIN
+              _buildSectionHeader(
+                icon: Icons.security_rounded,
+                title: context.tr('የመተግበሪያ ቁልፍ / App Lock', 'App Lock & PIN Security'),
+              ),
+              const SizedBox(height: 6),
+              const AppLockSettingsCard(),
 
               const SizedBox(height: KeraSpacing.lg),
 
@@ -864,32 +912,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Business Avatar
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const KeraLogoWidget(size: 56, borderRadius: 12),
-              Positioned(
-                bottom: -4,
-                right: -4,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: KeraColors.actionBlue,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Colors.white,
-                    size: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Business Avatar with Photo Upload
+          const ProfilePhotoAvatar(radius: 28),
           const SizedBox(width: KeraSpacing.md),
           // Info Block
           Expanded(
@@ -1420,38 +1444,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     // CASE 2: Has pending changes and phone is ONLINE
     if (precheck.isOnline) {
-      final confirmed = await showDialog<bool>(
+      final choice = await showDialog<String>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l10n.logoutPendingOnlineTitle),
           content: Text(l10n.logoutPendingOnlineMessage(precheck.pendingCount)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
+              onPressed: () => Navigator.pop(ctx, 'cancel'),
               child: Text(l10n.cancel),
+            ),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: KeraColors.error,
+                side: const BorderSide(color: KeraColors.error),
+              ),
+              onPressed: () => Navigator.pop(ctx, 'direct_logout'),
+              child: Text(context.tr('ቀጥታ ውጣ', 'Sign Out Directly')),
             ),
             ElevatedButton.icon(
               icon: const Icon(Icons.sync_rounded),
               label: Text(l10n.syncNowAndLogout),
-              onPressed: () => Navigator.pop(ctx, true),
+              onPressed: () => Navigator.pop(ctx, 'sync_and_logout'),
             ),
           ],
         ),
       );
 
-      if (confirmed == true && context.mounted) {
+      if (choice == 'direct_logout' && context.mounted) {
+        await ref.read(authControllerProvider.notifier).logout();
+        return;
+      }
+
+      if (choice == 'sync_and_logout' && context.mounted) {
         context.showSnackBar(l10n.syncStatusSyncing);
         final result = await ref
             .read(authControllerProvider.notifier)
             .performSyncAndLogout();
 
         if (context.mounted && result.isFailure) {
-          context.showSnackBar(
-            l10n.syncFailedLogoutCancelled(
-              result.failureOrNull?.message ?? 'Sync failed',
+          // If sync fails (e.g. token expired, server unreachable), offer direct sign out so user is never trapped!
+          final proceedDirectly = await showDialog<bool>(
+            context: context,
+            builder: (failCtx) => AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: KeraColors.error),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(context.tr('ማመሳሰል አልተሳካም', 'Sync Failed'))),
+                ],
+              ),
+              content: Text(
+                context.tr(
+                  'ማመሳሰል አልተሳካም: ${result.failureOrNull?.message ?? ""}\n\nአሁን ቀጥታ ከአካውንት መውጣት ይፈልጋሉ?',
+                  'Sync failed: ${result.failureOrNull?.message ?? ""}\n\nDo you want to sign out directly anyway?',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(failCtx, false),
+                  child: Text(l10n.cancel),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: KeraColors.error,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(failCtx, true),
+                  child: Text(context.tr('ቀጥታ ውጣ', 'Sign Out Directly')),
+                ),
+              ],
             ),
-            isError: true,
           );
+
+          if (proceedDirectly == true && context.mounted) {
+            await ref.read(authControllerProvider.notifier).logout();
+          } else if (context.mounted) {
+            context.showSnackBar(
+              l10n.syncFailedLogoutCancelled(
+                result.failureOrNull?.message ?? 'Sync failed',
+              ),
+              isError: true,
+            );
+          }
         }
       }
       return;

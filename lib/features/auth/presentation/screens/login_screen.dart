@@ -5,16 +5,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_button.dart';
 import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/services/app_lock_service.dart';
 import '../../../../core/services/session_store.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../../data/local/database_provider.dart';
 import '../../data/repositories/api_auth_repository.dart';
@@ -38,6 +40,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _isOfflineError = false;
   String? _errorMessage;
+  int _failedAttempts = 0;
+  DateTime? _lockoutUntil;
 
   @override
   void dispose() {
@@ -47,6 +51,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin({bool forceDiscardUnsynced = false}) async {
+    if (_lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!)) {
+      final remaining = _lockoutUntil!.difference(DateTime.now()).inSeconds;
+      setState(() {
+        _errorMessage = context.tr(
+          'ተከታታይ የተሳሳተ ሙከራዎች ምክንያት ለ $remaining ሰከንድ ታግዷል',
+          'Too many failed attempts. Try again in ${remaining}s',
+        );
+      });
+      return;
+    }
     setState(() {
       _errorMessage = null;
       _isOfflineError = false;
@@ -67,6 +81,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     await result.when(
       onSuccess: (user) async {
+        _failedAttempts = 0;
+        _lockoutUntil = null;
+        final lockService = ref.read(appLockServiceProvider);
+        if (lockService.state.isEnabled) {
+          lockService.lockApp();
+        }
         if (user.mustChangePassword) {
           context.go('/change-password');
         } else if (user.isAdmin) {
@@ -150,6 +170,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           return;
         }
 
+        _failedAttempts++;
+        if (_failedAttempts >= 5) {
+          _lockoutUntil = DateTime.now().add(const Duration(seconds: 60));
+          setState(() {
+            _errorMessage = context.tr(
+              'ተከታታይ 5 የተሳሳቱ ሙከራዎች! እባክዎ ለ 60 ሰከንዶች ይጠብቁ።',
+              '5 consecutive failed login attempts! Temporary lockout for 60 seconds.',
+            );
+          });
+          return;
+        }
+
         String msg;
         switch (failure.code) {
           case 'INVALID_CREDENTIALS':
@@ -172,7 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
           // Top System Anchor Banner (Stitch Screen 3 Header)
@@ -222,10 +254,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  /// Stitch Header: Navy top bar with Storefront brand and Hub Status pill
+  /// Top bar with brand and language switch
   Widget _buildTopBanner(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
-      color: KeraColors.primaryNavy,
+      color: isDark ? const Color(0xFF071322) : KeraColors.primaryNavy,
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -233,12 +266,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: const EdgeInsets.symmetric(horizontal: KeraSpacing.md),
           child: Row(
             children: [
-              const Icon(
-                Icons.storefront_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 6),
+              const KeraLogoWidget(size: 28, borderRadius: 6),
+              const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'ኬራ ስፔር / Kera Spare',
@@ -251,7 +280,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               ),
-              // Server settings quick icon
               IconButton(
                 icon: const Icon(
                   Icons.settings_ethernet_rounded,
@@ -264,7 +292,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: () => _showServerConfigDialog(context),
               ),
               const SizedBox(width: 8),
-              // Language switcher
               const LanguageSegmentedSwitch(),
             ],
           ),
@@ -273,61 +300,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  /// Screen Intent Title Cluster matching Stitch
+  /// Screen Intent Title Cluster
   Widget _buildHeaderCluster(BuildContext context) {
-    final l10n = context.l10n;
-
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: KeraColors.actionBlueTint,
-                borderRadius: BorderRadius.circular(KeraRadii.md),
-              ),
-              child: const Icon(
-                Icons.lock_open_rounded,
-                color: KeraColors.actionBlue,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: KeraSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.loginTitle,
-                    style: KeraTypography.headlineSmall(color: KeraColors.textPrimary).copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    l10n.loginSubtitle,
-                    style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        const SizedBox(height: 12),
+        const Center(
+          child: KeraLogoWidget(size: 64, borderRadius: 16),
         ),
-        const SizedBox(height: KeraSpacing.xs),
-        Container(
-          margin: const EdgeInsets.only(top: 4),
-          padding: const EdgeInsets.only(left: KeraSpacing.sm),
-          decoration: const BoxDecoration(
-            border: Border(
-              left: BorderSide(color: KeraColors.actionBlue, width: 2.5),
-            ),
+        const SizedBox(height: 14),
+        Text(
+          context.tr('እንኳን ደህና መጡ', 'Welcome to Kera Spare'),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: context.textPrimaryColor,
           ),
-          child: Text(
-            'የስልክ ቁጥርዎን እና የይለፍ ቃልዎን በማስገባት የእለት ስራዎን ይጀምሩ።',
-            style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          context.tr(
+            'የስልክ ቁጥርዎን እና የይለፍ ቃልዎን በማስገባት ይግቡ',
+            'Sign in with your phone and password to continue',
           ),
+          style: TextStyle(
+            fontSize: 13,
+            color: context.textSecondaryColor,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -586,24 +587,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () => context.go('/change-password'),
+                  onPressed: () => context.push('/forgot-password'),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    foregroundColor: KeraColors.actionBlue,
+                    foregroundColor: AdminColors.keraOrange,
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                   ),
-                  child: const Text('የይለፍ ቃል ረሱ? (Forgot?)'),
+                  child: Text(
+                    context.tr('የይለፍ ቃል ረሱ?', 'Forgot password?'),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: KeraSpacing.md),
 
-            // Primary Login CTA Button
-            KeraButton.primary(
-              label: l10n.login,
-              icon: Icons.arrow_forward_rounded,
-              isLoading: _isLoading,
-              onPressed: _handleLogin,
+            // Large Orange Login Button
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _handleLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AdminColors.keraOrange,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AdminColors.keraOrange.withValues(alpha: 0.5),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KeraRadii.md),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            context.tr('ይግቡ', 'Login'),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Offline Login Hint
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: context.borderColor),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.offline_bolt_outlined, size: 16, color: AdminColors.keraOrange),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      context.tr(
+                        'ከመጀመሪያው ምዝገባ በኋላ ያለ ኢንተርኔት መግባት ይችላሉ።',
+                        'You can log in offline after the first sign-in.',
+                      ),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: context.textSecondaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Admin Shortcut (Debug Mode)
@@ -730,10 +797,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         horizontal: KeraSpacing.lg,
         vertical: KeraSpacing.md,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: context.cardBg,
         border: Border(
-          top: BorderSide(color: KeraColors.borderOpaque),
+          top: BorderSide(color: context.borderColor),
         ),
       ),
       child: Column(
@@ -786,10 +853,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
-                'Kera Spare OS v2.4.1 • Addis Ababa Retail Grid',
-                style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                  fontSize: 10,
+              Flexible(
+                child: Text(
+                  'Kera Spare OS v2.4.1 • Addis Ababa Retail Grid',
+                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

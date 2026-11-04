@@ -155,6 +155,19 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     }
     return result;
   }
+
+  /// Updates the profile photo path locally and in session state.
+  Future<void> updateProfilePhoto(String? photoPath) async {
+    final current = state.value;
+    if (current != null) {
+      final updated = current.copyWith(avatarUrl: photoPath);
+      state = AsyncValue.data(updated);
+      final repo = _repo;
+      if (repo is ApiAuthRepository) {
+        await repo.sessionStore.updateUserProfile(updated.toJson());
+      }
+    }
+  }
 }
 
 /// Provider exposing AuthController and the current AuthUser.

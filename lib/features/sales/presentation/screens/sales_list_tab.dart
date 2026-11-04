@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
 import '../providers/sales_providers.dart';
@@ -46,7 +48,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
             start: now.subtract(const Duration(days: 7)),
             end: now,
           ),
-      helpText: 'ቀን ምረጥ / Select Date Range',
+      helpText: context.tr('ቀን ምረጥ', 'Select Date Range'),
     );
 
     if (picked != null) {
@@ -59,24 +61,25 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     final authUser = ref.watch(authControllerProvider).value;
-    final businessName = authUser?.businessName ?? 'ተስፋዬ እና ልጆቹ';
+    final businessName = authUser?.businessName ?? context.tr('ተስፋዬ እና ልጆቹ', 'Tesfaye & Sons');
     final selectedFilter = ref.watch(salesHistoryDateFilterProvider);
     final dayGroupsAsync = ref.watch(salesDayGroupsProvider);
     final timeFormat = DateFormat('hh:mm a');
     final dayHeaderFormat = DateFormat('EEEE, MMM d, yyyy');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
+      backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'sales_history_fab',
         backgroundColor: const Color(0xFFF58220),
         foregroundColor: Colors.white,
         elevation: 3,
         icon: const Icon(Icons.add_rounded, size: 22),
-        label: const Text(
-          'ሽያጭ መመዝገብ',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        label: Text(
+          context.tr('ሽያጭ መመዝገብ', 'Record Sale'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         onPressed: () => context.push('/sales/new'),
       ),
@@ -86,7 +89,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
           children: [
             // 1. Navy Industrial App Header (5 Sales history.png)
             Container(
-              color: const Color(0xFF0C2340),
+              color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 8,
                 bottom: 16,
@@ -96,7 +99,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top Row: Logo + Store Name + Subtitle
+                  // Top Row: Logo + Store Name + Subtitle + Controls
                   Row(
                     children: [
                       Container(
@@ -133,9 +136,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const Text(
-                              'ከራ · Kera Spare Tracker',
-                              style: TextStyle(
+                            Text(
+                              context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker'),
+                              style: const TextStyle(
                                 color: Color(0xFFA5B4CB),
                                 fontSize: 12,
                               ),
@@ -143,6 +146,10 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                           ],
                         ),
                       ),
+                      const SizedBox(width: 6),
+                      const OwnerThemeToggle(),
+                      const SizedBox(width: 6),
+                      const OwnerLanguageToggle(),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -151,9 +158,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'ሽያጭ',
-                        style: TextStyle(
+                      Text(
+                        context.tr('ሽያጭ', 'Sales History'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -161,7 +168,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                       ),
                       InkWell(
                         onTap: () {
-                          context.showSnackBar('የሽያጭ ሪፖርት ወደ ውጭ በመላክ ላይ...');
+                          context.showSnackBar(context.tr('የሽያጭ ሪፖርት ወደ ውጭ በመላክ ላይ...', 'Exporting sales report...'));
                         },
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
@@ -170,14 +177,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             border: Border.all(color: Colors.white54),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.download_rounded, color: Colors.white, size: 16),
-                              SizedBox(width: 4),
+                              const Icon(Icons.download_rounded, color: Colors.white, size: 16),
+                              const SizedBox(width: 4),
                               Text(
-                                'ወደ ውጭ ላክ',
-                                style: TextStyle(
+                                context.tr('ወደ ውጭ ላክ', 'Export'),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -195,8 +202,11 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   Container(
                     height: 46,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x14000000),
@@ -207,14 +217,17 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+                      style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'በዕቃ ወይም በቀን ፈልግ...',
-                        hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
-                        prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 20),
+                        hintText: context.tr('በዕቃ ወይም በቀን ፈልግ...', 'Search by part or date...'),
+                        hintStyle: TextStyle(
+                          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(Icons.search_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
+                                icon: Icon(Icons.clear_rounded, size: 18, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                 onPressed: () {
                                   _searchController.clear();
                                   ref.read(salesHistorySearchQueryProvider.notifier).setQuery('');
@@ -243,7 +256,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 child: Row(
                   children: [
                     _buildFilterPill(
-                      label: 'ዛሬ',
+                      label: context.tr('ዛሬ', 'Today'),
                       isSelected: selectedFilter == DateRangeType.today,
                       onTap: () => ref
                           .read(salesHistoryDateFilterProvider.notifier)
@@ -251,7 +264,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     ),
                     const SizedBox(width: 8),
                     _buildFilterPill(
-                      label: 'ይህ ሳምንት',
+                      label: context.tr('ይህ ሳምንት', 'This Week'),
                       isSelected: selectedFilter == DateRangeType.thisWeek,
                       onTap: () => ref
                           .read(salesHistoryDateFilterProvider.notifier)
@@ -259,7 +272,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                     ),
                     const SizedBox(width: 8),
                     _buildFilterPill(
-                      label: 'ይህ ወር',
+                      label: context.tr('ይህ ወር', 'This Month'),
                       isSelected: selectedFilter == DateRangeType.thisMonth,
                       onTap: () => ref
                           .read(salesHistoryDateFilterProvider.notifier)
@@ -270,7 +283,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                       label: selectedFilter == DateRangeType.custom &&
                               ref.watch(salesHistoryCustomRangeProvider) != null
                           ? '${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.start)} - ${DateFormat('MM/dd').format(ref.watch(salesHistoryCustomRangeProvider)!.end)}'
-                          : 'ቀን ምረጥ',
+                          : context.tr('ቀን ምረጥ', 'Custom Range'),
                       isSelected: selectedFilter == DateRangeType.custom,
                       onTap: _pickCustomRange,
                     ),
@@ -291,14 +304,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.cardBg,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE5EBF2)),
-                      boxShadow: const [
+                      border: Border.all(color: context.borderColor),
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x060C2340),
+                          color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
                           blurRadius: 8,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -308,21 +321,21 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'ጠቅላላ ሽያጭ',
+                            Text(
+                              context.tr('ጠቅላላ ሽያጭ', 'Total Sales'),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF64748B),
+                                color: context.textSecondaryColor,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '${totalRevenue.toStringAsFixed(0)} ETB',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2340),
+                                color: context.textPrimaryColor,
                               ),
                             ),
                           ],
@@ -330,21 +343,21 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text(
-                              'የተጣራ ትርፍ',
+                            Text(
+                              context.tr('የተጣራ ትርፍ', 'Net Profit'),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF16A34A),
+                                color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               '+${totalProfit.toStringAsFixed(0)} ETB',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF16A34A),
+                                color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                               ),
                             ),
                           ],
@@ -360,8 +373,12 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
             // 4. Transactions List
             Expanded(
               child: dayGroupsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF0C2340))),
-                error: (err, _) => Center(child: Text(err.toString())),
+                loading: () => KeraLoadingView(
+                  message: context.tr('የሽያጭ ታሪክ በመጫን ላይ...', 'Loading sales history...'),
+                ),
+                error: (err, _) => Center(
+                  child: Text(err.toString(), style: TextStyle(color: context.textPrimaryColor)),
+                ),
                 data: (groups) {
                   if (groups.isEmpty) {
                     return Center(
@@ -373,31 +390,34 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                             Container(
                               width: 70,
                               height: 70,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE2E8F0),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.receipt_long_rounded,
                                 size: 36,
-                                color: Color(0xFF0C2340),
+                                color: isDark ? Colors.white70 : const Color(0xFF0C2340),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
-                              'ምንም ሽያጭ አልተገኘም',
+                            Text(
+                              context.tr('ምንም ሽያጭ አልተገኘም', 'No sales found'),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2340),
+                                color: context.textPrimaryColor,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              'በተመረጠው ጊዜ ወይም ቃል ምንም ሽያጭ አልተመዘገበም',
+                            Text(
+                              context.tr(
+                                'በተመረጠው ጊዜ ወይም ቃል ምንም ሽያጭ አልተመዘገበም',
+                                'No sales recorded for the selected period or search query',
+                              ),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFF64748B),
+                                color: context.textSecondaryColor,
                               ),
                             ),
                           ],
@@ -423,18 +443,18 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                               children: [
                                 Text(
                                   dayHeaderFormat.format(group.date),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF475569),
+                                    color: context.textSecondaryColor,
                                   ),
                                 ),
                                 Text(
                                   CurrencyFormatter.formatEtb(group.totalAmount),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0C2340),
+                                    color: context.textPrimaryColor,
                                   ),
                                 ),
                               ],
@@ -445,8 +465,8 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                           ...group.sales.map((sale) {
                             final firstItem = sale.items.isNotEmpty ? sale.items.first : null;
                             final itemsSummary = sale.items.isEmpty
-                                ? 'ሽያጭ'
-                                : '${firstItem?.partNameSnapshot ?? "ዕቃ"}${sale.items.length > 1 ? " +${sale.items.length - 1} ተጨማሪ" : ""}';
+                                ? context.tr('ሽያጭ', 'Sale')
+                                : '${firstItem?.partNameSnapshot ?? context.tr("ዕቃ", "Part")}${sale.items.length > 1 ? " +${sale.items.length - 1} ${context.tr("ተጨማሪ", "more")}" : ""}';
 
                             return InkWell(
                               onTap: () => context.push('/sales/${sale.id}'),
@@ -455,14 +475,14 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                 margin: const EdgeInsets.only(bottom: 10),
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: context.cardBg,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: const Color(0xFFE5EBF2)),
-                                  boxShadow: const [
+                                  border: Border.all(color: context.borderColor),
+                                  boxShadow: [
                                     BoxShadow(
-                                      color: Color(0x060C2340),
+                                      color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
                                       blurRadius: 6,
-                                      offset: Offset(0, 2),
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
@@ -473,12 +493,12 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                       width: 44,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF1F5F9),
+                                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.receipt_rounded,
-                                        color: Color(0xFF0C2340),
+                                        color: isDark ? Colors.white70 : const Color(0xFF0C2340),
                                         size: 22,
                                       ),
                                     ),
@@ -491,10 +511,10 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                         children: [
                                           Text(
                                             itemsSummary,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
-                                              color: Color(0xFF0C2340),
+                                              color: context.textPrimaryColor,
                                             ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -504,18 +524,18 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                             children: [
                                               Text(
                                                 timeFormat.format(sale.soldAt),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 12,
-                                                  color: Color(0xFF64748B),
+                                                  color: context.textSecondaryColor,
                                                 ),
                                               ),
                                               if (sale.paymentMethod != null && sale.paymentMethod!.isNotEmpty) ...[
-                                                const Text(' · ', style: TextStyle(color: Color(0xFF94A3B8))),
+                                                Text(' · ', style: TextStyle(color: context.textSecondaryColor)),
                                                 Text(
                                                   sale.paymentMethod!,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 12,
-                                                    color: Color(0xFF64748B),
+                                                    color: context.textSecondaryColor,
                                                   ),
                                                 ),
                                               ],
@@ -531,19 +551,19 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                       children: [
                                         Text(
                                           '${sale.totalAmount.toStringAsFixed(0)} ETB',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF0C2340),
+                                            color: context.textPrimaryColor,
                                           ),
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
                                           '+${sale.totalProfit.toStringAsFixed(0)} ETB',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
-                                            color: Color(0xFF16A34A),
+                                            color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                           ),
                                         ),
                                       ],
@@ -571,16 +591,21 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0C2340) : Colors.white,
+          color: isSelected
+              ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
+              : context.cardBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFF0C2340) : const Color(0xFFE2E8F0),
+            color: isSelected
+                ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF0C2340))
+                : context.borderColor,
           ),
         ),
         child: Text(
@@ -588,7 +613,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-            color: isSelected ? Colors.white : const Color(0xFF0C2340),
+            color: isSelected ? Colors.white : context.textPrimaryColor,
           ),
         ),
       ),

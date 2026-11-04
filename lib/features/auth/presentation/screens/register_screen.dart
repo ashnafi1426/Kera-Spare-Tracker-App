@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_button.dart';
 import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../controllers/auth_controller.dart';
 
@@ -44,6 +45,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  int _calculateStrength(String pass) {
+    if (pass.isEmpty) return 0;
+    int score = 0;
+    if (pass.length >= 6) score++;
+    if (RegExp(r'[a-zA-Z]').hasMatch(pass) && RegExp(r'[0-9]').hasMatch(pass)) score++;
+    if (pass.length >= 8 && RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(pass)) score++;
+    return score;
+  }
+
   Future<void> _handleRegister() async {
     setState(() {
       _errorMessage = null;
@@ -75,7 +85,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     result.when(
       onSuccess: (_) {
-        context.go('/home');
+        context.go('/pending-approval', extra: {
+          'businessName': _businessNameController.text.trim(),
+          'phoneNumber': _phoneController.text.trim(),
+        });
       },
       onFailure: (failure) {
         if (failure is OfflineInternetRequiredFailure) {
@@ -125,7 +138,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KeraColors.surfaceCanvas,
+      backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
           // Top Bar (Stitch Screen 4 Header)
@@ -177,8 +190,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Widget _buildTopBanner(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
-      color: KeraColors.primaryNavy,
+      color: isDark ? const Color(0xFF071322) : KeraColors.primaryNavy,
       child: SafeArea(
         bottom: false,
         child: Container(
@@ -197,7 +211,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 },
                 tooltip: 'ወደ ኋላ ተመለስ / Back',
               ),
-              const SizedBox(width: 4),
+              const KeraLogoWidget(size: 28, borderRadius: 6),
+              const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'ኬራ ስፔር / Kera Spare',
@@ -227,14 +242,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ደረጃ 1 ከ 2 (Step 1 of 2)',
+              context.tr('ደረጃ 1 ከ 2', 'Step 1 of 2'),
               style: KeraTypography.labelLarge(color: KeraColors.actionBlue).copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             Text(
-              'የንግድ መረጃ',
-              style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
+              context.tr('የንግድ መረጃ', 'Business Information'),
+              style: KeraTypography.bodySmall(color: context.textSecondaryColor).copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -483,6 +498,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
+              onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: l10n.passwordHint,
                 prefixIcon: const Icon(Icons.lock_outline_rounded, color: KeraColors.textSecondary),
@@ -509,39 +525,71 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
             ),
             const SizedBox(height: 6),
-            // Password strength bar indicator
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: KeraColors.success,
-                      borderRadius: BorderRadius.circular(2),
+            // Dynamic Password strength bar indicator
+            Builder(
+              builder: (context) {
+                final strength = _calculateStrength(_passwordController.text);
+                final label = strength == 3
+                    ? context.tr('ጠንካራ የይለፍ ቃል', 'Strong password')
+                    : (strength == 2
+                        ? context.tr('መካከለኛ የይለፍ ቃል', 'Medium password')
+                        : (strength == 1
+                            ? context.tr('ደካማ የይለፍ ቃል', 'Weak password')
+                            : ''));
+                final barColor = strength == 3
+                    ? const Color(0xFF10B981)
+                    : (strength == 2 ? AdminColors.keraOrange : const Color(0xFFEF4444));
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: strength >= 1 ? barColor : context.borderColor,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: strength >= 2 ? barColor : context.borderColor,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Container(
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: strength >= 3 ? barColor : context.borderColor,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: KeraColors.success,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: KeraColors.success,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-              ],
+                    if (label.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: barColor,
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
             const SizedBox(height: KeraSpacing.md),
 
@@ -583,7 +631,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       height: 24,
                       child: Checkbox(
                         value: _agreedToTerms,
-                        activeColor: KeraColors.actionBlue,
+                        activeColor: AdminColors.keraOrange,
                         onChanged: (val) =>
                             setState(() => _agreedToTerms = val ?? false),
                       ),
@@ -592,18 +640,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     Expanded(
                       child: RichText(
                         text: TextSpan(
-                          text: 'በኬራ መለዋወጫ ',
-                          style: KeraTypography.bodySmall(color: KeraColors.textPrimary),
+                          text: context.tr('በኬራ መለዋወጫ ', 'I agree to Kera Spare '),
+                          style: KeraTypography.bodySmall(color: context.textPrimaryColor),
                           children: [
                             TextSpan(
-                              text: 'መመሪያ እና ደንብ',
-                              style: KeraTypography.bodySmall(color: KeraColors.actionBlue).copyWith(
+                              text: context.tr('መመሪያ እና ደንብ', 'Terms & Conditions'),
+                              style: KeraTypography.bodySmall(color: AdminColors.keraOrange).copyWith(
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration.underline,
                               ),
                             ),
-                            const TextSpan(
-                              text: ' ተስማምቻለሁ (I agree to Terms & Conditions)',
+                            TextSpan(
+                              text: context.tr(' ተስማምቻለሁ', ''),
                             ),
                           ],
                         ),
@@ -616,11 +664,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const SizedBox(height: KeraSpacing.lg),
 
             // Submit Button
-            KeraButton.primary(
-              label: l10n.register,
-              icon: Icons.arrow_forward_rounded,
-              isLoading: _isLoading,
-              onPressed: _handleRegister,
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _handleRegister,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AdminColors.keraOrange,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AdminColors.keraOrange.withValues(alpha: 0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KeraRadii.md),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            context.tr('ይመዝገቡ', 'Register Business'),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                        ],
+                      ),
+              ),
             ),
           ],
         ),

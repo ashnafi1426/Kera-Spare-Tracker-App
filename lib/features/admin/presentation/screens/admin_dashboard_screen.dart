@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
-import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/design/widgets/dashboard_header_bar.dart';
 import '../../../../core/design/widgets/error_state.dart';
-import '../../../../core/design/widgets/skeleton_loader.dart';
+import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_header_bar.dart';
@@ -20,244 +21,204 @@ class AdminDashboardScreen extends ConsumerWidget {
     final dashboardAsync = ref.watch(adminDashboardProvider);
 
     return Scaffold(
-      backgroundColor: AdminColors.background,
-      body: dashboardAsync.when(
-        loading: () => const Padding(
-          padding: EdgeInsets.all(AdminSpacing.lg),
-          child: Column(
-            children: [
-              SizedBox(height: 60),
-              SkeletonMetricLoader(),
-              SizedBox(height: AdminSpacing.lg),
-              SkeletonListLoader(count: 3),
-            ],
+      backgroundColor: context.scaffoldBg,
+      body: Column(
+        children: [
+          // Fixed, Non-shifting Shared Header Bar (Issue 4)
+          DashboardHeaderBar(
+            title: 'Kera Spare Tracker',
+            subtitle: context.tr('አድሚን ኮንሶል · Admin Console', 'Admin Console · Manager'),
+            searchHint: context.tr('ፈልግ · Search owners, phones', 'Search owners, phones...'),
+            onSearchTap: () => context.push('/admin/owners'),
+            trailingAction: AdminHeaderIconButton(
+              icon: Icons.notifications_outlined,
+              hasBadge: true,
+              tooltip: 'Notifications',
+              onTap: () => context.push('/admin/notifications'),
+            ),
           ),
-        ),
-        error: (err, _) => Center(
-          child: ErrorState(
-            message: err.toString().replaceAll('Exception: ', ''),
-            onRetry: () => ref.refresh(adminDashboardProvider),
-            secondaryActionLabel: 'Server Settings',
-            secondaryActionIcon: Icons.settings_ethernet_rounded,
-            onSecondaryAction: () => showServerConfigDialog(context, ref),
-          ),
-        ),
-        data: (stats) => RefreshIndicator(
-          color: AdminColors.primary,
-          onRefresh: () async => ref.refresh(adminDashboardProvider.future),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Deep Navy Hero Header (Dashboard.png)
-                _buildNavyDashboardHeader(context, ref, stats),
 
-                // 2. Main Metrics Grid & Activity (Dashboard.png)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 18.0,
-                  ),
+          // Scrollable Body
+          Expanded(
+            child: dashboardAsync.when(
+              loading: () => KeraLoadingView(
+                message: context.tr('የአድሚን ዳሽቦርድ በመጫን ላይ...', 'Loading Admin Dashboard...'),
+              ),
+              error: (err, _) => Center(
+                child: ErrorState(
+                  message: err.toString().replaceAll('Exception: ', ''),
+                  onRetry: () => ref.refresh(adminDashboardProvider),
+                  secondaryActionLabel: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
+                  secondaryActionIcon: Icons.settings_ethernet_rounded,
+                  onSecondaryAction: () => showServerConfigDialog(context, ref),
+                ),
+              ),
+              data: (stats) => RefreshIndicator(
+                color: AdminColors.primary,
+                onRefresh: () async => ref.refresh(adminDashboardProvider.future),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildMetricsGrid(context, stats),
-                      const SizedBox(height: 24),
+                      // 1. Registered Owners Hero + Quick Actions (Dashboard.png)
+                      _buildRegisteredOwnersHero(context, ref, stats),
 
-                      // Navigation Quick Cards (Reports, Sync Monitor, Audit)
-                      _buildQuickFeatureStrip(context, ref, stats),
-                      const SizedBox(height: 32),
+                      // 2. Main Metrics Grid & Activity (Dashboard.png)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 14.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildMetricsGrid(context, stats),
+                            const SizedBox(height: 24),
+
+                            // Navigation Quick Cards (Reports, Sync Monitor, Audit)
+                            _buildQuickFeatureStrip(context, ref, stats),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  /// Deep Navy Header Bar matching Dashboard.png
-  Widget _buildNavyDashboardHeader(
+  /// Registered Owners Hero & Quick Actions Card
+  Widget _buildRegisteredOwnersHero(
     BuildContext context,
     WidgetRef ref,
     dynamic stats,
   ) {
     final totalOwners = stats.totalOwners;
     final newThisMonth = stats.newOwnersThisWeek > 0 ? '+${stats.newOwnersThisWeek}' : '+9';
+    final isDark = context.isDark;
 
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AdminColors.headerNavy,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF102138) : AdminColors.headerNavy,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E385C) : Colors.transparent,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Row: Logo + App Name + Notification Bell
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.settings_suggest_rounded,
-                        color: AdminColors.headerNavy,
-                        size: 26,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Registered Owners Hero + Orange Sparkline
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr('ጠቅላላ ባለቤቶች · Registered owners', 'Total Registered Owners'),
+                      style: const TextStyle(
+                        color: AdminColors.headerTextSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Kera Spare Tracker',
-                          style: TextStyle(
+                          totalOwners > 0 ? '$totalOwners' : '128',
+                          style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 34,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: -0.2,
+                            letterSpacing: -1,
                           ),
                         ),
-                        Text(
-                          'አድሚን ኮንሶል · Admin Console',
-                          style: TextStyle(
-                            color: AdminColors.headerTextSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AdminColors.keraOrange,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            '$newThisMonth ${context.tr("በዚህ ወር", "this month")}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  AdminHeaderIconButton(
-                    icon: Icons.notifications_outlined,
-                    hasBadge: true,
-                    tooltip: 'Notifications & Audit',
-                    onTap: () => context.push('/admin/notifications'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  ],
+                ),
 
-              // Search Bar: ፈልግ · Search owners, phones
-              AdminHeaderSearchBar(
-                hintText: 'ፈልግ · Search owners, phones',
-                readOnly: true,
-                onTap: () => context.push('/admin/owners'),
-              ),
-              const SizedBox(height: 20),
+                // Sparkline upward trend wave
+                const SizedBox(
+                  width: 100,
+                  height: 48,
+                  child: CustomPaint(
+                    painter: SparklinePainter(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Divider(height: 1, color: isDark ? const Color(0xFF1E385C) : Colors.white24),
+            const SizedBox(height: 16),
 
-              // Registered Owners Hero + Orange Sparkline
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'ጠቅላላ ባለቤቶች · Registered owners',
-                        style: TextStyle(
-                          color: AdminColors.headerTextSecondary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            totalOwners > 0 ? '$totalOwners' : '128',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 38,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AdminColors.keraOrange,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              '$newThisMonth this month',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  // Sparkline upward trend wave
-                  const SizedBox(
-                    width: 100,
-                    height: 48,
-                    child: CustomPaint(
-                      painter: SparklinePainter(),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // 4 Quick Actions Row: ባለቤት ጨምር, ማጽደቅ 9, ብራንድ, ምትኬ
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildQuickActionCircle(
-                    icon: Icons.person_add_alt_1_rounded,
-                    label: 'ባለቤት ጨምር',
-                    onTap: () => context.push('/admin/owners/add'),
-                  ),
-                  _buildQuickActionCircle(
-                    icon: Icons.refresh_rounded,
-                    label: 'ማጽደቅ 9',
-                    onTap: () => context.push('/admin/owners?status=PENDING'),
-                  ),
-                  _buildQuickActionCircle(
-                    icon: Icons.sell_outlined,
-                    label: 'ብራንድ',
-                    onTap: () => context.push('/admin/catalog'),
-                  ),
-                  _buildQuickActionCircle(
-                    icon: Icons.wb_sunny_outlined,
-                    label: 'ምትኬ',
-                    onTap: () => context.push('/admin/backup'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            // 4 Quick Actions Row: ባለቤት ጨምር, ማጽደቅ 9, ብራንድ, ምትኬ
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildQuickActionCircle(
+                  icon: Icons.person_add_alt_1_rounded,
+                  label: context.tr('ባለቤት ጨምር', 'Add Owner'),
+                  onTap: () => context.push('/admin/owners/add'),
+                ),
+                _buildQuickActionCircle(
+                  icon: Icons.refresh_rounded,
+                  label: context.tr('ማጽደቅ 9', 'Approvals'),
+                  onTap: () => context.push('/admin/owners?status=PENDING'),
+                ),
+                _buildQuickActionCircle(
+                  icon: Icons.sell_outlined,
+                  label: context.tr('ብራንድ', 'Brands'),
+                  onTap: () => context.push('/admin/catalog'),
+                ),
+                _buildQuickActionCircle(
+                  icon: Icons.wb_sunny_outlined,
+                  label: context.tr('ምትኬ', 'Backup'),
+                  onTap: () => context.push('/admin/backup'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -315,7 +276,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.home_outlined,
           value: '$activeCount',
-          label: 'ንቁ · Active',
+          label: context.tr('ንቁ · Active', 'Active Owners'),
           badgeText: '$activePercent%',
           badgeColor: const Color(0xFF10B981),
           onTap: () => context.push('/admin/owners?status=ACTIVE'),
@@ -325,8 +286,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.refresh_rounded,
           value: '9',
-          label: 'በመጠባበቅ · Pending',
-          badgeText: 'Review',
+          label: context.tr('በመጠባበቅ · Pending', 'Pending Approval'),
+          badgeText: context.tr('ግምገማ', 'Review'),
           badgeColor: AdminColors.keraOrange,
           onTap: () => context.push('/admin/owners?status=PENDING'),
         ),
@@ -335,8 +296,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.sell_outlined,
           value: partsCount,
-          label: 'ዕቃዎች · Parts',
-          badgeText: 'All owners',
+          label: context.tr('ዕቃዎች · Parts', 'Total Parts'),
+          badgeText: context.tr('ሁሉም', 'All Owners'),
           badgeColor: const Color(0xFF5E6D82),
           onTap: () => context.push('/admin/catalog'),
         ),
@@ -345,8 +306,8 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.sync_rounded,
           value: '98%',
-          label: 'Sync health',
-          badgeText: '7 pending',
+          label: context.tr('የማመሳሰል ሁኔታ · Sync', 'Sync Health'),
+          badgeText: context.tr('7 በመጠባበቅ', '7 pending'),
           badgeColor: AdminColors.keraOrange,
           onTap: () => context.push('/admin/sync'),
         ),
@@ -355,7 +316,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.bar_chart_rounded,
           value: '4.8M',
-          label: 'ሽያጭ · Revenue',
+          label: context.tr('ሽያጭ · Revenue', 'Total Revenue'),
           badgeText: 'ETB · month',
           badgeColor: const Color(0xFF10B981),
           onTap: () => context.push('/admin/reports'),
@@ -365,7 +326,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         AdminMetricTile(
           icon: Icons.insert_chart_outlined_rounded,
           value: '1.1M',
-          label: 'ትርፍ · Profit',
+          label: context.tr('ትርፍ · Profit', 'Estimated Profit'),
           badgeText: 'ETB · est.',
           badgeColor: const Color(0xFF10B981),
           onTap: () => context.push('/admin/reports'),
@@ -383,19 +344,19 @@ class AdminDashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5EBF2)),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'ተጨማሪ ሞጁሎች · Administration Hub',
+          Text(
+            context.tr('ተጨማሪ ሞጁሎች · Administration Hub', 'Administration Modules'),
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0C2340),
+              color: context.textPrimaryColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -409,15 +370,18 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               child: const Icon(Icons.analytics_outlined, color: Color(0xFF3B82F6)),
             ),
-            title: const Text(
-              'ሪፖርቶች · Sales Reports',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            title: Text(
+              context.tr('ሪፖርቶች · Sales Reports', 'Sales Analytics & Reports'),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textPrimaryColor),
             ),
-            subtitle: const Text('Revenue and profit analytics across owners'),
-            trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            subtitle: Text(
+              context.tr('የሽያጭና የትርፍ ትንተና', 'Revenue and profit analytics across stores'),
+              style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+            ),
+            trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
             onTap: () => context.push('/admin/reports'),
           ),
-          const Divider(height: 16),
+          Divider(height: 16, color: context.borderColor),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Container(
@@ -428,15 +392,18 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
               child: const Icon(Icons.sync_problem_rounded, color: AdminColors.keraOrange),
             ),
-            title: const Text(
-              'Sync Monitor',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            title: Text(
+              context.tr('የማመሳሰል ሁኔታ · Sync Monitor', 'Sync Queue & Conflict Monitor'),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textPrimaryColor),
             ),
-            subtitle: const Text('Resolve device conflicts & offline queues'),
-            trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            subtitle: Text(
+              context.tr('የመሣሪያ አለመግባባቶችና ከመስመር ውጭ ወረፋዎች', 'Resolve device conflicts & offline queues'),
+              style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+            ),
+            trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
             onTap: () => context.push('/admin/sync'),
           ),
-          const Divider(height: 16),
+          Divider(height: 16, color: context.borderColor),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Container(
@@ -445,14 +412,17 @@ class AdminDashboardScreen extends ConsumerWidget {
                 color: const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.settings_ethernet_rounded, color: Color(0xFF0C2340)),
+              child: Icon(Icons.settings_ethernet_rounded, color: context.textPrimaryColor),
             ),
-            title: const Text(
-              'ሰርቨር ማስተካከያ · Server Connection',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            title: Text(
+              context.tr('ሰርቨር ማስተካከያ · Server Connection', 'Server & API Connection'),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textPrimaryColor),
             ),
-            subtitle: const Text('Configure backend IP and API port'),
-            trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            subtitle: Text(
+              context.tr('የአይፒ አድራሻና ፖርት ያቀናብሩ', 'Configure backend IP and API port'),
+              style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+            ),
+            trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
             onTap: () => showServerConfigDialog(context, ref),
           ),
         ],

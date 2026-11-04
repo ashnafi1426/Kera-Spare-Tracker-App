@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
-import '../../../../core/design/tokens/admin_spacing.dart';
 import '../../../../core/design/widgets/empty_state.dart';
 import '../../../../core/design/widgets/error_state.dart';
-import '../../../../core/design/widgets/skeleton_loader.dart';
+import '../../../../core/design/widgets/owner_header_bar.dart';
+import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -56,7 +57,6 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
       ref.read(adminOwnersProvider.notifier).setSearch(query.trim());
     });
   }
-
   void _onFilterSelected(String filterKey) {
     setState(() => _selectedFilter = filterKey);
     ref.read(adminOwnersProvider.notifier).setStatus(filterKey);
@@ -95,13 +95,13 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     final state = ref.watch(adminOwnersProvider);
 
     return Scaffold(
-      backgroundColor: AdminColors.background,
+      backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AdminColors.keraOrange,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text(
-          'ባለቤት ጨምር',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        label: Text(
+          context.tr('ባለቤት ጨምር', 'Add Owner'),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: () => context.push('/admin/owners/add'),
       ),
@@ -117,10 +117,10 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Showing ${state.owners.length} of ${state.pagination['total'] ?? state.owners.length}',
-                  style: const TextStyle(
+                  '${context.tr("የሚታየው", "Showing")} ${state.owners.length} / ${state.pagination['total'] ?? state.owners.length}',
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF5E6D82),
+                    color: context.textSecondaryColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -131,25 +131,25 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   itemBuilder: (ctx) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: OwnerSortOption.newest,
-                      child: Text('Newest'),
+                      child: Text(context.tr('አዲስ', 'Newest')),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: OwnerSortOption.name,
-                      child: Text('Business Name'),
+                      child: Text(context.tr('የድርጅት ስም', 'Business Name')),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: OwnerSortOption.lastSync,
-                      child: Text('Last Sync'),
+                      child: Text(context.tr('የቅርብ ጊዜ ማመሳሰል', 'Last Sync')),
                     ),
                   ],
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.cardBg,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: context.borderColor),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x06000000),
@@ -162,18 +162,18 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Sort: ${_sortOption == OwnerSortOption.newest ? "Newest" : _sortOption == OwnerSortOption.name ? "Name" : "Last Sync"}',
-                          style: const TextStyle(
+                          '${context.tr("ደርድር", "Sort")}: ${_sortOption == OwnerSortOption.newest ? context.tr("አዲስ", "Newest") : _sortOption == OwnerSortOption.name ? context.tr("ስም", "Name") : context.tr("ማመሳሰል", "Last Sync")}',
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF0C2340),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(
+                        Icon(
                           Icons.keyboard_arrow_down_rounded,
                           size: 16,
-                          color: Color(0xFF0C2340),
+                          color: context.textPrimaryColor,
                         ),
                       ],
                     ),
@@ -188,9 +188,8 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             child: Builder(
               builder: (context) {
                 if (state.isLoading) {
-                  return const Padding(
-                    padding: EdgeInsets.all(AdminSpacing.lg),
-                    child: SkeletonListLoader(count: 6),
+                  return KeraLoadingView(
+                    message: context.tr('የባለቤቶች ዝርዝር በመጫን ላይ...', 'Loading owners directory...'),
                   );
                 }
 
@@ -199,7 +198,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     child: ErrorState(
                       message: state.errorMessage!,
                       onRetry: () => ref.read(adminOwnersProvider.notifier).loadOwners(),
-                      secondaryActionLabel: 'Server Settings',
+                      secondaryActionLabel: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
                       secondaryActionIcon: Icons.settings_ethernet_rounded,
                       onSecondaryAction: () => showServerConfigDialog(context, ref),
                     ),
@@ -210,12 +209,12 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                   return Center(
                     child: EmptyState(
                       icon: Icons.person_search_rounded,
-                      title: 'ምንም ባለቤቶች አልተገኙም',
+                      title: context.tr('ምንም ባለቤቶች አልተገኙም', 'No owners found'),
                       onAction: () {
                         _searchController.clear();
                         _onFilterSelected('ALL');
                       },
-                      actionLabel: 'ሁሉንም አሳይ',
+                      actionLabel: context.tr('ሁሉንም አሳይ', 'Show All'),
                     ),
                   );
                 }
@@ -245,11 +244,14 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
 
   /// Navy Header matching Owners.png
   Widget _buildNavyOwnersHeader(AdminOwnersState state) {
+    final isDark = context.isDark;
+    final totalCount = state.pagination['total'] ?? state.owners.length;
+
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AdminColors.headerNavy,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF071322) : AdminColors.headerNavy,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
       child: SafeArea(
         bottom: false,
@@ -258,7 +260,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar: Logo + Title + Bell
+              // Top Bar: Logo + Title + Toggles + Bell
               Row(
                 children: [
                   Container(
@@ -280,13 +282,13 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'ባለቤቶች · Owners',
-                          style: TextStyle(
+                          context.tr('ባለቤቶች · Owners', 'Store Owners Directory'),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -294,8 +296,8 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                           ),
                         ),
                         Text(
-                          '128 registered accounts',
-                          style: TextStyle(
+                          '$totalCount ${context.tr("የተመዘገቡ አካውንቶች", "registered store accounts")}',
+                          style: const TextStyle(
                             color: AdminColors.headerTextSecondary,
                             fontSize: 12,
                           ),
@@ -303,6 +305,10 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                       ],
                     ),
                   ),
+                  const OwnerThemeToggle(),
+                  const SizedBox(width: 6),
+                  const OwnerLanguageToggle(),
+                  const SizedBox(width: 6),
                   AdminHeaderIconButton(
                     icon: Icons.notifications_outlined,
                     hasBadge: true,
@@ -316,35 +322,35 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               AdminHeaderSearchBar(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                hintText: 'ፈልግ · Search owners, phones',
+                hintText: context.tr('ፈልግ · Search owners, phones', 'Search owners, phones, stores...'),
               ),
               const SizedBox(height: 14),
 
-              // Horizontal Filter Chips: ሁሉም 128, ንቁ 112, በመጠባበቅ 9, ታግዷል 7
+              // Horizontal Filter Chips: ሁሉም, ንቁ, በመጠባበቅ, ታግዷል
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
                     _buildHeaderFilterChip(
-                      label: 'ሁሉም 128',
+                      label: context.tr('ሁሉም', 'All'),
                       isSelected: _selectedFilter == 'ALL',
                       onTap: () => _onFilterSelected('ALL'),
                     ),
                     const SizedBox(width: 8),
                     _buildHeaderFilterChip(
-                      label: 'ንቁ 112',
+                      label: context.tr('ንቁ', 'Active'),
                       isSelected: _selectedFilter == 'ACTIVE',
                       onTap: () => _onFilterSelected('ACTIVE'),
                     ),
                     const SizedBox(width: 8),
                     _buildHeaderFilterChip(
-                      label: 'በመጠባበቅ 9',
+                      label: context.tr('በመጠባበቅ', 'Pending'),
                       isSelected: _selectedFilter == 'PENDING',
                       onTap: () => _onFilterSelected('PENDING'),
                     ),
                     const SizedBox(width: 8),
                     _buildHeaderFilterChip(
-                      label: 'ታግዷል 7',
+                      label: context.tr('ታግዷል', 'Suspended'),
                       isSelected: _selectedFilter == 'SUSPENDED',
                       onTap: () => _onFilterSelected('SUSPENDED'),
                     ),
@@ -389,18 +395,19 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     final initials = _getInitials(owner.businessName);
     final isPending = owner.status.toUpperCase() == 'PENDING' || owner.status.toUpperCase() == 'INACTIVE';
     final isSuspended = owner.isSuspended;
+    final isDark = context.isDark;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5EBF2)),
-        boxShadow: const [
+        border: Border.all(color: context.borderColor),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x060C2340),
+            color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
             blurRadius: 8,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -415,7 +422,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0C2340),
+                  color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -435,10 +442,10 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                   children: [
                     Text(
                       owner.businessName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0C2340),
+                        color: context.textPrimaryColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -446,9 +453,9 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     const SizedBox(height: 2),
                     Text(
                       _maskPhone(owner.phoneNumber),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF5E6D82),
+                        color: context.textSecondaryColor,
                         fontFamily: 'monospace',
                       ),
                     ),
@@ -460,18 +467,18 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isSuspended
-                      ? const Color(0xFFFEE2E2)
+                      ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
                       : isPending
-                          ? const Color(0xFFFEF3EB)
-                          : const Color(0xFFE6F8F0),
+                          ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3EB))
+                          : (isDark ? const Color(0xFF052E16) : const Color(0xFFE6F8F0)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   isSuspended
-                      ? 'ታግዷል'
+                      ? context.tr('ታግዷል', 'Suspended')
                       : isPending
-                          ? 'በመጠባበቅ'
-                          : 'ንቁ',
+                          ? context.tr('በመጠባበቅ', 'Pending')
+                          : context.tr('ንቁ', 'Active'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -492,16 +499,16 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildOwnerStatItem(
-                label: 'ዕቃ',
+                label: context.tr('ዕቃ', 'Parts'),
                 value: '${(owner.id.hashCode.abs() % 1500) + 200}',
               ),
               _buildOwnerStatItem(
-                label: 'ሽያጭ',
+                label: context.tr('ሽያጭ', 'Sales'),
                 value: '${(owner.id.hashCode.abs() % 350) + 40}k',
               ),
               _buildOwnerStatItem(
                 label: 'Sync',
-                value: owner.lastSyncAt != null ? 'Synced' : '2h',
+                value: owner.lastSyncAt != null ? context.tr('ተመሳስሏል', 'Synced') : '2h',
               ),
             ],
           ),
@@ -513,17 +520,17 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF0C2340),
-                    side: const BorderSide(color: Color(0xFFCBD5E1)),
+                    foregroundColor: context.textPrimaryColor,
+                    side: BorderSide(color: context.borderColor),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 11),
                   ),
                   onPressed: () => context.push('/admin/owners/${owner.id}'),
-                  child: const Text(
-                    'ዝርዝር · View',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  child: Text(
+                    context.tr('ዝርዝር · View', 'View Details'),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                 ),
               ),
@@ -541,9 +548,9 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 11),
                     ),
                     onPressed: () => _handleApproveOwner(context, owner),
-                    child: const Text(
-                      'አጽድቅ · Approve',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    child: Text(
+                      context.tr('አጽድቅ · Approve', 'Approve Owner'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),
                 )
@@ -551,17 +558,17 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0C2340),
-                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      foregroundColor: context.textPrimaryColor,
+                      side: BorderSide(color: context.borderColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 11),
                     ),
                     onPressed: () => _handleResetPassword(context, owner),
-                    child: const Text(
-                      'Reset pw',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    child: Text(
+                      context.tr('የይለፍ ቃል ቀይር', 'Reset Password'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),
                 ),
@@ -581,14 +588,14 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
       children: [
         Text(
           '$label ',
-          style: const TextStyle(fontSize: 12, color: Color(0xFF5E6D82)),
+          style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0C2340),
+            color: context.textPrimaryColor,
           ),
         ),
       ],
@@ -627,14 +634,19 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Temporary Password Generated'),
+            backgroundColor: context.cardBg,
+            title: Text(
+              context.tr('ጊዜያዊ የይለፍ ቃል ተፈጥሯል', 'Temporary Password Generated'),
+              style: TextStyle(color: context.textPrimaryColor),
+            ),
             content: SelectableText(
               'Business: ${owner.businessName}\nNew Password: $temp\n\nPlease share this securely with the owner.',
+              style: TextStyle(color: context.textPrimaryColor),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Done'),
+                child: Text(context.tr('ጨርስ', 'Done')),
               ),
             ],
           ),

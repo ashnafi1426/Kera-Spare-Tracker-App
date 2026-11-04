@@ -137,6 +137,11 @@ class SessionStore {
     }
   }
 
+  /// Updates cached user profile in storage.
+  Future<void> updateUserProfile(Map<String, dynamic> userProfile) async {
+    await _storage.write(key: keyUserSession, value: jsonEncode(userProfile));
+  }
+
   /// Updates rotated access & refresh tokens without disturbing profile or offline state.
   Future<void> updateTokens({
     required String accessToken,

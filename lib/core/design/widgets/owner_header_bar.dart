@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../providers/locale_provider.dart';
+import '../../providers/theme_provider.dart';
+import '../../utils/context_extensions.dart';
 import '../tokens/admin_colors.dart';
 
 /// Reusable deep navy header for Kera Spare Tracker Owner App screens.
-/// Matches 1 Dashboard.png, 2 Inventory.png, 3 Add spare part.png,
-/// 4 Record sale.png, and 5 Sales history.png.
+/// Supports dark mode, dynamic localization, and quick language/theme controls.
 class OwnerHeaderBar extends StatelessWidget {
   final String businessName;
   final String? subtitle;
@@ -16,7 +20,7 @@ class OwnerHeaderBar extends StatelessWidget {
   const OwnerHeaderBar({
     super.key,
     required this.businessName,
-    this.subtitle = 'ከራ · Kera Spare Tracker',
+    this.subtitle,
     this.titleWidget,
     this.leading,
     this.actions,
@@ -26,10 +30,14 @@ class OwnerHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+    final headerBg = isDark ? const Color(0xFF071322) : AdminColors.headerNavy;
+    final defaultSubtitle = context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker');
+
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AdminColors.headerNavy,
+      decoration: BoxDecoration(
+        color: headerBg,
       ),
       child: SafeArea(
         bottom: false,
@@ -73,7 +81,9 @@ class OwnerHeaderBar extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          businessName.isNotEmpty ? businessName : 'ተስፋዬ እና ልጆቹ',
+                          businessName.isNotEmpty
+                              ? businessName
+                              : context.tr('ተስፋዬ እና ልጆቹ', 'Tesfaye & Sons'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -83,20 +93,23 @@ class OwnerHeaderBar extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (subtitle != null && subtitle!.isNotEmpty)
-                          Text(
-                            subtitle!,
-                            style: const TextStyle(
-                              color: AdminColors.headerTextSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        Text(
+                          subtitle ?? defaultSubtitle,
+                          style: const TextStyle(
+                            color: AdminColors.headerTextSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  const OwnerThemeToggle(),
+                  const SizedBox(width: 8),
+                  const OwnerLanguageToggle(),
                   ...?actions,
                 ],
               ),
@@ -120,7 +133,74 @@ class OwnerHeaderBar extends StatelessWidget {
   }
 }
 
-/// Search input capsule matching the Owner App header in mockups.
+/// Quick inline language toggle for headers.
+class OwnerLanguageToggle extends ConsumerWidget {
+  const OwnerLanguageToggle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAmharic = context.isAmharic;
+    return InkWell(
+      onTap: () {
+        ref.read(localeControllerProvider.notifier).setLocale(
+              Locale(isAmharic ? 'en' : 'am'),
+            );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.language_rounded, size: 13, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              isAmharic ? 'EN' : 'አማ',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Quick inline theme toggle (Dark / Light) for headers.
+class OwnerThemeToggle extends ConsumerWidget {
+  const OwnerThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = context.isDark;
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.all(4),
+      constraints: const BoxConstraints(),
+      icon: Icon(
+        isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+        color: Colors.white,
+        size: 18,
+      ),
+      tooltip: isDark ? 'Light Theme' : 'Dark Theme',
+      onPressed: () {
+        ref.read(themeModeControllerProvider.notifier).setThemeMode(
+              isDark ? ThemeMode.light : ThemeMode.dark,
+            );
+      },
+    );
+  }
+}
+
+/// Reusable search capsule designed for deep navy header contexts.
 class OwnerSearchBar extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -128,24 +208,30 @@ class OwnerSearchBar extends StatelessWidget {
   final String hintText;
   final bool readOnly;
   final Widget? trailing;
+  final FocusNode? focusNode;
 
   const OwnerSearchBar({
     super.key,
     this.controller,
     this.onChanged,
     this.onTap,
-    this.hintText = 'ዕቃ በስም ወይም በቁጥር ይፈልጉ',
+    this.hintText = 'Search...',
     this.readOnly = false,
     this.trailing,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     return Container(
       height: 46,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -154,29 +240,30 @@ class OwnerSearchBar extends StatelessWidget {
           ),
         ],
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Row(
         children: [
-          const SizedBox(width: 14),
-          const Icon(
+          Icon(
             Icons.search_rounded,
-            color: Color(0xFF64748B),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             size: 20,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: controller,
+              focusNode: focusNode,
               readOnly: readOnly,
               onTap: onTap,
               onChanged: onChanged,
-              style: const TextStyle(
-                color: Color(0xFF0F172A),
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 fontSize: 14,
               ),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(
-                  color: Color(0xFF64748B),
+                hintStyle: TextStyle(
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
@@ -192,4 +279,3 @@ class OwnerSearchBar extends StatelessWidget {
     );
   }
 }
-

@@ -9,10 +9,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).default('mysql://root:14263208%40aA@localhost:3306/mobile'),
   JWT_SECRET: z.string().min(8).default('kera-spare-tracker-jwt-access-secret-2026-super-secure'),
   JWT_REFRESH_SECRET: z.string().min(8).default('kera-spare-tracker-jwt-refresh-secret-2026-super-secure'),
-  ACCESS_TOKEN_MINUTES: z.coerce.number().int().positive().default(15),
+  ACCESS_TOKEN_MINUTES: z.coerce.number().int().positive().default(43200), // 30 days (1 month)
   REFRESH_TOKEN_DAYS: z.coerce.number().int().positive().default(90),
   OFFLINE_MAX_DAYS: z.coerce.number().int().positive().default(90),
-  JWT_ADMIN_ACCESS_EXPIRES_IN: z.string().default('10m'),
+  JWT_ADMIN_ACCESS_EXPIRES_IN: z.string().default('30d'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(4).max(16).default(10),
   CORS_ORIGIN: z.string().default('*'),
   ADMIN_CORS_ORIGIN: z.string().default('http://localhost:3000,http://localhost:5000,http://localhost:8080'),

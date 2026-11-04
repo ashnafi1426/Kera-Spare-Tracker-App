@@ -3,22 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
-import '../../../../core/design/widgets/owner_header_bar.dart';
+import '../../../../core/design/widgets/dashboard_header_bar.dart';
+import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
+import '../../../reports/domain/models/report_period.dart';
+import '../../../reports/domain/models/sales_summary.dart';
 import '../../../reports/presentation/providers/reports_providers.dart';
 import '../../../sales/presentation/providers/sales_providers.dart';
 import '../providers/dashboard_providers.dart';
 
-/// Screen 1: Business Dashboard matching 1 Dashboard.png.
+/// Screen 1: Dashboard (1 Dashboard.png).
+/// Supports dark mode, live bilingual (Amharic/English) translation, and professional loading indicators.
 class BusinessDashboardScreen extends ConsumerStatefulWidget {
   final VoidCallback? onSwitchToInventory;
   final VoidCallback? onSwitchToSales;
+  final VoidCallback? onSwitchToReports;
 
   const BusinessDashboardScreen({
     super.key,
     this.onSwitchToInventory,
     this.onSwitchToSales,
+    this.onSwitchToReports,
   });
 
   @override
@@ -29,53 +36,74 @@ class BusinessDashboardScreen extends ConsumerStatefulWidget {
 class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScreen> {
   int _selectedPeriod = 0; // 0: ዛሬ, 1: ይህ ሳምንት, 2: ይህ ወር
 
+  void _onPeriodChanged(int index) {
+    setState(() => _selectedPeriod = index);
+    final period = switch (index) {
+      0 => ReportPeriod.daily,
+      1 => ReportPeriod.weekly,
+      2 => ReportPeriod.monthly,
+      _ => ReportPeriod.daily,
+    };
+    ref.read(selectedReportPeriodProvider.notifier).setPeriod(period);
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).value;
     final metricsAsync = ref.watch(businessDashboardMetricsProvider);
     final recentSalesAsync = ref.watch(activeSalesStreamProvider);
+    final salesSummary = ref.watch(salesSummaryProvider).value ?? SalesSummary.zero;
 
-    final businessName = user?.businessName ?? 'ተስፋዬ እና ልጆቹ';
+    final businessName = (user != null && user.businessName.trim().isNotEmpty)
+        ? user.businessName
+        : context.tr('የእኔ መለዋወጫ መደብር', 'My Spare Parts Store');
     final metrics = metricsAsync.value;
-    final pendingSync = metrics?.pendingSyncCount ?? 5;
-    final totalSales = metrics != null && metrics.todayRevenue > 0 ? metrics.todayRevenue : 128400.0;
-    final estimatedProfit = metrics != null && metrics.todayProfit > 0 ? metrics.todayProfit : 34200.0;
-    const salesCount = 18;
-    final costAmount = totalSales - estimatedProfit > 0 ? totalSales - estimatedProfit : 94200.0;
+    final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
+    final totalSales = salesSummary.totalRevenue;
+    final estimatedProfit = salesSummary.totalProfit;
+    final salesCount = salesSummary.salesCount;
+    final costAmount = (totalSales - estimatedProfit).clamp(0.0, double.infinity);
+
+    final isDark = context.isDark;
 
     return Scaffold(
-      backgroundColor: AdminColors.background,
-      body: RefreshIndicator(
-        color: AdminColors.keraOrange,
-        onRefresh: () async {
-          ref.invalidate(partsStreamProvider);
-          ref.invalidate(salesSummaryProvider);
-          ref.invalidate(activeSalesStreamProvider);
-          ref.invalidate(pendingSyncCountProvider);
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Deep Navy Header with Search Bar (1 Dashboard.png)
-              OwnerHeaderBar(
-                businessName: businessName,
-                bottomContent: OwnerSearchBar(
-                  readOnly: true,
-                  hintText: 'ዕቃ በስም ወይም በቁጥር ይፈልጉ',
-                  onTap: () => widget.onSwitchToInventory?.call(),
-                ),
-              ),
+      backgroundColor: context.scaffoldBg,
+      body: Column(
+        children: [
+          // 1. Deep Navy Shared Fixed Header (1 Dashboard.png)
+          DashboardHeaderBar(
+            title: businessName,
+            subtitle: context.tr('የባለቤት መቆጣጠሪያ • ዳሽቦርድ', 'Owner Dashboard'),
+            searchHint: context.tr('ዕቃ በስም ወይም በቁጥር ይፈልጉ', 'Search part by name or number'),
+            onSearchTap: () => widget.onSwitchToInventory?.call(),
+          ),
+
+          // 2. Scrollable Dashboard Body
+          Expanded(
+            child: RefreshIndicator(
+              color: AdminColors.keraOrange,
+              onRefresh: () async {
+                ref.invalidate(partsStreamProvider);
+                ref.invalidate(salesSummaryProvider);
+                ref.invalidate(activeSalesStreamProvider);
+                ref.invalidate(pendingSyncCountProvider);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
               // 2. Offline / Sync Banner (1 Dashboard.png)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFFBEB),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF2D2305) : const Color(0xFFFFFBEB),
                   border: Border(
-                    bottom: BorderSide(color: Color(0xFFFEF3C7)),
+                    bottom: BorderSide(
+                      color: isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7),
+                    ),
                   ),
                 ),
                 child: Row(
@@ -90,11 +118,14 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'ከመስመር ውጭ · $pendingSync ለውጦች በመጠባበቅ ላይ',
-                      style: const TextStyle(
+                      context.tr(
+                        'ከመስመር ውጭ · $pendingSync ለውጦች በመጠባበቅ ላይ',
+                        'Offline · $pendingSync changes pending sync',
+                      ),
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF92400E),
+                        color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
                       ),
                     ),
                   ],
@@ -106,15 +137,15 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
                 child: Row(
                   children: [
-                    _buildTimeTab(0, 'ዛሬ'),
+                    _buildTimeTab(0, context.tr('ዛሬ', 'Today')),
                     const SizedBox(width: 24),
-                    _buildTimeTab(1, 'ይህ ሳምንት'),
+                    _buildTimeTab(1, context.tr('ይህ ሳምንት', 'This Week')),
                     const SizedBox(width: 24),
-                    _buildTimeTab(2, 'ይህ ወር'),
+                    _buildTimeTab(2, context.tr('ይህ ወር', 'This Month')),
                   ],
                 ),
               ),
-              const Divider(height: 16, color: Color(0xFFE2E8F0)),
+              Divider(height: 16, color: context.borderColor),
 
               // 4. Sales & Profit Highlights Row (1 Dashboard.png)
               Padding(
@@ -128,11 +159,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'ጠቅላላ ሽያጭ',
+                          Text(
+                            context.tr('ጠቅላላ ሽያጭ', 'Total Sales'),
                             style: TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF5E6D82),
+                              color: context.textSecondaryColor,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -142,19 +173,19 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                               children: [
                                 TextSpan(
                                   text: _formatNumber(totalSales),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0C2340),
+                                    color: context.textPrimaryColor,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
-                                const TextSpan(
+                                TextSpan(
                                   text: ' ETB',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0C2340),
+                                    color: context.textPrimaryColor,
                                   ),
                                 ),
                               ],
@@ -162,10 +193,13 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '$salesCount ሽያጮች · የግዢ ወጪ ${_formatNumber(costAmount)} ETB',
-                            style: const TextStyle(
+                            context.tr(
+                              '$salesCount ሽያጮች · የግዢ ወጪ ${_formatNumber(costAmount)} ETB',
+                              '$salesCount sales · Cost ${_formatNumber(costAmount)} ETB',
+                            ),
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF5E6D82),
+                              color: context.textSecondaryColor,
                             ),
                           ),
                         ],
@@ -176,11 +210,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Text(
-                          'የሚገመት ትርፍ',
+                        Text(
+                          context.tr('የሚገመት ትርፍ', 'Estimated Profit'),
                           style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF5E6D82),
+                            color: context.textSecondaryColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -226,7 +260,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.receipt_long_rounded,
-                            label: 'ሽያጭ መመዝገብ',
+                            label: context.tr('ሽያጭ መመዝገብ', 'Record Sale'),
                             isPrimary: true,
                             onTap: () => context.push('/sales/new'),
                           ),
@@ -236,7 +270,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.inventory_2_outlined,
-                            label: 'ዕቃዎች',
+                            label: context.tr('ዕቃዎች', 'Inventory'),
                             isPrimary: false,
                             onTap: () => widget.onSwitchToInventory?.call(),
                           ),
@@ -246,7 +280,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.add_rounded,
-                            label: 'ዕቃ መጨመር',
+                            label: context.tr('ዕቃ መጨመር', 'Add Part'),
                             isPrimary: false,
                             onTap: () => context.push('/parts/add'),
                           ),
@@ -260,7 +294,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.swap_vert_rounded,
-                            label: 'ክምችት ማስተካከል',
+                            label: context.tr('ክምችት ማስተካከል', 'Stock Levels'),
                             isPrimary: false,
                             onTap: () => context.push('/stock/low'),
                           ),
@@ -270,7 +304,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.history_rounded,
-                            label: 'የሽያጭ ታሪክ',
+                            label: context.tr('የሽያጭ ታሪክ', 'Sales History'),
                             isPrimary: false,
                             onTap: () => widget.onSwitchToSales?.call(),
                           ),
@@ -280,9 +314,15 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         Expanded(
                           child: _buildActionCard(
                             icon: Icons.bar_chart_rounded,
-                            label: 'ሪፖርት',
+                            label: context.tr('ሪፖርት', 'Reports'),
                             isPrimary: false,
-                            onTap: () => context.push('/reports'),
+                            onTap: () {
+                              if (widget.onSwitchToReports != null) {
+                                widget.onSwitchToReports!();
+                              } else {
+                                context.push('/reports');
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -301,9 +341,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7ED),
+                      color: isDark ? const Color(0xFF3B1D04) : const Color(0xFFFFF7ED),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFFED7AA)),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF9A3412) : const Color(0xFFFED7AA),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -312,19 +354,25 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${metrics?.lowStockCount ?? 16} ዕቃዎች ሊያልቅ ነው',
-                              style: const TextStyle(
+                              context.tr(
+                                '${metrics?.lowStockCount ?? 16} ዕቃዎች ሊያልቅ ነው',
+                                '${metrics?.lowStockCount ?? 16} items running low',
+                              ),
+                              style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2340),
+                                color: isDark ? Colors.white : const Color(0xFF0C2340),
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${metrics?.outOfStockCount ?? 3} ዕቃዎች አልቀዋል',
+                              context.tr(
+                                '${metrics?.outOfStockCount ?? 3} ዕቃዎች አልቀዋል',
+                                '${metrics?.outOfStockCount ?? 3} items out of stock',
+                              ),
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFFC2410C),
+                                color: Color(0xFFEA580C),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -332,7 +380,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         ),
                         const Icon(
                           Icons.chevron_right_rounded,
-                          color: Color(0xFFC2410C),
+                          color: Color(0xFFEA580C),
                           size: 24,
                         ),
                       ],
@@ -349,9 +397,9 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.cardBg,
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFE5EBF2)),
+                    border: Border.all(color: context.borderColor),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x060C2340),
@@ -363,19 +411,35 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'የቅርብ ሽያጮች',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0C2340),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            context.tr('የቅርብ ሽያጮች', 'Recent Sales'),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => widget.onSwitchToSales?.call(),
+                            child: Text(
+                              context.tr('ሁሉንም አሳይ', 'View All'),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AdminColors.keraOrange,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 14),
                       recentSalesAsync.when(
                         data: (sales) {
                           if (sales.isEmpty) {
-                            return _buildFallbackSalesList();
+                            return _buildEmptySalesList(context);
                           }
                           final recent = sales.take(3).toList();
                           return Column(
@@ -388,11 +452,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                                       child: Text(
                                         recent[i].items.isNotEmpty
                                             ? recent[i].items.first.partNameSnapshot
-                                            : 'ሽያጭ',
-                                        style: const TextStyle(
+                                            : context.tr('ሽያጭ', 'Sale'),
+                                        style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: Color(0xFF0C2340),
+                                          color: context.textPrimaryColor,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -400,22 +464,29 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                                     ),
                                     Text(
                                       '${_formatNumber(recent[i].totalAmount)} ETB',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF0C2340),
+                                        color: context.textPrimaryColor,
                                       ),
                                     ),
                                   ],
                                 ),
                                 if (i != recent.length - 1)
-                                  const Divider(height: 18, color: Color(0xFFF1F5F9)),
+                                  Divider(height: 18, color: context.borderColor),
                               ],
                             ],
                           );
                         },
-                        loading: () => _buildFallbackSalesList(),
-                        error: (err, stack) => _buildFallbackSalesList(),
+                        loading: () => Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: KeraLoadingIndicator(
+                              message: context.tr('ሽያጮችን በመጫን ላይ...', 'Loading sales...'),
+                            ),
+                          ),
+                        ),
+                        error: (err, stack) => _buildEmptySalesList(context),
                       ),
                     ],
                   ),
@@ -426,13 +497,17 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
           ),
         ),
       ),
-    );
-  }
+    ),
+  ],
+),
+);
+}
 
   Widget _buildTimeTab(int index, String label) {
     final isSelected = _selectedPeriod == index;
+    final isDark = context.isDark;
     return InkWell(
-      onTap: () => setState(() => _selectedPeriod = index),
+      onTap: () => _onPeriodChanged(index),
       child: Column(
         children: [
           Text(
@@ -440,7 +515,9 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? const Color(0xFF0C2340) : const Color(0xFF5E6D82),
+              color: isSelected
+                  ? (isDark ? Colors.white : const Color(0xFF0C2340))
+                  : context.textSecondaryColor,
             ),
           ),
           const SizedBox(height: 6),
@@ -463,6 +540,11 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     required bool isPrimary,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
+    final nonPrimaryBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final nonPrimaryText = isDark ? Colors.white : const Color(0xFF0C2340);
+    final nonPrimaryBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE5EBF2);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -470,10 +552,10 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
         height: 94,
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
         decoration: BoxDecoration(
-          color: isPrimary ? AdminColors.keraOrange : Colors.white,
+          color: isPrimary ? AdminColors.keraOrange : nonPrimaryBg,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isPrimary ? AdminColors.keraOrange : const Color(0xFFE5EBF2),
+            color: isPrimary ? AdminColors.keraOrange : nonPrimaryBorder,
           ),
           boxShadow: [
             BoxShadow(
@@ -491,7 +573,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             Icon(
               icon,
               size: 24,
-              color: isPrimary ? Colors.white : const Color(0xFF0C2340),
+              color: isPrimary ? Colors.white : nonPrimaryText,
             ),
             const SizedBox(height: 8),
             Text(
@@ -499,7 +581,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isPrimary ? Colors.white : const Color(0xFF0C2340),
+                color: isPrimary ? Colors.white : nonPrimaryText,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -511,37 +593,32 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
     );
   }
 
-  Widget _buildFallbackSalesList() {
-    return const Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildEmptySalesList(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
           children: [
+            Icon(Icons.receipt_long_outlined, size: 36, color: context.textSecondaryColor),
+            const SizedBox(height: 8),
             Text(
-              'የነዳጅ ማጣሪያ × 2',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF0C2340)),
+              context.tr('እስካሁን ምንም ሽያጭ አልተመዘገበም', 'No sales recorded yet'),
+              style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
             ),
-            Text(
-              '2,400 ETB',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0C2340)),
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/sales/new'),
+              icon: const Icon(Icons.add_rounded, size: 16),
+              label: Text(context.tr('የመጀመሪያ ሽያጭ መዝግብ', 'Record First Sale')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AdminColors.keraOrange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
           ],
         ),
-        Divider(height: 18, color: Color(0xFFF1F5F9)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'የፒስተን ቀለበት × 1',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF0C2340)),
-            ),
-            Text(
-              '3,500 ETB',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0C2340)),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 

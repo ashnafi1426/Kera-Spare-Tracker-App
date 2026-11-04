@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
 import '../../../stock/presentation/providers/stock_providers.dart';
@@ -171,6 +172,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     final cart = ref.watch(newSaleCartProvider);
     final totalAmount = cart.fold(0.0, (sum, i) => sum + i.lineTotal);
     final totalProfit = cart.fold(0.0, (sum, i) => sum + i.lineProfit);
@@ -178,14 +180,14 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
     final totalUnits = cart.fold(0.0, (sum, i) => sum + i.quantity);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         top: false,
         child: Column(
           children: [
             // 1. Navy Industrial App Header (4 Record sale.png)
             Container(
-              color: const Color(0xFF0C2340),
+              color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 8,
                 bottom: 16,
@@ -209,21 +211,21 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'ሽያጭ መመዝገብ',
-                              style: TextStyle(
+                              context.tr('ሽያጭ መመዝገብ', 'Record Sale'),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              'ከራ · Kera Spare Tracker',
-                              style: TextStyle(
+                              context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker'),
+                              style: const TextStyle(
                                 color: Color(0xFFA5B4CB),
                                 fontSize: 12,
                               ),
@@ -239,7 +241,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Text(
-                            '${cart.length} ዕቃዎች · ${totalUnits.toStringAsFixed(0)} ፍሬ',
+                            '${cart.length} ${context.tr("ዕቃዎች", "items")} · ${totalUnits.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -259,8 +261,11 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                       height: 46,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
                         borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        ),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x14000000),
@@ -269,20 +274,20 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 20),
-                          SizedBox(width: 10),
+                          Icon(Icons.search_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'ዕቃ ይፈልጉ ወይም ይጨምሩ...',
+                              context.tr('ዕቃ ይፈልጉ ወይም ይጨምሩ...', 'Search and add parts...'),
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                 fontSize: 14,
                               ),
                             ),
                           ),
-                          Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF0C2340), size: 20),
+                          Icon(Icons.qr_code_scanner_rounded, color: isDark ? const Color(0xFFF58220) : const Color(0xFF0C2340), size: 20),
                         ],
                       ),
                     ),
@@ -303,41 +308,44 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                             Container(
                               width: 80,
                               height: 80,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE2E8F0),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.add_shopping_cart_rounded,
                                 size: 40,
-                                color: Color(0xFF0C2340),
+                                color: isDark ? Colors.white70 : const Color(0xFF0C2340),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
-                              'ምንም ዕቃ አልተመረጠም',
+                            Text(
+                              context.tr('ምንም ዕቃ አልተመረጠም', 'No items selected'),
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0C2340),
+                                color: context.textPrimaryColor,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            const Text(
-                              'ሽያጭ ለመመዝገብ ከላይ ባለው መፈለጊያ ዕቃ ይምረጡ',
+                            Text(
+                              context.tr(
+                                'ሽያጭ ለመመዝገብ ከላይ ባለው መፈለጊያ ዕቃ ይምረጡ',
+                                'Select parts from the search bar above to record a sale',
+                              ),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF64748B),
+                                color: context.textSecondaryColor,
                               ),
                             ),
                             const SizedBox(height: 20),
                             ElevatedButton.icon(
                               onPressed: _openPartPicker,
                               icon: const Icon(Icons.search_rounded, size: 18),
-                              label: const Text('ዕቃ ምረጥ'),
+                              label: Text(context.tr('ዕቃ ምረጥ', 'Pick Parts')),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0C2340),
+                                backgroundColor: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 shape: RoundedRectangleBorder(
@@ -360,19 +368,19 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.cardBg,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFE5EBF2)),
+                            border: Border.all(color: context.borderColor),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'የክፍያ ዘዴ',
+                              Text(
+                                context.tr('የክፍያ ዘዴ', 'Payment Method'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF0C2340),
+                                  color: context.textPrimaryColor,
                                 ),
                               ),
                               const SizedBox(height: 10),
@@ -380,32 +388,40 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    _buildPaymentChip('ጥሬ ገንዘብ (Cash)', 'Cash', Icons.payments_rounded),
+                                    _buildPaymentChip(context.tr('ጥሬ ገንዘብ (Cash)', 'Cash'), 'Cash', Icons.payments_rounded),
                                     const SizedBox(width: 8),
                                     _buildPaymentChip('ቴሌብር (Telebirr)', 'Telebirr', Icons.phone_android_rounded),
                                     const SizedBox(width: 8),
                                     _buildPaymentChip('ባንክ (CBE)', 'CBE Birr', Icons.account_balance_rounded),
                                     const SizedBox(width: 8),
-                                    _buildPaymentChip('ብድር (Credit)', 'Credit', Icons.receipt_long_rounded),
+                                    _buildPaymentChip(context.tr('ብድር (Credit)', 'Credit'), 'Credit', Icons.receipt_long_rounded),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 12),
                               TextField(
                                 controller: _notesController,
+                                style: TextStyle(color: context.textPrimaryColor),
                                 decoration: InputDecoration(
-                                  hintText: 'ማስታወሻ ወይም የደንበኛ ስም (አማራጭ)...',
-                                  hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                                  prefixIcon: const Icon(Icons.note_alt_outlined, size: 18, color: Color(0xFF64748B)),
+                                  hintText: context.tr('ማስታወሻ ወይም የደንበኛ ስም (አማራጭ)...', 'Customer name or sale note (optional)...'),
+                                  hintStyle: TextStyle(
+                                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                    fontSize: 13,
+                                  ),
+                                  prefixIcon: Icon(Icons.note_alt_outlined, size: 18, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                   filled: true,
-                                  fillColor: const Color(0xFFF8FAFC),
+                                  fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    borderSide: BorderSide(color: context.borderColor),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                    borderSide: BorderSide(color: context.borderColor),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(color: Color(0xFFF58220)),
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                 ),
@@ -419,14 +435,14 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.cardBg,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFE5EBF2)),
-                            boxShadow: const [
+                            border: Border.all(color: context.borderColor),
+                            boxShadow: [
                               BoxShadow(
-                                color: Color(0x060C2340),
+                                color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
                                 blurRadius: 8,
-                                offset: Offset(0, 3),
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
@@ -435,18 +451,18 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'ጠቅላላ የመግዣ ዋጋ (Cost Price)',
+                                  Text(
+                                    context.tr('ጠቅላላ የመግዣ ዋጋ (Cost Price)', 'Total Cost Price'),
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: context.textSecondaryColor,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   Text(
                                     '${totalCost.toStringAsFixed(0)} ETB',
-                                    style: const TextStyle(
-                                      color: Color(0xFF0F172A),
+                                    style: TextStyle(
+                                      color: context.textPrimaryColor,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -457,43 +473,43 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'የተጣራ ትርፍ (Profit)',
+                                  Text(
+                                    context.tr('የተጣራ ትርፍ (Profit)', 'Net Profit'),
                                     style: TextStyle(
-                                      color: Color(0xFF16A34A),
+                                      color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   Text(
                                     '+${totalProfit.toStringAsFixed(0)} ETB',
-                                    style: const TextStyle(
-                                      color: Color(0xFF16A34A),
+                                    style: TextStyle(
+                                      color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
                               ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                child: Divider(height: 1, color: context.borderColor),
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    'ጠቅላላ ሂሳብ (Total)',
+                                  Text(
+                                    context.tr('ጠቅላላ ሂሳብ (Total)', 'Grand Total'),
                                     style: TextStyle(
-                                      color: Color(0xFF0C2340),
+                                      color: context.textPrimaryColor,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
                                     '${totalAmount.toStringAsFixed(0)} ETB',
-                                    style: const TextStyle(
-                                      color: Color(0xFF0C2340),
+                                    style: TextStyle(
+                                      color: context.textPrimaryColor,
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -509,20 +525,23 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFBFDBFE)),
+                            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE)),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.offline_bolt_rounded, size: 16, color: Color(0xFF1E40AF)),
-                              SizedBox(width: 8),
+                              Icon(Icons.offline_bolt_rounded, size: 16, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E40AF)),
+                              const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  'ከመስመር ውጭ ይሰራል · ኢንተርኔት ሲኖር በራስ-ሰር ይመሳሰላል',
+                                  context.tr(
+                                    'ከመስመር ውጭ ይሰራል · ኢንተርኔት ሲኖር በራስ-ሰር ይመሳሰላል',
+                                    'Works completely offline · Auto-syncs when online',
+                                  ),
                                   style: TextStyle(
-                                    color: Color(0xFF1E3A8A),
+                                    color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -543,9 +562,9 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
           ? null
           : Container(
               padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                border: Border(top: BorderSide(color: context.borderColor)),
               ),
               child: SizedBox(
                 height: 52,
@@ -560,19 +579,15 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                     ),
                   ),
                   child: _isSubmitting
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                        )
-                      : const Row(
+                      ? const KeraLoadingIndicator.small(color: Colors.white)
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle_outline_rounded, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(Icons.check_circle_outline_rounded, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'ሽያጭ አስቀምጥ',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              context.tr('ሽያጭ አስቀምጥ', 'Complete Sale'),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -584,16 +599,21 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
 
   Widget _buildPaymentChip(String label, String value, IconData icon) {
     final isSelected = _selectedPaymentMethod == value;
+    final isDark = context.isDark;
     return InkWell(
       onTap: () => setState(() => _selectedPaymentMethod = value),
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0C2340) : const Color(0xFFF8FAFC),
+          color: isSelected
+              ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
+              : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? const Color(0xFF0C2340) : const Color(0xFFE2E8F0),
+            color: isSelected
+                ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF0C2340))
+                : context.borderColor,
           ),
         ),
         child: Row(
@@ -602,7 +622,9 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
             ),
             const SizedBox(width: 6),
             Text(
@@ -610,7 +632,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF334155),
+                color: isSelected ? Colors.white : context.textPrimaryColor,
               ),
             ),
           ],
@@ -630,19 +652,20 @@ class _SaleLineItemCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartNotifier = ref.read(newSaleCartProvider.notifier);
     final location = item.part.customLocation ?? item.part.locationName ?? '';
+    final isDark = context.isDark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5EBF2)),
-        boxShadow: const [
+        border: Border.all(color: context.borderColor),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x060C2340),
+            color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
             blurRadius: 6,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -656,10 +679,10 @@ class _SaleLineItemCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   item.part.displayName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C2340),
+                    color: context.textPrimaryColor,
                   ),
                 ),
               ),
@@ -680,10 +703,10 @@ class _SaleLineItemCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${item.part.partNumber ?? 'Part'} · ${location.isNotEmpty ? 'መደርደሪያ $location' : 'መጋዘን'}',
-                  style: const TextStyle(
+                  '${item.part.partNumber ?? "Part"} · ${location.isNotEmpty ? "${context.tr("መደርደሪያ", "Shelf")} $location" : context.tr("መጋዘን", "Store")}',
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: context.textSecondaryColor,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -691,15 +714,18 @@ class _SaleLineItemCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'በክምችት ${item.part.cachedQuantity.toStringAsFixed(0)} ፍሬ',
-                  style: const TextStyle(
+                  context.tr(
+                    'በክምችት ${item.part.cachedQuantity.toStringAsFixed(0)} ፍሬ',
+                    '${item.part.cachedQuantity.toStringAsFixed(0)} in stock',
+                  ),
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569),
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                   ),
                 ),
               ),
@@ -724,21 +750,21 @@ class _SaleLineItemCard extends ConsumerWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                        border: Border.all(color: context.borderColor),
                       ),
-                      child: const Icon(Icons.remove_rounded, size: 16, color: Color(0xFF0C2340)),
+                      child: Icon(Icons.remove_rounded, size: 16, color: context.textPrimaryColor),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Text(
                       item.quantity.toStringAsFixed(0),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0C2340),
+                        color: context.textPrimaryColor,
                       ),
                     ),
                   ),
@@ -752,7 +778,7 @@ class _SaleLineItemCard extends ConsumerWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0C2340),
+                        color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.add_rounded, size: 16, color: Colors.white),
@@ -764,10 +790,10 @@ class _SaleLineItemCard extends ConsumerWidget {
               // Subtotal on right
               Text(
                 '${item.lineTotal.toStringAsFixed(0)} ETB',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0C2340),
+                  color: context.textPrimaryColor,
                 ),
               ),
             ],
@@ -801,9 +827,10 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
   Widget build(BuildContext context) {
     final partsAsync = ref.watch(partsStreamProvider);
     final cartNotifier = ref.read(newSaleCartProvider.notifier);
+    final isDark = context.isDark;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBg,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       clipBehavior: Clip.antiAlias,
       child: Container(
@@ -817,7 +844,7 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -825,16 +852,16 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'ዕቃ ይፈልጉ እና ይጨምሩ',
+                Text(
+                  context.tr('ዕቃ ይፈልጉ እና ይጨምሩ', 'Search & Add Part'),
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C2340),
+                    color: context.textPrimaryColor,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                  icon: Icon(Icons.close_rounded, color: context.textSecondaryColor),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -844,13 +871,17 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
             // Search Field
             TextField(
               controller: _searchController,
+              style: TextStyle(color: context.textPrimaryColor),
               decoration: InputDecoration(
-                hintText: 'በስም፣ በቁጥር ወይም በብራንድ ፈልግ...',
-                hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
-                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF64748B)),
+                hintText: context.tr('በስም፣ በቁጥር ወይም በብራንድ ፈልግ...', 'Search by name, part no, or brand...'),
+                hintStyle: TextStyle(
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  fontSize: 13,
+                ),
+                prefixIcon: Icon(Icons.search_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                 suffixIcon: _query.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        icon: Icon(Icons.clear_rounded, size: 18, color: context.textSecondaryColor),
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _query = '');
@@ -858,7 +889,7 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFFF1F5F9),
+                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -882,10 +913,10 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                   }).toList();
 
                   if (filtered.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        'ምንም ዕቃ አልተገኘም',
-                        style: TextStyle(color: Color(0xFF64748B)),
+                        context.tr('ምንም ዕቃ አልተገኘም', 'No items found'),
+                        style: TextStyle(color: context.textSecondaryColor),
                       ),
                     );
                   }
@@ -908,9 +939,9 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: context.cardBg,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: context.borderColor),
                           ),
                           child: Row(
                             children: [
@@ -918,10 +949,14 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                                 width: 42,
                                 height: 42,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF1F5F9),
+                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF475569), size: 22),
+                                child: Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                                  size: 22,
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -930,11 +965,18 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                                   children: [
                                     Text(
                                       part.displayName,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: context.textPrimaryColor,
+                                      ),
                                     ),
                                     Text(
-                                      '${part.partNumber ?? 'No OEM'} · ${part.brandName ?? 'Generic'}',
-                                      style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                      '${part.partNumber ?? "No OEM"} · ${part.brandName ?? "Generic"}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.textSecondaryColor,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -944,15 +986,25 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                                 children: [
                                   Text(
                                     '${price.toStringAsFixed(0)} ETB',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0C2340)),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: context.textPrimaryColor,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    isOut ? 'አልቋል' : '${part.cachedQuantity.toStringAsFixed(0)} በክምችት',
+                                    isOut
+                                        ? context.tr('አልቋል', 'Out of stock')
+                                        : '${part.cachedQuantity.toStringAsFixed(0)} ${context.tr("በክምችት", "in stock")}',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: isOut ? const Color(0xFFDC2626) : isLow ? const Color(0xFFD97706) : const Color(0xFF16A34A),
+                                      color: isOut
+                                          ? const Color(0xFFDC2626)
+                                          : isLow
+                                              ? const Color(0xFFD97706)
+                                              : const Color(0xFF16A34A),
                                     ),
                                   ),
                                 ],
@@ -964,8 +1016,12 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                     },
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
+                loading: () => Center(
+                  child: KeraLoadingIndicator(
+                    label: context.tr('ዕቃዎችን በመፈለግ ላይ...', 'Searching parts...'),
+                  ),
+                ),
+                error: (e, _) => Center(child: Text('Error: $e', style: TextStyle(color: context.textSecondaryColor))),
               ),
             ),
           ],

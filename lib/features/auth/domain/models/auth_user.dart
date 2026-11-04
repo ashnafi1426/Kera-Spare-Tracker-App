@@ -8,6 +8,7 @@ class AuthUser {
   final bool mustChangePassword;
   final String status;
   final String? suspendedReason;
+  final String? avatarUrl;
 
   const AuthUser({
     required this.id,
@@ -18,6 +19,7 @@ class AuthUser {
     this.mustChangePassword = false,
     this.status = 'ACTIVE',
     this.suspendedReason,
+    this.avatarUrl,
   });
 
   bool get isAdmin => role.toLowerCase() == 'admin';
@@ -33,6 +35,7 @@ class AuthUser {
     bool? mustChangePassword,
     String? status,
     String? suspendedReason,
+    String? avatarUrl,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -43,6 +46,7 @@ class AuthUser {
       mustChangePassword: mustChangePassword ?? this.mustChangePassword,
       status: status ?? this.status,
       suspendedReason: suspendedReason ?? this.suspendedReason,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 
@@ -55,6 +59,7 @@ class AuthUser {
         'must_change_password': mustChangePassword,
         'status': status,
         'suspended_reason': suspendedReason,
+        'avatar_url': avatarUrl,
       };
 
   factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
@@ -66,11 +71,12 @@ class AuthUser {
         mustChangePassword: json['must_change_password'] == true || json['mustChangePassword'] == true,
         status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),
         suspendedReason: (json['suspended_reason'] ?? json['suspendedReason']) as String?,
+        avatarUrl: (json['avatar_url'] ?? json['avatarUrl']) as String?,
       );
 
   @override
   String toString() =>
-      'AuthUser(id: $id, ownerId: $ownerId, phone: $phoneNumber, business: $businessName, role: $role, mustChangePassword: $mustChangePassword, status: $status, suspendedReason: $suspendedReason)';
+      'AuthUser(id: $id, ownerId: $ownerId, phone: $phoneNumber, business: $businessName, role: $role, mustChangePassword: $mustChangePassword, status: $status, suspendedReason: $suspendedReason, avatarUrl: $avatarUrl)';
 
   @override
   bool operator ==(Object other) {
@@ -83,7 +89,8 @@ class AuthUser {
         other.role == role &&
         other.mustChangePassword == mustChangePassword &&
         other.status == status &&
-        other.suspendedReason == suspendedReason;
+        other.suspendedReason == suspendedReason &&
+        other.avatarUrl == avatarUrl;
   }
 
   @override
@@ -96,5 +103,6 @@ class AuthUser {
         mustChangePassword,
         status,
         suspendedReason,
+        avatarUrl,
       );
 }

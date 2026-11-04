@@ -35,7 +35,8 @@ final appLockStateProvider =
 enum AppLockTimeout {
   immediately(0),
   oneMinute(60),
-  fiveMinutes(300);
+  fiveMinutes(300),
+  fifteenMinutes(900);
 
   final int seconds;
   const AppLockTimeout(this.seconds);

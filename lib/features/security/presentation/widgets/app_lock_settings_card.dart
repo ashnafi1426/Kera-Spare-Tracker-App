@@ -93,9 +93,10 @@ class AppLockSettingsCard extends ConsumerWidget {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(switch (lockState.timeout) {
-                AppLockTimeout.immediately => l10n.appLockTimeoutImmediately,
-                AppLockTimeout.oneMinute => l10n.appLockTimeout1Min,
-                AppLockTimeout.fiveMinutes => l10n.appLockTimeout5Min,
+                AppLockTimeout.immediately => context.tr('ወዲያውኑ', 'Immediately'),
+                AppLockTimeout.oneMinute => context.tr('ከ1 ደቂቃ በኋላ', 'After 1 minute'),
+                AppLockTimeout.fiveMinutes => context.tr('ከ5 ደቂቃ በኋላ', 'After 5 minutes'),
+                AppLockTimeout.fifteenMinutes => context.tr('ከ15 ደቂቃ በኋላ', 'After 15 minutes'),
               }),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _showTimeoutDialog(context, ref, lockState.timeout),
@@ -271,9 +272,10 @@ class AppLockSettingsCard extends ConsumerWidget {
         title: Text(l10n.appLockTimeout),
         children: AppLockTimeout.values.map((timeout) {
           final title = switch (timeout) {
-            AppLockTimeout.immediately => l10n.appLockTimeoutImmediately,
-            AppLockTimeout.oneMinute => l10n.appLockTimeout1Min,
-            AppLockTimeout.fiveMinutes => l10n.appLockTimeout5Min,
+            AppLockTimeout.immediately => context.tr('ወዲያውኑ', 'Immediately'),
+            AppLockTimeout.oneMinute => context.tr('ከ1 ደቂቃ በኋላ', 'After 1 minute'),
+            AppLockTimeout.fiveMinutes => context.tr('ከ5 ደቂቃ በኋላ', 'After 5 minutes'),
+            AppLockTimeout.fifteenMinutes => context.tr('ከ15 ደቂቃ በኋላ', 'After 15 minutes'),
           };
           return SimpleDialogOption(
             onPressed: () {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,14 +7,20 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/announcement_banner_widget.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/maintenance_banner_widget.dart';
 import '../../../../core/widgets/suspended_account_banner_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../settings/data/services/export_backup_service.dart';
 import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/inventory_providers.dart';
+import '../providers/metadata_providers.dart';
+import '../providers/parts_providers.dart';
+import '../widgets/inventory_filter_sheet.dart';
 
 /// Stitch Screen 12: Inventory Overview (የዕቃዎች ዝርዝር).
 ///
@@ -166,7 +173,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
+      backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
@@ -222,11 +229,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required dynamic l10n,
     required InventoryFilter filter,
   }) {
-    final businessName = authUser?.businessName ?? 'ተስፋዬ እና ልጆቹ';
+    final businessName = authUser?.businessName ?? context.tr('ተስፋዬ እና ልጆቹ', 'Tesfaye & Sons');
     final partsCount = ref.watch(inventoryListProvider).items.length;
+    final isDark = context.isDark;
 
     return Container(
-      color: const Color(0xFF0C2340),
+      color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
         bottom: 16,
@@ -273,9 +281,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Text(
-                      'ከራ · Kera Spare Tracker',
-                      style: TextStyle(
+                    Text(
+                      context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker'),
+                      style: const TextStyle(
                         color: Color(0xFFA5B4CB),
                         fontSize: 12,
                       ),
@@ -283,6 +291,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ],
                 ),
               ),
+              const SizedBox(width: 6),
+              const OwnerThemeToggle(),
+              const SizedBox(width: 6),
+              const OwnerLanguageToggle(),
             ],
           ),
           const SizedBox(height: 16),
@@ -295,16 +307,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'ዕቃዎች',
-                    style: TextStyle(
+                  Text(
+                    context.tr('ዕቃዎች', 'Inventory'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '$partsCount ዕቃዎች',
+                    context.tr('$partsCount ዕቃዎች', '$partsCount items'),
                     style: const TextStyle(
                       color: Color(0xFFA5B4CB),
                       fontSize: 13,
@@ -321,7 +333,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      pendingSync == 0 ? 'ተመሳስሏል' : 'ያልተመሳሰለ $pendingSync',
+                      pendingSync == 0
+                          ? context.tr('ተመሳስሏል', 'Synced')
+                          : context.tr('ያልተመሳሰለ $pendingSync', 'Pending $pendingSync'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -331,10 +345,20 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                   const SizedBox(width: 8),
                   InkWell(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Exporting CSV...')),
-                      );
+                    onTap: () async {
+                      final ownerId = ref.read(currentOwnerIdProvider);
+                      if (ownerId.isEmpty) return;
+                      try {
+                        context.showSnackBar(context.tr('ወደ ውጭ በመላክ ላይ...', 'Exporting CSV...'));
+                        final file = await ref.read(exportBackupServiceProvider).exportInventoryCsv(ownerId: ownerId);
+                        if (context.mounted) {
+                          context.showSnackBar(context.tr('ፋይል ተቀምጧል: ${file.path}', 'File exported: ${file.path}'));
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          context.showSnackBar(context.tr('ወደ ውጭ መላክ አልተሳካም: $e', 'Export failed: $e'), isError: true);
+                        }
+                      }
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
@@ -343,14 +367,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         border: Border.all(color: Colors.white54),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.download_rounded, color: Colors.white, size: 16),
-                          SizedBox(width: 4),
+                          const Icon(Icons.download_rounded, color: Colors.white, size: 16),
+                          const SizedBox(width: 4),
                           Text(
-                            'ወደ ውጭ ላክ',
-                            style: TextStyle(
+                            context.tr('ወደ ውጭ ላክ', 'Export'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -360,6 +384,36 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                     ),
                   ),
+                  if (kDebugMode) ...[
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: _handleSeedParts,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7941D).withValues(alpha: 0.25),
+                          border: Border.all(color: const Color(0xFFF7941D)),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.science_rounded, color: Color(0xFFF7941D), size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              context.tr('ናሙና (Dev)', 'Sample (Dev)'),
+                              style: const TextStyle(
+                                color: Color(0xFFF7941D),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -374,11 +428,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildSearchBar(dynamic l10n) {
+    final isDark = context.isDark;
     return Container(
       height: 46,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x14000000),
@@ -390,21 +448,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: _onSearchChanged,
-        style: const TextStyle(color: Color(0xFF0F172A), fontSize: 14),
+        style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
         decoration: InputDecoration(
-          hintText: 'ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ',
-          hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
-          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 20),
+          hintText: context.tr('ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ', 'Search name, OEM, brand, shelf...'),
+          hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontSize: 13),
+          prefixIcon: Icon(Icons.search_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
           suffixIcon: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (_searchController.text.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 18, color: Color(0xFF64748B)),
+                  icon: Icon(Icons.clear_rounded, size: 18, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                   onPressed: _onClearSearch,
                 ),
               IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18, color: Color(0xFF64748B)),
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18, color: Color(0xFFF58220)),
                 tooltip: 'Scan barcode',
                 onPressed: _showBarcodeScannerModal,
               ),
@@ -423,51 +481,113 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     dynamic l10n,
     ColorScheme colorScheme,
   ) {
+    final partsList = ref.watch(partsStreamProvider).value ?? [];
+    final allCount = partsList.length;
+    final inStockCount = partsList.where((p) => p.isInStock).length;
+    final lowStockCount = partsList.where((p) => p.isLowStock).length;
+    final outOfStockCount = partsList.where((p) => p.isOutOfStock).length;
+    final activeFilterCount = filter.filterCount;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
+          // Filter Sheet Launcher button with active badge
+          InkWell(
+            onTap: () => InventoryFilterSheet.show(context),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: activeFilterCount > 0
+                    ? const Color(0xFFF7941D)
+                    : (context.isDark ? const Color(0xFF1E293B) : Colors.white),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: activeFilterCount > 0
+                      ? const Color(0xFFF7941D)
+                      : (context.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.tune_rounded,
+                    size: 16,
+                    color: activeFilterCount > 0 ? Colors.white : context.textPrimaryColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    context.tr('አጣራ', 'Filters'),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: activeFilterCount > 0 ? Colors.white : context.textPrimaryColor,
+                    ),
+                  ),
+                  if (activeFilterCount > 0) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '$activeFilterCount',
+                        style: const TextStyle(
+                          color: Color(0xFFF7941D),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // All (ሁሉም) Chip
           _buildPillChip(
-            label: 'ሁሉም',
-            isSelected: filter.stockFilter == StockFilter.all && filter.brandId == null,
+            label: context.tr('ሁሉም ($allCount)', 'All ($allCount)'),
+            isSelected: filter.stockFilter == StockFilter.all,
             onTap: () {
               ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.all);
             },
           ),
           const SizedBox(width: 8),
+
+          // In Stock (ክምችት ያለው) Chip
           _buildPillChip(
-            label: 'CAT',
-            isSelected: filter.query?.toLowerCase() == 'cat',
+            label: context.tr('ክምችት ያለው ($inStockCount)', 'In Stock ($inStockCount)'),
+            isSelected: filter.stockFilter == StockFilter.inStock,
             onTap: () {
-              _searchController.text = 'CAT';
-              ref.read(inventoryFilterProvider.notifier).setQuery('CAT');
+              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.inStock);
             },
           ),
           const SizedBox(width: 8),
+
+          // Low Stock (ሊያልቅ ነው) Chip
           _buildPillChip(
-            label: 'Doosan',
-            isSelected: filter.query?.toLowerCase() == 'doosan',
-            onTap: () {
-              _searchController.text = 'Doosan';
-              ref.read(inventoryFilterProvider.notifier).setQuery('Doosan');
-            },
-          ),
-          const SizedBox(width: 8),
-          _buildPillChip(
-            label: 'SANY',
-            isSelected: filter.query?.toLowerCase() == 'sany',
-            onTap: () {
-              _searchController.text = 'SANY';
-              ref.read(inventoryFilterProvider.notifier).setQuery('SANY');
-            },
-          ),
-          const SizedBox(width: 8),
-          _buildPillChip(
-            label: 'ሊያልቅ ነው',
+            label: context.tr('ሊያልቅ ነው ($lowStockCount)', 'Low Stock ($lowStockCount)'),
             isSelected: filter.stockFilter == StockFilter.lowStock,
             isWarningPill: true,
             onTap: () {
               ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.lowStock);
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Out of Stock (ያለቀ) Chip
+          _buildPillChip(
+            label: context.tr('ያለቀ ($outOfStockCount)', 'Out of Stock ($outOfStockCount)'),
+            isSelected: filter.stockFilter == StockFilter.outOfStock,
+            isErrorPill: true,
+            onTap: () {
+              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.outOfStock);
             },
           ),
         ],
@@ -479,8 +599,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required String label,
     required bool isSelected,
     bool isWarningPill = false,
+    bool isErrorPill = false,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -488,17 +610,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF0C2340)
+              ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
               : isWarningPill
-                  ? const Color(0xFFFEF3C7)
-                  : Colors.white,
+                  ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
+                  : isErrorPill
+                      ? (isDark ? const Color(0xFF4C0519) : const Color(0xFFFFE4E6))
+                      : (isDark ? const Color(0xFF1E293B) : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF0C2340)
+                ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF0C2340))
                 : isWarningPill
-                    ? const Color(0xFFFDE68A)
-                    : const Color(0xFFE2E8F0),
+                    ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
+                    : isErrorPill
+                        ? (isDark ? const Color(0xFF9F1239) : const Color(0xFFFECDD3))
+                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
           ),
         ),
         child: Text(
@@ -509,8 +635,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             color: isSelected
                 ? Colors.white
                 : isWarningPill
-                    ? const Color(0xFFD97706)
-                    : const Color(0xFF0C2340),
+                    ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
+                    : isErrorPill
+                        ? (isDark ? const Color(0xFFFB7185) : const Color(0xFFE11D48))
+                        : context.textPrimaryColor,
           ),
         ),
       ),
@@ -524,8 +652,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     dynamic l10n,
   ) {
     if (state.isLoading && state.items.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: KeraColors.actionBlue),
+      return KeraLoadingView(
+        message: context.tr('ዕቃዎችን በመጫን ላይ...', 'Loading inventory items...'),
       );
     }
 
@@ -542,7 +670,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Text(
                 state.errorMessage!,
                 textAlign: TextAlign.center,
-                style: KeraTypography.bodyMedium(),
+                style: KeraTypography.bodyMedium(color: context.textPrimaryColor),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -593,7 +721,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: CircularProgressIndicator(strokeWidth: 2.5),
+                child: KeraLoadingIndicator.small(),
               ),
             );
           }
@@ -613,7 +741,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: CircularProgressIndicator(strokeWidth: 2.5),
+              child: KeraLoadingIndicator.small(),
             ),
           );
         }
@@ -626,6 +754,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget _buildProductCard(PartItem part, {required bool isGrid}) {
     final isOutOfStock = part.isOutOfStock || part.cachedQuantity <= 0;
     final isLowStock = !isOutOfStock && (part.isLowStock || part.cachedQuantity <= 5);
+    final isDark = context.isDark;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -639,14 +768,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5EBF2)),
-          boxShadow: const [
+          border: Border.all(color: context.borderColor),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x060C2340),
+              color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
               blurRadius: 8,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -657,12 +786,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.inventory_2_outlined,
-                color: Color(0xFF5E6D82),
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF5E6D82),
                 size: 24,
               ),
             ),
@@ -675,30 +804,30 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 children: [
                   Text(
                     part.displayName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0C2340),
+                      color: context.textPrimaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'ቁጥር ${part.partNumber ?? '-'} · ${part.brandName ?? 'CAT'}',
-                    style: const TextStyle(
+                    '${context.tr("ቁጥር", "No.")} ${part.partNumber ?? '-'} · ${part.brandName ?? "CAT"}',
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF5E6D82),
+                      color: context.textSecondaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    part.customLocation ?? 'ሸልፍ 1',
-                    style: const TextStyle(
+                    part.customLocation ?? context.tr('ሸልፍ 1', 'Shelf 1'),
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF5E6D82),
+                      color: context.textSecondaryColor,
                     ),
                   ),
                 ],
@@ -712,18 +841,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               children: [
                 Text(
                   '${(part.sellingPrice ?? 1200).toStringAsFixed(0)} ETB',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C2340),
+                    color: context.textPrimaryColor,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${part.cachedQuantity.toStringAsFixed(0)} ፍሬ',
-                  style: const TextStyle(
+                  '${part.cachedQuantity.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF5E6D82),
+                    color: context.textSecondaryColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -731,26 +860,26 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: isOutOfStock
-                        ? const Color(0xFFFEE2E2)
+                        ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
                         : isLowStock
-                            ? const Color(0xFFFEF3C7)
-                            : const Color(0xFFDCFCE7),
+                            ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
+                            : (isDark ? const Color(0xFF052E16) : const Color(0xFFDCFCE7)),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     isOutOfStock
-                        ? 'አልቋል'
+                        ? context.tr('አልቋል', 'Out of Stock')
                         : isLowStock
-                            ? 'ሊያልቅ ነው'
-                            : 'በቂ',
+                            ? context.tr('ሊያልቅ ነው', 'Low Stock')
+                            : context.tr('በቂ', 'In Stock'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: isOutOfStock
-                          ? const Color(0xFFDC2626)
+                          ? (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626))
                           : isLowStock
-                              ? const Color(0xFFD97706)
-                              : const Color(0xFF16A34A),
+                              ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
+                              : (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
                     ),
                   ),
                 ),

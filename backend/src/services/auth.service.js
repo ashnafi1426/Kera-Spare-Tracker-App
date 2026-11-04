@@ -326,7 +326,7 @@ export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }
       mustChangePassword: user.mustChangePassword,
     },
     accessToken,
-    accessTokenExpiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    accessTokenExpiresAt: new Date(Date.now() + config.accessTokenMinutes * 60 * 1000).toISOString(),
     refreshToken,
     refreshTokenExpiresAt: expiresAt.toISOString(),
     offlineMaxDays: config.offlineMaxDays,

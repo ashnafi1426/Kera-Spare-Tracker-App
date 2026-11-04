@@ -3,20 +3,27 @@ import 'package:flutter/material.dart';
 /// Centralized color palette from Google Stitch Design System
 /// for Kera Spare Tracker mobile app.
 ///
-/// Tailored for high-density, high-contrast, dust-resilient automotive
-/// retail operations in Kera, Addis Ababa.
+/// Brand specifications:
+/// - Brand Navy: #0B2A5B
+/// - Accent Orange: #F7941D
 class KeraColors {
   KeraColors._();
 
   // --- Brand & Structural Palette ---
   /// Deep Industrial Navy - Top application bar, master headers, structural anchors.
-  static const Color primaryNavy = Color(0xFF172B4D);
+  static const Color primaryNavy = Color(0xFF0B2A5B);
 
   /// Deep Navy Light / Secondary container.
-  static const Color primaryNavyLight = Color(0xFF1E3A8A);
+  static const Color primaryNavyLight = Color(0xFF163E7D);
 
   /// Deepest Navy structural anchor.
-  static const Color primaryNavyDark = Color(0xFF001637);
+  static const Color primaryNavyDark = Color(0xFF071B3B);
+
+  /// Brand Accent Orange (CTA buttons, key highlights, active pills)
+  static const Color keraOrange = Color(0xFFF7941D);
+  static const Color brandOrange = Color(0xFFF7941D);
+  static const Color keraOrangeDark = Color(0xFFD67B0E);
+  static const Color keraOrangeTint = Color(0x26F7941D); // ~15% alpha
 
   // Aliases for token consistency across modules
   static const Color backgroundLight = surfaceCanvas;
@@ -53,10 +60,10 @@ class KeraColors {
   static const Color utilityTealTint = Color(0x260D9488);
 
   // --- Surface & Canvas Hierarchy ---
-  /// Level 0: Root foundational neutral canvas, low-glare background.
+  /// Level 0: Root foundational neutral canvas, low-glare background (Light Mode).
   static const Color surfaceCanvas = Color(0xFFF8FAFC);
 
-  /// Level 1: Cards, list rows, static containers with crisp 1px borders.
+  /// Level 1: Cards, list rows, static containers with crisp 1px borders (Light Mode).
   static const Color surfacePure = Color(0xFFFFFFFF);
 
   /// Level 1.5: Secondary pill surfaces, table headers, inactive rows.
@@ -69,7 +76,7 @@ class KeraColors {
   static const Color surfaceContainerHighest = Color(0xFFE0E3E5);
 
   // --- Outlines & Dividers ---
-  /// Standard 1px card and container border.
+  /// Standard 1px card and container border (Light Mode).
   static const Color outlineBorder = Color(0xFFE2E8F0);
 
   /// Alias for outlineBorder
@@ -79,11 +86,11 @@ class KeraColors {
   static const Color outlineVariant = Color(0xFFCBD5E1);
 
   // --- High-Contrast Typography ---
-  /// Headers, part titles, primary prices.
-  static const Color textPrimary = Color(0xFF191C1E);
+  /// Headers, part titles, primary prices (Light Mode).
+  static const Color textPrimary = Color(0xFF0B2A5B);
 
-  /// Part numbers, shelf locations, bilingual subtitles.
-  static const Color textSecondary = Color(0xFF64748B);
+  /// Part numbers, shelf locations, bilingual subtitles (Light Mode).
+  static const Color textSecondary = Color(0xFF5E6D82);
 
   /// Placeholders, helper hints, disabled labels.
   static const Color textMuted = Color(0xFF94A3B8);
@@ -129,7 +136,7 @@ class KeraColors {
   static const Color warningBg = Color(0xFFFEF3C7);
 
   /// Success foreground.
-  static const Color success = Color(0xFF16A34A);
+  static const Color success = Color(0xFF10B981);
   /// Success container background.
   static const Color successBg = Color(0xFFDCFCE7);
 
@@ -144,32 +151,32 @@ class KeraColors {
 
   /// Subtle Level 1 card elevation shadow.
   static const BoxShadow shadowLevel1 = BoxShadow(
-    color: Color(0x0D172B4D), // 5% navy
-    blurRadius: 2,
+    color: Color(0x0D0B2A5B), // 5% navy
+    blurRadius: 3,
     offset: Offset(0, 1),
   );
 
   /// Raised Level 2 search bar and FAB elevation shadow.
   static const BoxShadow shadowLevel2 = BoxShadow(
-    color: Color(0x14172B4D), // 8% navy
-    blurRadius: 6,
+    color: Color(0x140B2A5B), // 8% navy
+    blurRadius: 8,
     offset: Offset(0, 4),
   );
 
   /// Overlay Level 3 modal sheet elevation shadow.
   static const BoxShadow shadowLevel3 = BoxShadow(
-    color: Color(0x1F172B4D), // 12% navy
-    blurRadius: 15,
+    color: Color(0x220B2A5B), // 13% navy
+    blurRadius: 18,
     offset: Offset(0, 10),
   );
 
   // --- Dark Theme Tokens ---
-  static const Color darkCanvas = Color(0xFF0E1621);
-  static const Color darkCard = Color(0xFF152233);
-  static const Color darkCardElevated = Color(0xFF1C2C42);
-  static const Color darkBorder = Color(0xFF2A3B52);
-  static const Color darkTextPrimary = Color(0xFFEAF0F7);
-  static const Color darkTextSecondary = Color(0xFF9FB0C3);
+  static const Color darkCanvas = Color(0xFF071322);
+  static const Color darkCard = Color(0xFF102138);
+  static const Color darkCardElevated = Color(0xFF182D4A);
+  static const Color darkBorder = Color(0xFF1E385C);
+  static const Color darkTextPrimary = Color(0xFFF1F5F9);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
   static const Color darkTextMuted = Color(0xFF64748B);
 
   // --- Theme-Aware Dynamic Color Resolvers ---
@@ -197,4 +204,3 @@ class KeraColors {
   static Color textSubtle(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : textSecondary;
 }
-

@@ -7,6 +7,7 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/app_picker_bottom_sheet.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/models/picker_item.dart';
 import '../providers/metadata_providers.dart';
@@ -496,10 +497,10 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF334155),
+              color: context.textPrimaryColor,
             ),
           ),
           if (isRequired)
@@ -521,37 +522,42 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
     Widget? suffixIcon,
     String? suffixText,
   }) {
+    final isDark = context.isDark;
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+      hintStyle: TextStyle(
+        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+        fontSize: 13,
+      ),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       suffixText: suffixText,
-      suffixStyle: const TextStyle(
+      suffixStyle: TextStyle(
         fontWeight: FontWeight.bold,
-        color: Color(0xFF64748B),
+        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         fontSize: 13,
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: context.cardBg,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+        borderSide: BorderSide(color: context.borderColor),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderSide: BorderSide(color: context.borderColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF0C2340), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFFF58220), width: 1.5),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
     final cost = double.tryParse(_purchasePriceController.text.trim());
     final sell = double.tryParse(_sellingPriceController.text.trim());
     final hasPriceInputs = sell != null && sell > 0;
@@ -570,9 +576,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF4F7FB),
+        backgroundColor: context.scaffoldBg,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0C2340),
+          backgroundColor: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
           foregroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
@@ -585,7 +591,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
             },
           ),
           title: Text(
-            isEditing ? 'ዕቃ ማስተካከል' : 'ዕቃ መጨመር',
+            isEditing
+                ? context.tr('ዕቃ ማስተካከል', 'Edit Spare Part')
+                : context.tr('ዕቃ መጨመር', 'Add Spare Part'),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 19,
@@ -595,8 +603,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
           centerTitle: false,
         ),
         body: _isLoading && !_isInitialized
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0C2340)),
+            ? KeraLoadingView(
+                message: context.tr('የዕቃ መረጃ በመጫን ላይ...', 'Loading part details...'),
               )
             : Form(
                 key: _formKey,
@@ -609,17 +617,17 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                       child: Container(
                         height: 110,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.cardBg,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFFCBD5E1),
+                            color: context.borderColor,
                             width: 1.5,
                           ),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
-                              color: Color(0x060C2340),
+                              color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
                               blurRadius: 6,
-                              offset: Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -654,28 +662,28 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFEFF6FF),
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.camera_alt_outlined,
-                                      color: Color(0xFF0C2340),
+                                      color: isDark ? Colors.white : const Color(0xFF0C2340),
                                       size: 24,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
-                                    'ፎቶ ጨምር (አማራጭ)',
+                                  Text(
+                                    context.tr('ፎቶ ጨምር (አማራጭ)', 'Add Photo (Optional)'),
                                     style: TextStyle(
-                                      color: Color(0xFF0C2340),
+                                      color: context.textPrimaryColor,
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const Text(
-                                    'ካሜራ ወይም ከስልክ ማዕከለ-ስዕላት ምረጥ',
+                                  Text(
+                                    context.tr('ካሜራ ወይም ከስልክ ማዕከለ-ስዕላት ምረጥ', 'Take photo or choose from gallery'),
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: context.textSecondaryColor,
                                       fontSize: 11,
                                     ),
                                   ),
@@ -689,19 +697,28 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                        ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF1E40AF)),
-                          SizedBox(width: 8),
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E40AF),
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'ሁሉም መስኮች አማራጭ ናቸው — ባዶ ትተው ማስቀመጥ ይችላሉ።',
+                              context.tr(
+                                'ሁሉም መስኮች አማራጭ ናቸው — ባዶ ትተው ማስቀመጥ ይችላሉ።',
+                                'All fields are optional — you can save with partial information.',
+                              ),
                               style: TextStyle(
-                                color: Color(0xFF1E3A8A),
+                                color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -713,29 +730,31 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                     const SizedBox(height: 16),
 
                     // 3. Name field
-                    _buildFieldLabel('የዕቃ ስም', isRequired: false),
+                    _buildFieldLabel(context.tr('የዕቃ ስም', 'Part Name'), isRequired: false),
                     TextFormField(
                       controller: _nameController,
                       textCapitalization: TextCapitalization.words,
+                      style: TextStyle(color: context.textPrimaryColor),
                       decoration: _inputDecoration(
-                        hintText: 'ምሳሌ፦ ዘይት ፊልተር (Oil Filter)',
-                        prefixIcon: const Icon(Icons.build_circle_outlined, color: Color(0xFF64748B), size: 20),
+                        hintText: context.tr('ምሳሌ፦ ዘይት ፊልተር (Oil Filter)', 'e.g. Oil Filter / Fuel Pump'),
+                        prefixIcon: Icon(Icons.build_circle_outlined, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
                       ),
                     ),
                     const SizedBox(height: 14),
 
                     // 4. Part Number field with scanner
-                    _buildFieldLabel('የዕቃ ቁጥር (Part No.)'),
+                    _buildFieldLabel(context.tr('የዕቃ ቁጥር (Part No.)', 'Part Number (OEM No.)')),
                     TextFormField(
                       controller: _partNumberController,
                       textCapitalization: TextCapitalization.characters,
+                      style: TextStyle(color: context.textPrimaryColor),
                       decoration: _inputDecoration(
                         hintText: 'ምሳሌ፦ 1R-0716 / LF691A',
-                        prefixIcon: const Icon(Icons.tag_rounded, color: Color(0xFF64748B), size: 20),
+                        prefixIcon: Icon(Icons.tag_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
                         suffixIcon: IconButton(
-                          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF0C2340)),
+                          icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFFF58220)),
                           onPressed: () {
-                            context.showSnackBar('የባርኮድ ስካነር ዝግጁ ነው');
+                            context.showSnackBar(context.tr('የባርኮድ ስካነር ዝግጁ ነው', 'Barcode scanner ready'));
                           },
                         ),
                       ),
@@ -750,32 +769,34 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('ብራንድ (Brand)'),
+                              _buildFieldLabel(context.tr('ብራንድ (Brand)', 'Brand')),
                               InkWell(
                                 onTap: _pickBrand,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: context.cardBg,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    border: Border.all(color: context.borderColor),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _selectedBrand?.name ?? 'ምረጥ...',
+                                          _selectedBrand?.name ?? context.tr('ምረጥ...', 'Select...'),
                                           style: TextStyle(
-                                            color: _selectedBrand != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                                            color: _selectedBrand != null
+                                                ? context.textPrimaryColor
+                                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                                             fontSize: 13,
                                             fontWeight: _selectedBrand != null ? FontWeight.w600 : FontWeight.normal,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 20),
+                                      Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
                                     ],
                                   ),
                                 ),
@@ -788,32 +809,34 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('ምድብ (Category)'),
+                              _buildFieldLabel(context.tr('ምድብ (Category)', 'Category')),
                               InkWell(
                                 onTap: _pickCategory,
                                 borderRadius: BorderRadius.circular(12),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: context.cardBg,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    border: Border.all(color: context.borderColor),
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _selectedCategory?.name ?? 'ምረጥ...',
+                                          _selectedCategory?.name ?? context.tr('ምረጥ...', 'Select...'),
                                           style: TextStyle(
-                                            color: _selectedCategory != null ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
+                                            color: _selectedCategory != null
+                                                ? context.textPrimaryColor
+                                                : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
                                             fontSize: 13,
                                             fontWeight: _selectedCategory != null ? FontWeight.w600 : FontWeight.normal,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B), size: 20),
+                                      Icon(Icons.keyboard_arrow_down_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
                                     ],
                                   ),
                                 ),
@@ -833,10 +856,13 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('መለኪያ (Unit)'),
+                              _buildFieldLabel(context.tr('መለኪያ (Unit)', 'Unit')),
                               TextFormField(
                                 controller: _unitController,
-                                decoration: _inputDecoration(hintText: 'ፍሬ (Pcs)'),
+                                style: TextStyle(color: context.textPrimaryColor),
+                                decoration: _inputDecoration(
+                                  hintText: context.tr('ፍሬ (Pcs)', 'Pcs / Sets'),
+                                ),
                               ),
                             ],
                           ),
@@ -846,7 +872,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('ብዛት (Quantity)'),
+                              _buildFieldLabel(context.tr('ብዛት (Quantity)', 'Quantity')),
                               Row(
                                 children: [
                                   InkWell(
@@ -856,11 +882,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                       width: 38,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: context.cardBg,
                                         borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                                        border: Border.all(color: context.borderColor),
                                       ),
-                                      child: const Icon(Icons.remove_rounded, size: 18, color: Color(0xFF0C2340)),
+                                      child: Icon(Icons.remove_rounded, size: 18, color: context.textPrimaryColor),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -869,6 +895,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                       controller: _quantityController,
                                       keyboardType: TextInputType.number,
                                       textAlign: TextAlign.center,
+                                      style: TextStyle(color: context.textPrimaryColor),
                                       decoration: _inputDecoration(hintText: '0'),
                                     ),
                                   ),
@@ -880,7 +907,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                       width: 38,
                                       height: 44,
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF0C2340),
+                                        color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
@@ -903,10 +930,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('የመግዣ ዋጋ (Cost Price)'),
+                              _buildFieldLabel(context.tr('የመግዣ ዋጋ (Cost Price)', 'Cost Price')),
                               TextFormField(
                                 controller: _purchasePriceController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                style: TextStyle(color: context.textPrimaryColor),
                                 decoration: _inputDecoration(hintText: '850', suffixText: 'ETB'),
                               ),
                             ],
@@ -917,10 +945,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('የመሸጫ ዋጋ (Selling Price)'),
+                              _buildFieldLabel(context.tr('የመሸጫ ዋጋ (Selling Price)', 'Selling Price')),
                               TextFormField(
                                 controller: _sellingPriceController,
                                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                style: TextStyle(color: context.textPrimaryColor),
                                 decoration: _inputDecoration(hintText: '1,200', suffixText: 'ETB'),
                               ),
                             ],
@@ -934,10 +963,14 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: profit >= 0 ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
+                        color: profit >= 0
+                            ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5))
+                            : (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2)),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: profit >= 0 ? const Color(0xFFA7F3D0) : const Color(0xFFFECACA),
+                          color: profit >= 0
+                              ? (isDark ? const Color(0xFF065F46) : const Color(0xFFA7F3D0))
+                              : (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA)),
                         ),
                       ),
                       child: Row(
@@ -947,14 +980,18 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                             children: [
                               Icon(
                                 profit >= 0 ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-                                color: profit >= 0 ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                                color: profit >= 0
+                                    ? (isDark ? const Color(0xFF34D399) : const Color(0xFF059669))
+                                    : (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626)),
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Text(
-                                'ትርፍ በአንድ ፍሬ (Profit)',
+                              Text(
+                                context.tr('ትርፍ በአንድ ፍሬ (Profit)', 'Profit per unit'),
                                 style: TextStyle(
-                                  color: Color(0xFF065F46),
+                                  color: profit >= 0
+                                      ? (isDark ? const Color(0xFF6EE7B7) : const Color(0xFF065F46))
+                                      : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B)),
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -963,10 +1000,12 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           ),
                           Text(
                             profit >= 0
-                                ? '+${profit.toStringAsFixed(0)} ETB (${marginPct.toStringAsFixed(1)}% ትርፍ)'
+                                ? '+${profit.toStringAsFixed(0)} ETB (${marginPct.toStringAsFixed(1)}% ${context.tr("ትርፍ", "profit")})'
                                 : '${profit.toStringAsFixed(0)} ETB',
                             style: TextStyle(
-                              color: profit >= 0 ? const Color(0xFF047857) : const Color(0xFFDC2626),
+                              color: profit >= 0
+                                  ? (isDark ? const Color(0xFF34D399) : const Color(0xFF047857))
+                                  : (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626)),
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -984,14 +1023,15 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('መደርደሪያ / ቦታ (Location)'),
+                              _buildFieldLabel(context.tr('መደርደሪያ / ቦታ (Location)', 'Shelf / Location')),
                               TextFormField(
                                 controller: _customLocationController,
+                                style: TextStyle(color: context.textPrimaryColor),
                                 decoration: _inputDecoration(
                                   hintText: 'ምሳሌ፦ A-12',
-                                  prefixIcon: const Icon(Icons.shelves, color: Color(0xFF64748B), size: 18),
+                                  prefixIcon: Icon(Icons.shelves, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 18),
                                   suffixIcon: IconButton(
-                                    icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF64748B)),
+                                    icon: Icon(Icons.arrow_drop_down_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                                     onPressed: () async {
                                       await _pickLocation();
                                       if (_selectedLocation != null) {
@@ -1009,12 +1049,13 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildFieldLabel('ማስታወሻ (Note)'),
+                              _buildFieldLabel(context.tr('ማስታወሻ (Note)', 'Note')),
                               TextFormField(
                                 controller: _notesController,
+                                style: TextStyle(color: context.textPrimaryColor),
                                 decoration: _inputDecoration(
-                                  hintText: 'ምሳሌ፦ ኦሪጅናል CAT',
-                                  prefixIcon: const Icon(Icons.note_alt_outlined, color: Color(0xFF64748B), size: 18),
+                                  hintText: context.tr('ምሳሌ፦ ኦሪጅናል CAT', 'e.g. OEM Heavy Duty'),
+                                  prefixIcon: Icon(Icons.note_alt_outlined, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 18),
                                 ),
                               ),
                             ],
@@ -1028,9 +1069,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
               ),
         bottomNavigationBar: Container(
           padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+          decoration: BoxDecoration(
+            color: context.cardBg,
+            border: Border(top: BorderSide(color: context.borderColor)),
           ),
           child: SizedBox(
             height: 52,
@@ -1043,19 +1084,15 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               child: _isLoading
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                    )
-                  : const Row(
+                  ? const KeraLoadingIndicator.small(color: Colors.white)
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.check_circle_outline_rounded, size: 20),
-                        SizedBox(width: 8),
+                        const Icon(Icons.check_circle_outline_rounded, size: 20),
+                        const SizedBox(width: 8),
                         Text(
-                          'አስቀምጥ',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          context.tr('አስቀምጥ', 'Save Part'),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),

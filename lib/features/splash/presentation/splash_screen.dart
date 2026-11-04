@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/design/design.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 
 /// Industrial, high-performance splash screen for Kera Spare Tracker
@@ -76,91 +77,37 @@ class SplashScreen extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Precision Automotive Identity Gear + Piston Badge
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [KeraColors.primaryNavyDark, KeraColors.primaryNavyLight],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: KeraColors.actionBlue.withAlpha(80),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: KeraColors.actionBlue.withAlpha(50),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Icon(
-                          Icons.settings_suggest_rounded,
-                          size: 64,
-                          color: KeraColors.actionBlue.withAlpha(140),
-                        ),
-                        const Icon(
-                          Icons.precision_manufacturing_rounded,
-                          size: 38,
-                          color: KeraColors.textWhite,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: KeraSpacing.xl),
+                  const KeraLogoWidget(size: 88, borderRadius: 20),
+                  const SizedBox(height: KeraSpacing.lg),
 
                   // Bilingual Brand Identity Titles
                   Text(
-                    l10n.appName,
+                    context.tr('ኬራ ስፔር ትራከር', 'Kera Spare Tracker'),
                     textAlign: TextAlign.center,
                     style: KeraTypography.headlineLarge(color: KeraColors.textWhite).copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Kera Spare Tracker',
-                    textAlign: TextAlign.center,
-                    style: KeraTypography.titleMedium(color: KeraColors.utilityTeal).copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
+                  const SizedBox(height: 6),
 
-                  // Decorative Divider
+                  // Exact Tagline: Track - Manage - Grow
                   Container(
-                    width: 64,
-                    height: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.transparent, KeraColors.actionBlue, Colors.transparent],
+                      color: KeraColors.primaryNavyDark.withAlpha(160),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: KeraColors.keraOrange.withAlpha(100)),
+                    ),
+                    child: Text(
+                      context.tr('ተከታተል • አስተዳድር • አሳድግ', 'Track • Manage • Grow'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: KeraColors.keraOrange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        letterSpacing: 0.5,
                       ),
-                      borderRadius: BorderRadius.circular(1),
                     ),
-                  ),
-
-                  // Tagline
-                  Text(
-                    l10n.appSubtitle,
-                    textAlign: TextAlign.center,
-                    style: KeraTypography.bodyLarge(color: KeraColors.textWhite).copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Modern Auto Spare Inventory & POS',
-                    textAlign: TextAlign.center,
-                    style: KeraTypography.bodySmall(color: KeraColors.textMuted),
                   ),
                 ],
               ),

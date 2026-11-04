@@ -109,8 +109,8 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: context.cardBg,
             borderRadius: KeraRadii.borderSheet,
           ),
           child: Column(
@@ -122,7 +122,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(top: 10, bottom: 6),
                   decoration: BoxDecoration(
-                    color: KeraColors.outlineVariant,
+                    color: context.isDark ? Colors.white24 : KeraColors.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -133,11 +133,11 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 16, 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.tune_rounded, color: KeraColors.primaryNavy, size: 22),
+                    const Icon(Icons.tune_rounded, color: Color(0xFFF7941D), size: 22),
                     const SizedBox(width: 8),
                     Text(
-                      'የዕቃዎች ማጣሪያ (Filter)',
-                      style: KeraTypography.titleMedium(color: KeraColors.primaryNavy).copyWith(
+                      context.tr('የዕቃዎች ማጣሪያ', 'Inventory Filter'),
+                      style: KeraTypography.titleMedium(color: context.textPrimaryColor).copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -147,19 +147,19 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                       child: Text(
                         l10n.resetFilters,
                         style: const TextStyle(
-                          color: KeraColors.actionBlue,
+                          color: Color(0xFFF7941D),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: KeraColors.textSecondary),
+                      icon: Icon(Icons.close_rounded, color: context.textSecondaryColor),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, color: KeraColors.outlineBorder),
+              Divider(height: 1, color: context.borderColor),
 
               // 3. Filter Content
               Expanded(
@@ -171,7 +171,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     Text(
                       l10n.stockStatus,
                       style: KeraTypography.titleSmall().copyWith(
-                        color: KeraColors.primaryNavy,
+                        color: context.textPrimaryColor,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -192,7 +192,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     Text(
                       l10n.brand,
                       style: KeraTypography.titleSmall().copyWith(
-                        color: KeraColors.primaryNavy,
+                        color: context.textPrimaryColor,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -230,7 +230,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     Text(
                       l10n.category,
                       style: KeraTypography.titleSmall().copyWith(
-                        color: KeraColors.primaryNavy,
+                        color: context.textPrimaryColor,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -269,7 +269,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     Text(
                       l10n.storageLocation,
                       style: KeraTypography.titleSmall().copyWith(
-                        color: KeraColors.primaryNavy,
+                        color: context.textPrimaryColor,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -308,16 +308,16 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                     Text(
                       l10n.sortBy,
                       style: KeraTypography.titleSmall().copyWith(
-                        color: KeraColors.primaryNavy,
+                        color: context.textPrimaryColor,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: KeraColors.surfaceMuted,
+                        color: context.isDark ? const Color(0xFF132238) : KeraColors.surfaceMuted,
                         borderRadius: KeraRadii.borderCard,
-                        border: Border.all(color: KeraColors.outlineBorder),
+                        border: Border.all(color: context.borderColor),
                       ),
                       child: Column(
                         children: [
@@ -326,31 +326,31 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                             ascending: false,
                             label: l10n.sortNewest,
                           ),
-                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          Divider(height: 1, color: context.borderColor),
                           _buildSortTile(
                             sortBy: PartsSortBy.name,
                             ascending: true,
                             label: l10n.sortName,
                           ),
-                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          Divider(height: 1, color: context.borderColor),
                           _buildSortTile(
                             sortBy: PartsSortBy.quantity,
                             ascending: false,
                             label: l10n.sortQuantityHigh,
                           ),
-                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          Divider(height: 1, color: context.borderColor),
                           _buildSortTile(
                             sortBy: PartsSortBy.quantity,
                             ascending: true,
                             label: l10n.sortQuantityLow,
                           ),
-                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          Divider(height: 1, color: context.borderColor),
                           _buildSortTile(
                             sortBy: PartsSortBy.price,
                             ascending: false,
                             label: l10n.sortPriceHigh,
                           ),
-                          const Divider(height: 1, color: KeraColors.outlineBorder),
+                          Divider(height: 1, color: context.borderColor),
                           _buildSortTile(
                             sortBy: PartsSortBy.price,
                             ascending: true,
@@ -366,16 +366,16 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
               // 4. Bottom Sticky Apply Action
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(top: BorderSide(color: KeraColors.outlineBorder)),
+                decoration: BoxDecoration(
+                  color: context.cardBg,
+                  border: Border(top: BorderSide(color: context.borderColor)),
                 ),
                 child: SizedBox(
                   width: double.infinity,
                   height: AppConstants.standardButtonHeight,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: KeraColors.actionBlue,
+                      backgroundColor: const Color(0xFFF7941D),
                       foregroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
                         borderRadius: KeraRadii.borderButton,
@@ -404,15 +404,15 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
       selected: isSelected,
       label: Text(label),
       onSelected: (_) => setState(() => _stockFilter = filter),
-      backgroundColor: KeraColors.surfaceMuted,
-      selectedColor: KeraColors.primaryNavy,
-      shape: const RoundedRectangleBorder(
+      backgroundColor: context.isDark ? const Color(0xFF132238) : KeraColors.surfaceMuted,
+      selectedColor: const Color(0xFF0B2A5B),
+      shape: RoundedRectangleBorder(
         borderRadius: KeraRadii.borderMicro,
-        side: BorderSide(color: KeraColors.outlineBorder),
+        side: BorderSide(color: isSelected ? const Color(0xFFF7941D) : context.borderColor),
       ),
       labelStyle: TextStyle(
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: isSelected ? Colors.white : KeraColors.textPrimary,
+        color: isSelected ? Colors.white : context.textPrimaryColor,
       ),
     );
   }
@@ -432,19 +432,19 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
         decoration: BoxDecoration(
           borderRadius: KeraRadii.borderInput,
           border: Border.all(
-            color: hasValue ? KeraColors.actionBlue : KeraColors.outlineBorder,
+            color: hasValue ? const Color(0xFFF7941D) : context.borderColor,
             width: hasValue ? 1.5 : 1.0,
           ),
           color: hasValue
-              ? KeraColors.actionBlue.withValues(alpha: 0.08)
-              : KeraColors.surfaceMuted,
+              ? const Color(0xFFF7941D).withValues(alpha: 0.1)
+              : (context.isDark ? const Color(0xFF132238) : KeraColors.surfaceMuted),
         ),
         child: Row(
           children: [
             Icon(
               icon,
               size: 20,
-              color: hasValue ? KeraColors.actionBlue : KeraColors.textSecondary,
+              color: hasValue ? const Color(0xFFF7941D) : context.textSecondaryColor,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -452,7 +452,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                 title,
                 style: KeraTypography.bodyMedium().copyWith(
                   fontWeight: hasValue ? FontWeight.w600 : FontWeight.normal,
-                  color: hasValue ? KeraColors.textPrimary : KeraColors.textSecondary,
+                  color: hasValue ? context.textPrimaryColor : context.textSecondaryColor,
                 ),
               ),
             ),
@@ -464,7 +464,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
                 constraints: const BoxConstraints(),
               )
             else
-              const Icon(Icons.arrow_drop_down_rounded, color: KeraColors.textSecondary),
+              Icon(Icons.arrow_drop_down_rounded, color: context.textSecondaryColor),
           ],
         ),
       ),
@@ -493,7 +493,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
               isSelected
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_off_rounded,
-              color: isSelected ? KeraColors.actionBlue : KeraColors.textSecondary,
+              color: isSelected ? const Color(0xFFF7941D) : context.textSecondaryColor,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -501,7 +501,7 @@ class _InventoryFilterSheetState extends ConsumerState<InventoryFilterSheet> {
               label,
               style: KeraTypography.bodyMedium().copyWith(
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
-                color: isSelected ? KeraColors.actionBlue : KeraColors.textPrimary,
+                color: isSelected ? const Color(0xFFF7941D) : context.textPrimaryColor,
               ),
             ),
           ],
