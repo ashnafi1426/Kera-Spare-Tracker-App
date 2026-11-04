@@ -367,7 +367,7 @@ export async function getOwnerReportTrends(ownerId, { period = 'today', startDat
 export async function getAdminReportsSummary({ period = 'month' } = {}) {
   const { start, end } = getDateRange(period);
 
-  const [sales, ownersCount, partsCount] = await Promise.all([
+  const [sales, ownersCount, partsCount, topItems] = await Promise.all([
     prisma.sale.findMany({
       where: {
         deletedAt: null,
@@ -377,15 +377,31 @@ export async function getAdminReportsSummary({ period = 'month' } = {}) {
         },
       },
       select: {
+        id: true,
         totalAmount: true,
         totalProfit: true,
+        soldAt: true,
       },
+      orderBy: { soldAt: 'asc' },
     }),
     prisma.user.count({
       where: { role: 'OWNER', deletedAt: null },
     }),
     prisma.sparePart.count({
       where: { deletedAt: null },
+    }),
+    prisma.saleItem.groupBy({
+      by: ['partId'],
+      where: {
+        deletedAt: null,
+        sale: {
+          deletedAt: null,
+          soldAt: { gte: start, lte: end },
+        },
+      },
+      _sum: { quantity: true, subtotal: true },
+      orderBy: { _sum: { quantity: 'desc' } },
+      take: 5,
     }),
   ]);
 
@@ -396,6 +412,99 @@ export async function getAdminReportsSummary({ period = 'month' } = {}) {
     totalProfit += Number(s.totalProfit) || 0;
   }
 
+  // Calculate points
+  const points = [];
+  const addisOffsetMs = 3 * 60 * 60 * 1000;
+  if (period === 'today' || period === 'daily') {
+    const blocks = [
+      { label: '06:00', startH: 6, endH: 9, rev: 0, prof: 0 },
+      { label: '09:00', startH: 9, endH: 12, rev: 0, prof: 0 },
+      { label: '12:00', startH: 12, endH: 15, rev: 0, prof: 0 },
+      { label: '15:00', startH: 15, endH: 18, rev: 0, prof: 0 },
+      { label: '18:00', startH: 18, endH: 21, rev: 0, prof: 0 },
+      { label: '21:00', startH: 21, endH: 24, rev: 0, prof: 0 },
+    ];
+    for (const s of sales) {
+      const localTime = new Date(s.soldAt.getTime() + addisOffsetMs);
+      const hour = localTime.getUTCHours();
+      const rev = Number(s.totalAmount) || 0;
+      const prof = Number(s.totalProfit) || 0;
+      for (const b of blocks) {
+        if (hour >= b.startH && hour < b.endH) {
+          b.rev += rev;
+          b.prof += prof;
+          break;
+        }
+      }
+    }
+    for (const b of blocks) {
+      points.push({
+        label: b.label,
+        revenue: Number(b.rev.toFixed(2)),
+        profit: Number(b.prof.toFixed(2)),
+      });
+    }
+  } else if (period === 'week' || period === 'thisweek' || period === 'weekly') {
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayBuckets = dayLabels.map((l) => ({ label: l, rev: 0, prof: 0 }));
+    for (const s of sales) {
+      const localTime = new Date(s.soldAt.getTime() + addisOffsetMs);
+      const dayIndex = (localTime.getUTCDay() + 6) % 7;
+      dayBuckets[dayIndex].rev += Number(s.totalAmount) || 0;
+      dayBuckets[dayIndex].prof += Number(s.totalProfit) || 0;
+    }
+    for (const b of dayBuckets) {
+      points.push({
+        label: b.label,
+        revenue: Number(b.rev.toFixed(2)),
+        profit: Number(b.prof.toFixed(2)),
+      });
+    }
+  } else {
+    const weeks = [
+      { label: 'W1', rev: 0, prof: 0 },
+      { label: 'W2', rev: 0, prof: 0 },
+      { label: 'W3', rev: 0, prof: 0 },
+      { label: 'W4', rev: 0, prof: 0 },
+      { label: 'W5', rev: 0, prof: 0 },
+    ];
+    for (const s of sales) {
+      const localTime = new Date(s.soldAt.getTime() + addisOffsetMs);
+      const date = localTime.getUTCDate();
+      const weekIdx = Math.min(4, Math.floor((date - 1) / 7));
+      weeks[weekIdx].rev += Number(s.totalAmount) || 0;
+      weeks[weekIdx].prof += Number(s.totalProfit) || 0;
+    }
+    for (const w of weeks) {
+      points.push({
+        label: w.label,
+        revenue: Number(w.rev.toFixed(2)),
+        profit: Number(w.prof.toFixed(2)),
+      });
+    }
+  }
+
+  // Top selling parts
+  const partIds = topItems.map((i) => i.partId).filter(Boolean);
+  const partMap = {};
+  if (partIds.length > 0) {
+    const parts = await prisma.sparePart.findMany({
+      where: { id: { in: partIds } },
+      select: { id: true, nameAm: true, nameEn: true, brand: true },
+    });
+    parts.forEach((p) => { partMap[p.id] = p; });
+  }
+
+  const topSellingItems = topItems.map((item) => {
+    const p = partMap[item.partId];
+    return {
+      partId: item.partId,
+      name: p ? `${p.nameEn || p.nameAm || 'Part'} · ${p.brand || ''}` : 'Spare Part',
+      units: Number(item._sum.quantity || 0),
+      totalAmount: Number(item._sum.subtotal || 0),
+    };
+  });
+
   return {
     period,
     totalRevenue: Number(totalRevenue.toFixed(2)),
@@ -403,5 +512,7 @@ export async function getAdminReportsSummary({ period = 'month' } = {}) {
     transactionsCount: sales.length,
     activeOwnersCount: ownersCount,
     totalPartsCount: partsCount,
+    points,
+    topSellingItems,
   };
 }

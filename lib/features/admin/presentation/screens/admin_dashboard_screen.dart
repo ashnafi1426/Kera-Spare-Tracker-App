@@ -6,6 +6,7 @@ import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/widgets/dashboard_header_bar.dart';
 import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../providers/admin_providers.dart';
@@ -100,7 +101,7 @@ class AdminDashboardScreen extends ConsumerWidget {
     dynamic stats,
   ) {
     final totalOwners = stats.totalOwners;
-    final newThisMonth = stats.newOwnersThisWeek > 0 ? '+${stats.newOwnersThisWeek}' : '+9';
+    final newThisWeek = stats.newOwnersThisWeek;
     final isDark = context.isDark;
 
     return Container(
@@ -146,7 +147,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          totalOwners > 0 ? '$totalOwners' : '128',
+                          '$totalOwners',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 34,
@@ -165,7 +166,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
-                            '$newThisMonth ${context.tr("በዚህ ወር", "this month")}',
+                            '+$newThisWeek ${context.tr("በዚህ ሳምንት", "this week")}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -192,7 +193,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             Divider(height: 1, color: isDark ? const Color(0xFF1E385C) : Colors.white24),
             const SizedBox(height: 16),
 
-            // 4 Quick Actions Row: ባለቤት ጨምር, ማጽደቅ 9, ብራንድ, ምትኬ
+            // 4 Quick Actions Row: ባለቤት ጨምር, ማጽደቅ, ብራንድ, ምትኬ
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -203,8 +204,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                 ),
                 _buildQuickActionCircle(
                   icon: Icons.refresh_rounded,
-                  label: context.tr('ማጽደቅ 9', 'Approvals'),
-                  onTap: () => context.push('/admin/owners?status=PENDING'),
+                  label: context.tr('ማጽደቅ', 'Approvals'),
+                  onTap: () => context.push('/admin/owners?status=SUSPENDED'),
                 ),
                 _buildQuickActionCircle(
                   icon: Icons.sell_outlined,
@@ -259,10 +260,15 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   /// 6 Core Metric Cards in 2x3 Grid matching Dashboard.png
   Widget _buildMetricsGrid(BuildContext context, dynamic stats) {
-    final activeCount = stats.activeOwners > 0 ? stats.activeOwners : 112;
-    final totalCount = stats.totalOwners > 0 ? stats.totalOwners : 128;
-    final activePercent = (activeCount * 100 / (totalCount > 0 ? totalCount : 1)).round();
-    final partsCount = stats.totalParts > 0 ? stats.totalParts.toString() : '84,310';
+    final activeCount = stats.activeOwners;
+    final totalCount = stats.totalOwners;
+    final activePercent = totalCount > 0 ? (activeCount * 100 / totalCount).round() : 100;
+    final partsCount = CurrencyFormatter.formatCount(stats.totalParts);
+    final pendingCount = stats.suspendedOwners;
+    final syncProblems = stats.ownersWithSyncProblems;
+    final syncHealth = totalCount > 0 ? (((totalCount - syncProblems) / totalCount) * 100).round() : 100;
+    final revenue = CurrencyFormatter.formatCompact(stats.totalRevenue);
+    final profit = CurrencyFormatter.formatCompact(stats.totalProfit);
 
     return GridView.count(
       crossAxisCount: 2,
@@ -285,11 +291,11 @@ class AdminDashboardScreen extends ConsumerWidget {
         // 2. Pending Owners
         AdminMetricTile(
           icon: Icons.refresh_rounded,
-          value: '9',
+          value: '$pendingCount',
           label: context.tr('በመጠባበቅ · Pending', 'Pending Approval'),
           badgeText: context.tr('ግምገማ', 'Review'),
           badgeColor: AdminColors.keraOrange,
-          onTap: () => context.push('/admin/owners?status=PENDING'),
+          onTap: () => context.push('/admin/owners?status=SUSPENDED'),
         ),
 
         // 3. Parts Catalog
@@ -305,19 +311,19 @@ class AdminDashboardScreen extends ConsumerWidget {
         // 4. Sync Health
         AdminMetricTile(
           icon: Icons.sync_rounded,
-          value: '98%',
+          value: '$syncHealth%',
           label: context.tr('የማመሳሰል ሁኔታ · Sync', 'Sync Health'),
-          badgeText: context.tr('7 በመጠባበቅ', '7 pending'),
-          badgeColor: AdminColors.keraOrange,
+          badgeText: '$syncProblems ${context.tr("ችግር", "issues")}',
+          badgeColor: syncProblems == 0 ? const Color(0xFF10B981) : AdminColors.keraOrange,
           onTap: () => context.push('/admin/sync'),
         ),
 
         // 5. Total Revenue
         AdminMetricTile(
           icon: Icons.bar_chart_rounded,
-          value: '4.8M',
+          value: revenue,
           label: context.tr('ሽያጭ · Revenue', 'Total Revenue'),
-          badgeText: 'ETB · month',
+          badgeText: 'ETB',
           badgeColor: const Color(0xFF10B981),
           onTap: () => context.push('/admin/reports'),
         ),
@@ -325,9 +331,9 @@ class AdminDashboardScreen extends ConsumerWidget {
         // 6. Estimated Profit
         AdminMetricTile(
           icon: Icons.insert_chart_outlined_rounded,
-          value: '1.1M',
+          value: profit,
           label: context.tr('ትርፍ · Profit', 'Estimated Profit'),
-          badgeText: 'ETB · est.',
+          badgeText: 'ETB',
           badgeColor: const Color(0xFF10B981),
           onTap: () => context.push('/admin/reports'),
         ),

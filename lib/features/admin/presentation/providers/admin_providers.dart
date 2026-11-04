@@ -20,6 +20,20 @@ final adminDashboardProvider =
   );
 });
 
+/// Currently selected period for Admin reports: 'daily', 'weekly', 'monthly'.
+final adminReportPeriodProvider = StateProvider<String>((ref) => 'monthly');
+
+/// Admin reports summary provider family based on period.
+final adminReportsProvider =
+    FutureProvider.autoDispose.family<AdminReportSummary, String>((ref, period) async {
+  final repo = ref.watch(adminRepositoryProvider);
+  final result = await repo.getReportsSummary(period: period);
+  return result.when(
+    onSuccess: (data) => data,
+    onFailure: (err) => throw Exception(err.message),
+  );
+});
+
 /// Filter state for owners list.
 class AdminOwnersFilter {
   final String? search;

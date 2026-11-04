@@ -78,4 +78,7 @@ abstract class AdminRepository {
     String? startDate,
     String? endDate,
   });
+
+  // Admin Reports Summary
+  Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'});
 }

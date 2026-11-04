@@ -565,4 +565,20 @@ class ApiAdminRepository implements AdminRepository {
       return Result.failure(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'}) async {
+    try {
+      final res = await _dio.get('/reports/summary', queryParameters: {'period': period});
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final data = res.data['data'] as Map<String, dynamic>;
+        return Result.success(AdminReportSummary.fromJson(data));
+      }
+      return const Result.failure(ServerFailure(message: 'Failed to load admin reports summary'));
+    } on DioException catch (e) {
+      return Result.failure(_mapDioError(e));
+    } catch (e) {
+      return Result.failure(ServerFailure(message: e.toString()));
+    }
+  }
 }

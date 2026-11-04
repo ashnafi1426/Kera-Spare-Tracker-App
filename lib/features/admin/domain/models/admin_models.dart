@@ -329,3 +329,87 @@ class AdminMaintenanceMode {
     'messageEn': messageEn,
   };
 }
+
+class AdminReportPoint {
+  final String label;
+  final double revenue;
+  final double profit;
+
+  const AdminReportPoint({
+    required this.label,
+    required this.revenue,
+    required this.profit,
+  });
+
+  factory AdminReportPoint.fromJson(Map<String, dynamic> json) {
+    return AdminReportPoint(
+      label: json['label']?.toString() ?? '',
+      revenue: (json['revenue'] as num?)?.toDouble() ?? 0.0,
+      profit: (json['profit'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+class AdminTopSellingItem {
+  final String partId;
+  final String name;
+  final int units;
+  final double totalAmount;
+
+  const AdminTopSellingItem({
+    required this.partId,
+    required this.name,
+    required this.units,
+    required this.totalAmount,
+  });
+
+  factory AdminTopSellingItem.fromJson(Map<String, dynamic> json) {
+    return AdminTopSellingItem(
+      partId: json['partId']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Spare Part',
+      units: (json['units'] as num?)?.toInt() ?? 0,
+      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+class AdminReportSummary {
+  final String period;
+  final double totalRevenue;
+  final double totalProfit;
+  final int transactionsCount;
+  final int activeOwnersCount;
+  final int totalPartsCount;
+  final List<AdminReportPoint> points;
+  final List<AdminTopSellingItem> topSellingItems;
+
+  const AdminReportSummary({
+    required this.period,
+    required this.totalRevenue,
+    required this.totalProfit,
+    required this.transactionsCount,
+    required this.activeOwnersCount,
+    required this.totalPartsCount,
+    required this.points,
+    required this.topSellingItems,
+  });
+
+  factory AdminReportSummary.fromJson(Map<String, dynamic> json) {
+    return AdminReportSummary(
+      period: json['period']?.toString() ?? 'month',
+      totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0.0,
+      totalProfit: (json['totalProfit'] as num?)?.toDouble() ?? 0.0,
+      transactionsCount: (json['transactionsCount'] as num?)?.toInt() ?? 0,
+      activeOwnersCount: (json['activeOwnersCount'] as num?)?.toInt() ?? 0,
+      totalPartsCount: (json['totalPartsCount'] as num?)?.toInt() ?? 0,
+      points: (json['points'] as List?)
+              ?.map((p) => AdminReportPoint.fromJson(p as Map<String, dynamic>))
+              .toList() ??
+          [],
+      topSellingItems: (json['topSellingItems'] as List?)
+              ?.map((t) => AdminTopSellingItem.fromJson(t as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}

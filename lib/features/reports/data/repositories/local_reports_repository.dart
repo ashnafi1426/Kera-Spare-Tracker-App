@@ -35,7 +35,6 @@ class LocalReportsRepository implements ReportsRepository {
       );
     }
   }
-
   @override
   Future<Result<List<ChartPoint>>> getChartPoints({
     required String ownerId,
@@ -48,11 +47,42 @@ class LocalReportsRepository implements ReportsRepository {
 
       switch (period) {
         case ReportPeriod.daily:
-          // Last 7 days (6 days ago through today)
-          for (var i = 6; i >= 0; i--) {
-            final dayDate = now.subtract(Duration(days: i));
-            final start = DateTime(dayDate.year, dayDate.month, dayDate.day, 0, 0, 0, 0);
-            final end = DateTime(dayDate.year, dayDate.month, dayDate.day, 23, 59, 59, 999);
+          // Hourly blocks for today (06:00 to 21:00)
+          final blocks = [
+            {'label': '06:00', 'startH': 6, 'endH': 9},
+            {'label': '09:00', 'startH': 9, 'endH': 12},
+            {'label': '12:00', 'startH': 12, 'endH': 15},
+            {'label': '15:00', 'startH': 15, 'endH': 18},
+            {'label': '18:00', 'startH': 18, 'endH': 21},
+            {'label': '21:00', 'startH': 21, 'endH': 24},
+          ];
+          for (final b in blocks) {
+            final start = DateTime(now.year, now.month, now.day, b['startH'] as int, 0, 0, 0);
+            final end = DateTime(now.year, now.month, now.day, (b['endH'] as int) - 1, 59, 59, 999);
+            final summary = await db.salesDao.getSalesSummary(
+              ownerId: ownerId,
+              startDate: start,
+              endDate: end,
+            );
+            points.add(
+              ChartPoint(
+                label: b['label'] as String,
+                date: start,
+                revenue: summary.totalRevenue,
+                profit: summary.totalProfit,
+              ),
+            );
+          }
+          break;
+
+        case ReportPeriod.weekly:
+          // Days of current week (Mon through Sun)
+          final dayOffset = now.weekday - 1;
+          final monday = now.subtract(Duration(days: dayOffset));
+          for (var i = 0; i < 7; i++) {
+            final day = monday.add(Duration(days: i));
+            final start = DateTime(day.year, day.month, day.day, 0, 0, 0, 0);
+            final end = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
             final summary = await db.salesDao.getSalesSummary(
               ownerId: ownerId,
               startDate: start,
@@ -70,47 +100,23 @@ class LocalReportsRepository implements ReportsRepository {
           }
           break;
 
-        case ReportPeriod.weekly:
-          // Last 4 weeks (3 weeks ago through current week)
-          for (var w = 3; w >= 0; w--) {
-            final target = now.subtract(Duration(days: w * 7));
-            final dayOffset = target.weekday - 1;
-            final startDay = target.subtract(Duration(days: dayOffset));
-            final start = DateTime(startDay.year, startDay.month, startDay.day, 0, 0, 0, 0);
-            final endDay = start.add(const Duration(days: 6));
-            final end = DateTime(endDay.year, endDay.month, endDay.day, 23, 59, 59, 999);
-            final summary = await db.salesDao.getSalesSummary(
-              ownerId: ownerId,
-              startDate: start,
-              endDate: end,
-            );
-            final label = 'W${4 - w}';
-            points.add(
-              ChartPoint(
-                label: label,
-                date: start,
-                revenue: summary.totalRevenue,
-                profit: summary.totalProfit,
-              ),
-            );
-          }
-          break;
-
         case ReportPeriod.monthly:
-          // Last 6 months (5 months ago through current month)
-          for (var m = 5; m >= 0; m--) {
-            final targetMonth = DateTime(now.year, now.month - m, 1);
-            final start = DateTime(targetMonth.year, targetMonth.month, 1, 0, 0, 0, 0);
-            final end = DateTime(targetMonth.year, targetMonth.month + 1, 0, 23, 59, 59, 999);
+          // Weeks of current month (W1 through W5)
+          final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+          for (var w = 1; w <= 5; w++) {
+            final startDay = (w - 1) * 7 + 1;
+            if (startDay > lastDayOfMonth) break;
+            final endDay = (w * 7).clamp(1, lastDayOfMonth);
+            final start = DateTime(now.year, now.month, startDay, 0, 0, 0, 0);
+            final end = DateTime(now.year, now.month, endDay, 23, 59, 59, 999);
             final summary = await db.salesDao.getSalesSummary(
               ownerId: ownerId,
               startDate: start,
               endDate: end,
             );
-            final label = DateFormat('MMM').format(start);
             points.add(
               ChartPoint(
-                label: label,
+                label: 'W$w',
                 date: start,
                 revenue: summary.totalRevenue,
                 profit: summary.totalProfit,
