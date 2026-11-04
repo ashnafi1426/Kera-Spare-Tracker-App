@@ -66,7 +66,7 @@ class KeraAvatarWidget extends StatelessWidget {
     final initials = _getInitials(name);
     final size = radius * 2;
     final defaultBg = isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340);
-    final defaultTxt = Colors.white;
+    const defaultTxt = Colors.white;
 
     Widget fallback() {
       return Container(
@@ -102,7 +102,7 @@ class KeraAvatarWidget extends StatelessWidget {
             width: size,
             height: size,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => fallback(),
+            errorBuilder: (ctx, err, stack) => fallback(),
           ),
         );
       }
@@ -116,7 +116,7 @@ class KeraAvatarWidget extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => fallback(),
+          errorBuilder: (ctx, err, stack) => fallback(),
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return Container(
@@ -196,7 +196,7 @@ class KeraPartImage extends StatelessWidget {
               width: width,
               height: height,
               fit: fit,
-              errorBuilder: (_, __, ___) => placeholder(),
+              errorBuilder: (ctx, err, stack) => placeholder(),
             ),
           );
         }
@@ -213,7 +213,7 @@ class KeraPartImage extends StatelessWidget {
           width: width,
           height: height,
           fit: fit,
-          errorBuilder: (_, __, ___) => placeholder(),
+          errorBuilder: (ctx, err, stack) => placeholder(),
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return Container(

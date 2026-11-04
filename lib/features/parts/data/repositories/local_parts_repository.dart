@@ -478,7 +478,7 @@ class LocalPartsRepository implements PartsRepository {
             unit: const Value('pcs'),
             purchasePrice: Value(purchasePrice),
             sellingPrice: Value(sellingPrice),
-            sizeSpecs: Value('Std OEM spec'),
+            sizeSpecs: const Value('Std OEM spec'),
             notes: Value('[DEMO] Sample demo spare part #${i + 1}'),
             lowStockLevel: const Value(5.0),
             cachedQuantity: Value(qty),

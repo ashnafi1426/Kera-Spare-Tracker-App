@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/design/design.dart';
 import '../../../../core/utils/context_extensions.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database_provider.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 
@@ -271,9 +270,12 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
       setState(() => _isGenerating = false);
       Navigator.pop(context);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'Kera Spare Tracker - Report Export ($fileName)',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: 'Kera Spare Tracker - Report Export',
+          text: 'Kera Spare Tracker - Report Export ($fileName)',
+        ),
       );
 
       if (mounted) {

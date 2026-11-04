@@ -8,8 +8,8 @@ import '../../../../core/design/widgets/empty_state.dart';
 import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
-import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
+import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -393,7 +393,6 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
 
   /// Owner Card matching Owners.png
   Widget _buildOwnerCard(BuildContext context, AdminOwnerSummary owner) {
-    final initials = _getInitials(owner.businessName);
     final isPending = owner.status.toUpperCase() == 'PENDING' || owner.status.toUpperCase() == 'INACTIVE';
     final isSuspended = owner.isSuspended;
     final isDark = context.isDark;
@@ -592,13 +591,6 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
         ),
       ],
     );
-  }
-
-  String _getInitials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts[0].isEmpty) return '?';
-    if (parts.length == 1) return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
   }
 
   Future<void> _handleApproveOwner(BuildContext context, AdminOwnerSummary owner) async {

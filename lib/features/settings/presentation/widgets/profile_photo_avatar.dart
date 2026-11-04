@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,15 +26,6 @@ class ProfilePhotoAvatar extends ConsumerStatefulWidget {
 
 class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
   bool _isProcessing = false;
-
-  String _getInitials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts[0].isEmpty) return '?';
-    if (parts.length == 1) {
-      return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
-    }
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-  }
 
   Future<void> _showPhotoPickerSheet(BuildContext context) async {
     final user = ref.read(authControllerProvider).value;
@@ -167,7 +157,6 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
     final user = ref.watch(authControllerProvider).value;
     final photoUrl = user?.avatarUrl;
     final name = user?.businessName ?? user?.phoneNumber ?? '?';
-    final initials = _getInitials(name);
     final isDark = context.isDark;
 
     Widget avatarContent;

@@ -11,3 +11,4 @@ router.get('/summary', reportsController.getSummary);
 router.get('/trends', reportsController.getTrends);
 
 export default router;
+

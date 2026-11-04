@@ -6,7 +6,6 @@ import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/widgets/dashboard_header_bar.dart';
 import '../../../../core/design/widgets/kera_app_footer.dart';
 import '../../../../core/utils/context_extensions.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';

@@ -84,9 +84,9 @@ class KeraAppFooter extends ConsumerWidget {
             children: [
               const KeraLogoWidget(size: 28, borderRadius: 8),
               const SizedBox(width: 10),
-              Text(
+              const Text(
                 AppConstants.appName,
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -100,9 +100,9 @@ class KeraAppFooter extends ConsumerWidget {
                   color: KeraColors.brandOrange.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
+                child: const Text(
                   'v${AppConstants.appVersion}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: KeraColors.brandOrange,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,

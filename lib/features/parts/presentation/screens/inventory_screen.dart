@@ -10,6 +10,7 @@ import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/announcement_banner_widget.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/maintenance_banner_widget.dart';
 import '../../../../core/widgets/suspended_account_banner_widget.dart';
@@ -22,7 +23,6 @@ import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
 import '../widgets/inventory_filter_sheet.dart';
 import '../widgets/sample_parts_dialog.dart';
-import '../../../../core/widgets/kera_image_widget.dart';
 
 
 
@@ -899,12 +899,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 if (val == 'view') {
                   final result = await context.push('/parts/${part.id}');
                   if (result == true && mounted) {
-                    ref.read(inventoryListProvider.notifier).refresh();
+                    await ref.read(inventoryListProvider.notifier).refresh();
                   }
                 } else if (val == 'edit') {
                   final result = await context.push('/parts/${part.id}/edit');
                   if (result == true && mounted) {
-                    ref.read(inventoryListProvider.notifier).refresh();
+                    await ref.read(inventoryListProvider.notifier).refresh();
                   }
                 } else if (val == 'delete') {
                   final confirmed = await showDialog<bool>(
@@ -929,7 +929,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     );
                     if (res.isSuccess && mounted) {
                       context.showSnackBar(context.tr('ዕቃው ተሰርዟል', 'Part deleted'));
-                      ref.read(inventoryListProvider.notifier).refresh();
+                      await ref.read(inventoryListProvider.notifier).refresh();
                     }
                   }
                 }
