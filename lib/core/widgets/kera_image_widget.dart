@@ -8,7 +8,7 @@ String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
   if (pathOrUrl == null || pathOrUrl.trim().isEmpty) return null;
   final clean = pathOrUrl.trim();
 
-  // If already full http(s) URL
+  // 1. If already full http(s) URL
   if (clean.startsWith('http://') || clean.startsWith('https://')) {
     if (cacheBust && !clean.contains('?t=')) {
       final sep = clean.contains('?') ? '&' : '?';
@@ -17,8 +17,20 @@ String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
     return clean;
   }
 
-  // If server relative URL
-  if (clean.startsWith('/')) {
+  // 2. Check if local device file path (especially on Android where paths start with /data or /storage)
+  try {
+    final localFile = File(clean);
+    if (localFile.existsSync()) {
+      return clean;
+    }
+  } catch (_) {}
+
+  // 3. If server relative URL (e.g. /uploads/profiles/... or /uploads/parts/...)
+  if (clean.startsWith('/uploads') ||
+      clean.startsWith('/api/v1/uploads') ||
+      (clean.startsWith('/') &&
+          !clean.startsWith('/data/') &&
+          !clean.startsWith('/storage/'))) {
     final base = AppConstants.apiBaseUrl.replaceAll('/api/v1', '');
     var full = '$base$clean';
     if (cacheBust && !full.contains('?t=')) {

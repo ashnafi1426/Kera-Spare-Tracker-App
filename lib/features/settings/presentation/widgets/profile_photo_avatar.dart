@@ -119,19 +119,33 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
       );
 
       if (photoPath != null && mounted) {
-        await ref.read(authControllerProvider.notifier).updateProfilePhoto(photoPath);
+        final res = await ref.read(authControllerProvider.notifier).updateProfilePhoto(photoPath);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.tr(
-                  'የመገለጫ ፎቶ በተሳካ ሁኔታ ተቀይሯል',
-                  'Profile photo updated successfully',
+          if (res.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  context.tr(
+                    'የመገለጫ ፎቶ በተሳካ ሁኔታ ተቀይሯል',
+                    'Profile photo updated successfully',
+                  ),
                 ),
+                backgroundColor: const Color(0xFF10B981),
               ),
-              backgroundColor: const Color(0xFF10B981),
-            ),
-          );
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  context.tr(
+                    'ፎቶ መጫን አልተሳካም፡ ${res.failureOrNull?.message ?? ""}',
+                    'Failed to update photo: ${res.failureOrNull?.message ?? ""}',
+                  ),
+                ),
+                backgroundColor: const Color(0xFFDC2626),
+              ),
+            );
+          }
         }
       }
     } catch (e) {

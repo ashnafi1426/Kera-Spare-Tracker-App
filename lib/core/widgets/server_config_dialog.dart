@@ -77,6 +77,16 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                       },
                     ),
                     ActionChip(
+                      avatar: const Icon(Icons.wifi_rounded, size: 16),
+                      label: const Text('Local Wi-Fi (192.168.137.184)'),
+                      onPressed: () {
+                        setDialogState(() {
+                          serverController.text =
+                              'http://192.168.137.184:7000/api/v1';
+                        });
+                      },
+                    ),
+                    ActionChip(
                       avatar: const Icon(Icons.usb_rounded, size: 16),
                       label: const Text('Local USB (127.0.0.1)'),
                       onPressed: () {

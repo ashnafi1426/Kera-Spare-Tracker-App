@@ -1005,29 +1005,46 @@ class ApiAuthRepository implements AuthRepository {
 
       String remotePhotoUrl = localFilePath;
       if (await _hasNetwork()) {
-        final fileName = p.basename(localFilePath);
-        final formData = FormData.fromMap({
-          'photo': await MultipartFile.fromFile(
-            localFilePath,
-            filename: fileName,
-          ),
-        });
+        try {
+          final fileName = p.basename(localFilePath);
+          final formData = FormData.fromMap({
+            'photo': await MultipartFile.fromFile(
+              localFilePath,
+              filename: fileName,
+            ),
+          });
 
-        final response = await dio.post(
-          '/auth/profile/photo',
-          data: formData,
-        );
+          final response = await dio.post(
+            '/auth/profile/photo',
+            data: formData,
+            options: Options(
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+            ),
+          );
 
-        if (response.statusCode == 200 && response.data['success'] == true) {
-          final returnedUrl = response.data['data']?['photoUrl']?.toString();
-          if (returnedUrl != null && returnedUrl.isNotEmpty) {
-            remotePhotoUrl = returnedUrl;
+          if (response.statusCode == 200 && response.data['success'] == true) {
+            final returnedUrl = response.data['data']?['photoUrl']?.toString();
+            if (returnedUrl != null && returnedUrl.isNotEmpty) {
+              remotePhotoUrl = returnedUrl;
+            }
           }
+        } catch (netErr) {
+          debugPrint('[ApiAuthRepo] Remote upload failed, keeping local photo: $netErr');
         }
       }
 
       final updatedUser = user.copyWith(avatarUrl: remotePhotoUrl);
       await _sessionStore.updateUserProfile(updatedUser.toJson());
+      try {
+        await (db.update(db.profiles)..where((t) => t.id.equals(user.id))).write(
+          ProfilesCompanion(
+            avatarUrl: Value(remotePhotoUrl),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
+      } catch (_) {}
+
       _cachedUser = updatedUser;
       _authStateController.add(updatedUser);
 
@@ -1050,12 +1067,26 @@ class ApiAuthRepository implements AuthRepository {
 
       if (await _hasNetwork()) {
         try {
-          await dio.delete('/auth/profile/photo');
+          await dio.delete(
+            '/auth/profile/photo',
+            options: Options(
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+            ),
+          );
         } catch (_) {}
       }
 
       final updatedUser = user.copyWith(avatarUrl: null);
       await _sessionStore.updateUserProfile(updatedUser.toJson());
+      try {
+        await (db.update(db.profiles)..where((t) => t.id.equals(user.id))).write(
+          const ProfilesCompanion(
+            avatarUrl: Value(null),
+          ),
+        );
+      } catch (_) {}
+
       _cachedUser = updatedUser;
       _authStateController.add(updatedUser);
 

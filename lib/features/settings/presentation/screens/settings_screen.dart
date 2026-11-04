@@ -11,6 +11,7 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
@@ -727,6 +728,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: 'የተቀመጠ የመጠባበቂያ ፋይል ይመልሱ / Restore database from saved file',
                       onTap: () => _confirmRestoreDatabase(context),
                     ),
+                    Divider(height: 1, color: context.borderColor),
+                    _buildSettingsRow(
+                      icon: Icons.settings_ethernet_rounded,
+                      titleAm: 'የአገልጋይ ግንኙነት',
+                      titleEn: '/ Server Settings',
+                      subtitle: 'የአገልጋይ አድራሻ እና ግንኙነት ፈትሽ / API URL & connection test',
+                      onTap: () => showServerConfigDialog(context, ref),
+                    ),
                   ],
                 ),
               ),
@@ -1434,7 +1443,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
 
       if (confirmed == true && context.mounted) {
-        await ref.read(authControllerProvider.notifier).logout();
+        try {
+          await ref.read(authControllerProvider.notifier).logout();
+        } finally {
+          if (context.mounted) {
+            context.go('/login');
+          }
+        }
       }
       return;
     }
@@ -1469,7 +1484,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
 
       if (choice == 'direct_logout' && context.mounted) {
-        await ref.read(authControllerProvider.notifier).logout();
+        try {
+          await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
+        } finally {
+          if (context.mounted) {
+            context.go('/login');
+          }
+        }
         return;
       }
 
@@ -1478,6 +1499,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final result = await ref
             .read(authControllerProvider.notifier)
             .performSyncAndLogout();
+
+        if (result.isSuccess && context.mounted) {
+          context.go('/login');
+          return;
+        }
 
         if (context.mounted && result.isFailure) {
           // If sync fails (e.g. token expired, server unreachable), offer direct sign out so user is never trapped!
@@ -1515,7 +1541,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           );
 
           if (proceedDirectly == true && context.mounted) {
-            await ref.read(authControllerProvider.notifier).logout();
+            try {
+              await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
+            } finally {
+              if (context.mounted) {
+                context.go('/login');
+              }
+            }
           } else if (context.mounted) {
             context.showSnackBar(
               l10n.syncFailedLogoutCancelled(
@@ -1627,7 +1659,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
+      try {
+        await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
+      } finally {
+        if (context.mounted) {
+          context.go('/login');
+        }
+      }
     }
   }
 }
