@@ -33,10 +33,17 @@ export async function countTotalStockMovements(filter = {}) {
 }
 
 export async function getOwnerItemCounts(ownerId) {
-  const [partsCount, salesCount] = await Promise.all([
+  const [partsCount, salesCount, salesAggregate] = await Promise.all([
     countTotalParts({ ownerId }),
     countTotalSales({ ownerId }),
+    prisma.sale.aggregate({
+      where: { ownerId, deletedAt: null },
+      _sum: { totalAmount: true, totalProfit: true },
+    }),
   ]);
 
-  return { partsCount, salesCount };
+  const totalRevenue = Number(salesAggregate._sum?.totalAmount || 0);
+  const totalProfit = Number(salesAggregate._sum?.totalProfit || 0);
+
+  return { partsCount, salesCount, totalRevenue, totalProfit };
 }

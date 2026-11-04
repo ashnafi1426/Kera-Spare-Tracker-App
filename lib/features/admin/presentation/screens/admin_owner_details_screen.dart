@@ -629,8 +629,13 @@ class _AdminOwnerDetailsScreenState
 
   /// 4 Metric Stat Tiles matching Owner detail.png
   Widget _buildStatTiles(dynamic details) {
-    final parts = details.totalParts > 0 ? details.totalParts : 1240;
-    final sales = details.totalSales > 0 ? details.totalSales : 312;
+    final parts = details.totalParts;
+    final sales = details.totalSales;
+    final rev = details.totalRevenue ?? 0.0;
+    final prof = details.totalProfit ?? 0.0;
+
+    final revFormatted = rev >= 1000 ? '${(rev / 1000).toStringAsFixed(1)}k' : rev.toStringAsFixed(0);
+    final profFormatted = prof >= 1000 ? '${(prof / 1000).toStringAsFixed(1)}k' : prof.toStringAsFixed(0);
 
     return GridView.count(
       crossAxisCount: 2,
@@ -643,19 +648,19 @@ class _AdminOwnerDetailsScreenState
         // Parts
         _buildStatTile(
           icon: Icons.sell_outlined,
-          badge: '38 low',
+          badge: context.tr('አክሲዮን', 'Stock'),
           badgeColor: AdminColors.keraOrange,
           value: '$parts',
-          label: 'ዕቃዎች · Parts',
+          label: context.tr('ዕቃዎች · Parts', 'Total Parts'),
         ),
 
         // Sales
         _buildStatTile(
           icon: Icons.bar_chart_rounded,
-          badge: 'this month',
+          badge: context.tr('ሽያጭ', 'Sales'),
           badgeColor: const Color(0xFF5E6D82),
           value: '$sales',
-          label: 'ሽያጭ · Sales',
+          label: context.tr('ሽያጭ · Sales', 'Total Sales'),
         ),
 
         // Revenue
@@ -663,17 +668,17 @@ class _AdminOwnerDetailsScreenState
           icon: Icons.bar_chart_rounded,
           badge: 'ETB',
           badgeColor: const Color(0xFF10B981),
-          value: '182k',
-          label: 'Revenue',
+          value: revFormatted,
+          label: context.tr('ጠቅላላ ገቢ', 'Revenue'),
         ),
 
         // Profit
         _buildStatTile(
-          icon: Icons.bar_chart_rounded,
-          badge: 'ETB est.',
+          icon: Icons.trending_up_rounded,
+          badge: 'ETB',
           badgeColor: const Color(0xFF10B981),
-          value: '41k',
-          label: 'Profit',
+          value: profFormatted,
+          label: context.tr('ጠቅላላ ትርፍ', 'Profit'),
         ),
       ],
     );
@@ -751,13 +756,9 @@ class _AdminOwnerDetailsScreenState
     );
   }
 
-  /// Recent Sales Card matching Owner detail.png
-  Widget _buildRecentSalesCard() {
-    final recentItems = [
-      {'title': 'Seal kit · CAT × 4', 'meta': 'ETB 6,800 · profit 1,600 · 3 Nov'},
-      {'title': 'Fuel filter · IPD × 12', 'meta': 'ETB 14,400 · profit 3,200 · 2 Nov'},
-      {'title': 'Oil pump · Doosan × 1', 'meta': 'ETB 18,500 · profit 4,100 · 1 Nov'},
-    ];
+  /// Recent Activity Card showing real audit logs
+  Widget _buildRecentSalesCard(dynamic details) {
+    final logs = details.auditLogs as List;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -770,7 +771,7 @@ class _AdminOwnerDetailsScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            context.tr('ሽያጭ ታሪክ · Recent sales', 'Recent Sales Activity'),
+            context.tr('የቅርብ ጊዜ እንቅስቃሴ · Activity', 'Recent Account Activity'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -778,50 +779,61 @@ class _AdminOwnerDetailsScreenState
             ),
           ),
           const SizedBox(height: 12),
-          for (final item in recentItems) ...[
+          if (logs.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 5),
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF10B981),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['title']!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item['meta']!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.textSecondaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(
+                child: Text(
+                  context.tr('የተመዘገበ እንቅስቃሴ የለም', 'No recent activity recorded'),
+                  style: TextStyle(color: context.textSecondaryColor, fontSize: 13),
+                ),
               ),
-            ),
-            if (item != recentItems.last) Divider(height: 12, color: context.borderColor),
-          ],
+            )
+          else
+            for (final log in logs.take(5)) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 5),
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            log.action,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            DateFormat('dd MMM yyyy, HH:mm').format(log.createdAt),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.textSecondaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (log != logs.take(5).last) Divider(height: 12, color: context.borderColor),
+            ],
         ],
       ),
     );
