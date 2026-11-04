@@ -11,6 +11,7 @@ import '../../../../core/design/widgets/confirm_dialog.dart';
 import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/database_provider.dart';
@@ -427,30 +428,14 @@ class _AdminOwnerDetailsScreenState
               ),
               const SizedBox(height: 18),
 
-              // Large White Avatar Card with Initials
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0C2340),
-                  ),
-                ),
+              // Large Avatar with photo or Initials
+              KeraAvatarWidget(
+                photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
+                name: owner.businessName,
+                radius: 36,
+                isDark: false,
+                backgroundColor: Colors.white,
+                textColor: const Color(0xFF0C2340),
               ),
               const SizedBox(height: 12),
 

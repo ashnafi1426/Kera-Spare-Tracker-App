@@ -103,6 +103,7 @@ export async function registerOwner({ phoneNumber, businessName, password, langu
       id: true,
       phoneNumber: true,
       businessName: true,
+      photoUrl: true,
       role: true,
       status: true,
       language: true,
@@ -196,6 +197,7 @@ export async function loginUser({ phoneNumber, password, deviceId, deviceName, i
       id: user.id,
       phoneNumber: user.phoneNumber,
       businessName: user.businessName,
+      photoUrl: user.photoUrl || null,
       role: user.role,
       status: user.status,
       language: user.language,
@@ -320,6 +322,7 @@ export async function loginAdmin({ phoneNumber, password, ipAddress, userAgent }
       id: user.id,
       phoneNumber: user.phoneNumber,
       businessName: user.businessName,
+      photoUrl: user.photoUrl || null,
       role: user.role,
       status: user.status,
       language: user.language,
@@ -561,6 +564,7 @@ export async function getUserProfile(userId) {
       id: true,
       phoneNumber: true,
       businessName: true,
+      photoUrl: true,
       role: true,
       status: true,
       language: true,
@@ -575,4 +579,48 @@ export async function getUserProfile(userId) {
   }
 
   return user;
+}
+
+export async function updateUserProfilePhoto(userId, photoUrl) {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+  });
+  if (!user) throw new NotFoundError('User profile not found.');
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { photoUrl },
+    select: {
+      id: true,
+      phoneNumber: true,
+      businessName: true,
+      photoUrl: true,
+      role: true,
+      status: true,
+      language: true,
+    },
+  });
+  return updated;
+}
+
+export async function removeUserProfilePhoto(userId) {
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deletedAt: null },
+  });
+  if (!user) throw new NotFoundError('User profile not found.');
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { photoUrl: null },
+    select: {
+      id: true,
+      phoneNumber: true,
+      businessName: true,
+      photoUrl: true,
+      role: true,
+      status: true,
+      language: true,
+    },
+  });
+  return updated;
 }

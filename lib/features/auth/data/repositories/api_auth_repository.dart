@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failure.dart';
@@ -808,6 +809,10 @@ class ApiAuthRepository implements AuthRepository {
               'refreshToken': session.refreshToken,
               'deviceId': session.deviceId,
             },
+            options: Options(
+              sendTimeout: const Duration(milliseconds: 1500),
+              receiveTimeout: const Duration(milliseconds: 1500),
+            ),
           );
         } catch (_) {}
       }
@@ -980,6 +985,84 @@ class ApiAuthRepository implements AuthRepository {
           message: 'Update business name failed: ${e.toString()}',
           cause: e,
         ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<AuthUser>> uploadProfilePhoto(String localFilePath) async {
+    try {
+      final userResult = await currentUser();
+      final user = userResult.valueOrNull;
+      if (user == null) {
+        return const Result.failure(AuthFailure(message: 'User is not logged in'));
+      }
+
+      final file = File(localFilePath);
+      if (!await file.exists()) {
+        return const Result.failure(AuthFailure(message: 'File not found'));
+      }
+
+      String remotePhotoUrl = localFilePath;
+      if (await _hasNetwork()) {
+        final fileName = p.basename(localFilePath);
+        final formData = FormData.fromMap({
+          'photo': await MultipartFile.fromFile(
+            localFilePath,
+            filename: fileName,
+          ),
+        });
+
+        final response = await dio.post(
+          '/auth/profile/photo',
+          data: formData,
+        );
+
+        if (response.statusCode == 200 && response.data['success'] == true) {
+          final returnedUrl = response.data['data']?['photoUrl']?.toString();
+          if (returnedUrl != null && returnedUrl.isNotEmpty) {
+            remotePhotoUrl = returnedUrl;
+          }
+        }
+      }
+
+      final updatedUser = user.copyWith(avatarUrl: remotePhotoUrl);
+      await _sessionStore.updateUserProfile(updatedUser.toJson());
+      _cachedUser = updatedUser;
+      _authStateController.add(updatedUser);
+
+      return Result.success(updatedUser);
+    } catch (e) {
+      return Result.failure(
+        AuthFailure(message: 'Upload profile photo failed: ${e.toString()}', cause: e),
+      );
+    }
+  }
+
+  @override
+  Future<Result<AuthUser>> removeProfilePhoto() async {
+    try {
+      final userResult = await currentUser();
+      final user = userResult.valueOrNull;
+      if (user == null) {
+        return const Result.failure(AuthFailure(message: 'User is not logged in'));
+      }
+
+      if (await _hasNetwork()) {
+        try {
+          await dio.delete('/auth/profile/photo');
+        } catch (_) {}
+      }
+
+      final updatedUser = user.copyWith(avatarUrl: null);
+      await _sessionStore.updateUserProfile(updatedUser.toJson());
+      _cachedUser = updatedUser;
+      _authStateController.add(updatedUser);
+
+      return Result.success(updatedUser);
+    } catch (e) {
+      return Result.failure(
+        AuthFailure(message: 'Remove profile photo failed: ${e.toString()}', cause: e),
       );
     }
   }

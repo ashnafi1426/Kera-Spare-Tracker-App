@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../utils/context_extensions.dart';
 import '../../widgets/kera_logo_widget.dart';
+import '../../widgets/kera_image_widget.dart';
 import '../tokens/kera_colors.dart';
 import 'owner_header_bar.dart';
 
@@ -62,16 +63,17 @@ class DashboardHeaderBar extends StatelessWidget {
                   builder: (context, ref, _) {
                     final user = ref.watch(authControllerProvider).value;
                     final photo = user?.avatarUrl;
-                    if (photo != null && photo.isNotEmpty && File(photo).existsSync()) {
+                    if (photo != null && photo.isNotEmpty) {
                       return Container(
-                        width: 38,
-                        height: 38,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: KeraColors.keraOrange, width: 1.5),
                         ),
-                        child: ClipOval(
-                          child: Image.file(File(photo), width: 38, height: 38, fit: BoxFit.cover),
+                        child: KeraAvatarWidget(
+                          photoUrl: photo,
+                          name: user?.businessName ?? 'User',
+                          radius: 19,
+                          isDark: context.isDark,
                         ),
                       );
                     }

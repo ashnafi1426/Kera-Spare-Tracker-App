@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/services/image_service.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 /// Reusable profile avatar with camera badge and bottom sheet photo picker.
@@ -179,40 +180,12 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
           valueColor: AlwaysStoppedAnimation<Color>(AdminColors.keraOrange),
         ),
       );
-    } else if (photoUrl != null && photoUrl.isNotEmpty && File(photoUrl).existsSync()) {
-      avatarContent = ClipOval(
-        child: Image.file(
-          File(photoUrl),
-          width: widget.radius * 2,
-          height: widget.radius * 2,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else if (photoUrl != null && photoUrl.startsWith('http')) {
-      avatarContent = ClipOval(
-        child: Image.network(
-          photoUrl,
-          width: widget.radius * 2,
-          height: widget.radius * 2,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => Text(
-            initials,
-            style: TextStyle(
-              fontSize: widget.radius * 0.7,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      );
     } else {
-      avatarContent = Text(
-        initials,
-        style: TextStyle(
-          fontSize: widget.radius * 0.7,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
+      avatarContent = KeraAvatarWidget(
+        photoUrl: photoUrl,
+        name: name,
+        radius: widget.radius,
+        isDark: isDark,
       );
     }
 

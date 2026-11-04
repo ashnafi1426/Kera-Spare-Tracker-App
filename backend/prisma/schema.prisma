@@ -60,6 +60,7 @@ model User {
   phoneNumber        String       @unique @db.VarChar(20)
   businessName       String       @db.VarChar(100)
   passwordHash       String       @db.VarChar(255)
+  photoUrl           String?      @db.VarChar(500)
   role               UserRole     @default(OWNER)
   status             UserStatus   @default(ACTIVE)
   language           UserLanguage @default(AMHARIC)
@@ -201,6 +202,7 @@ model SparePart {
   sellingPrice   Decimal?  @db.Decimal(12, 2)
   notes          String?   @db.Text
   sizeSpecs      String?   @db.VarChar(100)
+  isDemo         Boolean   @default(false)
   createdAt      DateTime  @default(now()) @db.Timestamp(6)
   updatedAt      DateTime  @updatedAt @db.Timestamp(6)
   deletedAt      DateTime? @db.Timestamp(6)

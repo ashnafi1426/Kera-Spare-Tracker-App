@@ -18,6 +18,7 @@ export async function getDashboardMetrics() {
     versionGroups,
     totalParts,
     totalSales,
+    salesAggregate,
   ] = await Promise.all([
     prisma.user.count({ where: baseOwnerFilter }),
     prisma.user.count({
@@ -65,12 +66,19 @@ export async function getDashboardMetrics() {
     }),
     countTotalParts(),
     countTotalSales(),
+    prisma.sale.aggregate({
+      where: { deletedAt: null },
+      _sum: { totalAmount: true, totalProfit: true },
+    }),
   ]);
 
-  const appVersionDistribution = versionGroups.map((g) => ({
-    version: g.appVersion || 'unknown',
-    count: g._count.id,
-  }));
+  const appVersionDistribution = {};
+  versionGroups.forEach((g) => {
+    appVersionDistribution[g.appVersion || 'unknown'] = g._count.id;
+  });
+
+  const totalRevenue = Number(salesAggregate._sum?.totalAmount || 0);
+  const totalProfit = Number(salesAggregate._sum?.totalProfit || 0);
 
   return {
     totalOwners,
@@ -78,9 +86,12 @@ export async function getDashboardMetrics() {
     activeOwners,
     suspendedOwners,
     inactiveOwners,
+    pendingOwners: suspendedOwners, // For badge display
     ownersWithSyncProblems,
     totalParts,
     totalSales,
+    totalRevenue,
+    totalProfit,
     appVersionDistribution,
   };
 }

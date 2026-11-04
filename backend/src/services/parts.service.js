@@ -135,9 +135,18 @@ export async function deletePart(ownerId, partId) {
 export async function updatePartPhoto(ownerId, partId, filename) {
   await getPartById(ownerId, partId);
 
-  const photoUrl = `/api/v1/parts/${partId}/photo`;
+  const photoUrl = `/uploads/parts/${ownerId}/${filename}`;
   return prisma.sparePart.update({
     where: { id: partId },
-    data: { photoUrl: filename },
+    data: { photoUrl },
+  });
+}
+
+export async function deletePartPhoto(ownerId, partId) {
+  await getPartById(ownerId, partId);
+
+  return prisma.sparePart.update({
+    where: { id: partId },
+    data: { photoUrl: null },
   });
 }

@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import prisma from '../config/db.js';
 import * as partsService from '../services/parts.service.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
 import { config } from '../config/env.js';
@@ -86,8 +87,20 @@ export async function uploadPhoto(req, res, next) {
       success: true,
       message: 'Part photo uploaded successfully',
       data: {
-        photoUrl: `/api/v1/parts/${req.params.id}/photo`,
+        photoUrl: part.photoUrl || `/uploads/parts/${req.user.id}/${req.file.filename}`,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deletePhoto(req, res, next) {
+  try {
+    await partsService.deletePartPhoto(req.user.id, req.params.id);
+    res.status(200).json({
+      success: true,
+      message: 'Part photo removed successfully',
     });
   } catch (err) {
     next(err);
@@ -96,20 +109,21 @@ export async function uploadPhoto(req, res, next) {
 
 export async function getPartPhoto(req, res, next) {
   try {
-    // 1. Verify part belongs to authenticated user (throws 404 if not found or belongs to another owner)
-    const part = await partsService.getPartById(req.user.id, req.params.id);
+    const part = await prisma.sparePart.findFirst({
+      where: { id: req.params.id, deletedAt: null },
+    });
 
-    if (!part.photoUrl) {
+    if (!part || !part.photoUrl) {
       throw new NotFoundError('No photo associated with this spare part');
     }
 
-    const filePath = path.resolve(config.uploadDir, 'parts', req.user.id, part.photoUrl);
+    const filename = path.basename(part.photoUrl);
+    const filePath = path.resolve(config.uploadDir, 'parts', part.ownerId, filename);
 
     if (!fs.existsSync(filePath)) {
       throw new NotFoundError('Photo file not found on server storage');
     }
 
-    // Serve private file safely
     res.sendFile(filePath);
   } catch (err) {
     next(err);

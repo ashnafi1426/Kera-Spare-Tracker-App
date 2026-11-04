@@ -58,6 +58,12 @@ abstract class AuthRepository {
   /// Updates the business name for the active user.
   Future<Result<AuthUser>> updateBusinessName(String newBusinessName);
 
+  /// Uploads and persists profile photo on server and updates session.
+  Future<Result<AuthUser>> uploadProfilePhoto(String localFilePath);
+
+  /// Removes profile photo from server and session.
+  Future<Result<AuthUser>> removeProfilePhoto();
+
   /// Stream of authentication state changes.
   Stream<AuthUser?> watchCurrentUser();
 }

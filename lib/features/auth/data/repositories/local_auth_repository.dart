@@ -352,6 +352,38 @@ class LocalAuthRepository implements AuthRepository {
     }
   }
 
+  @override
+  Future<Result<AuthUser>> uploadProfilePhoto(String localFilePath) async {
+    try {
+      final userResult = await currentUser();
+      final user = userResult.valueOrNull;
+      if (user == null) {
+        return const Result.failure(AuthFailure(message: 'User is not logged in'));
+      }
+      final updatedUser = user.copyWith(avatarUrl: localFilePath);
+      await _persistSession(updatedUser);
+      return Result.success(updatedUser);
+    } catch (e) {
+      return Result.failure(AuthFailure(message: 'Upload profile photo failed: $e', cause: e));
+    }
+  }
+
+  @override
+  Future<Result<AuthUser>> removeProfilePhoto() async {
+    try {
+      final userResult = await currentUser();
+      final user = userResult.valueOrNull;
+      if (user == null) {
+        return const Result.failure(AuthFailure(message: 'User is not logged in'));
+      }
+      final updatedUser = user.copyWith(avatarUrl: null);
+      await _persistSession(updatedUser);
+      return Result.success(updatedUser);
+    } catch (e) {
+      return Result.failure(AuthFailure(message: 'Remove profile photo failed: $e', cause: e));
+    }
+  }
+
   Future<void> _persistSession(AuthUser user) async {
     _cachedUser = user;
     await _storage.write(

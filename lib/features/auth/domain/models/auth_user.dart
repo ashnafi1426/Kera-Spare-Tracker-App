@@ -60,6 +60,7 @@ class AuthUser {
         'status': status,
         'suspended_reason': suspendedReason,
         'avatar_url': avatarUrl,
+        'photoUrl': avatarUrl,
       };
 
   factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
@@ -71,7 +72,7 @@ class AuthUser {
         mustChangePassword: json['must_change_password'] == true || json['mustChangePassword'] == true,
         status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),
         suspendedReason: (json['suspended_reason'] ?? json['suspendedReason']) as String?,
-        avatarUrl: (json['avatar_url'] ?? json['avatarUrl']) as String?,
+        avatarUrl: (json['avatar_url'] ?? json['avatarUrl'] ?? json['photoUrl'] ?? json['photo_url']) as String?,
       );
 
   @override

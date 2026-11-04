@@ -9,6 +9,7 @@ import catalogRoutes from './catalog.routes.js';
 import settingsRoutes from './settings.routes.js';
 import auditRoutes from './audit.routes.js';
 import * as dashboardController from '../../controllers/admin/dashboard.controller.js';
+import * as reportsController from '../../controllers/reports.controller.js';
 
 const router = Router();
 
@@ -21,6 +22,9 @@ router.use('/users', usersRoutes);
 router.use('/', catalogRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/audit-logs', auditRoutes);
+
+// Admin reports endpoint
+router.get('/reports/summary', reportsController.getAdminSummary);
 
 // Backward compatibility for /admin/stats
 router.get('/stats', dashboardController.getDashboard);

@@ -9,6 +9,7 @@ import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/server_config_dialog.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
@@ -418,22 +419,11 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+              KeraAvatarWidget(
+                photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
+                name: owner.businessName,
+                radius: 22,
+                isDark: isDark,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -500,15 +490,17 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             children: [
               _buildOwnerStatItem(
                 label: context.tr('ዕቃ', 'Parts'),
-                value: '${(owner.id.hashCode.abs() % 1500) + 200}',
+                value: '${owner.partsCount}',
               ),
               _buildOwnerStatItem(
                 label: context.tr('ሽያጭ', 'Sales'),
-                value: '${(owner.id.hashCode.abs() % 350) + 40}k',
+                value: '${owner.salesCount}',
               ),
               _buildOwnerStatItem(
                 label: 'Sync',
-                value: owner.lastSyncAt != null ? context.tr('ተመሳስሏል', 'Synced') : '2h',
+                value: owner.lastSyncAt != null
+                    ? context.tr('ተመሳስሏል', 'Synced')
+                    : context.tr('አልተመሳሰለም', 'Never'),
               ),
             ],
           ),

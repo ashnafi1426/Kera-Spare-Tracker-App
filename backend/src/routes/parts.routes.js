@@ -9,7 +9,10 @@ import { uploadPartPhoto } from '../middleware/upload.middleware.js';
 
 const router = Router();
 
-// All spare parts routes require authentication, active status, and OWNER role
+// Public streaming of part photo (allows standard <img> and Image.network to render)
+router.get('/:id/photo', partsController.getPartPhoto);
+
+// All spare parts mutation and list routes require authentication, active status, and OWNER role
 router.use(authenticate, requireActive, requireRole('OWNER'));
 
 router.get('/', partsController.listParts);
@@ -18,8 +21,8 @@ router.get('/:id', partsController.getPart);
 router.put('/:id', validate(updatePartSchema), partsController.updatePart);
 router.delete('/:id', partsController.deletePart);
 
-// Private photo upload and streaming endpoints
+// Photo upload and delete endpoints
 router.post('/:id/photo', uploadPartPhoto.single('photo'), partsController.uploadPhoto);
-router.get('/:id/photo', partsController.getPartPhoto);
+router.delete('/:id/photo', partsController.deletePhoto);
 
 export default router;

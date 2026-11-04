@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -88,6 +89,11 @@ app.use((req, res, next) => {
 
 // 6. Swagger API Documentation (Non-production only)
 setupSwagger(app);
+
+// Static uploads serving (both at root and /api/v1 for reverse proxies and mobile apps)
+const resolvedUploadDir = path.resolve(config.uploadDir);
+app.use('/uploads', express.static(resolvedUploadDir));
+app.use('/api/v1/uploads', express.static(resolvedUploadDir));
 
 // 7. Health Check Route (Mounted at root and /api/v1)
 app.use('/', healthRoutes);

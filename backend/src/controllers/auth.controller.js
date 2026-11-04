@@ -120,3 +120,43 @@ export async function changePassword(req, res, next) {
     next(err);
   }
 }
+
+export async function uploadProfilePhoto(req, res, next) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'NO_FILE', message: 'No photo image uploaded' },
+      });
+    }
+
+    const photoUrl = `/uploads/profiles/${req.user.id}/${req.file.filename}`;
+    const user = await authService.updateUserProfilePhoto(req.user.id, photoUrl);
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo updated successfully',
+      data: {
+        photoUrl,
+        user,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteProfilePhoto(req, res, next) {
+  try {
+    const user = await authService.removeUserProfilePhoto(req.user.id);
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo removed successfully',
+      data: {
+        user,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}

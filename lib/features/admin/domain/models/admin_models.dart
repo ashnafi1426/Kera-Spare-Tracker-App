@@ -60,6 +60,10 @@ class AdminOwnerSummary {
   final String id;
   final String businessName;
   final String phoneNumber;
+  final String? photoUrl;
+  final String? thumbnailUrl;
+  final int partsCount;
+  final int salesCount;
   final String status;
   final DateTime? lastSyncAt;
   final int failedSyncCount;
@@ -71,6 +75,10 @@ class AdminOwnerSummary {
     required this.id,
     required this.businessName,
     required this.phoneNumber,
+    this.photoUrl,
+    this.thumbnailUrl,
+    this.partsCount = 0,
+    this.salesCount = 0,
     required this.status,
     this.lastSyncAt,
     this.failedSyncCount = 0,
@@ -86,6 +94,10 @@ class AdminOwnerSummary {
       id: json['id'] as String,
       businessName: json['businessName'] as String? ?? 'Unnamed Business',
       phoneNumber: json['phoneNumber'] as String? ?? '',
+      photoUrl: json['photoUrl'] as String? ?? json['photo_url'] as String?,
+      thumbnailUrl: json['thumbnailUrl'] as String? ?? json['thumbnail_url'] as String?,
+      partsCount: (json['partsCount'] as num?)?.toInt() ?? 0,
+      salesCount: (json['salesCount'] as num?)?.toInt() ?? 0,
       status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),
       lastSyncAt: json['lastSyncAt'] != null
           ? DateTime.tryParse(json['lastSyncAt'].toString())
@@ -104,12 +116,16 @@ class AdminOwnerDetails {
   final AdminOwnerSummary owner;
   final int totalParts;
   final int totalSales;
+  final double totalRevenue;
+  final double totalProfit;
   final List<AdminAuditLogEntry> auditLogs;
 
   const AdminOwnerDetails({
     required this.owner,
     required this.totalParts,
     required this.totalSales,
+    this.totalRevenue = 0.0,
+    this.totalProfit = 0.0,
     required this.auditLogs,
   });
 
@@ -122,6 +138,8 @@ class AdminOwnerDetails {
       owner: AdminOwnerSummary.fromJson(userJson),
       totalParts: (statsJson['partsCount'] as num?)?.toInt() ?? 0,
       totalSales: (statsJson['salesCount'] as num?)?.toInt() ?? 0,
+      totalRevenue: (statsJson['totalRevenue'] as num?)?.toDouble() ?? 0.0,
+      totalProfit: (statsJson['totalProfit'] as num?)?.toDouble() ?? 0.0,
       auditLogs: logsJson
           .map((l) => AdminAuditLogEntry.fromJson(l as Map<String, dynamic>))
           .toList(),

@@ -9,6 +9,7 @@ import locationsRoutes from './locations.routes.js';
 import adminRoutes from './admin.routes.js';
 import configRoutes from './config.routes.js';
 import syncRoutes from './sync.routes.js';
+import reportsRoutes from './reports.routes.js';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.use('/sales', salesRoutes);
 router.use('/brands', brandsRoutes);
 router.use('/categories', categoriesRoutes);
 router.use('/locations', locationsRoutes);
+router.use('/reports', reportsRoutes);
 router.use('/admin', adminRoutes);
 
 export default router;

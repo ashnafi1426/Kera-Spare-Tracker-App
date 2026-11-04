@@ -156,16 +156,20 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     return result;
   }
 
-  /// Updates the profile photo path locally and in session state.
-  Future<void> updateProfilePhoto(String? photoPath) async {
-    final current = state.value;
-    if (current != null) {
-      final updated = current.copyWith(avatarUrl: photoPath);
-      state = AsyncValue.data(updated);
-      final repo = _repo;
-      if (repo is ApiAuthRepository) {
-        await repo.sessionStore.updateUserProfile(updated.toJson());
+  /// Updates or removes the profile photo and synchronizes with server.
+  Future<Result<AuthUser>> updateProfilePhoto(String? photoPath) async {
+    if (photoPath != null && photoPath.isNotEmpty) {
+      final result = await _repo.uploadProfilePhoto(photoPath);
+      if (result.isSuccess) {
+        state = AsyncValue.data(result.valueOrNull);
       }
+      return result;
+    } else {
+      final result = await _repo.removeProfilePhoto();
+      if (result.isSuccess) {
+        state = AsyncValue.data(result.valueOrNull);
+      }
+      return result;
     }
   }
 }

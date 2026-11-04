@@ -73,6 +73,7 @@ export async function listUsers({
         id: true,
         businessName: true,
         phoneNumber: true,
+        photoUrl: true,
         role: true,
         status: true,
         language: true,
@@ -84,6 +85,12 @@ export async function listUsers({
         disabledAt: true,
         suspendedAt: true,
         suspendedReason: true,
+        _count: {
+          select: {
+            spareParts: { where: { deletedAt: null } },
+            sales: { where: { deletedAt: null } },
+          },
+        },
       },
       orderBy: { [sortField]: orderDirection },
       take: limitNum,
@@ -94,6 +101,10 @@ export async function listUsers({
   const formattedUsers = users.map((u) => ({
     ...u,
     phone: u.phoneNumber,
+    photoUrl: u.photoUrl || null,
+    thumbnailUrl: u.photoUrl || null,
+    partsCount: u._count?.spareParts ?? 0,
+    salesCount: u._count?.sales ?? 0,
     plan: null,
     expiry: null,
   }));
@@ -116,6 +127,7 @@ export async function getUserById(id) {
       id: true,
       phoneNumber: true,
       businessName: true,
+      photoUrl: true,
       role: true,
       status: true,
       language: true,
@@ -149,10 +161,13 @@ export async function getUserById(id) {
     user: {
       ...user,
       phone: user.phoneNumber,
+      photoUrl: user.photoUrl || null,
+      thumbnailUrl: user.photoUrl || null,
       plan: null,
       expiry: null,
     },
     counts,
+    stats: counts,
     recentAuditLogs,
   };
 }

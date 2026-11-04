@@ -10,6 +10,7 @@ import {
 } from '../validators/auth.validator.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { requireActive } from '../middleware/status.middleware.js';
+import { uploadProfilePhoto } from '../middleware/upload.middleware.js';
 
 const router = Router();
 
@@ -50,10 +51,30 @@ router.post('/register', authLimiter, validate(registerSchema), authController.r
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
 router.post('/admin/login', adminAuthLimiter, validate(loginSchema), authController.adminLogin);
 router.post('/refresh', authLimiter, validate(refreshTokenSchema), authController.refresh);
-router.post('/logout', authenticate, authController.logout);
+// Logout handler supporting both Bearer auth and direct refreshToken revocation
+router.post('/logout', (req, res, next) => {
+  // If authorization header exists, try authenticating; otherwise let controller handle refreshToken
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    return authenticate(req, res, () => authController.logout(req, res, next));
+  }
+  return authController.logout(req, res, next);
+});
 router.post('/logout-all', authenticate, authController.logoutAll);
 router.get('/me', authenticate, requireActive, authController.getMe);
 router.get('/profile', authenticate, requireActive, authController.getMe);
+router.post(
+  '/profile/photo',
+  authenticate,
+  requireActive,
+  uploadProfilePhoto.single('photo'),
+  authController.uploadProfilePhoto
+);
+router.delete(
+  '/profile/photo',
+  authenticate,
+  requireActive,
+  authController.deleteProfilePhoto
+);
 router.post(
   '/change-password',
   authenticate,
