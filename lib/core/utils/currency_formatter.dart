@@ -17,6 +17,18 @@ class CurrencyFormatter {
     return 'ETB ${_currencyFormat.format(amount)}';
   }
 
+  /// Formats large numbers compactly: e.g. 1.2M, 45.5K, or standard number.
+  static String formatCompact(num? amount) {
+    if (amount == null || amount == 0) return '0';
+    final val = amount.toDouble();
+    if (val >= 1000000) {
+      return '${(val / 1000000).toStringAsFixed(1)}M';
+    } else if (val >= 1000) {
+      return '${(val / 1000).toStringAsFixed(1)}K';
+    }
+    return val % 1 == 0 ? val.toInt().toString() : val.toStringAsFixed(1);
+  }
+
   /// Formats an integer count with thousands separators.
   /// Example: 12500 -> "12,500"
   static String formatCount(int? count) {

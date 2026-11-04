@@ -8,8 +8,11 @@ class AdminDashboardStats {
   final int activeOwners;
   final int suspendedOwners;
   final int inactiveOwners;
+  final int pendingOwners;
   final int totalParts;
   final int totalSales;
+  final double totalRevenue;
+  final double totalProfit;
   final int ownersWithSyncProblems;
   final Map<String, int> appVersionDistribution;
 
@@ -19,8 +22,11 @@ class AdminDashboardStats {
     required this.activeOwners,
     required this.suspendedOwners,
     required this.inactiveOwners,
+    this.pendingOwners = 0,
     required this.totalParts,
     required this.totalSales,
+    this.totalRevenue = 0.0,
+    this.totalProfit = 0.0,
     required this.ownersWithSyncProblems,
     required this.appVersionDistribution,
   });
@@ -48,8 +54,11 @@ class AdminDashboardStats {
       activeOwners: (json['activeOwners'] as num?)?.toInt() ?? 0,
       suspendedOwners: (json['suspendedOwners'] as num?)?.toInt() ?? 0,
       inactiveOwners: (json['inactiveOwners'] as num?)?.toInt() ?? 0,
+      pendingOwners: (json['pendingOwners'] as num?)?.toInt() ?? (json['suspendedOwners'] as num?)?.toInt() ?? 0,
       totalParts: (json['totalParts'] as num?)?.toInt() ?? 0,
       totalSales: (json['totalSales'] as num?)?.toInt() ?? 0,
+      totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0.0,
+      totalProfit: (json['totalProfit'] as num?)?.toDouble() ?? 0.0,
       ownersWithSyncProblems: (json['ownersWithSyncProblems'] as num?)?.toInt() ?? 0,
       appVersionDistribution: dist,
     );
