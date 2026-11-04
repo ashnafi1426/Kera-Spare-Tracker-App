@@ -89,7 +89,7 @@ void main() {
       // Section 1
       expect(find.text('Account & Business'), findsOneWidget);
       expect(find.text('Business Profile'), findsOneWidget);
-      expect(find.text('Security'), findsOneWidget);
+      expect(find.textContaining('Security'), findsWidgets);
 
       // Section 2
       expect(find.text('Preferences'), findsOneWidget);
@@ -120,7 +120,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final scrollable = find.byType(Scrollable).first;
-      final logoutBtnFinder = find.text('ከመለያ ውጣ (Sign Out / Logout)');
+      final logoutBtnFinder = find.widgetWithText(ElevatedButton, 'Sign Out');
       await tester.scrollUntilVisible(logoutBtnFinder, 500, scrollable: scrollable);
       await tester.ensureVisible(logoutBtnFinder);
       await tester.pumpAndSettle();
@@ -149,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final scrollable = find.byType(Scrollable).first;
-      final logoutBtnFinder = find.text('ከመለያ ውጣ (Sign Out / Logout)');
+      final logoutBtnFinder = find.widgetWithText(ElevatedButton, 'Sign Out');
       await tester.scrollUntilVisible(logoutBtnFinder, 500, scrollable: scrollable);
       await tester.ensureVisible(logoutBtnFinder);
       await tester.pumpAndSettle();

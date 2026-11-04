@@ -62,12 +62,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         foregroundColor: Colors.white,
         elevation: 1,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const KeraLogoWidget(size: 34, borderRadius: 6),
-            const SizedBox(width: 10),
-            Text(
-              context.tr('ቅንብሮች', 'Settings'),
-              style: KeraTypography.titleMedium(color: Colors.white),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                context.tr('ቅንብሮች', 'Settings'),
+                style: KeraTypography.titleMedium(color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
