@@ -364,6 +364,37 @@ class SyncCoordinatorService {
                   updatedAt: Value(soldAt),
                 ),
               );
+
+          final items = s['items'];
+          if (items is List) {
+            for (final rawItem in items) {
+              if (rawItem is! Map<String, dynamic>) continue;
+              final itemId = rawItem['id']?.toString() ?? '${saleId}_${rawItem['partId']}';
+              final partId = rawItem['partId']?.toString() ?? '';
+              final partNameSnapshot = rawItem['partNameSnapshot']?.toString() ?? 'Item';
+              final quantity = double.tryParse(rawItem['quantity']?.toString() ?? '1') ?? 1.0;
+              final unitCost = double.tryParse(rawItem['unitCostSnapshot']?.toString() ?? '0') ?? 0.0;
+              final unitPrice = double.tryParse(rawItem['unitPriceSnapshot']?.toString() ?? '0') ?? 0.0;
+              final subtotal = double.tryParse(rawItem['subtotal']?.toString() ?? '0') ?? (quantity * unitPrice);
+              final itemProfit = double.tryParse(rawItem['profit']?.toString() ?? '0') ?? (subtotal - (quantity * unitCost));
+
+              await db.into(db.saleItems).insertOnConflictUpdate(
+                SaleItemsCompanion(
+                  id: Value(itemId),
+                  ownerId: Value(ownerId),
+                  saleId: Value(saleId),
+                  partId: Value(partId),
+                  partNameSnapshot: Value(partNameSnapshot),
+                  quantity: Value(quantity),
+                  unitCost: Value(unitCost),
+                  unitPrice: Value(unitPrice),
+                  lineTotal: Value(subtotal),
+                  lineProfit: Value(itemProfit),
+                  syncStatus: const Value(SyncStatus.synced),
+                ),
+              );
+            }
+          }
           appliedPullCount++;
         }
 
