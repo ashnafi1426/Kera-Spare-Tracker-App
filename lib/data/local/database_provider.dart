@@ -1,16 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/parts/presentation/providers/metadata_providers.dart';
 import 'app_database.dart';
 import 'daos/parts_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
 import 'daos/stock_dao.dart';
 import 'daos/sync_queue_dao.dart';
+import 'database_manager.dart';
 
-/// Singleton provider for the local Drift database.
+/// Provider for the local Drift database partitioned by owner.
+/// Switching accounts automatically points to the isolated owner SQLite file.
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
-  ref.onDispose(db.close);
-  return db;
+  final ownerId = ref.watch(currentOwnerIdProvider);
+  return DatabaseManager.instance
+      .getDatabase(ownerId.isNotEmpty ? ownerId : null);
 });
 
 /// Provider for PartsDao.

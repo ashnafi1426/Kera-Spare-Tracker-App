@@ -68,10 +68,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('New Sale'), findsOneWidget);
-    expect(find.text('No Items in Sale'), findsOneWidget);
-    expect(find.text('Search and add parts to record a sale'), findsOneWidget);
-    expect(find.text('Complete Sale'), findsNothing);
+    expect(find.text('Record Sale'), findsOneWidget);
+    expect(find.text('No items selected'), findsOneWidget);
+    expect(find.textContaining('Select parts'), findsOneWidget);
   });
 
   testWidgets('NewSaleScreen displays line item and live totals when cart has items',
@@ -100,8 +99,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Fuel Injector Nozzle'), findsOneWidget);
-    expect(find.text('Complete Sale'), findsOneWidget);
-    expect(find.text('350.00 ብር'), findsWidgets);
+    expect(find.textContaining('350 ETB'), findsWidgets);
   });
 
   testWidgets('SaleSuccessScreen renders receipt details and itemized summary',

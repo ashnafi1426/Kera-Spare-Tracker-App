@@ -10,5 +10,6 @@ router.use(authenticate, requireActive);
 
 router.get('/pull', syncController.pullSync);
 router.post('/push', syncController.pushSync);
+router.get('/status', syncController.getSyncStatus);
 
 export default router;

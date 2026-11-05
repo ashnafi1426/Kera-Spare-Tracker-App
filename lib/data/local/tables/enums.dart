@@ -8,6 +8,16 @@ enum SyncStatus {
   failed,
 }
 
+/// Status for sync queue operations.
+enum QueueStatus {
+  pending,
+  inProgress,
+  synced,
+  failed,
+  needsAttention,
+  conflict,
+}
+
 /// Operation type for sync queue items.
 enum SyncOperation {
   insert,
@@ -19,9 +29,12 @@ enum SyncOperation {
 enum MovementType {
   initial,
   purchase,
+  stockIn,
   sale,
+  stockOut,
   adjustment,
   returned,
+  returnMovement,
 }
 
 /// User authorization roles.

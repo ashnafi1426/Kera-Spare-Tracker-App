@@ -11,9 +11,12 @@ export async function listAllUsers({ limit = 50, offset = 0 } = {}) {
         id: true,
         phoneNumber: true,
         businessName: true,
+        photoUrl: true,
         role: true,
         status: true,
         language: true,
+        lastSyncAt: true,
+        failedSyncCount: true,
         createdAt: true,
         _count: {
           select: {

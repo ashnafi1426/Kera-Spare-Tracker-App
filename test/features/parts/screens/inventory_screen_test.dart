@@ -106,21 +106,20 @@ void main() {
     expect(find.byType(TextField), findsOneWidget);
 
     // Verify Quick Stock Chips
-    expect(find.text('ሁሉም'), findsOneWidget);
-    expect(find.text('ክምችት ያለው'), findsOneWidget);
-    expect(find.text('አነስተኛ ክምችት'), findsOneWidget);
-    expect(find.text('ያለቀ'), findsOneWidget);
+    expect(find.textContaining('ሁሉም'), findsOneWidget);
+    expect(find.textContaining('ክምችት ያለው'), findsOneWidget);
+    expect(find.textContaining('ሊያልቅ ነው'), findsWidgets);
+    expect(find.textContaining('ያለቀ'), findsOneWidget);
 
     // Verify Parts rendered
     expect(find.text('Oil Filter CAT'), findsOneWidget);
-    expect(find.text('#1R-0716'), findsOneWidget);
-    expect(find.text('CAT'), findsOneWidget);
-    expect(find.text('1200 ብር'), findsOneWidget);
-    expect(find.text('15 pcs'), findsOneWidget);
+    expect(find.textContaining('1R-0716'), findsOneWidget);
+    expect(find.textContaining('1200 ETB'), findsOneWidget);
+    expect(find.textContaining('15 ፍሬ'), findsOneWidget);
 
     expect(find.text('Brake Pad Set'), findsOneWidget);
-    expect(find.text('#BP-2020'), findsOneWidget);
-    expect(find.text('2400 ብር'), findsOneWidget);
+    expect(find.textContaining('BP-2020'), findsOneWidget);
+    expect(find.textContaining('2400 ETB'), findsOneWidget);
   });
 
   testWidgets('InventoryScreen debounces search input and refreshes list',

@@ -40,6 +40,28 @@ class SyncPushService {
       }
     } catch (_) {}
 
+    // Verify server health before pushing
+    try {
+      final healthRes = await dio
+          .get('/health')
+          .timeout(const Duration(seconds: 4));
+      if (healthRes.statusCode != 200) {
+        return const Result.failure(
+          NetworkFailure(
+            message: 'Server is currently offline or unreachable. Please try again later.',
+            code: 'SERVER_UNAVAILABLE',
+          ),
+        );
+      }
+    } catch (_) {
+      return const Result.failure(
+        NetworkFailure(
+          message: 'Server is currently unreachable. Changes are saved locally and will sync when server is reachable.',
+          code: 'SERVER_UNREACHABLE',
+        ),
+      );
+    }
+
     int totalSynced = 0;
     int batchesCount = 0;
 
@@ -50,7 +72,14 @@ class SyncPushService {
 
         batchesCount++;
 
-        final payload = batch.map((item) {
+        // Sort: spare_parts first so referenced items exist before sales & movements
+        final sortedBatch = List<SyncQueueItem>.from(batch)..sort((a, b) {
+          if (a.entityType == 'spare_parts' && b.entityType != 'spare_parts') return -1;
+          if (a.entityType != 'spare_parts' && b.entityType == 'spare_parts') return 1;
+          return a.createdAt.compareTo(b.createdAt);
+        });
+
+        final payload = sortedBatch.map((item) {
           dynamic parsedData;
           try {
             parsedData = jsonDecode(item.payload);
@@ -59,8 +88,9 @@ class SyncPushService {
           }
           return {
             'id': item.recordId,
+            'operationId': item.operationId,
             'entity': item.tableTarget,
-            'action': item.operation.name,
+            'action': item.operationType ?? item.operation.name,
             'data': parsedData,
           };
         }).toList();
@@ -71,15 +101,35 @@ class SyncPushService {
         );
 
         if (response.statusCode == 200 && response.data['success'] == true) {
-          for (final item in batch) {
-            await db.syncQueueDao.deleteItem(item.id);
+          final data = response.data['data'] as Map<String, dynamic>?;
+          final appliedList = data?['applied'] as List<dynamic>? ?? [];
+
+          final appliedMap = <String, String>{};
+          for (final a in appliedList) {
+            if (a is Map) {
+              final id = a['id']?.toString() ?? '';
+              final status = a['status']?.toString() ?? 'applied';
+              if (id.isNotEmpty) appliedMap[id] = status;
+            }
           }
-          totalSynced += batch.length;
+
+          for (final item in sortedBatch) {
+            final status = appliedMap[item.recordId] ?? 'applied';
+            if (status == 'applied' || status == 'ok' || status == 'duplicate' || status == 'acknowledged') {
+              await db.syncQueueDao.deleteItem(item.id);
+              totalSynced++;
+            } else if (status == 'error') {
+              await db.syncQueueDao.recordAttemptFailure(
+                item.id,
+                'Server rejected mutation: ${appliedMap[item.recordId]}',
+              );
+            }
+          }
           await sessionStore.recordOnlineActivity();
         } else {
           final errorMsg = response.data?['message']?.toString() ??
               'Server returned error during sync';
-          for (final item in batch) {
+          for (final item in sortedBatch) {
             await db.syncQueueDao.recordAttemptFailure(item.id, errorMsg);
           }
           return Result.failure(

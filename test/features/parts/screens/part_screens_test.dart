@@ -83,10 +83,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Title
-    expect(find.text('አዲስ የመለዋወጫ ዕቃ መዝግብ'), findsOneWidget);
+    expect(find.text('ዕቃ መጨመር'), findsOneWidget);
 
     // Enter only Part Name
-    final nameField = find.widgetWithText(TextFormField, 'የዕቃው ስም');
+    final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Oil Filter Standard');
     await tester.pumpAndSettle();
 

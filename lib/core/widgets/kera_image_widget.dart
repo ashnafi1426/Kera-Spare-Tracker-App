@@ -6,7 +6,7 @@ import '../design/tokens/kera_colors.dart';
 /// Helper to convert relative or local paths to fully qualified URLs or valid local paths.
 String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
   if (pathOrUrl == null || pathOrUrl.trim().isEmpty) return null;
-  final clean = pathOrUrl.trim();
+  var clean = pathOrUrl.trim().replaceAll(r'\', '/');
 
   // 1. If already full http(s) URL
   if (clean.startsWith('http://') || clean.startsWith('https://')) {
@@ -26,11 +26,14 @@ String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
   } catch (_) {}
 
   // 3. If server relative URL (e.g. /uploads/profiles/... or /uploads/parts/...)
-  if (clean.startsWith('/uploads') ||
+  if (clean.startsWith('uploads') ||
+      clean.startsWith('/uploads') ||
+      clean.startsWith('api/v1/uploads') ||
       clean.startsWith('/api/v1/uploads') ||
       (clean.startsWith('/') &&
           !clean.startsWith('/data/') &&
           !clean.startsWith('/storage/'))) {
+    if (!clean.startsWith('/')) clean = '/$clean';
     final base = AppConstants.apiBaseUrl.replaceAll('/api/v1', '');
     var full = '$base$clean';
     if (cacheBust && !full.contains('?t=')) {

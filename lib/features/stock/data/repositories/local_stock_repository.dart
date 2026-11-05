@@ -60,8 +60,12 @@ class LocalStockRepository implements StockRepository {
                 id: Value(movementId),
                 ownerId: ownerId,
                 partId: partId,
+                sparePartId: Value(partId),
                 type: MovementType.purchase,
+                movementType: const Value('purchase'),
                 quantityChange: quantity,
+                quantityBefore: Value(currentStock),
+                quantityAfter: Value(newStock),
                 unitCost: Value(unitCost ?? part.purchasePrice),
                 note: Value(note?.trim()),
                 movedAt: Value(now),
@@ -71,41 +75,38 @@ class LocalStockRepository implements StockRepository {
               ),
             );
 
-        // 2. Update spare_parts cached_quantity
+        // 2. Update spare_parts cached_quantity locally
         await (db.update(db.spareParts)..where((t) => t.id.equals(partId))).write(
           SparePartsCompanion(
             cachedQuantity: Value(newStock),
+            quantity: Value(newStock),
             updatedAt: Value(now),
             syncStatus: const Value(SyncStatus.pending),
           ),
         );
 
-        // 3. Enqueue stock movement creation to sync_queue
-        await db.syncQueueDao.enqueue(
-          tableName: 'stock_movements',
-          recordId: movementId,
-          operation: SyncOperation.insert,
+        // 3. Enqueue stock movement creation to sync_queue with DELTA only (+quantity)
+        final opId = uuid.v4();
+        await db.syncQueueDao.enqueueOperation(
+          operationId: opId,
+          ownerId: ownerId,
+          entityType: 'stock_movements',
+          entityId: movementId,
+          operationType: 'insert',
           payload: jsonEncode({
             'id': movementId,
             'owner_id': ownerId,
             'part_id': partId,
+            'spare_part_id': partId,
             'type': MovementType.purchase.name,
+            'movement_type': 'purchase',
             'quantity_change': quantity,
+            'quantity_before': currentStock,
+            'quantity_after': newStock,
             'unit_cost': unitCost ?? part.purchasePrice,
             'note': note?.trim(),
             'moved_at': now.toIso8601String(),
             'created_at': now.toIso8601String(),
-          }),
-        );
-
-        // 4. Enqueue spare part cached quantity update to sync_queue
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: partId,
-          operation: SyncOperation.update,
-          payload: jsonEncode({
-            'cached_quantity': newStock,
-            'updated_at': now.toIso8601String(),
           }),
         );
 
@@ -179,8 +180,12 @@ class LocalStockRepository implements StockRepository {
                 id: Value(movementId),
                 ownerId: ownerId,
                 partId: partId,
+                sparePartId: Value(partId),
                 type: MovementType.adjustment,
+                movementType: const Value('stock_out'),
                 quantityChange: -quantity,
+                quantityBefore: Value(currentStock),
+                quantityAfter: Value(projectedStock),
                 unitCost: Value(unitCost ?? part.purchasePrice),
                 note: Value(note?.trim()),
                 movedAt: Value(now),
@@ -190,41 +195,38 @@ class LocalStockRepository implements StockRepository {
               ),
             );
 
-        // 2. Update spare_parts cached_quantity
+        // 2. Update spare_parts cached_quantity locally
         await (db.update(db.spareParts)..where((t) => t.id.equals(partId))).write(
           SparePartsCompanion(
             cachedQuantity: Value(projectedStock),
+            quantity: Value(projectedStock),
             updatedAt: Value(now),
             syncStatus: const Value(SyncStatus.pending),
           ),
         );
 
-        // 3. Enqueue stock movement creation to sync_queue
-        await db.syncQueueDao.enqueue(
-          tableName: 'stock_movements',
-          recordId: movementId,
-          operation: SyncOperation.insert,
+        // 3. Enqueue stock movement creation to sync_queue with DELTA only (-quantity)
+        final opId = uuid.v4();
+        await db.syncQueueDao.enqueueOperation(
+          operationId: opId,
+          ownerId: ownerId,
+          entityType: 'stock_movements',
+          entityId: movementId,
+          operationType: 'insert',
           payload: jsonEncode({
             'id': movementId,
             'owner_id': ownerId,
             'part_id': partId,
+            'spare_part_id': partId,
             'type': MovementType.adjustment.name,
+            'movement_type': 'stock_out',
             'quantity_change': -quantity,
+            'quantity_before': currentStock,
+            'quantity_after': projectedStock,
             'unit_cost': unitCost ?? part.purchasePrice,
             'note': note?.trim(),
             'moved_at': now.toIso8601String(),
             'created_at': now.toIso8601String(),
-          }),
-        );
-
-        // 4. Enqueue spare part cached quantity update
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: partId,
-          operation: SyncOperation.update,
-          payload: jsonEncode({
-            'cached_quantity': projectedStock,
-            'updated_at': now.toIso8601String(),
           }),
         );
 
@@ -292,8 +294,12 @@ class LocalStockRepository implements StockRepository {
                 id: Value(movementId),
                 ownerId: ownerId,
                 partId: partId,
+                sparePartId: Value(partId),
                 type: MovementType.adjustment,
+                movementType: const Value('adjustment'),
                 quantityChange: delta,
+                quantityBefore: Value(currentStock),
+                quantityAfter: Value(countedQuantity),
                 unitCost: Value(unitCost ?? part.purchasePrice),
                 note: Value(note?.trim()),
                 movedAt: Value(now),
@@ -303,41 +309,38 @@ class LocalStockRepository implements StockRepository {
               ),
             );
 
-        // 2. Update spare_parts cached_quantity
+        // 2. Update spare_parts cached_quantity locally
         await (db.update(db.spareParts)..where((t) => t.id.equals(partId))).write(
           SparePartsCompanion(
             cachedQuantity: Value(countedQuantity),
+            quantity: Value(countedQuantity),
             updatedAt: Value(now),
             syncStatus: const Value(SyncStatus.pending),
           ),
         );
 
-        // 3. Enqueue stock movement
-        await db.syncQueueDao.enqueue(
-          tableName: 'stock_movements',
-          recordId: movementId,
-          operation: SyncOperation.insert,
+        // 3. Enqueue stock movement with DELTA only (delta), never absolute total
+        final opId = uuid.v4();
+        await db.syncQueueDao.enqueueOperation(
+          operationId: opId,
+          ownerId: ownerId,
+          entityType: 'stock_movements',
+          entityId: movementId,
+          operationType: 'insert',
           payload: jsonEncode({
             'id': movementId,
             'owner_id': ownerId,
             'part_id': partId,
+            'spare_part_id': partId,
             'type': MovementType.adjustment.name,
+            'movement_type': 'adjustment',
             'quantity_change': delta,
+            'quantity_before': currentStock,
+            'quantity_after': countedQuantity,
             'unit_cost': unitCost ?? part.purchasePrice,
             'note': note?.trim(),
             'moved_at': now.toIso8601String(),
             'created_at': now.toIso8601String(),
-          }),
-        );
-
-        // 4. Enqueue spare part update
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: partId,
-          operation: SyncOperation.update,
-          payload: jsonEncode({
-            'cached_quantity': countedQuantity,
-            'updated_at': now.toIso8601String(),
           }),
         );
 

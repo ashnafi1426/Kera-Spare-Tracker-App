@@ -5,6 +5,7 @@ part of 'sync_queue_dao.dart';
 // ignore_for_file: type=lint
 mixin _$SyncQueueDaoMixin on DatabaseAccessor<AppDatabase> {
   $SyncQueueTable get syncQueue => attachedDatabase.syncQueue;
+  $SyncStateTable get syncState => attachedDatabase.syncState;
   SyncQueueDaoManager get managers => SyncQueueDaoManager(this);
 }
 
@@ -13,4 +14,6 @@ class SyncQueueDaoManager {
   SyncQueueDaoManager(this._db);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db.attachedDatabase, _db.syncQueue);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db.attachedDatabase, _db.syncState);
 }

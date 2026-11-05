@@ -9,29 +9,33 @@ import '../../domain/models/inventory_filter.dart';
 import '../../domain/models/paged_result.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/repositories/parts_repository.dart';
+import '../datasources/parts_local_data_source.dart';
 
-/// SQLite and sync_queue backed implementation of [PartsRepository].
+/// Clean Architecture implementation of [PartsRepository] backed by [PartsLocalDataSource].
+/// All reads strictly query SQLite reactive streams, and all writes execute atomic
+/// transactions saving to the local database and the sync outbox.
 class LocalPartsRepository implements PartsRepository {
+  final PartsLocalDataSource localDataSource;
   final AppDatabase db;
   final Uuid uuid;
 
   LocalPartsRepository({
     required this.db,
+    PartsLocalDataSource? localDataSource,
     this.uuid = const Uuid(),
-  });
+  }) : localDataSource =
+            localDataSource ?? PartsLocalDataSource(db: db, uuid: uuid);
 
   @override
   Stream<List<PartItem>> watchActiveParts(String ownerId) {
-    return db.partsDao.watchActiveParts(ownerId).map(
-          (rows) => rows.map(_mapRowToPartItem).toList(),
-        );
+    return localDataSource.watchActiveParts(ownerId);
   }
 
   @override
   Future<Result<List<PartItem>>> getActiveParts(String ownerId) async {
     try {
-      final rows = await db.partsDao.getActiveParts(ownerId);
-      return Result.success(rows.map(_mapRowToPartItem).toList());
+      final items = await localDataSource.getActiveParts(ownerId);
+      return Result.success(items);
     } catch (e) {
       return Result.failure(DatabaseFailure(
         message: 'Failed to retrieve active parts: $e',
@@ -46,11 +50,11 @@ class LocalPartsRepository implements PartsRepository {
     required String id,
   }) async {
     try {
-      final row = await db.partsDao.getPartById(id, ownerId);
-      if (row == null) {
+      final part = await localDataSource.getPartById(ownerId, id);
+      if (part == null) {
         return const Result.failure(NotFoundFailure(message: 'Part not found'));
       }
-      return Result.success(_mapRowToPartItem(row));
+      return Result.success(part);
     } catch (e) {
       return Result.failure(DatabaseFailure(
         message: 'Failed to retrieve part: $e',
@@ -102,131 +106,26 @@ class LocalPartsRepository implements PartsRepository {
     }
 
     try {
-      final partId = uuid.v4();
-      final now = DateTime.now();
-      final hasInitialStock = initialQuantity != null && initialQuantity > 0;
-      final cachedQty = hasInitialStock ? initialQuantity : 0.0;
-
-      final createdPart = await db.transaction(() async {
-        // 1. Insert spare_parts row
-        await db.into(db.spareParts).insert(
-              SparePartsCompanion.insert(
-                id: Value(partId),
-                ownerId: ownerId,
-                name: Value(name?.trim()),
-                partNumber: Value(partNumber?.trim()),
-                photoLocalPath: Value(photoLocalPath),
-                photoUrl: Value(photoUrl),
-                brandId: Value(brandId),
-                categoryId: Value(categoryId),
-                locationId: Value(locationId),
-                customLocation: Value(customLocation?.trim()),
-                description: Value(description?.trim()),
-                unit: Value(unit?.trim()),
-                purchasePrice: Value(purchasePrice),
-                sellingPrice: Value(sellingPrice),
-                sizeSpecs: Value(sizeSpecs?.trim()),
-                notes: Value(notes?.trim()),
-                lowStockLevel: Value(lowStockLevel),
-                cachedQuantity: Value(cachedQty),
-                createdAt: Value(now),
-                updatedAt: Value(now),
-                syncStatus: const Value(SyncStatus.pending),
-              ),
-            );
-
-        // 2. Enqueue spare_parts insert mutation to sync_queue
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: partId,
-          operation: SyncOperation.insert,
-          payload: jsonEncode({
-            'id': partId,
-            'owner_id': ownerId,
-            'name': name?.trim(),
-            'part_number': partNumber?.trim(),
-            'photo_local_path': photoLocalPath,
-            'photo_url': photoUrl,
-            'brand_id': brandId,
-            'category_id': categoryId,
-            'location_id': locationId,
-            'custom_location': customLocation?.trim(),
-            'description': description?.trim(),
-            'unit': unit?.trim(),
-            'purchase_price': purchasePrice,
-            'selling_price': sellingPrice,
-            'size_specs': sizeSpecs?.trim(),
-            'notes': notes?.trim(),
-            'low_stock_level': lowStockLevel,
-            'cached_quantity': cachedQty,
-            'created_at': now.toIso8601String(),
-            'updated_at': now.toIso8601String(),
-          }),
-        );
-
-        // 3. If initial stock is entered, insert initial stock_movement ledger entry
-        if (hasInitialStock) {
-          final movementId = uuid.v4();
-          await db.into(db.stockMovements).insert(
-                StockMovementsCompanion.insert(
-                  id: Value(movementId),
-                  ownerId: ownerId,
-                  partId: partId,
-                  type: MovementType.initial,
-                  quantityChange: initialQuantity,
-                  unitCost: Value(purchasePrice),
-                  note: const Value('Initial stock on part creation'),
-                  movedAt: Value(now),
-                  createdAt: Value(now),
-                  updatedAt: Value(now),
-                  syncStatus: const Value(SyncStatus.pending),
-                ),
-              );
-
-          await db.syncQueueDao.enqueue(
-            tableName: 'stock_movements',
-            recordId: movementId,
-            operation: SyncOperation.insert,
-            payload: jsonEncode({
-              'id': movementId,
-              'owner_id': ownerId,
-              'part_id': partId,
-              'type': MovementType.initial.name,
-              'quantity_change': initialQuantity,
-              'unit_cost': purchasePrice,
-              'note': 'Initial stock on part creation',
-              'moved_at': now.toIso8601String(),
-              'created_at': now.toIso8601String(),
-              'updated_at': now.toIso8601String(),
-            }),
-          );
-        }
-
-        return PartItem(
-          id: partId,
-          ownerId: ownerId,
-          name: name?.trim(),
-          partNumber: partNumber?.trim(),
-          photoLocalPath: photoLocalPath,
-          photoUrl: photoUrl,
-          brandId: brandId,
-          categoryId: categoryId,
-          locationId: locationId,
-          customLocation: customLocation?.trim(),
-          description: description?.trim(),
-          unit: unit?.trim(),
-          purchasePrice: purchasePrice,
-          sellingPrice: sellingPrice,
-          sizeSpecs: sizeSpecs?.trim(),
-          notes: notes?.trim(),
-          lowStockLevel: lowStockLevel,
-          cachedQuantity: cachedQty,
-          createdAt: now,
-          updatedAt: now,
-        );
-      });
-
-      return Result.success(createdPart);
+      final created = await localDataSource.savePartWithOutbox(
+        ownerId: ownerId,
+        name: name,
+        partNumber: partNumber,
+        photoLocalPath: photoLocalPath,
+        photoUrl: photoUrl,
+        brandId: brandId,
+        categoryId: categoryId,
+        locationId: locationId,
+        customLocation: customLocation,
+        description: description,
+        unit: unit,
+        purchasePrice: purchasePrice,
+        sellingPrice: sellingPrice,
+        sizeSpecs: sizeSpecs,
+        notes: notes,
+        lowStockLevel: lowStockLevel,
+        initialQuantity: initialQuantity,
+      );
+      return Result.success(created);
     } catch (e) {
       return Result.failure(DatabaseFailure(
         message: 'Failed to create spare part: $e',
@@ -272,86 +171,25 @@ class LocalPartsRepository implements PartsRepository {
     }
 
     try {
-      final existing = await db.partsDao.getPartById(id, ownerId);
-      if (existing == null) {
-        return const Result.failure(NotFoundFailure(message: 'Part not found'));
-      }
-
-      final now = DateTime.now();
-
-      final updated = await db.transaction(() async {
-        await (db.update(db.spareParts)..where((t) => t.id.equals(id))).write(
-          SparePartsCompanion(
-            name: Value(name?.trim()),
-            partNumber: Value(partNumber?.trim()),
-            photoLocalPath: Value(photoLocalPath),
-            photoUrl: Value(photoUrl),
-            brandId: Value(brandId),
-            categoryId: Value(categoryId),
-            locationId: Value(locationId),
-            customLocation: Value(customLocation?.trim()),
-            description: Value(description?.trim()),
-            unit: Value(unit?.trim()),
-            purchasePrice: Value(purchasePrice),
-            sellingPrice: Value(sellingPrice),
-            sizeSpecs: Value(sizeSpecs?.trim()),
-            notes: Value(notes?.trim()),
-            lowStockLevel: Value(lowStockLevel),
-            updatedAt: Value(now),
-            syncStatus: const Value(SyncStatus.pending),
-          ),
-        );
-
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: id,
-          operation: SyncOperation.update,
-          payload: jsonEncode({
-            'id': id,
-            'owner_id': ownerId,
-            'name': name?.trim(),
-            'part_number': partNumber?.trim(),
-            'photo_local_path': photoLocalPath,
-            'photo_url': photoUrl,
-            'brand_id': brandId,
-            'category_id': categoryId,
-            'location_id': locationId,
-            'custom_location': customLocation?.trim(),
-            'description': description?.trim(),
-            'unit': unit?.trim(),
-            'purchase_price': purchasePrice,
-            'selling_price': sellingPrice,
-            'size_specs': sizeSpecs?.trim(),
-            'notes': notes?.trim(),
-            'low_stock_level': lowStockLevel,
-            'updated_at': now.toIso8601String(),
-          }),
-        );
-
-        return PartItem(
-          id: id,
-          ownerId: ownerId,
-          name: name?.trim(),
-          partNumber: partNumber?.trim(),
-          photoLocalPath: photoLocalPath,
-          photoUrl: photoUrl,
-          brandId: brandId,
-          categoryId: categoryId,
-          locationId: locationId,
-          customLocation: customLocation?.trim(),
-          description: description?.trim(),
-          unit: unit?.trim(),
-          purchasePrice: purchasePrice,
-          sellingPrice: sellingPrice,
-          sizeSpecs: sizeSpecs?.trim(),
-          notes: notes?.trim(),
-          lowStockLevel: lowStockLevel,
-          cachedQuantity: existing.cachedQuantity ?? 0.0,
-          createdAt: existing.createdAt,
-          updatedAt: now,
-        );
-      });
-
+      final updated = await localDataSource.updatePartWithOutbox(
+        ownerId: ownerId,
+        id: id,
+        name: name,
+        partNumber: partNumber,
+        photoLocalPath: photoLocalPath,
+        photoUrl: photoUrl,
+        brandId: brandId,
+        categoryId: categoryId,
+        locationId: locationId,
+        customLocation: customLocation,
+        description: description,
+        unit: unit,
+        purchasePrice: purchasePrice,
+        sellingPrice: sellingPrice,
+        sizeSpecs: sizeSpecs,
+        notes: notes,
+        lowStockLevel: lowStockLevel,
+      );
       return Result.success(updated);
     } catch (e) {
       return Result.failure(DatabaseFailure(
@@ -367,28 +205,10 @@ class LocalPartsRepository implements PartsRepository {
     required String id,
   }) async {
     try {
-      final existing = await db.partsDao.getPartById(id, ownerId);
-      if (existing == null) {
-        return const Result.failure(NotFoundFailure(message: 'Part not found'));
-      }
-
-      final now = DateTime.now();
-
-      await db.transaction(() async {
-        await db.partsDao.softDeletePart(id, ownerId);
-
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: id,
-          operation: SyncOperation.delete,
-          payload: jsonEncode({
-            'id': id,
-            'owner_id': ownerId,
-            'deleted_at': now.toIso8601String(),
-          }),
-        );
-      });
-
+      await localDataSource.softDeletePartWithOutbox(
+        ownerId: ownerId,
+        id: id,
+      );
       return const Result.success(null);
     } catch (e) {
       return Result.failure(DatabaseFailure(
@@ -406,7 +226,7 @@ class LocalPartsRepository implements PartsRepository {
     int offset = 0,
   }) async {
     try {
-      final paged = await db.partsDao.getPagedParts(
+      final paged = await localDataSource.getPagedParts(
         ownerId: ownerId,
         filter: filter,
         limit: limit,
@@ -421,6 +241,20 @@ class LocalPartsRepository implements PartsRepository {
     }
   }
 
+  /// Calculates real-time dashboard figures locally from SQLite.
+  Future<Result<InventoryDashboardMetrics>> getLocalDashboardMetrics(
+      String ownerId) async {
+    try {
+      final metrics = await localDataSource.getLocalDashboardMetrics(ownerId);
+      return Result.success(metrics);
+    } catch (e) {
+      return Result.failure(DatabaseFailure(
+        message: 'Failed to calculate local dashboard metrics: $e',
+        cause: e,
+      ));
+    }
+  }
+
   @override
   Future<Result<int>> seedTestParts({
     required String ownerId,
@@ -428,6 +262,7 @@ class LocalPartsRepository implements PartsRepository {
   }) async {
     try {
       final List<Map<String, String>> templateParts = [
+        {'nameAm': 'ተርቦቻርጀር ስብስብ', 'nameEn': 'Turbocharger Assembly Kit', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '14000', 'sell': '21000'},
         {'nameAm': 'የዘይት ማጣሪያ', 'nameEn': 'Oil Filter Heavy Duty', 'brand': 'CAT', 'cat': 'Filters', 'shelf': 'Shelf 1', 'buy': '450', 'sell': '700'},
         {'nameAm': 'የናፍጣ ማጣሪያ', 'nameEn': 'Fuel Filter Secondary', 'brand': 'CTP', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '650', 'sell': '950'},
         {'nameAm': 'የሃይድሮሊክ ሲሊንደር ማሸጊያ', 'nameEn': 'Hydraulic Cylinder Seal Kit', 'brand': 'Hitachi', 'cat': 'Seals & Gaskets', 'shelf': 'Shelf 3', 'buy': '2400', 'sell': '3800'},
@@ -454,7 +289,6 @@ class LocalPartsRepository implements PartsRepository {
         final name = '${template["nameAm"]} · ${template["nameEn"]} #${i + 1}';
         final partNumber = '${template["brand"]}-${1000 + i * 11}';
 
-        // Stock distribution: 10% out of stock (0), 20% low stock (1 to 4), 70% in stock (10 to 45)
         final double qty;
         if (i % 10 == 0) {
           qty = 0.0;
@@ -464,8 +298,10 @@ class LocalPartsRepository implements PartsRepository {
           qty = (10 + (i * 3) % 36).toDouble();
         }
 
-        final purchasePrice = double.tryParse(template['buy'] ?? '500') ?? 500.0;
-        final sellingPrice = double.tryParse(template['sell'] ?? '800') ?? 800.0;
+        final purchasePrice =
+            double.tryParse(template['buy'] ?? '500') ?? 500.0;
+        final sellingPrice =
+            double.tryParse(template['sell'] ?? '800') ?? 800.0;
 
         companions.add(
           SparePartsCompanion(
@@ -474,7 +310,8 @@ class LocalPartsRepository implements PartsRepository {
             name: Value(name),
             partNumber: Value(partNumber),
             customLocation: Value(template['shelf'] ?? 'Shelf 1'),
-            description: Value('Sample ${template["nameEn"]} replacement for heavy machinery'),
+            description: Value(
+                'Sample ${template["nameEn"]} replacement for heavy machinery'),
             unit: const Value('pcs'),
             purchasePrice: Value(purchasePrice),
             sellingPrice: Value(sellingPrice),
@@ -482,6 +319,7 @@ class LocalPartsRepository implements PartsRepository {
             notes: Value('[DEMO] Sample demo spare part #${i + 1}'),
             lowStockLevel: const Value(5.0),
             cachedQuantity: Value(qty),
+            quantity: Value(qty),
             createdAt: Value(now.subtract(Duration(minutes: i * 5))),
             updatedAt: Value(now),
             syncStatus: const Value(SyncStatus.pending),
@@ -491,27 +329,29 @@ class LocalPartsRepository implements PartsRepository {
 
       await db.partsDao.batchInsertParts(companions);
 
-      // Enqueue sync items so sample parts sync normally
+      // Enqueue sync items to outbox
       for (final comp in companions) {
-        await db.syncQueueDao.enqueue(
-          tableName: 'spare_parts',
-          recordId: comp.id.value,
-          operation: SyncOperation.insert,
+        await db.syncQueueDao.enqueueOperation(
+          operationId: uuid.v4(),
+          ownerId: ownerId,
+          entityType: 'spare_parts',
+          entityId: comp.id.value,
+          operationType: 'insert',
           payload: jsonEncode({
             'id': comp.id.value,
-            'ownerId': ownerId,
+            'owner_id': ownerId,
             'name': comp.name.value,
             'nameAm': comp.name.value?.split('·').first.trim(),
             'nameEn': comp.name.value?.split('·').last.trim(),
-            'partNumber': comp.partNumber.value,
-            'customLocation': comp.customLocation.value,
+            'part_number': comp.partNumber.value,
+            'custom_location': comp.customLocation.value,
             'unit': 'pcs',
-            'purchasePrice': comp.purchasePrice.value,
-            'sellingPrice': comp.sellingPrice.value,
+            'purchase_price': comp.purchasePrice.value,
+            'selling_price': comp.sellingPrice.value,
             'notes': comp.notes.value,
             'isDemo': true,
-            'lowStockLevel': 5.0,
-            'cachedQuantity': comp.cachedQuantity.value,
+            'low_stock_level': 5.0,
+            'cached_quantity': comp.cachedQuantity.value,
             'created_at': now.toIso8601String(),
             'updated_at': now.toIso8601String(),
           }),
@@ -538,31 +378,5 @@ class LocalPartsRepository implements PartsRepository {
         cause: e,
       ));
     }
-  }
-
-  PartItem _mapRowToPartItem(SparePart row) {
-    return PartItem(
-      id: row.id,
-      ownerId: row.ownerId,
-      name: row.name,
-      partNumber: row.partNumber,
-      photoLocalPath: row.photoLocalPath,
-      photoUrl: row.photoUrl,
-      brandId: row.brandId,
-      categoryId: row.categoryId,
-      locationId: row.locationId,
-      customLocation: row.customLocation,
-      description: row.description,
-      unit: row.unit,
-      purchasePrice: row.purchasePrice,
-      sellingPrice: row.sellingPrice,
-      sizeSpecs: row.sizeSpecs,
-      notes: row.notes,
-      lowStockLevel: row.lowStockLevel,
-      cachedQuantity: row.cachedQuantity ?? 0.0,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      deletedAt: row.deletedAt,
-    );
   }
 }

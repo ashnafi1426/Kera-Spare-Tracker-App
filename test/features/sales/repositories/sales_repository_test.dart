@@ -150,7 +150,7 @@ void main() {
       expect(fetchedSale.totalProfit, equals(420.0));
     });
 
-    test('enqueues sales, sale_items, stock_movements, and spare_parts to sync_queue',
+    test('enqueues ONE atomic sale operation to sync_queue and guarantees retry safety',
         () async {
       final pRes = await partsRepo.createPart(
         ownerId: ownerId,
@@ -163,17 +163,35 @@ void main() {
       // Clear sync queue from initial part creation
       await db.delete(db.syncQueue).go();
 
+      const fixedSaleId = 'fixed-sale-retry-uuid-001';
       final res = await salesRepo.createSale(
         ownerId: ownerId,
+        saleId: fixedSaleId,
         items: [SaleLineItem.fromPart(part, quantity: 2.0)],
       );
       expect(res.isSuccess, isTrue);
 
       final queue = await db.syncQueueDao.getPendingBatch();
-      expect(queue.any((q) => q.tableTarget == 'sales' && q.operation == SyncOperation.insert), isTrue);
-      expect(queue.any((q) => q.tableTarget == 'sale_items' && q.operation == SyncOperation.insert), isTrue);
-      expect(queue.any((q) => q.tableTarget == 'stock_movements' && q.operation == SyncOperation.insert), isTrue);
-      expect(queue.any((q) => q.tableTarget == 'spare_parts' && q.operation == SyncOperation.update), isTrue);
+      expect(queue.length, equals(1));
+      expect(queue.first.entityType, equals('sales'));
+      expect(queue.first.entityId, equals(fixedSaleId));
+      expect(queue.first.payload, contains('items'));
+
+      // Check stock after first sale
+      final partAfterSale = await db.partsDao.getPartById(part.id, ownerId);
+      expect(partAfterSale?.cachedQuantity, equals(8.0)); // 10 - 2
+
+      // Retry the same sale with identical saleId (Idempotency guarantee)
+      final retryRes = await salesRepo.createSale(
+        ownerId: ownerId,
+        saleId: fixedSaleId,
+        items: [SaleLineItem.fromPart(part, quantity: 2.0)],
+      );
+      expect(retryRes.isSuccess, isTrue);
+
+      // Verify stock was NOT reduced a second time
+      final partAfterRetry = await db.partsDao.getPartById(part.id, ownerId);
+      expect(partAfterRetry?.cachedQuantity, equals(8.0)); // Still 8.0, NOT 6.0!
     });
   });
 

@@ -716,12 +716,15 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
       case MovementType.initial:
         return l10n.movementTypeInitial;
       case MovementType.purchase:
+      case MovementType.stockIn:
         return l10n.movementTypePurchase;
       case MovementType.sale:
+      case MovementType.stockOut:
         return l10n.movementTypeSale;
       case MovementType.adjustment:
         return l10n.movementTypeAdjustment;
       case MovementType.returned:
+      case MovementType.returnMovement:
         return l10n.movementTypeReturn;
     }
   }
@@ -731,12 +734,15 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
       case MovementType.initial:
         return Icons.inventory_rounded;
       case MovementType.purchase:
+      case MovementType.stockIn:
         return Icons.add_circle_outline_rounded;
       case MovementType.sale:
+      case MovementType.stockOut:
         return Icons.point_of_sale_rounded;
       case MovementType.adjustment:
         return Icons.tune_rounded;
       case MovementType.returned:
+      case MovementType.returnMovement:
         return Icons.assignment_return_rounded;
     }
   }
@@ -744,13 +750,16 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
   Color _getBulletColor(MovementType type) {
     switch (type) {
       case MovementType.purchase:
+      case MovementType.stockIn:
       case MovementType.initial:
         return KeraColors.stockInText;
       case MovementType.sale:
+      case MovementType.stockOut:
         return KeraColors.stockOutText;
       case MovementType.adjustment:
         return const Color(0xFFD97706);
       case MovementType.returned:
+      case MovementType.returnMovement:
         return const Color(0xFF7C3AED);
     }
   }

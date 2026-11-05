@@ -5,14 +5,17 @@ import '../models/sale_model.dart';
 /// Contract for sales recording, transaction processing, and history queries.
 abstract class SalesRepository {
   /// Records a new sale in a single database transaction:
-  /// 1. Inserts the `sales` header record.
-  /// 2. Inserts `sale_items` with snapshot pricing.
-  /// 3. Inserts negative `stock_movements` (type `sale`, reference ID linked).
-  /// 4. Updates `cached_quantity` on `spare_parts`.
-  /// 5. Enqueues all changes to `sync_queue`.
+  /// 1. Validates available quantity locally.
+  /// 2. Inserts the `sales` header record (with historical total_cost).
+  /// 3. Inserts `sale_items` with historical unit_cost snapshots for profit preservation.
+  /// 4. Inserts negative `stock_movements` (type `sale`, reference ID linked).
+  /// 5. Reduces `cached_quantity` on `spare_parts`.
+  /// 6. Enqueues ONE atomic sale operation to `sync_queue`.
+  /// Retry-safe: Calling with an existing [saleId] never reduces stock twice.
   Future<Result<SaleModel>> createSale({
     required String ownerId,
     required List<SaleLineItem> items,
+    String? saleId,
     String? notes,
     String? paymentMethod,
     bool forceAllowNegative = false,
@@ -35,7 +38,15 @@ abstract class SalesRepository {
     DateTime? endDate,
   });
 
-  /// Soft deletes a sale and associated line items.
+  /// Processes a sale return/reversal without mutating the immutable original transaction.
+  /// Restores stock via positive return ledger movements and enqueues a return operation.
+  Future<Result<void>> returnSale({
+    required String ownerId,
+    required String saleId,
+    required String reason,
+  });
+
+  /// Soft deletes a sale and associated line items (tombstone).
   Future<Result<void>> deleteSale({
     required String ownerId,
     required String saleId,

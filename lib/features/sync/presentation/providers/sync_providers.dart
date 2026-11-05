@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/database_provider.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../data/services/sync_coordinator_service.dart';
 import '../../data/services/sync_push_service.dart';
 import '../../domain/models/sync_conflict_model.dart';
 
@@ -72,6 +74,27 @@ class SyncPushController extends Notifier<SyncPushState> {
   Future<bool> pushNow() async {
     state = state.copyWith(isPushing: true, lastError: null);
     try {
+      final user = ref.read(authControllerProvider).value;
+      if (user != null) {
+        final coordinator = ref.read(syncCoordinatorServiceProvider);
+        final res = await coordinator.synchronize(ownerId: user.id);
+        if (res.isSuccess) {
+          state = state.copyWith(
+            isPushing: false,
+            lastSyncedCount: (res.valueOrNull?.pushedCount ?? 0) +
+                (res.valueOrNull?.pulledCount ?? 0),
+            lastSyncedAt: DateTime.now(),
+          );
+          return true;
+        } else {
+          state = state.copyWith(
+            isPushing: false,
+            lastError: res.failureOrNull?.message ?? 'Sync failed',
+          );
+          return false;
+        }
+      }
+
       final service = ref.read(syncPushServiceProvider);
       final result = await service.pushPendingQueue();
 

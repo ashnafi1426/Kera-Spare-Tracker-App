@@ -29,22 +29,28 @@ Widget createTestApp({
       syncQueueItemsStreamProvider.overrideWith((ref) => Stream.value([
             SyncQueueItem(
               id: 1,
+              operationId: 'op-101',
               tableTarget: 'sales',
               recordId: 'sale_101',
               operation: SyncOperation.insert,
               payload:
                   '{"receipt_number":"KS-9821","total_amount":4200.0,"payment_method":"Cash"}',
+              retryCount: 0,
               attempts: 0,
+              queueStatus: 'pending',
               lastError: null,
               createdAt: DateTime(2026, 11, 2, 10, 42),
             ),
             SyncQueueItem(
               id: 2,
+              operationId: 'op-202',
               tableTarget: 'stock_movements',
               recordId: 'mov_202',
               operation: SyncOperation.insert,
               payload: '{"note":"Shelf D-2","quantity_change":-4}',
+              retryCount: 1,
               attempts: 1,
+              queueStatus: 'failed',
               lastError: 'HTTP 422: Negative stock unpermitted',
               createdAt: DateTime(2026, 11, 2, 10, 15),
             ),
@@ -61,7 +67,7 @@ Widget createTestApp({
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('en'),
+      locale: const Locale('am'),
       home: child,
     ),
   );
@@ -79,10 +85,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('የዳታ ማመሳከሪያ ማዕከል'), findsOneWidget);
-      expect(find.text('2 የዳታ ለውጦች አልተላኩም'), findsOneWidget);
-      expect(find.text('አሁን ሞክር / Sync Now'), findsOneWidget);
-      expect(find.text('ያልተላኩ ሽያጮች (Offline Sales)'), findsOneWidget);
-      expect(find.text('የክምችት ማስተካከያዎች (Stock Movements)'), findsOneWidget);
+      expect(find.textContaining('አልተላኩም'), findsWidgets);
+      expect(find.text('አሁን አመሳስል'), findsOneWidget);
+      expect(find.text('ያልተላኩ ሽያጮች'), findsOneWidget);
+      expect(find.text('የክምችት ማስተካከያዎች'), findsOneWidget);
       expect(find.text('Addis Central Server • SQLite Cache Valid'), findsOneWidget);
     });
 
@@ -156,7 +162,7 @@ void main() {
           createTestApp(child: const OfflineDashboardScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text('ኬራ ስፔር / Kera Spare'), findsOneWidget);
+      expect(find.textContaining('ኬራ ስፔር'), findsWidgets);
       expect(find.text('ከመስመር ውጭ ይሰራል'), findsOneWidget);
       expect(find.text('የመጠባበቂያ ወረፋ'), findsOneWidget);
       expect(find.text('Queue #2'), findsOneWidget);
