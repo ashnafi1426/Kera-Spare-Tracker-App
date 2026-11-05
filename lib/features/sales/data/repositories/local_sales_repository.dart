@@ -116,7 +116,7 @@ class LocalSalesRepository implements SalesRepository {
               ),
             );
 
-        // 2. Enqueue Sales Header to sync_queue
+        // 2. Enqueue Sales Header with bundled items to sync_queue
         await db.syncQueueDao.enqueue(
           tableName: 'sales',
           recordId: saleId,
@@ -134,6 +134,18 @@ class LocalSalesRepository implements SalesRepository {
             'notes': notes?.trim(),
             'created_at': now.toIso8601String(),
             'updated_at': now.toIso8601String(),
+            'items': items.map((i) => {
+              'id': uuid.v4(),
+              'owner_id': ownerId,
+              'sale_id': saleId,
+              'part_id': i.part.id,
+              'part_name_snapshot': i.part.displayName,
+              'quantity': i.quantity,
+              'unit_cost': i.unitCost,
+              'unit_price': i.unitPrice,
+              'subtotal': i.lineTotal,
+              'profit': i.lineProfit,
+            }).toList(),
           }),
         );
 

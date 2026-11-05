@@ -254,3 +254,83 @@ class KeraPartImage extends StatelessWidget {
     return placeholder();
   }
 }
+
+/// Helper dialog to view any photo in full resolution with pinch-to-zoom.
+void showFullPhotoViewer(BuildContext context, {required String? photoUrl, required String title}) {
+  final resolved = resolveImageUrl(photoUrl);
+  if (resolved == null || resolved.isEmpty) return;
+
+  showDialog(
+    context: context,
+    builder: (ctx) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, color: Colors.white, size: 28),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              color: Colors.black87,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.7,
+                maxWidth: double.infinity,
+              ),
+              child: InteractiveViewer(
+                minScale: 0.8,
+                maxScale: 4.0,
+                child: resolved.startsWith('http://') || resolved.startsWith('https://')
+                    ? Image.network(
+                        resolved,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (c, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: CircularProgressIndicator(color: Colors.orange),
+                            ),
+                          );
+                        },
+                        errorBuilder: (c, e, s) => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: Icon(Icons.broken_image_rounded, color: Colors.white70, size: 48),
+                          ),
+                        ),
+                      )
+                    : Image.file(File(resolved), fit: BoxFit.contain),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'ለማሳደግ በሁለት ጣት ይጎትቱ (Pinch to zoom)',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
+    ),
+  );
+}

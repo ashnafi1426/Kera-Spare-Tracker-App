@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
 import '../../../stock/presentation/providers/stock_providers.dart';
+import '../../../sync/data/services/sync_push_service.dart';
 import '../../domain/models/sale_line_item.dart';
 import '../providers/sales_providers.dart';
 
@@ -153,6 +155,8 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
       if (result.isSuccess) {
         final sale = result.valueOrNull!;
         ref.read(newSaleCartProvider.notifier).clear();
+        // Immediately try pushing the sync queue to the server in background
+        unawaited(ref.read(syncPushServiceProvider).pushPendingQueue());
         context.showSnackBar('ሽያጭ በተሳካ ሁኔታ ተመዝግቧል!');
         if (mounted) {
           context.pushReplacement('/sales/${sale.id}');

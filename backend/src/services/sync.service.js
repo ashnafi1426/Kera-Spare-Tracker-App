@@ -238,6 +238,53 @@ export async function pushSyncData(userId, batch = []) {
             }
           }
           applied.push({ id: recordId, entity: 'sales', status: 'applied' });
+        } else if (entity === 'saleitems' || entity === 'sale_items' || entity === 'saleitem') {
+          if (action === 'delete') {
+            await tx.saleItem.updateMany({
+              where: { id: recordId, ownerId: userId },
+              data: { deletedAt: new Date() },
+            });
+          } else {
+            const saleId = data.saleId ?? data.sale_id;
+            const partId = data.partId ?? data.part_id ?? null;
+            const partNameSnapshot = data.partNameSnapshot ?? data.part_name_snapshot ?? 'Item';
+            const quantity = data.quantity ?? 1;
+            const unitCostSnapshot = data.unitCostSnapshot ?? data.unit_cost ?? data.unit_cost_snapshot ?? 0;
+            const unitPriceSnapshot = data.unitPriceSnapshot ?? data.unit_price ?? data.unit_price_snapshot ?? 0;
+            const subtotal = data.subtotal ?? data.line_total ?? (quantity * unitPriceSnapshot);
+            const profit = data.profit ?? data.line_profit ?? (subtotal - (quantity * unitCostSnapshot));
+
+            await tx.saleItem.upsert({
+              where: { id: recordId },
+              update: {
+                ownerId: userId,
+                saleId,
+                partId,
+                partNameSnapshot,
+                quantity,
+                unitCostSnapshot,
+                unitPriceSnapshot,
+                subtotal,
+                profit,
+                updatedAt: new Date(),
+              },
+              create: {
+                id: recordId,
+                ownerId: userId,
+                saleId,
+                partId,
+                partNameSnapshot,
+                quantity,
+                unitCostSnapshot,
+                unitPriceSnapshot,
+                subtotal,
+                profit,
+                createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+                updatedAt: new Date(),
+              },
+            });
+          }
+          applied.push({ id: recordId, entity: 'sale_items', status: 'applied' });
         } else if (entity === 'stockmovements' || entity === 'stockmovement') {
           if (action === 'delete') {
             await tx.stockMovement.updateMany({

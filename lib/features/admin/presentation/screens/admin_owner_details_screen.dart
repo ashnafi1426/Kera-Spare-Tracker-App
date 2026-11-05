@@ -428,14 +428,33 @@ class _AdminOwnerDetailsScreenState
               ),
               const SizedBox(height: 18),
 
-              // Large Avatar with photo or Initials
-              KeraAvatarWidget(
-                photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
-                name: owner.businessName,
-                radius: 36,
-                isDark: false,
-                backgroundColor: Colors.white,
-                textColor: const Color(0xFF0C2340),
+              // Large Avatar with photo or Initials (Tappable to view full photo)
+              GestureDetector(
+                onTap: () {
+                  final p = owner.photoUrl ?? owner.thumbnailUrl;
+                  if (p != null && p.isNotEmpty) {
+                    showFullPhotoViewer(context, photoUrl: p, title: owner.businessName);
+                  }
+                },
+                child: Column(
+                  children: [
+                    KeraAvatarWidget(
+                      photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
+                      name: owner.businessName,
+                      radius: 36,
+                      isDark: false,
+                      backgroundColor: Colors.white,
+                      textColor: const Color(0xFF0C2340),
+                    ),
+                    if (owner.photoUrl != null && owner.photoUrl!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('ሙሉ ፎቶ ለማየት ይንኩ', 'Tap to view full photo'),
+                        style: const TextStyle(color: Colors.white70, fontSize: 11),
+                      ),
+                    ],
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -1030,15 +1049,13 @@ class _AdminOwnerDetailsScreenState
                                 border: Border.all(color: context.borderColor),
                               ),
                               clipBehavior: Clip.antiAlias,
-                              child: part.photoLocalPath != null &&
-                                      part.photoLocalPath!.isNotEmpty &&
-                                      File(part.photoLocalPath!).existsSync()
-                                  ? Image.file(File(part.photoLocalPath!), fit: BoxFit.cover)
-                                  : Icon(
-                                      Icons.precision_manufacturing_rounded,
-                                      size: 26,
-                                      color: context.textSecondaryColor,
-                                    ),
+                              child: KeraPartImage(
+                                localPath: part.photoLocalPath,
+                                remoteUrl: part.photoUrl,
+                                width: 52,
+                                height: 52,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             const SizedBox(width: 12),
 
@@ -1189,9 +1206,10 @@ class _AdminOwnerDetailsScreenState
               const SizedBox(height: 12),
 
               // Zoomable Full Photo
-              if (part.photoLocalPath != null &&
-                  part.photoLocalPath!.isNotEmpty &&
-                  File(part.photoLocalPath!).existsSync()) ...[
+              if ((part.photoUrl != null && part.photoUrl!.isNotEmpty) ||
+                  (part.photoLocalPath != null &&
+                      part.photoLocalPath!.isNotEmpty &&
+                      File(part.photoLocalPath!).existsSync())) ...[
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
@@ -1201,7 +1219,11 @@ class _AdminOwnerDetailsScreenState
                     child: InteractiveViewer(
                       minScale: 0.8,
                       maxScale: 3.5,
-                      child: Image.file(File(part.photoLocalPath!), fit: BoxFit.contain),
+                      child: KeraPartImage(
+                        localPath: part.photoLocalPath,
+                        remoteUrl: part.photoUrl,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),

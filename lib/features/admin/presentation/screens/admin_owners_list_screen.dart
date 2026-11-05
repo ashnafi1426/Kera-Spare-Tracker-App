@@ -418,11 +418,19 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              KeraAvatarWidget(
-                photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
-                name: owner.businessName,
-                radius: 22,
-                isDark: isDark,
+              GestureDetector(
+                onTap: () {
+                  final p = owner.photoUrl ?? owner.thumbnailUrl;
+                  if (p != null && p.isNotEmpty) {
+                    showFullPhotoViewer(context, photoUrl: p, title: owner.businessName);
+                  }
+                },
+                child: KeraAvatarWidget(
+                  photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
+                  name: owner.businessName,
+                  radius: 22,
+                  isDark: isDark,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

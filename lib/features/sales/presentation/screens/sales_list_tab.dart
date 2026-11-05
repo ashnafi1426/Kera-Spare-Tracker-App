@@ -7,8 +7,10 @@ import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
+import '../../../../data/local/database_provider.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
+import '../../../sync/data/services/initial_sync_service.dart';
 import '../providers/sales_providers.dart';
 
 /// Screen 5: Sales History & Audit (5 Sales history.png).
@@ -28,6 +30,23 @@ class SalesListTab extends ConsumerStatefulWidget {
 
 class _SalesListTabState extends ConsumerState<SalesListTab> {
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncRemoteSales());
+  }
+
+  Future<void> _syncRemoteSales() async {
+    final user = ref.read(authControllerProvider).value;
+    if (user == null) return;
+    try {
+      final repo = ref.read(apiAuthRepositoryProvider);
+      final db = ref.read(appDatabaseProvider);
+      final service = InitialSyncService(dio: repo.dio, db: db);
+      await service.pullSales(user.ownerId);
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -381,55 +400,70 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                 ),
                 data: (groups) {
                   if (groups.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.receipt_long_rounded,
-                                size: 36,
-                                color: isDark ? Colors.white70 : const Color(0xFF0C2340),
+                    return RefreshIndicator(
+                      onRefresh: _syncRemoteSales,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.45,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 70,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.receipt_long_rounded,
+                                        size: 36,
+                                        color: isDark ? Colors.white70 : const Color(0xFF0C2340),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      context.tr('ምንም ሽያጭ አልተገኘም', 'No sales found'),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: context.textPrimaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      context.tr(
+                                        'በተመረጠው ጊዜ ወይም ቃል ምንም ሽያጭ አልተመዘገበም (ወደ ታች በመጎተት ያድሱ)',
+                                        'No sales recorded for the selected period (Pull to refresh)',
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: context.textSecondaryColor,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              context.tr('ምንም ሽያጭ አልተገኘም', 'No sales found'),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimaryColor,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              context.tr(
-                                'በተመረጠው ጊዜ ወይም ቃል ምንም ሽያጭ አልተመዘገበም',
-                                'No sales recorded for the selected period or search query',
-                              ),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context.textSecondaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   }
 
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                    itemCount: groups.length,
-                    itemBuilder: (context, groupIndex) {
+                  return RefreshIndicator(
+                    onRefresh: _syncRemoteSales,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                      itemCount: groups.length,
+                      itemBuilder: (context, groupIndex) {
                       final group = groups[groupIndex];
 
                       return Column(
@@ -576,8 +610,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                         ],
                       );
                     },
-                  );
-                },
+                  ),
+                );
+              },
               ),
             ),
           ],

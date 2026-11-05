@@ -1,6 +1,12 @@
 import * as authService from '../services/auth.service.js';
 import { ForbiddenError } from '../utils/errors.js';
 
+function extractClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  const raw = forwarded ? forwarded.split(',')[0].trim() : (req.ip || req.socket?.remoteAddress || '');
+  return String(raw).substring(0, 45);
+}
+
 export async function register(req, res, next) {
   try {
     const result = await authService.registerOwner(req.body);
@@ -16,7 +22,7 @@ export async function register(req, res, next) {
 
 export async function login(req, res, next) {
   try {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const ipAddress = extractClientIp(req);
     const result = await authService.loginUser({
       ...req.body,
       ipAddress,
@@ -33,7 +39,7 @@ export async function login(req, res, next) {
 
 export async function adminLogin(req, res, next) {
   try {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const ipAddress = extractClientIp(req);
     const userAgent = req.headers['user-agent'];
     const result = await authService.loginAdmin({
       phoneNumber: req.body.phoneNumber,
@@ -54,7 +60,7 @@ export async function adminLogin(req, res, next) {
 
 export async function refresh(req, res, next) {
   try {
-    const ipAddress = req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress;
+    const ipAddress = extractClientIp(req);
     const { refreshToken, deviceId, deviceName } = req.body;
     const result = await authService.refreshUserToken({
       refreshToken,

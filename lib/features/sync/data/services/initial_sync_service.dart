@@ -49,6 +49,7 @@ class InitialSyncService {
         total = meta?['total'] as int? ?? data.length;
 
         if (data.isEmpty || total == 0) {
+          await pullSales(ownerId);
           yield const InitialSyncProgress(
             downloaded: 0,
             total: 0,
@@ -94,6 +95,9 @@ class InitialSyncService {
             isCompleted: downloaded >= total,
           );
         }
+
+        // Also pull remote sales history into Drift
+        await pullSales(ownerId);
       }
     } catch (e) {
       debugPrint('[InitialSyncService] Error during catalog pull: $e');
@@ -143,5 +147,92 @@ class InitialSyncService {
     await db.batch((batch) {
       batch.insertAllOnConflictUpdate(db.spareParts, companions);
     });
+  }
+
+  /// Pulls remote sales and sale items from backend and persists to local Drift database.
+  Future<void> pullSales(String ownerId) async {
+    try {
+      final res = await dio.get(
+        '/sales',
+        queryParameters: {'limit': 200, 'offset': 0},
+      );
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        final salesData = res.data['data'] as List<dynamic>? ?? [];
+        if (salesData.isEmpty) return;
+
+        final salesCompanions = <SalesCompanion>[];
+        final itemsCompanions = <SaleItemsCompanion>[];
+
+        for (final raw in salesData) {
+          final s = raw as Map<String, dynamic>;
+          final saleId = s['id']?.toString();
+          if (saleId == null) continue;
+
+          final soldAt = s['soldAt'] != null
+              ? (DateTime.tryParse(s['soldAt'].toString()) ?? DateTime.now())
+              : DateTime.now();
+          final totalAmount = (s['totalAmount'] as num?)?.toDouble() ?? 0.0;
+          final totalProfit = (s['totalProfit'] as num?)?.toDouble() ?? 0.0;
+          final receiptNumber = s['receiptNumber']?.toString();
+          final paymentMethod = s['paymentMethod']?.toString();
+          final notes = s['notes']?.toString();
+
+          salesCompanions.add(
+            SalesCompanion.insert(
+              id: Value(saleId),
+              ownerId: ownerId,
+              receiptNumber: Value(receiptNumber),
+              soldAt: Value(soldAt),
+              subtotal: totalAmount,
+              discount: const Value(0.0),
+              totalAmount: totalAmount,
+              totalProfit: totalProfit,
+              paymentMethod: Value(paymentMethod),
+              notes: Value(notes),
+              syncStatus: const Value(SyncStatus.synced),
+            ),
+          );
+
+          if (s['items'] is List) {
+            for (final rawItem in (s['items'] as List)) {
+              final item = rawItem as Map<String, dynamic>;
+              final itemId = item['id']?.toString() ?? const Uuid().v4();
+              final partId = item['partId']?.toString() ?? '';
+              final partNameSnapshot = item['partNameSnapshot']?.toString() ?? 'Part';
+              final qty = (item['quantity'] as num?)?.toDouble() ?? 1.0;
+              final unitCost = (item['unitCostSnapshot'] as num?)?.toDouble() ?? 0.0;
+              final unitPrice = (item['unitPriceSnapshot'] as num?)?.toDouble() ?? 0.0;
+              final subtotal = (item['subtotal'] as num?)?.toDouble() ?? (qty * unitPrice);
+              final profit = (item['profit'] as num?)?.toDouble() ?? (subtotal - (qty * unitCost));
+
+              itemsCompanions.add(
+                SaleItemsCompanion.insert(
+                  id: Value(itemId),
+                  ownerId: ownerId,
+                  saleId: saleId,
+                  partId: partId,
+                  partNameSnapshot: partNameSnapshot,
+                  quantity: qty,
+                  unitCost: unitCost,
+                  unitPrice: unitPrice,
+                  lineTotal: subtotal,
+                  lineProfit: profit,
+                  syncStatus: const Value(SyncStatus.synced),
+                ),
+              );
+            }
+          }
+        }
+
+        await db.batch((batch) {
+          batch.insertAllOnConflictUpdate(db.sales, salesCompanions);
+          if (itemsCompanions.isNotEmpty) {
+            batch.insertAllOnConflictUpdate(db.saleItems, itemsCompanions);
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('[InitialSyncService] Error pulling sales: $e');
+    }
   }
 }
