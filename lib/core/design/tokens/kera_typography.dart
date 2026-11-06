@@ -8,6 +8,8 @@ class KeraTypography {
 
   /// Primary Ethiopic font family.
   static const String fontEthiopic = 'NotoSansEthiopic';
+  static const String fontLatin = 'PlusJakartaSans';
+  static const List<String> fontFallbacks = [fontLatin, 'sans-serif'];
 
   // --- Headings ---
   /// Screen Titles & Large Overview Metric Headings (28px Bold).

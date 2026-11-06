@@ -16,7 +16,7 @@ void main() {
       expect(KeraColors.stockInBg, const Color(0xFFE6ECF7));
       expect(KeraColors.stockInText, const Color(0xFF0B2A5B));
       expect(KeraColors.stockLowBg, const Color(0xFFFFF1DC));
-      expect(KeraColors.stockLowText, const Color(0xFFB35F00));
+      expect(KeraColors.stockLowText, const Color(0xFF9A5000));
       expect(KeraColors.stockOutBg, const Color(0xFFF7941D));
       expect(KeraColors.stockOutText, const Color(0xFF061B3F));
     });

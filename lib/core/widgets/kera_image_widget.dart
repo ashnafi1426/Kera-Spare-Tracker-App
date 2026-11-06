@@ -107,6 +107,9 @@ class KeraAvatarWidget extends StatelessWidget {
       return fallback();
     }
 
+    final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 2.0;
+    final cacheDim = (!size.isFinite || size <= 0) ? null : (size * dpr).round().clamp(16, 2048);
+
     // Check if local file
     try {
       final localFile = File(resolved);
@@ -116,6 +119,8 @@ class KeraAvatarWidget extends StatelessWidget {
             localFile,
             width: size,
             height: size,
+            cacheWidth: cacheDim,
+            cacheHeight: cacheDim,
             fit: BoxFit.cover,
             errorBuilder: (ctx, err, stack) => fallback(),
           ),
@@ -130,6 +135,8 @@ class KeraAvatarWidget extends StatelessWidget {
           resolved,
           width: size,
           height: size,
+          cacheWidth: cacheDim,
+          cacheHeight: cacheDim,
           fit: BoxFit.cover,
           errorBuilder: (ctx, err, stack) => fallback(),
           loadingBuilder: (context, child, progress) {
@@ -187,17 +194,20 @@ class KeraPartImage extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: const Color(0xFFF1F5F9),
+          color: KeraColors.navy50,
           borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: KeraColors.border),
         ),
         child: const Icon(
-          Icons.precision_manufacturing_outlined,
-          color: Color(0xFF94A3B8),
+          Icons.settings_suggest_rounded,
+          color: KeraColors.navy800,
           size: 24,
         ),
       );
     }
+
+    final cacheW = (width * 2).round();
+    final cacheH = (height * 2).round();
 
     // 1. Try local file if available
     if (localPath != null && localPath!.isNotEmpty) {
@@ -210,6 +220,8 @@ class KeraPartImage extends StatelessWidget {
               file,
               width: width,
               height: height,
+              cacheWidth: cacheW,
+              cacheHeight: cacheH,
               fit: fit,
               errorBuilder: (ctx, err, stack) => placeholder(),
             ),
@@ -227,6 +239,8 @@ class KeraPartImage extends StatelessWidget {
           resolved,
           width: width,
           height: height,
+          cacheWidth: cacheW,
+          cacheHeight: cacheH,
           fit: fit,
           errorBuilder: (ctx, err, stack) => placeholder(),
           loadingBuilder: (context, child, progress) {
@@ -235,7 +249,7 @@ class KeraPartImage extends StatelessWidget {
               width: width,
               height: height,
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: KeraColors.navy50,
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               child: const Center(

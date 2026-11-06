@@ -62,7 +62,19 @@ flutter:
   generate: true
   assets:
     - assets/images/
+    - assets/licenses/
   fonts:
     - family: NotoSansEthiopic
       fonts:
         - asset: assets/fonts/NotoSansEthiopic.ttf
+          weight: 400
+        - asset: assets/fonts/NotoSansEthiopic-Bold.ttf
+          weight: 700
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans.ttf
+          weight: 800

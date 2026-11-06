@@ -22,7 +22,7 @@ void main() {
       // Orange scale
       expect(light.orange500, const Color(0xFFF7941D));
       expect(light.orange600, const Color(0xFFE07F00));
-      expect(light.orange700, const Color(0xFFB35F00));
+      expect(light.orange700, const Color(0xFF9A5000));
       expect(light.orange100, const Color(0xFFFFF1DC));
 
       // Neutrals
@@ -78,7 +78,9 @@ void main() {
       // Verify icons are properly paired (never color alone)
       expect(find.byIcon(Icons.check_circle_rounded), findsWidgets);
       expect(find.byIcon(Icons.warning_amber_rounded), findsWidgets);
-      expect(find.byIcon(Icons.error_outline_rounded), findsWidgets);
+      expect(find.byIcon(Icons.inventory_2_outlined), findsWidgets);
+      expect(find.byIcon(Icons.sync_problem_rounded), findsWidgets);
+      expect(find.byIcon(Icons.report_rounded), findsWidgets);
       expect(find.byIcon(Icons.sync_rounded), findsWidgets);
       expect(find.byIcon(Icons.access_time_rounded), findsWidgets);
       expect(find.byIcon(Icons.cloud_off_rounded), findsWidgets);

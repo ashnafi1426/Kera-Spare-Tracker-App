@@ -33,7 +33,7 @@ class KeraColors {
 
   static const Color orange500 = Color(0xFFF7941D);
   static const Color orange600 = Color(0xFFE07F00);
-  static const Color orange700 = Color(0xFFB35F00);
+  static const Color orange700 = Color(0xFF9A5000);
   static const Color orange100 = Color(0xFFFFF1DC);
 
   static const Color white = Color(0xFFFFFFFF);

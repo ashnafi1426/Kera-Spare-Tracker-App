@@ -94,6 +94,21 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     return '$prefix•••••• $suffix';
   }
 
+  String _formatSyncTime(BuildContext context, DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    final isAmharic = context.isAmharic;
+    if (diff.inMinutes < 60) {
+      final m = diff.inMinutes.clamp(1, 59);
+      return isAmharic ? 'ከ $m ደቂቃ በፊት' : '$m min ago';
+    } else if (diff.inHours < 24) {
+      final h = diff.inHours;
+      return isAmharic ? 'ከ $h ሰዓት በፊት' : '$h hr ago';
+    } else {
+      final d = diff.inDays;
+      return isAmharic ? 'ከ $d ቀን በፊት' : '$d days ago';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminOwnersProvider);
@@ -102,10 +117,10 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
       backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AdminColors.keraOrange,
-        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        icon: const Icon(Icons.add_rounded, color: AdminColors.navyDark),
         label: Text(
           context.tr('ባለቤት ጨምር', 'Add Owner'),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: AdminColors.navyDark, fontWeight: FontWeight.bold),
         ),
         onPressed: () => context.push('/admin/owners/add'),
       ),
@@ -291,7 +306,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          context.tr('ባለቤቶች · Owners', 'Store Owners Directory'),
+                          context.tr('የሱቅ ባለቤቶች ማውጫ', 'Business Owners Directory'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -330,7 +345,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Horizontal Filter Chips: ሁሉም, ንቁ, በመጠባበቅ, ታግዷል
+              // Horizontal Filter Chips: All, Active, Suspended, Inactive (>30d)
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -348,15 +363,15 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     ),
                     const SizedBox(width: 8),
                     _buildHeaderFilterChip(
-                      label: context.tr('በመጠባበቅ', 'Pending'),
-                      isSelected: _selectedFilter == 'PENDING',
-                      onTap: () => _onFilterSelected('PENDING'),
+                      label: context.tr('የታገዱ', 'Suspended'),
+                      isSelected: _selectedFilter == 'SUSPENDED',
+                      onTap: () => _onFilterSelected('SUSPENDED'),
                     ),
                     const SizedBox(width: 8),
                     _buildHeaderFilterChip(
-                      label: context.tr('ታግዷል', 'Suspended'),
-                      isSelected: _selectedFilter == 'SUSPENDED',
-                      onTap: () => _onFilterSelected('SUSPENDED'),
+                      label: context.tr('ያልሰሩ (>30ቀን)', 'Inactive (>30d)'),
+                      isSelected: _selectedFilter == 'INACTIVE',
+                      onTap: () => _onFilterSelected('INACTIVE'),
                     ),
                   ],
                 ),
@@ -373,24 +388,23 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AdminColors.keraOrange : AdminColors.headerButtonBg,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-          ),
-        ),
+    return FilterChip(
+      selected: isSelected,
+      label: Text(label),
+      onSelected: (_) => onTap(),
+      selectedColor: AdminColors.keraOrange,
+      backgroundColor: AdminColors.headerButtonBg,
+      labelStyle: TextStyle(
+        color: isSelected ? AdminColors.navyDark : Colors.white,
+        fontSize: 13,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
       ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide.none,
+      ),
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
     );
   }
 
@@ -400,23 +414,19 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     final isSuspended = owner.isSuspended;
     final isDark = context.isDark;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardBg,
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: context.cardBg,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        side: BorderSide(color: context.borderColor),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Top Row: Avatar + Name + Masked Phone + Status Pill
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,8 +545,8 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               _buildOwnerStatItem(
                 label: 'Sync',
                 value: owner.lastSyncAt != null
-                    ? context.tr('ተመሳስሏል', 'Synced')
-                    : context.tr('አልተመሳሰለም', 'Never'),
+                    ? _formatSyncTime(context, owner.lastSyncAt!)
+                    : context.tr('እስካሁን አልተመሳሰለም', 'Never synced'),
               ),
             ],
           ),
@@ -568,7 +578,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AdminColors.keraOrange,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AdminColors.navyDark,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -603,6 +613,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             ],
           ),
         ],
+      ),
       ),
     );
   }

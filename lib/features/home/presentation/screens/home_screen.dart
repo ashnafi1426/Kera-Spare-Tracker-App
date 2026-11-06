@@ -105,7 +105,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             NavigationDestination(
               icon: Icon(Icons.settings_outlined, color: inactiveIconColor),
               selectedIcon: Icon(Icons.settings_rounded, color: activeIconColor),
-              label: context.tr('ቅንብር', 'Settings'),
+              label: context.tr('ቅንብሮች', 'Settings'),
             ),
           ],
         ),

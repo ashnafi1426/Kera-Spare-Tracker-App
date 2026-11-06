@@ -91,7 +91,7 @@ class StatusBadge extends StatelessWidget {
     return StatusBadge(
       key: key,
       label: label,
-      icon: Icons.error_outline_rounded,
+      icon: Icons.inventory_2_outlined,
       backgroundColor: KeraColors.orange500,
       textColor: KeraColors.navy900,
       border: Border.all(color: KeraColors.orange700, width: 1.5),
@@ -152,7 +152,7 @@ class StatusBadge extends StatelessWidget {
     return StatusBadge(
       key: key,
       label: label,
-      icon: Icons.error_outline_rounded,
+      icon: Icons.sync_problem_rounded,
       backgroundColor: KeraColors.orange500,
       textColor: KeraColors.navy900,
       border: Border.all(color: KeraColors.orange700, width: 1.5),
@@ -162,15 +162,15 @@ class StatusBadge extends StatelessWidget {
   /// Discrepancy / Sync Conflict (ግጭት / Conflict)
   factory StatusBadge.conflict({
     Key? key,
-    String label = 'ግጭት ተፈጥሯል',
+    String label = 'ግጭት',
   }) {
     return StatusBadge(
       key: key,
       label: label,
-      icon: Icons.report_problem_rounded,
+      icon: Icons.report_rounded,
       backgroundColor: KeraColors.orange500,
       textColor: KeraColors.navy900,
-      border: Border.all(color: KeraColors.orange700, width: 1.5),
+      border: Border.all(color: KeraColors.orange700, width: 2.0),
     );
   }
 

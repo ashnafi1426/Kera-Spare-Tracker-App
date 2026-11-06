@@ -195,6 +195,13 @@ void main() {
 
   group('AdminOwnersListScreen Widget Tests', () {
     testWidgets('1. Displays search field, filter chips, and loaded owner list', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final mockRepo = MockAdminRepository(owners: sampleOwners);
       await tester.pumpWidget(buildTestScreen(mockRepo));
       await tester.pumpAndSettle();

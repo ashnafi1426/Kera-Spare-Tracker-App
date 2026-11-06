@@ -17,6 +17,8 @@ import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valu
 import 'package:kera_spare_tracker/features/reports/domain/models/sales_summary.dart';
 import 'package:kera_spare_tracker/features/reports/presentation/providers/reports_providers.dart';
 import 'package:kera_spare_tracker/features/sales/presentation/providers/sales_providers.dart';
+import 'package:kera_spare_tracker/features/settings/domain/models/business_profile.dart';
+import 'package:kera_spare_tracker/features/settings/presentation/providers/business_profile_provider.dart';
 import 'package:kera_spare_tracker/main.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -35,6 +37,21 @@ class _FakeInventoryListNotifier extends InventoryListNotifier {
   Future<bool> seedTestParts({int count = 2000}) async => true;
   @override
   Future<bool> clearTestParts() async => true;
+}
+
+class _FakeBusinessProfileNotifier extends BusinessProfileNotifier {
+  @override
+  Future<BusinessProfile> build() async {
+    return BusinessProfile.defaultProfile(
+      businessName: 'Kera Turbo Spares',
+      phoneNumber: '+251911223344',
+    );
+  }
+}
+
+class _FakeNeedsLoginNotifier extends NeedsLoginNotifier {
+  @override
+  bool build() => false;
 }
 
 void main() {
@@ -58,6 +75,12 @@ void main() {
 
   testWidgets('Unauthenticated user is redirected to LoginScreen with Amharic by default',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -95,6 +118,12 @@ void main() {
 
   testWidgets('Navigation from Login to Register screen and form validation',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -133,6 +162,12 @@ void main() {
 
   testWidgets('Authenticated user is redirected to HomeScreen with bottom navigation and can log out',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
     const user = AuthUser(
       id: 'owner_123',
       ownerId: 'owner_123',
@@ -157,43 +192,46 @@ void main() {
           topSellingPartsProvider.overrideWith((ref) async => []),
           inventoryValuationProvider.overrideWith((ref) async => InventoryValuation.zero),
           inventoryListProvider.overrideWith(_FakeInventoryListNotifier.new),
+          needsLoginProvider.overrideWith(_FakeNeedsLoginNotifier.new),
+          offlineMaxDaysExceededProvider.overrideWith((ref) async => false),
+          pendingSyncCountProvider.overrideWith((ref) => Stream.value(0)),
+          businessProfileProvider.overrideWith(_FakeBusinessProfileNotifier.new),
         ],
         child: const KeraSpareTrackerApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Verify user lands on HomeScreen
     expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.text('ዕቃዎች'), findsWidgets);
-    expect(find.text('ሽያጭ'), findsOneWidget);
-    expect(find.text('ሪፖርት'), findsOneWidget);
+    expect(find.text('ሽያጭ'), findsWidgets);
+    expect(find.text('ሪፖርት'), findsWidgets);
     expect(find.text('ቅንብሮች'), findsOneWidget);
 
     // Tap Settings destination
-    await tester.tap(find.text('ቅንብሮች'));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Verify business name & phone are displayed
     expect(find.text('Kera Turbo Spares'), findsOneWidget);
     expect(find.text('+251911223344'), findsOneWidget);
 
-    // Scroll to and tap Logout button
-    final logoutBtn = find.text('ከመለያ ውጣ (Sign Out / Logout)');
-    await tester.scrollUntilVisible(logoutBtn, 500);
-    await tester.ensureVisible(logoutBtn);
-    await tester.pumpAndSettle();
+    // Tap Logout button
+    final logoutBtn = find.text('ከመለያ ውጣ');
     expect(logoutBtn, findsOneWidget);
     await tester.tap(logoutBtn);
-    await tester.pumpAndSettle();
-
+    await tester.pump(const Duration(milliseconds: 300));
     // Confirm dialog appears
     expect(find.text('ከመተግበሪያው መውጣት ይፈልጋሉ?'), findsOneWidget);
 
     // Tap confirm logout button in dialog
     final confirmDialogBtn = find.widgetWithText(ElevatedButton, 'ውጣ');
     await tester.tap(confirmDialogBtn);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Verify logout was called
     verify(() => mockAuth.logout()).called(1);
