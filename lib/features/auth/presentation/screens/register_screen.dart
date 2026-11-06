@@ -878,29 +878,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }) {
     final isDark = context.isDark;
 
-    return Row(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: KeraTypography.fontLatin,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: isDark ? Colors.white : KeraColors.navy900,
-          ),
+    return RichText(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          fontFamily: KeraTypography.fontLatin,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : KeraColors.navy900,
         ),
-        if (isRequired) ...[
-          const SizedBox(width: 4),
-          const Text(
-            '*',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: KeraColors.orange700,
-            ),
-          ),
-        ],
-      ],
+        children: isRequired
+            ? const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: KeraColors.orange700,
+                  ),
+                ),
+              ]
+            : null,
+      ),
     );
   }
 
