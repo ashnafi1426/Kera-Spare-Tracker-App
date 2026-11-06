@@ -294,6 +294,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 Text(
                   'Kera Spare',
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: KeraTypography.fontLatin,
                     fontSize: 16,
@@ -304,6 +305,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 Text(
                   l10n.merchantRegistration,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontFamily: KeraTypography.fontLatin,
                     fontSize: 11,
@@ -1238,28 +1240,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${l10n.alreadyHaveAccountPrefix} ',
-                style: TextStyle(
-                  fontFamily: KeraTypography.fontLatin,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
-                ),
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              text: '${l10n.alreadyHaveAccountPrefix} ',
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
               ),
-              Text(
-                l10n.signInHighlight,
-                style: const TextStyle(
-                  fontFamily: KeraTypography.fontLatin,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: KeraColors.orange600,
+              children: [
+                TextSpan(
+                  text: l10n.signInHighlight,
+                  style: const TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontWeight: FontWeight.w700,
+                    color: KeraColors.orange600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
