@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/screens/welcome_screen.dart';
-import 'package:kera_spare_tracker/features/splash/presentation/splash_screen.dart';
 import 'package:kera_spare_tracker/l10n/app_localizations.dart';
 
 class StaticLocaleNotifier extends LocaleController {
@@ -31,13 +30,7 @@ void main() {
     outDir.createSync(recursive: true);
   }
 
-  Future<void> captureOne(
-    WidgetTester tester, {
-    required Widget widget,
-    required bool isDark,
-    required Locale locale,
-    required String fileName,
-  }) async {
+  testWidgets('Capture welcome_dark_am', (tester) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0;
 
@@ -46,24 +39,24 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          localeControllerProvider.overrideWith(() => StaticLocaleNotifier(locale)),
+          localeControllerProvider.overrideWith(() => StaticLocaleNotifier(const Locale('am'))),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+          theme: AppTheme.darkTheme,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: locale,
+          locale: const Locale('am'),
           home: RepaintBoundary(
             key: boundaryKey,
-            child: widget,
+            child: const WelcomeScreen(),
           ),
         ),
       ),
     );
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 60));
 
     final boundary = boundaryKey.currentContext?.findRenderObject()
         as RenderRepaintBoundary?;
@@ -71,22 +64,12 @@ void main() {
       final image = await boundary.toImage(pixelRatio: 1.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData != null) {
-        final file = File('docs/ui-check/screen1_splash_onboarding/$fileName');
+        final file = File('docs/ui-check/screen1_splash_onboarding/welcome_dark_am.png');
         file.writeAsBytesSync(byteData.buffer.asUint8List());
         // ignore: avoid_print
-        print('📸 Captured $fileName (${byteData.lengthInBytes} bytes)');
+        print('📸 Captured: welcome_dark_am.png (${byteData.lengthInBytes} bytes)');
       }
     }
-  }
-
-  testWidgets('Capture splash_dark_am', (tester) async {
-    await captureOne(
-      tester,
-      widget: const SplashScreen(progressValue: 0.75),
-      isDark: true,
-      locale: const Locale('am'),
-      fileName: 'splash_dark_am.png',
-    );
     exit(0);
   });
 }

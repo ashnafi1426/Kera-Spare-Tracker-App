@@ -460,20 +460,19 @@ class ApiAuthRepository implements AuthRepository {
       );
 
       // Save profile in Drift SQLite so local queries work immediately (Rule 2)
-      if (!user.isAdmin) {
-        await db
-            .into(db.profiles)
-            .insertOnConflictUpdate(
-              ProfilesCompanion.insert(
-                id: Value(user.id),
-                ownerId: user.ownerId,
-                phoneNumber: Value(user.phoneNumber),
-                businessName: Value(user.businessName),
-                role: const Value(UserRole.owner),
-                syncStatus: const Value(SyncStatus.synced),
-              ),
-            );
-      }
+      await db
+          .into(db.profiles)
+          .insertOnConflictUpdate(
+            ProfilesCompanion.insert(
+              id: Value(user.id),
+              ownerId: user.ownerId,
+              phoneNumber: Value(user.phoneNumber),
+              businessName: Value(user.businessName),
+              role: Value(user.isAdmin ? UserRole.admin : UserRole.owner),
+              avatarUrl: Value(user.avatarUrl),
+              syncStatus: const Value(SyncStatus.synced),
+            ),
+          );
 
       // Save local password hash for offline continuity
       try {
@@ -719,20 +718,19 @@ class ApiAuthRepository implements AuthRepository {
     );
 
     // Save profile row in Drift SQLite so offline queries work immediately
-    if (!user.isAdmin) {
-      await db
-          .into(db.profiles)
-          .insertOnConflictUpdate(
-            ProfilesCompanion.insert(
-              id: Value(user.id),
-              ownerId: user.ownerId,
-              phoneNumber: Value(user.phoneNumber),
-              businessName: Value(user.businessName),
-              role: const Value(UserRole.owner),
-              syncStatus: const Value(SyncStatus.synced),
-            ),
-          );
-    }
+    await db
+        .into(db.profiles)
+        .insertOnConflictUpdate(
+          ProfilesCompanion.insert(
+            id: Value(user.id),
+            ownerId: user.ownerId,
+            phoneNumber: Value(user.phoneNumber),
+            businessName: Value(user.businessName),
+            role: Value(user.isAdmin ? UserRole.admin : UserRole.owner),
+            avatarUrl: Value(user.avatarUrl),
+            syncStatus: const Value(SyncStatus.synced),
+          ),
+        );
 
     // Save local password hash for offline continuity
     try {
@@ -855,12 +853,14 @@ class ApiAuthRepository implements AuthRepository {
       }
 
       final user = AuthUser.fromJson(session.userProfile!);
+      var resolvedUser = user;
+
+      final profile = await (db.select(
+        db.profiles,
+      )..where((t) => t.id.equals(user.id))).getSingleOrNull();
 
       // 3. For owners: verify that local profile exists in Drift SQLite (Rule 3)
       if (!user.isAdmin) {
-        final profile = await (db.select(
-          db.profiles,
-        )..where((t) => t.id.equals(user.id))).getSingleOrNull();
         if (profile == null) {
           debugPrint(
             '[STARTUP] Local Drift profile missing for stored session',
@@ -870,15 +870,20 @@ class ApiAuthRepository implements AuthRepository {
         }
       }
 
-      _cachedUser = user;
-      _authStateController.add(user);
+      // If local Drift database has an avatarUrl, ensure it's loaded in the user model
+      if (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty) {
+        resolvedUser = resolvedUser.copyWith(avatarUrl: profile.avatarUrl);
+      }
+
+      _cachedUser = resolvedUser;
+      _authStateController.add(resolvedUser);
 
       // 4. If tokens were cleared due to expiry/theft, notify needsLogin state
       if (session.refreshToken.isEmpty) {
         setNeedsLogin(true);
       }
 
-      return Result.success(user);
+      return Result.success(resolvedUser);
     } catch (e) {
       _authStateController.add(null);
       return const Result.success(null);
@@ -1037,13 +1042,20 @@ class ApiAuthRepository implements AuthRepository {
       final updatedUser = user.copyWith(avatarUrl: remotePhotoUrl);
       await _sessionStore.updateUserProfile(updatedUser.toJson());
       try {
-        await (db.update(db.profiles)..where((t) => t.id.equals(user.id))).write(
+        await db.into(db.profiles).insertOnConflictUpdate(
           ProfilesCompanion(
+            id: Value(user.id),
+            ownerId: Value(user.ownerId),
+            phoneNumber: Value(user.phoneNumber),
+            businessName: Value(user.businessName),
+            role: Value(user.isAdmin ? UserRole.admin : UserRole.owner),
             avatarUrl: Value(remotePhotoUrl),
             updatedAt: Value(DateTime.now()),
           ),
         );
-      } catch (_) {}
+      } catch (dbErr) {
+        debugPrint('[ApiAuthRepo] Profile DB save failed: $dbErr');
+      }
 
       _cachedUser = updatedUser;
       _authStateController.add(updatedUser);

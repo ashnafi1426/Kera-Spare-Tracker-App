@@ -9,6 +9,7 @@ import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/design/widgets/kera_status_badge.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../stock/presentation/dialogs/update_stock_dialog.dart';
 import '../../domain/models/part_item.dart';
 import '../providers/metadata_providers.dart';
@@ -459,19 +460,14 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: hasPhoto
-                ? Image.file(
-                    File(part.photoLocalPath!),
-                    fit: BoxFit.cover,
-                    cacheWidth: 400,
-                  )
-                : const Center(
-                    child: Icon(
-                      Icons.settings_suggest_rounded,
-                      size: 64,
-                      color: KeraColors.textMutedColor,
-                    ),
-                  ),
+            child: KeraPartImage(
+              localPath: part.photoLocalPath,
+              remoteUrl: part.photoUrl,
+              width: double.infinity,
+              height: 220,
+              borderRadius: 0,
+              fit: BoxFit.cover,
+            ),
           ),
           // Floating OEM Genuine Badge
           Positioned(
