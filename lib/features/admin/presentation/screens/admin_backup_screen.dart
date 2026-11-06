@@ -24,7 +24,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Database snapshot completed successfully!'),
-        backgroundColor: Color(0xFF10B981),
+        backgroundColor: AdminColors.navy,
       ),
     );
   }
@@ -53,7 +53,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Snapshot restored successfully!'),
-                  backgroundColor: Color(0xFF10B981),
+                  backgroundColor: AdminColors.navy,
                 ),
               );
             },
@@ -186,7 +186,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7),
+                  color: AdminColors.successBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text(
@@ -194,7 +194,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF15803D),
+                    color: AdminColors.navy,
                   ),
                 ),
               ),
@@ -369,7 +369,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
                       width: 8,
                       height: 8,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
+                        color: AdminColors.navy,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -409,7 +409,7 @@ class _AdminBackupScreenState extends State<AdminBackupScreen> {
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF0C2340),
-                side: const BorderSide(color: Color(0xFFFCA5A5)),
+                side: const BorderSide(color: AdminColors.border),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),

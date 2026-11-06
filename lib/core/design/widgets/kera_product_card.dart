@@ -116,7 +116,7 @@ class KeraProductCard extends StatelessWidget {
                         ),
                         child: Text(
                           brandName!,
-                          style: KeraTypography.labelSmall(color: KeraColors.actionBlue).copyWith(
+                          style: KeraTypography.labelSmall(color: KeraColors.brandNavy).copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -178,8 +178,8 @@ class KeraProductCard extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                     style: IconButton.styleFrom(
-                      backgroundColor: KeraColors.actionBlue,
-                      foregroundColor: KeraColors.textWhite,
+                      backgroundColor: KeraColors.brandOrange,
+                      foregroundColor: KeraColors.brandNavyDark,
                       shape: const RoundedRectangleBorder(
                         borderRadius: KeraRadii.borderMicro,
                       ),
@@ -312,7 +312,7 @@ class KeraProductCard extends StatelessWidget {
     return const Center(
       child: Icon(
         Icons.build_circle_outlined,
-        color: KeraColors.actionBlue,
+        color: KeraColors.textSecondary,
         size: 28,
       ),
     );

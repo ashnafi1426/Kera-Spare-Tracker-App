@@ -152,7 +152,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
         'type': 'sync',
         'title': 'Sync conflict',
         'subtitle': 'Meseret CAT Parts · part CTP-4412 · 1h ago',
-        'color': const Color(0xFFEF4444),
+        'color': AdminColors.danger,
       },
       {
         'type': 'accounts',
@@ -164,13 +164,13 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
         'type': 'sync',
         'title': 'Backup completed',
         'subtitle': 'Today 03:00',
-        'color': const Color(0xFF10B981),
+        'color': AdminColors.navy,
       },
       {
         'type': 'accounts',
         'title': 'Owner offline 9 days',
         'subtitle': 'Kera Sany Depot',
-        'color': const Color(0xFFEF4444),
+        'color': AdminColors.danger,
       },
       {
         'type': 'accounts',

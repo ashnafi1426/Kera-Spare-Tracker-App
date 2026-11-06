@@ -35,7 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
-    final activeIconColor = isDark ? const Color(0xFF38BDF8) : const Color(0xFF0C2340);
+    final activeIconColor = isDark ? const Color(0xFFF7941D) : const Color(0xFF0B2A5B);
     final inactiveIconColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF5E6D82);
 
     final tabs = [

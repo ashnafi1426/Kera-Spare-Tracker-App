@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import '../tokens/admin_colors.dart';
 import '../tokens/admin_spacing.dart';
+import '../tokens/kera_colors.dart';
 
 enum StatusType { success, warning, danger, info }
 
 /// Semantic badge displaying an icon, localized label, and status color.
-/// Ensuring color is not the sole conveyor of information (WCAG compliance).
+/// Strictly conforms to the 2-color brand system: every status has an icon AND label.
 class StatusChip extends StatelessWidget {
   final String label;
   final IconData? icon;
   final StatusType type;
   final Color? color;
   final Color? backgroundColor;
+  final Border? border;
 
   const StatusChip({
     super.key,
@@ -20,8 +21,10 @@ class StatusChip extends StatelessWidget {
     this.type = StatusType.info,
     this.color,
     this.backgroundColor,
+    this.border,
   });
 
+  /// Active status (Soft Navy chip + check icon).
   factory StatusChip.active(String label) {
     return StatusChip(
       label: label,
@@ -30,6 +33,7 @@ class StatusChip extends StatelessWidget {
     );
   }
 
+  /// Suspended / Disabled status (Solid Orange chip + bold Navy text + block icon).
   factory StatusChip.suspended(String label) {
     return StatusChip(
       label: label,
@@ -38,6 +42,7 @@ class StatusChip extends StatelessWidget {
     );
   }
 
+  /// Warning / Pending status (Soft Orange chip + alert icon).
   factory StatusChip.warning(String label) {
     return StatusChip(
       label: label,
@@ -46,6 +51,7 @@ class StatusChip extends StatelessWidget {
     );
   }
 
+  /// Informational status (Soft Navy chip + info icon).
   factory StatusChip.info(String label, {IconData icon = Icons.info_outline_rounded}) {
     return StatusChip(
       label: label,
@@ -56,9 +62,10 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (defaultTextColor, defaultBgColor) = _resolveColors();
+    final (defaultTextColor, defaultBgColor, defaultBorder) = _resolveColors();
     final textColor = color ?? defaultTextColor;
     final bgColor = backgroundColor ?? defaultBgColor;
+    final resolvedBorder = border ?? defaultBorder;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -68,6 +75,7 @@ class StatusChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(AdminSpacing.radiusChip),
+        border: resolvedBorder,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -85,7 +93,7 @@ class StatusChip extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
+                fontWeight: type == StatusType.danger ? FontWeight.w700 : FontWeight.w600,
                 color: textColor,
               ),
               maxLines: 1,
@@ -97,16 +105,16 @@ class StatusChip extends StatelessWidget {
     );
   }
 
-  (Color, Color) _resolveColors() {
+  (Color, Color, Border?) _resolveColors() {
     switch (type) {
       case StatusType.success:
-        return (AdminColors.success, AdminColors.successTint);
+        return (KeraColors.navy800, KeraColors.navy100, Border.all(color: KeraColors.border));
       case StatusType.warning:
-        return (AdminColors.warning, AdminColors.warningTint);
+        return (KeraColors.orange700, KeraColors.orange100, Border.all(color: KeraColors.orange600));
       case StatusType.danger:
-        return (AdminColors.danger, AdminColors.dangerTint);
+        return (KeraColors.navy900, KeraColors.orange500, Border.all(color: KeraColors.orange700, width: 1.5));
       case StatusType.info:
-        return (AdminColors.info, AdminColors.infoTint);
+        return (KeraColors.navy800, KeraColors.navy100, Border.all(color: KeraColors.border));
     }
   }
 }

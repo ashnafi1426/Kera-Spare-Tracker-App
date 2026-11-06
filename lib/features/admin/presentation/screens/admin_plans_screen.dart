@@ -27,8 +27,8 @@ class AdminPlansScreen extends StatelessWidget {
                   _buildPlanCard(
                     title: 'Free trial',
                     badge: 'Active',
-                    badgeBg: const Color(0xFFDCFCE7),
-                    badgeColor: const Color(0xFF15803D),
+                    badgeBg: AdminColors.successBg,
+                    badgeColor: AdminColors.navy,
                     price: '[PRICE]',
                     featureTitle: 'Inventory and sales',
                     featureSubtitle: 'Offline-first with sync',
@@ -207,7 +207,7 @@ class AdminPlansScreen extends StatelessWidget {
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: isHighlighted ? const Color(0xFF10B981) : const Color(0xFF5E6D82),
+                  color: isHighlighted ? AdminColors.navy : const Color(0xFF5E6D82),
                   shape: BoxShape.circle,
                 ),
               ),

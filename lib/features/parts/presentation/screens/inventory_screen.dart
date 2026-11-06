@@ -164,8 +164,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
-        backgroundColor: const Color(0xFFF58220),
-        foregroundColor: Colors.white,
+        backgroundColor: KeraColors.brandOrange,
+        foregroundColor: KeraColors.navy900,
         elevation: 3,
         shape: const CircleBorder(),
         child: const Icon(Icons.add_rounded, size: 32),
@@ -386,12 +386,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.science_rounded, color: Color(0xFFF7941D), size: 16),
+                            Icon(Icons.science_rounded, color: isDark ? KeraColors.brandOrange : KeraColors.orange700, size: 16),
                             const SizedBox(width: 4),
                             Text(
                               context.tr('ናሙና (Dev)', 'Sample (Dev)'),
-                              style: const TextStyle(
-                                color: Color(0xFFF7941D),
+                              style: TextStyle(
+                                color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),

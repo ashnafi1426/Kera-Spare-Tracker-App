@@ -36,12 +36,15 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final uri = GoRouterState.of(context).uri;
-      final statusParam = uri.queryParameters['status'];
-      if (statusParam != null && statusParam.isNotEmpty) {
-        setState(() => _selectedFilter = statusParam.toUpperCase());
-        ref.read(adminOwnersProvider.notifier).setStatus(_selectedFilter);
-      }
+      if (!mounted) return;
+      try {
+        final uri = GoRouterState.of(context).uri;
+        final statusParam = uri.queryParameters['status'];
+        if (statusParam != null && statusParam.isNotEmpty) {
+          setState(() => _selectedFilter = statusParam.toUpperCase());
+          ref.read(adminOwnersProvider.notifier).setStatus(_selectedFilter);
+        }
+      } catch (_) {}
     });
   }
 
@@ -464,27 +467,53 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isSuspended
-                      ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
+                      ? AdminColors.dangerBg
                       : isPending
-                          ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3EB))
-                          : (isDark ? const Color(0xFF052E16) : const Color(0xFFE6F8F0)),
+                          ? AdminColors.warningBg
+                          : AdminColors.successBg,
                   borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  isSuspended
-                      ? context.tr('ታግዷል', 'Suspended')
-                      : isPending
-                          ? context.tr('በመጠባበቅ', 'Pending')
-                          : context.tr('ንቁ', 'Active'),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                  border: Border.all(
                     color: isSuspended
-                        ? const Color(0xFFEF4444)
+                        ? AdminColors.danger.withValues(alpha: 0.3)
                         : isPending
-                            ? AdminColors.keraOrange
-                            : const Color(0xFF10B981),
+                            ? AdminColors.warning.withValues(alpha: 0.3)
+                            : AdminColors.success.withValues(alpha: 0.3),
                   ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isSuspended
+                          ? Icons.block_rounded
+                          : isPending
+                              ? Icons.access_time_rounded
+                              : Icons.check_circle_outline_rounded,
+                      size: 13,
+                      color: isSuspended
+                          ? AdminColors.danger
+                          : isPending
+                              ? AdminColors.warning
+                              : AdminColors.success,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isSuspended
+                          ? context.tr('ታግዷል', 'Suspended')
+                          : isPending
+                              ? context.tr('በመጠባበቅ', 'Pending')
+                              : context.tr('ንቁ', 'Active'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isSuspended
+                            ? AdminColors.danger
+                            : isPending
+                                ? AdminColors.warning
+                                : AdminColors.success,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -609,7 +638,7 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${owner.businessName} approved successfully'),
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: AdminColors.navy,
         ),
       );
       await ref.read(adminOwnersProvider.notifier).loadOwners();

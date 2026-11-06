@@ -1170,7 +1170,7 @@ class _SecuritySessionsScreenState
             : KeraColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isMet ? const Color(0xFFA7F3D0) : KeraColors.borderVariant,
+          color: isMet ? KeraColors.stockInBorder : KeraColors.borderVariant,
         ),
       ),
       child: Row(

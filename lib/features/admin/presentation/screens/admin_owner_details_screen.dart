@@ -489,10 +489,10 @@ class _AdminOwnerDetailsScreenState
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: isSuspended
-                          ? const Color(0xFFEF4444)
+                          ? AdminColors.danger
                           : isPending
-                              ? const Color(0xFFFFF3E6)
-                              : const Color(0xFF10B981),
+                              ? AdminColors.warningBg
+                              : AdminColors.navy,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
@@ -606,9 +606,9 @@ class _AdminOwnerDetailsScreenState
             Expanded(
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: AdminColors.danger,
                   backgroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFFFCA5A5)),
+                  side: const BorderSide(color: AdminColors.border),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -625,9 +625,9 @@ class _AdminOwnerDetailsScreenState
             Expanded(
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFEF4444),
+                  foregroundColor: AdminColors.danger,
                   backgroundColor: Colors.white,
-                  side: const BorderSide(color: Color(0xFFFCA5A5)),
+                  side: const BorderSide(color: AdminColors.border),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -686,7 +686,7 @@ class _AdminOwnerDetailsScreenState
         _buildStatTile(
           icon: Icons.bar_chart_rounded,
           badge: 'ETB',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           value: revFormatted,
           label: context.tr('ጠቅላላ ገቢ', 'Revenue'),
         ),
@@ -695,7 +695,7 @@ class _AdminOwnerDetailsScreenState
         _buildStatTile(
           icon: Icons.trending_up_rounded,
           badge: 'ETB',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           value: profFormatted,
           label: context.tr('ጠቅላላ ትርፍ', 'Profit'),
         ),
@@ -735,10 +735,10 @@ class _AdminOwnerDetailsScreenState
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E6),
+                  color: AdminColors.warningBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 18, color: const Color(0xFFD97706)),
+                child: Icon(icon, size: 18, color: AdminColors.warning),
               ),
               Text(
                 badge,
@@ -820,7 +820,7 @@ class _AdminOwnerDetailsScreenState
                       width: 8,
                       height: 8,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
+                        color: AdminColors.navy,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -1112,8 +1112,8 @@ class _AdminOwnerDetailsScreenState
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: isOut
-                                        ? const Color(0xFFFEE2E2)
-                                        : (isLow ? const Color(0xFFFEF3C7) : const Color(0xFFDCFCE7)),
+                                        ? AdminColors.dangerBg
+                                        : (isLow ? const Color(0xFFFEF3C7) : AdminColors.successBg),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -1124,8 +1124,8 @@ class _AdminOwnerDetailsScreenState
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isOut
-                                          ? const Color(0xFFDC2626)
-                                          : (isLow ? const Color(0xFFD97706) : const Color(0xFF16A34A)),
+                                          ? AdminColors.danger
+                                          : (isLow ? AdminColors.warning : const Color(0xFF16A34A)),
                                     ),
                                   ),
                                 ),
@@ -1303,7 +1303,7 @@ class _AdminOwnerDetailsScreenState
                         contentPadding: EdgeInsets.zero,
                         leading: Icon(
                           isPositive ? Icons.add_circle_outline_rounded : Icons.remove_circle_outline_rounded,
-                          color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                          color: isPositive ? AdminColors.navy : AdminColors.danger,
                         ),
                         title: Text(
                           m.type.name.toUpperCase(),
@@ -1318,7 +1318,7 @@ class _AdminOwnerDetailsScreenState
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                            color: isPositive ? AdminColors.navy : AdminColors.danger,
                           ),
                         ),
                       );

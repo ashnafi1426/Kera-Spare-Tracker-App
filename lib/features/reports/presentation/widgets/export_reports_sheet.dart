@@ -536,8 +536,8 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
               child: ElevatedButton.icon(
                 onPressed: _isGenerating ? null : _handleExport,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: KeraColors.primaryNavyDark,
-                  foregroundColor: Colors.white,
+                  backgroundColor: KeraColors.brandOrange,
+                  foregroundColor: KeraColors.navy900,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -548,7 +548,7 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: KeraColors.navy900,
                         ),
                       )
                     : const Icon(Icons.download_rounded),
@@ -556,7 +556,7 @@ ${topParts.asMap().entries.map((e) => '<tr><td>#${e.key + 1}</td><td>${e.value.p
                   _isGenerating
                       ? context.tr('ሪፖርት በመዘጋጀት ላይ...', 'Generating Report...')
                       : context.tr('ሪፖርት አውርድ', 'Generate Report'),
-                  style: KeraTypography.labelLarge(color: Colors.white)
+                  style: KeraTypography.labelLarge(color: KeraColors.navy900)
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
               ),

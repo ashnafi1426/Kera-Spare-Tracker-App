@@ -105,22 +105,19 @@ class ReportsScreen extends ConsumerWidget {
             margin: const EdgeInsets.symmetric(vertical: 12),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF064E3B) : const Color(0xFF00322D),
+              color: isDark ? const Color(0xFF102138) : Colors.white.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: KeraColors.tealAccent.withValues(alpha: 0.3),
+                color: Colors.white24,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: KeraColors.tealAccent,
-                    shape: BoxShape.circle,
-                  ),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.white,
+                  size: 11,
                 ),
                 const SizedBox(width: 5),
                 Text(
@@ -323,8 +320,8 @@ class ReportsScreen extends ConsumerWidget {
                                     child: Text(
                                       context.tr('ወቅታዊ', 'Current'),
                                       style: KeraTypography.labelSmall(
-                                        color: KeraColors.tealAccent,
-                                      ).copyWith(fontSize: 10),
+                                        color: KeraColors.brandOrange,
+                                      ).copyWith(fontSize: 10, fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],
@@ -337,10 +334,10 @@ class ReportsScreen extends ConsumerWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF00322D),
+                                color: KeraColors.brandOrange.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: KeraColors.tealAccent.withValues(alpha: 0.4),
+                                  color: KeraColors.brandOrange.withValues(alpha: 0.6),
                                 ),
                               ),
                               child: Row(
@@ -349,13 +346,13 @@ class ReportsScreen extends ConsumerWidget {
                                   const Icon(
                                     Icons.trending_up_rounded,
                                     size: 14,
-                                    color: KeraColors.tealAccent,
+                                    color: KeraColors.brandOrange,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${margin >= 0 ? "+" : ""}${margin.toStringAsFixed(1)}%',
                                     style: KeraTypography.labelSmall(
-                                      color: KeraColors.tealAccent,
+                                      color: Colors.white,
                                     ).copyWith(fontWeight: FontWeight.bold),
                                   ),
                                 ],
@@ -424,7 +421,7 @@ class ReportsScreen extends ConsumerWidget {
                                     child: Text(
                                       '${margin.toStringAsFixed(1)}%',
                                       style: KeraTypography.labelLarge(
-                                        color: KeraColors.tealAccent,
+                                        color: KeraColors.brandOrange,
                                       ).copyWith(fontWeight: FontWeight.bold),
                                     ),
                                   ),
@@ -498,7 +495,7 @@ class ReportsScreen extends ConsumerWidget {
                                   : '0 $currencyUnit',
                               subtitle: context.tr('በአንድ ደረሰኝ ሽያጭ', 'Average per receipt'),
                               icon: Icons.calculate_outlined,
-                              iconColor: isDark ? const Color(0xFF38BDF8) : KeraColors.actionBlue,
+                              iconColor: isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
                             ),
                           ),
                         ],
@@ -515,7 +512,7 @@ class ReportsScreen extends ConsumerWidget {
                                   : '0',
                               subtitle: context.tr('የተመዘገቡ ግብይቶች', 'Recorded checkouts'),
                               icon: Icons.shopping_bag_outlined,
-                              iconColor: isDark ? const Color(0xFF34D399) : Colors.teal.shade700,
+                              iconColor: KeraColors.brandOrange,
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -572,13 +569,13 @@ class ReportsScreen extends ConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   _buildLegendIndicator(
-                                    color: isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy,
+                                    color: isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
                                     label: l10n.totalRevenue,
                                     textColor: context.textSecondaryColor,
                                   ),
                                   const SizedBox(width: 12),
                                   _buildLegendIndicator(
-                                    color: const Color(0xFF22C55E),
+                                    color: KeraColors.brandOrange,
                                     label: l10n.lineProfit,
                                     textColor: context.textSecondaryColor,
                                   ),
@@ -810,7 +807,7 @@ class ReportsScreen extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy,
+                                  color: isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
                                 ),
                               ),
                             ],
@@ -823,13 +820,13 @@ class ReportsScreen extends ConsumerWidget {
                       Card(
                         elevation: 0,
                         color: valuation.lowStockCount > 0
-                            ? (isDark ? const Color(0xFF38290E) : const Color(0xFFFFFBEB))
+                            ? (isDark ? const Color(0xFF102138) : KeraColors.orange100)
                             : context.cardBg,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(
                             color: valuation.lowStockCount > 0
-                                ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
+                                ? KeraColors.brandOrange
                                 : context.borderColor,
                           ),
                         ),
@@ -842,14 +839,14 @@ class ReportsScreen extends ConsumerWidget {
                                 height: 42,
                                 decoration: BoxDecoration(
                                   color: valuation.lowStockCount > 0
-                                      ? (isDark ? const Color(0xFF5B3008) : const Color(0xFFFEF3C7))
+                                      ? (isDark ? KeraColors.navy800 : KeraColors.orange100)
                                       : (isDark ? const Color(0xFF1E385C) : const Color(0xFFE2E8F0)),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
                                   Icons.warning_amber_rounded,
                                   color: valuation.lowStockCount > 0
-                                      ? (isDark ? const Color(0xFFFDE68A) : const Color(0xFFB45309))
+                                      ? KeraColors.orange700
                                       : context.textSecondaryColor,
                                   size: 22,
                                 ),
@@ -865,7 +862,7 @@ class ReportsScreen extends ConsumerWidget {
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                         color: valuation.lowStockCount > 0
-                                            ? (isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E))
+                                            ? KeraColors.orange700
                                             : context.textPrimaryColor,
                                       ),
                                     ),
@@ -877,7 +874,7 @@ class ReportsScreen extends ConsumerWidget {
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: valuation.lowStockCount > 0
-                                            ? (isDark ? const Color(0xFFFCD34D) : const Color(0xFFB45309))
+                                            ? KeraColors.orange700
                                             : context.textSecondaryColor,
                                       ),
                                     ),
@@ -966,7 +963,7 @@ class ReportsScreen extends ConsumerWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: context.isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy,
+            color: context.isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
           ),
         ),
       ],
@@ -1019,7 +1016,7 @@ class ReportsScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy,
+                color: isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
               ),
             ),
           ],
@@ -1034,7 +1031,7 @@ class ReportsScreen extends ConsumerWidget {
             valueColor: AlwaysStoppedAnimation<Color>(
               item.percentage > 30
                   ? KeraColors.brandOrange
-                  : (isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy),
+                  : (isDark ? KeraColors.navyTint : KeraColors.primaryNavy),
             ),
           ),
         ),
@@ -1162,13 +1159,13 @@ class ReportsScreen extends ConsumerWidget {
         barRods: [
           BarChartRodData(
             toY: point.revenue,
-            color: isDark ? const Color(0xFF38BDF8) : KeraColors.primaryNavy,
+            color: isDark ? KeraColors.navyTint : KeraColors.primaryNavy,
             width: 10,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
           BarChartRodData(
             toY: max(0.0, point.profit),
-            color: const Color(0xFF22C55E),
+            color: KeraColors.brandOrange,
             width: 10,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),

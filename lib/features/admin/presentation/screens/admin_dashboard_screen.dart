@@ -284,7 +284,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           value: '$activeCount',
           label: context.tr('ንቁ · Active', 'Active Owners'),
           badgeText: '$activePercent%',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           onTap: () => context.push('/admin/owners?status=ACTIVE'),
         ),
 
@@ -314,7 +314,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           value: '$syncHealth%',
           label: context.tr('የማመሳሰል ሁኔታ · Sync', 'Sync Health'),
           badgeText: '$syncProblems ${context.tr("ችግር", "issues")}',
-          badgeColor: syncProblems == 0 ? const Color(0xFF10B981) : AdminColors.keraOrange,
+          badgeColor: syncProblems == 0 ? AdminColors.navy : AdminColors.keraOrange,
           onTap: () => context.push('/admin/sync'),
         ),
 
@@ -324,7 +324,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           value: revenue,
           label: context.tr('ሽያጭ · Revenue', 'Total Revenue'),
           badgeText: 'ETB',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           onTap: () => context.push('/admin/reports'),
         ),
 
@@ -334,7 +334,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           value: profit,
           label: context.tr('ትርፍ · Profit', 'Estimated Profit'),
           badgeText: 'ETB',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           onTap: () => context.push('/admin/reports'),
         ),
       ],
@@ -371,7 +371,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: AdminColors.navyTint,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.analytics_outlined, color: Color(0xFF3B82F6)),
@@ -393,7 +393,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF3EB),
+                color: AdminColors.orangeTint,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.sync_problem_rounded, color: AdminColors.keraOrange),

@@ -330,7 +330,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.logout_rounded, color: Color(0xFFDC2626)),
+            const Icon(Icons.logout_rounded, color: AdminColors.danger),
             const SizedBox(width: 8),
             Text(
               context.tr('ከአካውንት መውጣት', 'Logout'),
@@ -352,7 +352,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFDC2626),
+              backgroundColor: AdminColors.danger,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -1208,7 +1208,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.fingerprint_rounded, size: 16, color: Color(0xFF10B981)),
+              const Icon(Icons.fingerprint_rounded, size: 16, color: AdminColors.navy),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -1234,7 +1234,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.flag_outlined, size: 16, color: Color(0xFFEF4444)),
+              const Icon(Icons.flag_outlined, size: 16, color: AdminColors.danger),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -1268,7 +1268,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               Expanded(
                 child: Row(
                   children: [
-                    const Icon(Icons.cloud_sync_rounded, color: Color(0xFF10B981), size: 20),
+                    const Icon(Icons.cloud_sync_rounded, color: AdminColors.navy, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -1287,8 +1287,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               ),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF10B981)),
-                  foregroundColor: const Color(0xFF10B981),
+                  side: const BorderSide(color: AdminColors.navy),
+                  foregroundColor: AdminColors.navy,
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 ),
                 onPressed: () => context.push('/admin/backup'),
@@ -1450,7 +1450,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
           color: context.cardBg,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0xFFFCA5A5)),
+            side: const BorderSide(color: AdminColors.border),
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
@@ -1458,17 +1458,17 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFFEE2E2),
+                color: AdminColors.dangerBg,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.logout_rounded, color: Color(0xFFDC2626), size: 22),
+              child: const Icon(Icons.logout_rounded, color: AdminColors.danger, size: 22),
             ),
             title: Text(
               context.tr('ከአካውንት ውጣ · Logout', 'Logout / Exit Session'),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
-                color: Color(0xFFDC2626),
+                color: AdminColors.danger,
               ),
             ),
             subtitle: Text(
@@ -1479,8 +1479,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               ),
             ),
             trailing: _isLoggingOut
-                ? const KeraLoadingIndicator.small(color: Color(0xFFDC2626))
-                : const Icon(Icons.chevron_right_rounded, color: Color(0xFFDC2626)),
+                ? const KeraLoadingIndicator.small(color: AdminColors.danger)
+                : const Icon(Icons.chevron_right_rounded, color: AdminColors.danger),
             onTap: _isLoggingOut ? null : _confirmLogout,
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
@@ -80,7 +81,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
             builder: (ctx) => AlertDialog(
               title: const Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626)),
+                  Icon(Icons.warning_amber_rounded, color: KeraColors.orange700),
                   SizedBox(width: 8),
                   Expanded(child: Text('ያለቀ ክምችት ማስጠንቀቂያ')),
                 ],
@@ -126,8 +127,9 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFDC2626),
-                  foregroundColor: Colors.white,
+                  backgroundColor: KeraColors.brandOrange,
+                  foregroundColor: KeraColors.navy900,
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onPressed: () => Navigator.pop(ctx, true),
                 child: const Text('ቀጥል'),
@@ -480,7 +482,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                                   Text(
                                     context.tr('የተጣራ ትርፍ (Profit)', 'Net Profit'),
                                     style: TextStyle(
-                                      color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                      color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -488,7 +490,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                                   Text(
                                     '+${totalProfit.toStringAsFixed(0)} ETB',
                                     style: TextStyle(
-                                      color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                      color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -529,14 +531,14 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                            color: isDark ? const Color(0xFF102138) : KeraColors.navy100,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE)),
+                            border: Border.all(color: isDark ? const Color(0xFF1E385C) : KeraColors.border),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.offline_bolt_rounded, size: 16, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E40AF)),
+                              Icon(Icons.cloud_off_rounded, size: 16, color: isDark ? Colors.white : KeraColors.navy800),
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
@@ -545,9 +547,9 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                                     'Works completely offline · Auto-syncs when online',
                                   ),
                                   style: TextStyle(
-                                    color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
+                                    color: isDark ? Colors.white : KeraColors.navy800,
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -575,15 +577,15 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitSale,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF58220),
-                    foregroundColor: Colors.white,
+                    backgroundColor: KeraColors.brandOrange,
+                    foregroundColor: KeraColors.navy900,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: _isSubmitting
-                      ? const KeraLoadingIndicator.small(color: Colors.white)
+                      ? const KeraLoadingIndicator.small(color: KeraColors.navy900)
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -591,7 +593,11 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                             const SizedBox(width: 8),
                             Text(
                               context.tr('ሽያጭ አስቀምጥ', 'Complete Sale'),
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: KeraColors.navy900,
+                              ),
                             ),
                           ],
                         ),
@@ -695,7 +701,7 @@ class _SaleLineItemCard extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: const Padding(
                   padding: EdgeInsets.all(4),
-                  child: Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626), size: 20),
+                  child: Icon(Icons.delete_outline_rounded, color: KeraColors.brandNavy, size: 20),
                 ),
               ),
             ],
@@ -1005,10 +1011,10 @@ class _PartSearchPickerSheetState extends ConsumerState<_PartSearchPickerSheet> 
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: isOut
-                                          ? const Color(0xFFDC2626)
+                                          ? KeraColors.orange700
                                           : isLow
-                                              ? const Color(0xFFD97706)
-                                              : const Color(0xFF16A34A),
+                                              ? KeraColors.orange700
+                                              : (context.isDark ? Colors.white70 : KeraColors.brandNavy),
                                     ),
                                   ),
                                 ],

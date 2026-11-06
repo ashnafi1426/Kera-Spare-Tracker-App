@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -537,8 +536,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ? context.tr('ደካማ የይለፍ ቃል', 'Weak password')
                             : ''));
                 final barColor = strength == 3
-                    ? const Color(0xFF10B981)
-                    : (strength == 2 ? AdminColors.keraOrange : const Color(0xFFEF4444));
+                    ? KeraColors.brandNavy
+                    : (strength == 2 ? KeraColors.brandOrange : KeraColors.orange700);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -631,7 +630,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       height: 24,
                       child: Checkbox(
                         value: _agreedToTerms,
-                        activeColor: AdminColors.keraOrange,
+                        activeColor: KeraColors.brandOrange,
+                        checkColor: KeraColors.navy900,
                         onChanged: (val) =>
                             setState(() => _agreedToTerms = val ?? false),
                       ),
@@ -645,7 +645,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           children: [
                             TextSpan(
                               text: context.tr('መመሪያ እና ደንብ', 'Terms & Conditions'),
-                              style: KeraTypography.bodySmall(color: AdminColors.keraOrange).copyWith(
+                              style: KeraTypography.bodySmall(color: KeraColors.orange700).copyWith(
                                 fontWeight: FontWeight.bold,
                                 decoration: TextDecoration.underline,
                               ),
@@ -670,9 +670,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _handleRegister,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AdminColors.keraOrange,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AdminColors.keraOrange.withValues(alpha: 0.5),
+                  backgroundColor: KeraColors.brandOrange,
+                  foregroundColor: KeraColors.navy900,
+                  disabledBackgroundColor: KeraColors.brandOrange.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(KeraRadii.md),
                   ),
@@ -683,7 +683,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
                         ),
                       )
                     : Row(
@@ -691,10 +691,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         children: [
                           Text(
                             context.tr('ይመዝገቡ', 'Register Business'),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: KeraColors.navy900,
+                            ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                          const Icon(Icons.arrow_forward_rounded, size: 20, color: KeraColors.navy900),
                         ],
                       ),
               ),

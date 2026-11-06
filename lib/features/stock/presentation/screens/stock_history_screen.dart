@@ -109,7 +109,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF89F5E7),
+                    color: KeraColors.brandOrange,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -117,7 +117,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                 Text(
                   context.tr('የተገናኘ', 'Synced'),
                   style: KeraTypography.labelSmall(
-                    color: const Color(0xFF89F5E7),
+                    color: Colors.white,
                   ).copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -216,7 +216,7 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
                                 Text(
                                   location,
                                   style: KeraTypography.bodySmall(
-                                    color: const Color(0xFF92400E),
+                                    color: KeraColors.orange700,
                                   ),
                                 ),
                             ],
@@ -757,10 +757,10 @@ class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
       case MovementType.stockOut:
         return KeraColors.stockOutText;
       case MovementType.adjustment:
-        return const Color(0xFFD97706);
+        return KeraColors.brandOrange;
       case MovementType.returned:
       case MovementType.returnMovement:
-        return const Color(0xFF7C3AED);
+        return KeraColors.stockInText;
     }
   }
 }

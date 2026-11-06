@@ -65,8 +65,8 @@ class ErrorState extends StatelessWidget {
                   if (onRetry != null)
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AdminColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AdminColors.accent,
+                        foregroundColor: AdminColors.navyDark,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),

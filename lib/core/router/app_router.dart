@@ -384,36 +384,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'admin-backup',
             builder: (context, state) => const AdminBackupScreen(),
           ),
-          GoRoute(
-            path: '/admin/owners/add',
-            name: 'admin-owners-add',
-            builder: (context, state) => const AdminAddOwnerScreen(),
-          ),
-          GoRoute(
-            path: '/admin/reports',
-            name: 'admin-reports',
-            builder: (context, state) => const AdminReportsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/sync',
-            name: 'admin-sync-monitor',
-            builder: (context, state) => const AdminSyncMonitorScreen(),
-          ),
-          GoRoute(
-            path: '/admin/notifications',
-            name: 'admin-notifications',
-            builder: (context, state) => const AdminNotificationsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/plans',
-            name: 'admin-plans',
-            builder: (context, state) => const AdminPlansScreen(),
-          ),
-          GoRoute(
-            path: '/admin/backup',
-            name: 'admin-backup',
-            builder: (context, state) => const AdminBackupScreen(),
-          ),
         ],
       ),
     ],

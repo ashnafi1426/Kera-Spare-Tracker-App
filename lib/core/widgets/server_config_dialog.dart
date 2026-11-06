@@ -157,7 +157,7 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                             ? Icons.check_circle_rounded
                             : Icons.error_rounded,
                         size: 16,
-                        color: testSuccess == true ? Colors.green : Colors.red,
+                        color: testSuccess == true ? colorScheme.primary : const Color(0xFFB35F00),
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -165,7 +165,7 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                           statusMessage!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: testSuccess == true ? Colors.green : Colors.red,
+                            color: testSuccess == true ? colorScheme.primary : const Color(0xFFB35F00),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

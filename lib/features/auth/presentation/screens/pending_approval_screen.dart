@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
@@ -48,8 +48,9 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                   'መለያዎ እስካሁን አልተፈቀደም። እባክዎ ጥቂት ይጠብቁ።',
                   'Your account is still pending administrator approval. Please check again soon.',
                 ),
+                style: const TextStyle(color: KeraColors.navy900, fontWeight: FontWeight.w600),
               ),
-              backgroundColor: AdminColors.keraOrange,
+              backgroundColor: KeraColors.brandOrange,
             ),
           );
         }
@@ -62,8 +63,9 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 'መለያዎ በማጽደቅ ላይ ነው። እባክዎ ጥቂት ይጠብቁ።',
                 'Your account is still pending administrator review.',
               ),
+              style: const TextStyle(color: KeraColors.navy900, fontWeight: FontWeight.w600),
             ),
-            backgroundColor: AdminColors.keraOrange,
+            backgroundColor: KeraColors.brandOrange,
           ),
         );
       },
@@ -99,15 +101,15 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2D2305) : const Color(0xFFFFFBEB),
+                  color: isDark ? const Color(0xFF0F264A) : KeraColors.orange100,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AdminColors.keraOrange,
+                    color: KeraColors.brandOrange,
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AdminColors.keraOrange.withValues(alpha: 0.2),
+                      color: KeraColors.brandOrange.withValues(alpha: 0.2),
                       blurRadius: 18,
                       offset: const Offset(0, 6),
                     ),
@@ -116,7 +118,7 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 child: const Icon(
                   Icons.hourglass_top_rounded,
                   size: 48,
-                  color: AdminColors.keraOrange,
+                  color: KeraColors.brandOrange,
                 ),
               ),
               const SizedBox(height: 24),
@@ -172,12 +174,12 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                            color: isDark ? const Color(0xFF0F264A) : KeraColors.navy50,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
                             Icons.storefront_rounded,
-                            color: AdminColors.keraOrange,
+                            color: KeraColors.brandNavy,
                             size: 24,
                           ),
                         ),
@@ -227,7 +229,7 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF3B2404) : const Color(0xFFFEF3C7),
+                            color: isDark ? const Color(0xFF0F264A) : KeraColors.orange100,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
@@ -237,7 +239,7 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                                 width: 7,
                                 height: 7,
                                 decoration: const BoxDecoration(
-                                  color: AdminColors.keraOrange,
+                                  color: KeraColors.brandOrange,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -247,7 +249,7 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: AdminColors.keraOrange,
+                                  color: KeraColors.orange700,
                                 ),
                               ),
                             ],
@@ -272,17 +274,21 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
                           ),
                         )
-                      : const Icon(Icons.refresh_rounded, size: 20),
+                      : const Icon(Icons.refresh_rounded, size: 20, color: KeraColors.navy900),
                   label: Text(
                     context.tr('ሁኔታውን አረጋግጥ', 'Check Status'),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: KeraColors.navy900,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AdminColors.keraOrange,
-                    foregroundColor: Colors.white,
+                    backgroundColor: KeraColors.brandOrange,
+                    foregroundColor: KeraColors.navy900,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                 ),

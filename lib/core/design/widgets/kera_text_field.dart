@@ -165,15 +165,18 @@ class _KeraTextFieldState extends State<KeraTextField> {
             ),
             focusedBorder: const OutlineInputBorder(
               borderRadius: KeraRadii.borderInput,
-              borderSide: BorderSide(color: KeraColors.actionBlue, width: 2),
+              borderSide: BorderSide(color: KeraColors.navy800, width: 2),
             ),
             errorBorder: const OutlineInputBorder(
               borderRadius: KeraRadii.borderInput,
-              borderSide: BorderSide(color: KeraColors.error, width: 1.5),
+              borderSide: BorderSide(color: KeraColors.orange700, width: 1.5),
             ),
             focusedErrorBorder: const OutlineInputBorder(
               borderRadius: KeraRadii.borderInput,
-              borderSide: BorderSide(color: KeraColors.error, width: 2),
+              borderSide: BorderSide(color: KeraColors.orange700, width: 2),
+            ),
+            errorStyle: KeraTypography.bodySmall(color: KeraColors.orange700).copyWith(
+              fontWeight: FontWeight.w600,
             ),
             counterText: '',
           ),

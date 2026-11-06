@@ -101,28 +101,32 @@ class KeraButton extends StatelessWidget {
 
     switch (variant) {
       case KeraButtonVariant.primary:
-        bg = isEnabled ? KeraColors.actionBlue : KeraColors.outlineVariant;
-        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMuted;
+        bg = isEnabled ? KeraColors.orange500 : KeraColors.disabledColor;
+        fg = isEnabled ? KeraColors.navy900 : KeraColors.textMutedColor;
         break;
       case KeraButtonVariant.secondary:
-        bg = isEnabled ? KeraColors.primaryNavy : KeraColors.outlineVariant;
-        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMuted;
+        bg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
+        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMutedColor;
         break;
       case KeraButtonVariant.teal:
-        bg = isEnabled ? KeraColors.utilityTeal : KeraColors.outlineVariant;
-        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMuted;
+        bg = isEnabled ? KeraColors.orange500 : KeraColors.disabledColor;
+        fg = isEnabled ? KeraColors.navy900 : KeraColors.textMutedColor;
         break;
       case KeraButtonVariant.outlined:
         bg = Colors.transparent;
-        fg = isEnabled ? KeraColors.primaryNavy : KeraColors.textMuted;
+        fg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
         side = BorderSide(
-          color: isEnabled ? KeraColors.outlineBorder : KeraColors.outlineVariant,
+          color: isEnabled ? KeraColors.navy800 : KeraColors.border,
           width: 1.5,
         );
         break;
       case KeraButtonVariant.destructive:
-        bg = isEnabled ? KeraColors.error : KeraColors.outlineVariant;
-        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMuted;
+        bg = Colors.transparent;
+        fg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
+        side = BorderSide(
+          color: isEnabled ? KeraColors.navy800 : KeraColors.border,
+          width: 1.5,
+        );
         break;
     }
 
@@ -256,11 +260,14 @@ class _KeraDestructiveButton extends KeraButton {
     super.key,
     required super.label,
     required super.onPressed,
-    super.icon,
+    IconData? icon,
     super.isLoading,
     super.isFullWidth,
     super.height,
     super.padding,
-  }) : super(variant: KeraButtonVariant.destructive);
+  }) : super(
+          variant: KeraButtonVariant.destructive,
+          icon: icon ?? Icons.delete_outline_rounded,
+        );
 }
 

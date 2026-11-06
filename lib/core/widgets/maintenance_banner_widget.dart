@@ -50,7 +50,7 @@ class MaintenanceBannerWidget extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFFB45309), // Warm amber dark
+                color: Color(0xFFB35F00), // Brand orange-700 text on light
               ),
             ),
           ),

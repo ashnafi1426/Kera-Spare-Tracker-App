@@ -96,13 +96,13 @@ class KeraEmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: const BoxDecoration(
-                color: KeraColors.actionBlueTint,
+                color: KeraColors.navyTint,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: iconSize,
-                color: KeraColors.actionBlue,
+                color: KeraColors.brandNavy,
               ),
             ),
             const SizedBox(height: KeraSpacing.lg),

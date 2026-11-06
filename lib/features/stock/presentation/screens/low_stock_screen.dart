@@ -82,7 +82,7 @@ class _LowStockScreenState extends ConsumerState<LowStockScreen> {
                   width: 6,
                   height: 6,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF89F5E7),
+                    color: KeraColors.brandOrange,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -90,7 +90,7 @@ class _LowStockScreenState extends ConsumerState<LowStockScreen> {
                 Text(
                   'የተገናኘ',
                   style: KeraTypography.labelSmall(
-                    color: const Color(0xFF89F5E7),
+                    color: Colors.white,
                   ).copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -456,7 +456,7 @@ class _LowStockPartCard extends StatelessWidget {
                           Text(
                             location,
                             style: KeraTypography.bodySmall(
-                              color: const Color(0xFF92400E),
+                              color: KeraColors.orange700,
                             ),
                           ),
                       ],
@@ -494,10 +494,10 @@ class _LowStockPartCard extends StatelessWidget {
                 style: IconButton.styleFrom(
                   backgroundColor: isOutOfStock
                       ? KeraColors.stockOutBg
-                      : KeraColors.actionBlueTint,
+                      : KeraColors.stockInBg,
                   foregroundColor: isOutOfStock
                       ? KeraColors.stockOutText
-                      : KeraColors.actionBlue,
+                      : KeraColors.stockInText,
                   minimumSize: const Size(44, 44),
                 ),
                 icon: const Icon(Icons.add_shopping_cart_rounded, size: 20),

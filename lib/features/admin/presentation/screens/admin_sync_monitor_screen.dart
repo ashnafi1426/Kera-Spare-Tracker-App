@@ -111,13 +111,13 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
+                      color: AdminColors.successBg,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       'Healthy 98%',
                       style: TextStyle(
-                        color: Color(0xFF15803D),
+                        color: AdminColors.navy,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -161,7 +161,7 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
         _buildSyncTile(
           icon: Icons.refresh_rounded,
           badge: '92%',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           value: '118',
           label: 'Synced owners',
         ),
@@ -170,7 +170,7 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
         _buildSyncTile(
           icon: Icons.refresh_rounded,
           badge: 'uploading',
-          badgeColor: const Color(0xFFD97706),
+          badgeColor: AdminColors.warning,
           value: '7',
           label: 'Pending',
         ),
@@ -179,7 +179,7 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
         _buildSyncTile(
           icon: Icons.notifications_none_rounded,
           badge: 'review',
-          badgeColor: const Color(0xFFEF4444),
+          badgeColor: AdminColors.danger,
           value: '2',
           label: 'Conflicts',
         ),
@@ -188,7 +188,7 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
         _buildSyncTile(
           icon: Icons.notifications_none_rounded,
           badge: 'check',
-          badgeColor: const Color(0xFFEF4444),
+          badgeColor: AdminColors.danger,
           value: '1',
           label: 'Offline 7d+',
         ),
@@ -221,10 +221,10 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E6),
+                  color: AdminColors.warningBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 18, color: const Color(0xFFD97706)),
+                child: Icon(icon, size: 18, color: AdminColors.warning),
               ),
               Text(
                 badge,
@@ -316,13 +316,13 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3E6),
+                    color: AdminColors.warningBg,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Device', style: TextStyle(fontSize: 12, color: Color(0xFFD97706))),
+                      Text('Device', style: TextStyle(fontSize: 12, color: AdminColors.warning)),
                       SizedBox(height: 4),
                       Text('19', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF0C2340))),
                     ],
@@ -438,7 +438,7 @@ class _AdminSyncMonitorScreenState extends State<AdminSyncMonitorScreen> {
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isWarning ? AdminColors.keraOrange : const Color(0xFF10B981),
+            color: isWarning ? AdminColors.keraOrange : AdminColors.navy,
             shape: BoxShape.circle,
           ),
         ),

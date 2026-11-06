@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../data/local/database_provider.dart';
+import '../../../auth/data/repositories/api_auth_repository.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
 import '../../../sync/data/services/initial_sync_service.dart';
@@ -39,7 +41,9 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
 
   Future<void> _syncRemoteSales() async {
     final user = ref.read(authControllerProvider).value;
-    if (user == null) return;
+    if (user == null || user.ownerId.isEmpty) return;
+    final authRepo = ref.read(authRepositoryProvider);
+    if (authRepo is! ApiAuthRepository) return;
     try {
       final repo = ref.read(apiAuthRepositoryProvider);
       final db = ref.read(appDatabaseProvider);
@@ -92,8 +96,8 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
       backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'sales_history_fab',
-        backgroundColor: const Color(0xFFF58220),
-        foregroundColor: Colors.white,
+        backgroundColor: KeraColors.brandOrange,
+        foregroundColor: KeraColors.navy900,
         elevation: 3,
         icon: const Icon(Icons.add_rounded, size: 22),
         label: Text(
@@ -366,7 +370,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                               context.tr('የተጣራ ትርፍ', 'Net Profit'),
                               style: TextStyle(
                                 fontSize: 13,
-                                color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -376,7 +380,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                               ),
                             ),
                           ],
@@ -597,7 +601,7 @@ class _SalesListTabState extends ConsumerState<SalesListTab> {
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
-                                            color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                            color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
                                           ),
                                         ),
                                       ],

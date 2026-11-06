@@ -30,8 +30,9 @@ class EmptyState extends StatelessWidget {
     if (actionWidget == null && onAction != null && actionLabel != null) {
       actionWidget = ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AdminColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: AdminColors.accent,
+          foregroundColor: AdminColors.navyDark,
+          textStyle: const TextStyle(fontWeight: FontWeight.bold),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),
           ),

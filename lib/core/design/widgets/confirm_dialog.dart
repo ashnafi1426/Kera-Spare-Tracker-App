@@ -84,7 +84,8 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
-    final confirmColor = widget.isDestructive ? AdminColors.danger : AdminColors.primary;
+    const confirmBg = AdminColors.accent;
+    const confirmFg = AdminColors.navyDark;
 
     return AlertDialog(
       backgroundColor: AdminColors.surfaceOf(isDark),
@@ -148,8 +149,8 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: confirmColor,
-            foregroundColor: Colors.white,
+            backgroundColor: confirmBg,
+            foregroundColor: confirmFg,
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AdminSpacing.radiusButton),
@@ -180,7 +181,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
               ? const SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: confirmFg),
                 )
               : Text(
                   widget.confirmLabel ?? l10n.confirm,

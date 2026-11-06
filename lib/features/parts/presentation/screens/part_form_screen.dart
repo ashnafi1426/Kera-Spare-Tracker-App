@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
@@ -697,10 +698,10 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                        color: isDark ? const Color(0xFF102138) : KeraColors.navy100,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                          color: isDark ? const Color(0xFF1E385C) : KeraColors.border,
                         ),
                       ),
                       child: Row(
@@ -708,7 +709,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                           Icon(
                             Icons.info_outline_rounded,
                             size: 18,
-                            color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E40AF),
+                            color: isDark ? Colors.white : KeraColors.navy800,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -718,9 +719,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                 'All fields are optional — you can save with partial information.',
                               ),
                               style: TextStyle(
-                                color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E3A8A),
+                                color: isDark ? Colors.white : KeraColors.navy800,
                                 fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -964,13 +965,13 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: profit >= 0
-                            ? (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5))
-                            : (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2)),
+                            ? (isDark ? const Color(0xFF102138) : KeraColors.navy100)
+                            : KeraColors.orange100,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: profit >= 0
-                              ? (isDark ? const Color(0xFF065F46) : const Color(0xFFA7F3D0))
-                              : (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA)),
+                              ? (isDark ? const Color(0xFF1E385C) : KeraColors.border)
+                              : KeraColors.orange500,
                         ),
                       ),
                       child: Row(
@@ -981,8 +982,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                               Icon(
                                 profit >= 0 ? Icons.trending_up_rounded : Icons.trending_down_rounded,
                                 color: profit >= 0
-                                    ? (isDark ? const Color(0xFF34D399) : const Color(0xFF059669))
-                                    : (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626)),
+                                    ? (isDark ? Colors.white : KeraColors.navy800)
+                                    : KeraColors.orange700,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -990,8 +991,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                 context.tr('ትርፍ በአንድ ፍሬ (Profit)', 'Profit per unit'),
                                 style: TextStyle(
                                   color: profit >= 0
-                                      ? (isDark ? const Color(0xFF6EE7B7) : const Color(0xFF065F46))
-                                      : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B)),
+                                      ? (isDark ? Colors.white : KeraColors.navy800)
+                                      : KeraColors.orange700,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1004,8 +1005,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                 : '${profit.toStringAsFixed(0)} ETB',
                             style: TextStyle(
                               color: profit >= 0
-                                  ? (isDark ? const Color(0xFF34D399) : const Color(0xFF047857))
-                                  : (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626)),
+                                  ? (isDark ? Colors.white : KeraColors.navy800)
+                                  : KeraColors.orange700,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1078,13 +1079,13 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _savePart,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF58220),
-                foregroundColor: Colors.white,
+                backgroundColor: KeraColors.brandOrange,
+                foregroundColor: KeraColors.navy900,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               child: _isLoading
-                  ? const KeraLoadingIndicator.small(color: Colors.white)
+                  ? const KeraLoadingIndicator.small(color: KeraColors.navy900)
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1092,7 +1093,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                         const SizedBox(width: 8),
                         Text(
                           context.tr('አስቀምጥ', 'Save Part'),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: KeraColors.navy900,
+                          ),
                         ),
                       ],
                     ),

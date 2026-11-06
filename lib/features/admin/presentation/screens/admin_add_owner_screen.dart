@@ -46,7 +46,7 @@ class _AdminAddOwnerScreenState extends ConsumerState<AdminAddOwnerScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${_businessNameController.text} added successfully!'),
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: AdminColors.navy,
         ),
       );
 

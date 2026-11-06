@@ -6827,10 +6827,9 @@ class $SyncQueueTable extends SyncQueue
   late final GeneratedColumn<String> operationId = GeneratedColumn<String>(
     'operation_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
     clientDefault: () => const Uuid().v4(),
   );
   static const VerificationMeta _ownerIdMeta = const VerificationMeta(
@@ -7262,7 +7261,7 @@ class $SyncQueueTable extends SyncQueue
       operationId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}operation_id'],
-      )!,
+      ),
       ownerId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}owner_id'],
@@ -7359,7 +7358,7 @@ class $SyncQueueTable extends SyncQueue
 
 class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   final int id;
-  final String operationId;
+  final String? operationId;
   final String? ownerId;
   final String? entityType;
   final String tableTarget;
@@ -7382,7 +7381,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   final DateTime createdAt;
   const SyncQueueItem({
     required this.id,
-    required this.operationId,
+    this.operationId,
     this.ownerId,
     this.entityType,
     required this.tableTarget,
@@ -7408,7 +7407,9 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['operation_id'] = Variable<String>(operationId);
+    if (!nullToAbsent || operationId != null) {
+      map['operation_id'] = Variable<String>(operationId);
+    }
     if (!nullToAbsent || ownerId != null) {
       map['owner_id'] = Variable<String>(ownerId);
     }
@@ -7463,7 +7464,9 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   SyncQueueCompanion toCompanion(bool nullToAbsent) {
     return SyncQueueCompanion(
       id: Value(id),
-      operationId: Value(operationId),
+      operationId: operationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(operationId),
       ownerId: ownerId == null && nullToAbsent
           ? const Value.absent()
           : Value(ownerId),
@@ -7518,7 +7521,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncQueueItem(
       id: serializer.fromJson<int>(json['id']),
-      operationId: serializer.fromJson<String>(json['operationId']),
+      operationId: serializer.fromJson<String?>(json['operationId']),
       ownerId: serializer.fromJson<String?>(json['ownerId']),
       entityType: serializer.fromJson<String?>(json['entityType']),
       tableTarget: serializer.fromJson<String>(json['tableTarget']),
@@ -7548,7 +7551,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'operationId': serializer.toJson<String>(operationId),
+      'operationId': serializer.toJson<String?>(operationId),
       'ownerId': serializer.toJson<String?>(ownerId),
       'entityType': serializer.toJson<String?>(entityType),
       'tableTarget': serializer.toJson<String>(tableTarget),
@@ -7576,7 +7579,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
 
   SyncQueueItem copyWith({
     int? id,
-    String? operationId,
+    Value<String?> operationId = const Value.absent(),
     Value<String?> ownerId = const Value.absent(),
     Value<String?> entityType = const Value.absent(),
     String? tableTarget,
@@ -7599,7 +7602,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
     DateTime? createdAt,
   }) => SyncQueueItem(
     id: id ?? this.id,
-    operationId: operationId ?? this.operationId,
+    operationId: operationId.present ? operationId.value : this.operationId,
     ownerId: ownerId.present ? ownerId.value : this.ownerId,
     entityType: entityType.present ? entityType.value : this.entityType,
     tableTarget: tableTarget ?? this.tableTarget,
@@ -7756,7 +7759,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
 
 class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
   final Value<int> id;
-  final Value<String> operationId;
+  final Value<String?> operationId;
   final Value<String?> ownerId;
   final Value<String?> entityType;
   final Value<String> tableTarget;
@@ -7880,7 +7883,7 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
 
   SyncQueueCompanion copyWith({
     Value<int>? id,
-    Value<String>? operationId,
+    Value<String?>? operationId,
     Value<String?>? ownerId,
     Value<String?>? entityType,
     Value<String>? tableTarget,
@@ -12193,7 +12196,7 @@ typedef $$SaleItemsTableProcessedTableManager =
     >;
 typedef $$SyncQueueTableCreateCompanionBuilder = SyncQueueCompanion Function({
   Value<int> id,
-  Value<String> operationId,
+  Value<String?> operationId,
   Value<String?> ownerId,
   Value<String?> entityType,
   required String tableTarget,
@@ -12217,7 +12220,7 @@ typedef $$SyncQueueTableCreateCompanionBuilder = SyncQueueCompanion Function({
 });
 typedef $$SyncQueueTableUpdateCompanionBuilder = SyncQueueCompanion Function({
   Value<int> id,
-  Value<String> operationId,
+  Value<String?> operationId,
   Value<String?> ownerId,
   Value<String?> entityType,
   Value<String> tableTarget,
@@ -12609,7 +12612,7 @@ class $$SyncQueueTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> operationId = const Value.absent(),
+                Value<String?> operationId = const Value.absent(),
                 Value<String?> ownerId = const Value.absent(),
                 Value<String?> entityType = const Value.absent(),
                 Value<String> tableTarget = const Value.absent(),
@@ -12657,7 +12660,7 @@ class $$SyncQueueTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> operationId = const Value.absent(),
+                Value<String?> operationId = const Value.absent(),
                 Value<String?> ownerId = const Value.absent(),
                 Value<String?> entityType = const Value.absent(),
                 required String tableTarget,

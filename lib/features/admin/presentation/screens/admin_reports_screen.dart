@@ -59,7 +59,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.error_outline_rounded, color: Colors.red, size: 40),
+                        const Icon(Icons.error_outline_rounded, color: AdminColors.danger, size: 40),
                         const SizedBox(height: 12),
                         Text(
                           context.tr('ሪፖርቶችን መጫን አልተቻለም', 'Failed to load reports: $err'),
@@ -70,7 +70,8 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                         ElevatedButton(
                           onPressed: () => ref.invalidate(adminReportsProvider(_periodKey)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AdminColors.headerNavy,
+                            backgroundColor: AdminColors.accent,
+                            foregroundColor: AdminColors.navyDark,
                           ),
                           child: Text(context.tr('እንደገና ሞክር', 'Retry')),
                         ),
@@ -220,7 +221,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
         _buildReportTile(
           icon: Icons.bar_chart_rounded,
           badge: 'ETB · $periodName',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.navy,
           value: CurrencyFormatter.formatCompact(summary.totalRevenue),
           label: context.tr('ጠቅላላ ገቢ', 'Total Revenue'),
         ),
@@ -229,7 +230,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
         _buildReportTile(
           icon: Icons.insert_chart_outlined_rounded,
           badge: 'ETB · $periodName',
-          badgeColor: const Color(0xFF10B981),
+          badgeColor: AdminColors.accent,
           value: CurrencyFormatter.formatCompact(summary.totalProfit),
           label: context.tr('የተጣራ ትርፍ', 'Est. Profit'),
         ),
@@ -280,10 +281,10 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E6),
+                  color: AdminColors.warningBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 18, color: const Color(0xFFD97706)),
+                child: Icon(icon, size: 18, color: AdminColors.warning),
               ),
               Flexible(
                 child: Text(

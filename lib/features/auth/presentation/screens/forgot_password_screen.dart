@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
@@ -168,14 +169,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          color: isDark ? const Color(0xFF0F264A) : KeraColors.orange100,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AdminColors.keraOrange.withValues(alpha: 0.5)),
+                          border: Border.all(color: KeraColors.brandOrange.withValues(alpha: 0.5)),
                         ),
                         child: const Icon(
                           Icons.lock_reset_rounded,
                           size: 38,
-                          color: AdminColors.keraOrange,
+                          color: KeraColors.brandOrange,
                         ),
                       ),
                     ),
@@ -311,7 +312,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                         context.tr('ኮድ ላክ', 'Send OTP'),
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: AdminColors.keraOrange,
+                                          color: KeraColors.orange700,
                                         ),
                                       ),
                                     )
@@ -334,8 +335,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _handleSendOtp,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AdminColors.keraOrange,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: KeraColors.brandOrange,
+                                  foregroundColor: KeraColors.navy900,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                 ),
                                 child: _isLoading
@@ -344,12 +345,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                         height: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
                                         ),
                                       )
                                     : Text(
                                         context.tr('የማረጋገጫ ኮድ ላክ', 'Send Verification Code'),
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: KeraColors.navy900,
+                                        ),
                                       ),
                               ),
                             ),
@@ -439,8 +444,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                     decoration: BoxDecoration(
                                       color: strength >= 1
                                           ? (strength == 1
-                                              ? const Color(0xFFEF4444)
-                                              : (strength == 2 ? AdminColors.keraOrange : const Color(0xFF10B981)))
+                                              ? KeraColors.orange700
+                                              : (strength == 2 ? KeraColors.brandOrange : KeraColors.brandNavy))
                                           : context.borderColor,
                                       borderRadius: BorderRadius.circular(2),
                                     ),
@@ -452,7 +457,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                     height: 4,
                                     decoration: BoxDecoration(
                                       color: strength >= 2
-                                          ? (strength == 2 ? AdminColors.keraOrange : const Color(0xFF10B981))
+                                          ? (strength == 2 ? KeraColors.brandOrange : KeraColors.brandNavy)
                                           : context.borderColor,
                                       borderRadius: BorderRadius.circular(2),
                                     ),
@@ -463,7 +468,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                   child: Container(
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: strength >= 3 ? const Color(0xFF10B981) : context.borderColor,
+                                      color: strength >= 3 ? KeraColors.brandNavy : context.borderColor,
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                   ),
@@ -511,8 +516,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _handleResetPassword,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AdminColors.keraOrange,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: KeraColors.brandOrange,
+                                  foregroundColor: KeraColors.navy900,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                 ),
                                 child: _isLoading
@@ -521,12 +526,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                         height: 22,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2.2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
                                         ),
                                       )
                                     : Text(
                                         context.tr('የይለፍ ቃል ቀይር', 'Reset Password'),
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: KeraColors.navy900,
+                                        ),
                                       ),
                               ),
                             ),

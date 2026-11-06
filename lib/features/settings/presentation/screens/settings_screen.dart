@@ -801,7 +801,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (AppConstants.enableDemoGenerator)
                 ExpansionTile(
                   tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-                  leading: Icon(Icons.speed_rounded, color: context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
+                  leading: Icon(Icons.speed_rounded, color: context.isDark ? KeraColors.brandOrange : KeraColors.primaryNavy),
                   title: Text(
                     context.tr('የሙከራ ዕቃዎች ማመንጫ', 'Generate Sample Parts'),
                     style: KeraTypography.titleSmall(color: context.textPrimaryColor),
@@ -1091,7 +1091,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               child: Icon(
                 icon,
-                color: iconColor ?? (context.isDark ? KeraColors.tealAccent : KeraColors.primaryNavy),
+                color: iconColor ?? (context.isDark ? KeraColors.brandOrange : KeraColors.primaryNavy),
                 size: 20,
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../design/tokens/kera_colors.dart';
+import '../design/tokens/kera_theme_colors.dart';
 
 /// Convenient BuildContext extensions for localization and theme access.
 extension LocalizationX on BuildContext {
@@ -25,6 +26,11 @@ extension LocalizationX on BuildContext {
 
   /// Returns true if dark mode is active.
   bool get isDark => theme.brightness == Brightness.dark;
+
+  /// Strict 2-color brand theme tokens (Navy, Orange, Neutrals).
+  KeraThemeColors get keraTheme =>
+      theme.extension<KeraThemeColors>() ??
+      (isDark ? KeraThemeColors.dark : KeraThemeColors.light);
 
   /// Surface color for cards and elevated panels.
   Color get surfaceColor => isDark ? KeraColors.darkCard : KeraColors.surfacePure;

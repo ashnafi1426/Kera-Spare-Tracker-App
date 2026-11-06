@@ -77,11 +77,11 @@ class _KeraLoadingIndicatorState extends State<KeraLoadingIndicator>
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDark;
-    final primary = widget.color ?? widget.primaryColor ?? const Color(0xFFF58220); // Kera Orange
+    final primary = widget.color ?? widget.primaryColor ?? const Color(0xFFF7941D); // Brand Orange
     final secondary = widget.color != null
         ? widget.color!.withValues(alpha: 0.5)
         : widget.secondaryColor ??
-            (isDark ? const Color(0xFF38BDF8) : const Color(0xFF0C2340));
+            (isDark ? const Color(0xFFE6ECF7) : const Color(0xFF0B2A5B));
 
     final spinner = AnimatedBuilder(
       animation: _controller,

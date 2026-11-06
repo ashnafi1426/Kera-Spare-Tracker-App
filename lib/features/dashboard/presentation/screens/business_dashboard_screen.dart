@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/admin_colors.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/widgets/dashboard_header_bar.dart';
 import '../../../../core/design/widgets/kera_app_footer.dart';
 import '../../../../core/utils/context_extensions.dart';
@@ -168,37 +169,36 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: pendingSync == 0
-                            ? const Color(0xFF10B981).withValues(alpha: 0.2)
-                            : AdminColors.keraOrange.withValues(alpha: 0.2),
+                            ? (isDark ? const Color(0xFF102138) : KeraColors.navy100)
+                            : KeraColors.orange100,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: pendingSync == 0
-                              ? const Color(0xFF10B981)
-                              : AdminColors.keraOrange,
+                              ? (isDark ? const Color(0xFF1E385C) : KeraColors.border)
+                              : KeraColors.orange500,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: pendingSync == 0
-                                  ? const Color(0xFF10B981)
-                                  : AdminColors.keraOrange,
-                              shape: BoxShape.circle,
-                            ),
+                          Icon(
+                            pendingSync == 0
+                                ? Icons.check_circle_rounded
+                                : Icons.access_time_rounded,
+                            size: 13,
+                            color: pendingSync == 0
+                                ? (isDark ? Colors.white : KeraColors.navy800)
+                                : KeraColors.orange700,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 5),
                           Text(
                             pendingSync == 0
                                 ? context.tr('ተመሳስሏል', 'Synced')
                                 : '$pendingSync ${context.tr("በመጠባበቅ", "Pending")}',
                             style: TextStyle(
                               color: pendingSync == 0
-                                  ? const Color(0xFF10B981)
-                                  : AdminColors.keraOrange,
+                                  ? (isDark ? Colors.white : KeraColors.navy800)
+                                  : KeraColors.orange700,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -305,7 +305,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                                 style: const TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF10B981),
+                                  color: KeraColors.brandOrange,
                                   letterSpacing: -0.5,
                                 ),
                               ),
@@ -314,7 +314,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF10B981),
+                                  color: KeraColors.brandOrange,
                                 ),
                               ),
                             ],
@@ -419,10 +419,10 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3B1D04) : const Color(0xFFFFF7ED),
+                      color: isDark ? const Color(0xFF102138) : KeraColors.orange100,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF9A3412) : const Color(0xFFFED7AA),
+                        color: isDark ? KeraColors.orange700 : KeraColors.brandOrange,
                       ),
                     ),
                     child: Row(
@@ -439,7 +439,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : const Color(0xFF0C2340),
+                                color: isDark ? Colors.white : KeraColors.navy900,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -450,7 +450,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                               ),
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Color(0xFFEA580C),
+                                color: KeraColors.orange700,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -458,7 +458,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
                         ),
                         const Icon(
                           Icons.chevron_right_rounded,
-                          color: Color(0xFFEA580C),
+                          color: KeraColors.orange700,
                           size: 24,
                         ),
                       ],
@@ -653,7 +653,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
             Icon(
               icon,
               size: 24,
-              color: isPrimary ? Colors.white : nonPrimaryText,
+              color: isPrimary ? KeraColors.navy900 : nonPrimaryText,
             ),
             const SizedBox(height: 8),
             Text(
@@ -661,7 +661,7 @@ class _BusinessDashboardScreenState extends ConsumerState<BusinessDashboardScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isPrimary ? Colors.white : nonPrimaryText,
+                color: isPrimary ? KeraColors.navy900 : nonPrimaryText,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,

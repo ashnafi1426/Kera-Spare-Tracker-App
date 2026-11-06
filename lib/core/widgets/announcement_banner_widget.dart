@@ -68,7 +68,7 @@ class AnnouncementBannerWidget extends ConsumerWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: AppTheme.secondaryColor,
+                      color: Color(0xFFB35F00), // Orange-700 for WCAG AA text
                     ),
                   ),
                 if (title.isNotEmpty && body.isNotEmpty)

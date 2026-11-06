@@ -556,7 +556,7 @@ class _LanguageSelectionScreenState
                     decoration: BoxDecoration(
                       color: KeraColors.stockInBg,
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: const Color(0xFFA7F3D0)),
+                      border: Border.all(color: KeraColors.stockInBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

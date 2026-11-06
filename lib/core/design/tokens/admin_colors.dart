@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'kera_colors.dart';
 
-/// Admin portal color tokens tailored for Kera Spare Tracker Admin Console.
+/// Admin portal color tokens strictly aligned with the Kera 2-color brand system.
 /// Adheres strictly to WCAG 4.5:1 contrast standards.
 ///
 /// Brand specifications:
@@ -9,29 +10,34 @@ import 'package:flutter/material.dart';
 class AdminColors {
   AdminColors._();
 
-  // Kera Brand Orange Accent (Primary actions, CTA buttons, sparklines)
-  static const Color primary = Color(0xFFF7941D);
-  static const Color primaryTint = Color(0x26F7941D); // ~15% alpha
-  static const Color primaryDark = Color(0xFFD67B0E);
-  static const Color keraOrange = Color(0xFFF7941D);
+  // Kera Brand Orange Accent (Primary actions, CTA buttons, chart line 2)
+  static const Color primary = KeraColors.orange500;
+  static const Color accent = KeraColors.orange500;
+  static const Color primaryTint = KeraColors.orange100;
+  static const Color primaryDark = KeraColors.orange600;
+  static const Color keraOrange = KeraColors.orange500;
+  static const Color orangeTint = KeraColors.orange100;
 
-  // Deep Navy Structural Palette (Master Header, Status, Active Anchors)
-  static const Color headerNavy = Color(0xFF0B2A5B);
-  static const Color headerNavyDark = Color(0xFF071B3B);
-  static const Color headerButtonBg = Color(0xFF163E7D);
+  // Deep Navy Structural Palette (Master Header, Status, Active Anchors, chart line 1)
+  static const Color navy = KeraColors.navy800;
+  static const Color navyDark = KeraColors.navy900;
+  static const Color navyTint = KeraColors.navy100;
+  static const Color headerNavy = KeraColors.navy800;
+  static const Color headerNavyDark = KeraColors.navy900;
+  static const Color headerButtonBg = KeraColors.navy600;
   static const Color headerTextSecondary = Color(0xFFA5B4CB);
 
-  // Light Theme Canvas Palette (Default for Admin Dashboard & Screens)
-  static const Color lightBackground = Color(0xFFF8FAFC);
-  static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSurfaceRaised = Color(0xFFFFFFFF);
-  static const Color lightBorder = Color(0xFFE2E8F0);
-  static const Color lightTextPrimary = Color(0xFF0B2A5B);
-  static const Color lightTextSecondary = Color(0xFF5E6D82);
-  static const Color lightMuted = Color(0xFF94A3B8);
+  // Light Theme Canvas Palette
+  static const Color lightBackground = KeraColors.navy50;
+  static const Color lightSurface = KeraColors.white;
+  static const Color lightSurfaceRaised = KeraColors.white;
+  static const Color lightBorder = KeraColors.border;
+  static const Color lightTextPrimary = KeraColors.navy800;
+  static const Color lightTextSecondary = KeraColors.textMutedColor;
+  static const Color lightMuted = KeraColors.textMutedColor;
 
   // Dark Theme Palette
-  static const Color darkBackground = Color(0xFF071322);
+  static const Color darkBackground = KeraColors.navy900;
   static const Color darkSurface = Color(0xFF102138);
   static const Color darkSurfaceRaised = Color(0xFF182D4A);
   static const Color darkBorder = Color(0xFF1E385C);
@@ -39,7 +45,7 @@ class AdminColors {
   static const Color darkTextSecondary = Color(0xFF94A3B8);
   static const Color darkMuted = Color(0xFF64748B);
 
-  // Default Palette (Active UI matches modern crisp console in mockups)
+  // Default Palette (Active UI matches modern crisp console)
   static const Color background = lightBackground;
   static const Color surface = lightSurface;
   static const Color raised = lightSurfaceRaised;
@@ -48,17 +54,22 @@ class AdminColors {
   static const Color textSecondary = lightTextSecondary;
   static const Color muted = lightMuted;
 
-  // Semantic Status Colors (>= 4.5:1 contrast)
-  static const Color success = Color(0xFF10B981);
-  static const Color successTint = Color(0x2210B981); // 13% alpha
-  static const Color warning = Color(0xFFF7941D);
-  static const Color warningTint = Color(0x22F7941D);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color dangerTint = Color(0x22EF4444);
-  static const Color error = Color(0xFFDC2626);
-  static const Color errorTint = Color(0x22DC2626);
-  static const Color info = Color(0xFF2563EB);
-  static const Color infoTint = Color(0x222563EB);
+  // Semantic Status Colors strictly mapped to Navy/Orange (>= 4.5:1 contrast)
+  static const Color success = KeraColors.navy800;
+  static const Color successTint = KeraColors.navy100;
+  static const Color successBg = KeraColors.navy100;
+  static const Color warning = KeraColors.orange700;
+  static const Color warningTint = KeraColors.orange100;
+  static const Color warningBg = KeraColors.orange100;
+  static const Color danger = KeraColors.orange700;
+  static const Color dangerTint = KeraColors.orange100;
+  static const Color dangerBg = KeraColors.orange100;
+  static const Color error = KeraColors.orange700;
+  static const Color errorTint = KeraColors.orange100;
+  static const Color errorBg = KeraColors.orange100;
+  static const Color info = KeraColors.navy800;
+  static const Color infoTint = KeraColors.navy100;
+  static const Color infoBg = KeraColors.navy100;
 
   // Dynamic theme helpers
   static Color backgroundOf(bool isDark) => isDark ? darkBackground : lightBackground;

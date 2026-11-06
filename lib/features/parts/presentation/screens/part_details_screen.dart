@@ -47,8 +47,9 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: KeraColors.error,
-              foregroundColor: Colors.white,
+              backgroundColor: KeraColors.brandOrange,
+              foregroundColor: KeraColors.navy900,
+              textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.delete),
@@ -283,7 +284,7 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
                           title: l10n.sellingPrice,
                           amount: part.sellingPrice,
                           isHighlighted: true,
-                          color: KeraColors.actionBlue,
+                          color: KeraColors.textMutedColor,
                         ),
                         _PriceColumn(
                           title: l10n.estimatedProfit,
@@ -363,8 +364,9 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: KeraColors.actionBlue,
-                              foregroundColor: Colors.white,
+                              backgroundColor: KeraColors.brandOrange,
+                              foregroundColor: KeraColors.navy900,
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: const RoundedRectangleBorder(
                                 borderRadius: KeraRadii.borderButton,
@@ -465,9 +467,9 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
                   )
                 : const Center(
                     child: Icon(
-                      Icons.build_circle_outlined,
+                      Icons.settings_suggest_rounded,
                       size: 64,
-                      color: KeraColors.actionBlue,
+                      color: KeraColors.textMutedColor,
                     ),
                   ),
           ),

@@ -6,19 +6,19 @@ import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 void main() {
   group('Kera Design Tokens Test', () {
     test('KeraColors adheres to Google Stitch specifications', () {
-      expect(KeraColors.primaryNavy, const Color(0xFF172B4D));
-      expect(KeraColors.actionBlue, const Color(0xFF2563EB));
-      expect(KeraColors.utilityTeal, const Color(0xFF0D9488));
-      expect(KeraColors.surfaceCanvas, const Color(0xFFF8FAFC));
+      expect(KeraColors.primaryNavy, const Color(0xFF0B2A5B));
+      expect(KeraColors.keraOrange, const Color(0xFFF7941D));
+      expect(KeraColors.actionBlue, const Color(0xFF0B2A5B));
+      expect(KeraColors.utilityTeal, const Color(0xFF0B2A5B));
+      expect(KeraColors.surfaceCanvas, const Color(0xFFF3F5FA));
       expect(KeraColors.surfacePure, const Color(0xFFFFFFFF));
-      expect(KeraColors.outlineBorder, const Color(0xFFE2E8F0));
-      expect(KeraColors.textPrimary, const Color(0xFF191C1E));
-      expect(KeraColors.stockInBg, const Color(0xFFDCFCE7));
-      expect(KeraColors.stockInText, const Color(0xFF16A34A));
-      expect(KeraColors.stockLowBg, const Color(0xFFFEF3C7));
-      expect(KeraColors.stockLowText, const Color(0xFFD97706));
-      expect(KeraColors.stockOutBg, const Color(0xFFFEE2E2));
-      expect(KeraColors.stockOutText, const Color(0xFFDC2626));
+      expect(KeraColors.outlineBorder, const Color(0xFFD3DAE8));
+      expect(KeraColors.stockInBg, const Color(0xFFE6ECF7));
+      expect(KeraColors.stockInText, const Color(0xFF0B2A5B));
+      expect(KeraColors.stockLowBg, const Color(0xFFFFF1DC));
+      expect(KeraColors.stockLowText, const Color(0xFFB35F00));
+      expect(KeraColors.stockOutBg, const Color(0xFFF7941D));
+      expect(KeraColors.stockOutText, const Color(0xFF061B3F));
     });
 
     test('KeraTypography uses NotoSansEthiopic and proper scale', () {
@@ -54,8 +54,8 @@ void main() {
       final theme = AppTheme.lightTheme;
       expect(theme.scaffoldBackgroundColor, KeraColors.surfaceCanvas);
       expect(theme.colorScheme.primary, KeraColors.primaryNavy);
-      expect(theme.colorScheme.secondary, KeraColors.actionBlue);
-      expect(theme.colorScheme.tertiary, KeraColors.utilityTeal);
+      expect(theme.colorScheme.secondary, KeraColors.keraOrange);
+      expect(theme.colorScheme.tertiary, KeraColors.navy600);
       expect(theme.appBarTheme.backgroundColor, KeraColors.primaryNavy);
       expect(theme.cardTheme.color, KeraColors.surfacePure);
     });

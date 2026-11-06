@@ -449,8 +449,8 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                                 '${l10n.lineProfit}: ${CurrencyFormatter.formatEtb(item.lineProfit)}',
                                 style: KeraTypography.bodySmall().copyWith(
                                   color: item.lineProfit >= 0
-                                      ? Colors.green.shade700
-                                      : KeraColors.errorRed,
+                                      ? KeraColors.brandNavy
+                                      : KeraColors.orange700,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -516,7 +516,7 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                           Row(
                             children: [
                               const Icon(Icons.payments_rounded,
-                                  size: 20, color: KeraColors.tealAccent),
+                                  size: 20, color: KeraColors.brandOrange),
                               const SizedBox(width: 8),
                               Text(
                                 'የክፍያና የትርፍ ማጠቃለያ',
@@ -614,13 +614,13 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                               Text(
                                 CurrencyFormatter.formatEtb(sale.totalProfit),
                                 style: KeraTypography.headlineSmall(
-                                  color: KeraColors.tealAccent,
+                                  color: KeraColors.brandOrange,
                                 ).copyWith(fontWeight: FontWeight.bold),
                               ),
                               Text(
                                 '${margin.toStringAsFixed(1)}% Margin',
                                 style: KeraTypography.labelSmall(
-                                  color: KeraColors.tealAccent,
+                                  color: KeraColors.brandOrange,
                                 ).copyWith(fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -682,8 +682,9 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                   icon: const Icon(Icons.receipt_long_rounded),
                   label: const Text('ደረሰኝ እንደገና አትም (Re-print Thermal Slip)'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: KeraColors.actionBlue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: KeraColors.brandOrange,
+                    foregroundColor: KeraColors.navy900,
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -718,18 +719,18 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.keyboard_return_rounded,
-                            size: 18, color: KeraColors.errorRed),
+                            size: 18, color: KeraColors.brandNavy),
                         label: Text(
                           'ሽያጭ ሰርዝ',
                           style: KeraTypography.labelMedium(
-                              color: KeraColors.errorRed),
+                              color: KeraColors.brandNavy),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          side: const BorderSide(color: KeraColors.errorRed),
+                          side: const BorderSide(color: KeraColors.brandNavy, width: 1.5),
                         ),
                         onPressed: _isDeleting ? null : _confirmAndDelete,
                       ),

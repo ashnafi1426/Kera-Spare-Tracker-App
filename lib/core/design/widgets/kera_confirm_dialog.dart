@@ -177,17 +177,11 @@ class _KeraConfirmDialogState extends State<KeraConfirmDialog> {
                   ),
                   const SizedBox(width: KeraSpacing.md),
                   Expanded(
-                    child: widget.isDestructive
-                        ? KeraButton.destructive(
-                            label: widget.confirmLabel,
-                            isLoading: _isSubmitting,
-                            onPressed: _handleConfirm,
-                          )
-                        : KeraButton.primary(
-                            label: widget.confirmLabel,
-                            isLoading: _isSubmitting,
-                            onPressed: _handleConfirm,
-                          ),
+                    child: KeraButton.primary(
+                      label: widget.confirmLabel,
+                      isLoading: _isSubmitting,
+                      onPressed: _handleConfirm,
+                    ),
                   ),
                 ],
               ),

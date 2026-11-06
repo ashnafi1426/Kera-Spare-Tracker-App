@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/constants.dart';
@@ -95,52 +96,71 @@ class AppDatabase extends _$AppDatabase {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
-          // 1. Create SyncState table
-          await m.createTable(syncState);
+          Future<void> safeAddColumn(TableInfo table, GeneratedColumn column) async {
+            try {
+              final pragma = await customSelect('PRAGMA table_info("${table.actualTableName}")').get();
+              final exists = pragma.any((row) => row.read<String>('name') == column.$name);
+              if (!exists) {
+                await m.addColumn(table, column);
+              }
+            } catch (e) {
+              debugPrint('[Migration] Column ${column.$name} check/add failed: $e');
+            }
+          }
+
+          // 1. Create SyncState table if not exists
+          try {
+            await m.createTable(syncState);
+          } catch (_) {}
 
           // 2. Add columns to spare_parts
-          await m.addColumn(spareParts, spareParts.serverId);
-          await m.addColumn(spareParts, spareParts.brand);
-          await m.addColumn(spareParts, spareParts.category);
-          await m.addColumn(spareParts, spareParts.storageLocation);
-          await m.addColumn(spareParts, spareParts.specifications);
-          await m.addColumn(spareParts, spareParts.minimumStock);
-          await m.addColumn(spareParts, spareParts.quantity);
-          await m.addColumn(spareParts, spareParts.serverVersion);
+          await safeAddColumn(spareParts, spareParts.serverId);
+          await safeAddColumn(spareParts, spareParts.brand);
+          await safeAddColumn(spareParts, spareParts.category);
+          await safeAddColumn(spareParts, spareParts.storageLocation);
+          await safeAddColumn(spareParts, spareParts.specifications);
+          await safeAddColumn(spareParts, spareParts.minimumStock);
+          await safeAddColumn(spareParts, spareParts.quantity);
+          await safeAddColumn(spareParts, spareParts.serverVersion);
 
           // 3. Add columns to sales
-          await m.addColumn(sales, sales.serverId);
-          await m.addColumn(sales, sales.saleNumber);
-          await m.addColumn(sales, sales.totalCost);
-          await m.addColumn(sales, sales.saleDate);
+          await safeAddColumn(sales, sales.serverId);
+          await safeAddColumn(sales, sales.saleNumber);
+          await safeAddColumn(sales, sales.totalCost);
+          await safeAddColumn(sales, sales.saleDate);
 
           // 4. Add columns to sale_items
-          await m.addColumn(saleItems, saleItems.serverId);
-          await m.addColumn(saleItems, saleItems.sparePartId);
-          await m.addColumn(saleItems, saleItems.subtotal);
-          await m.addColumn(saleItems, saleItems.profit);
+          await safeAddColumn(saleItems, saleItems.serverId);
+          await safeAddColumn(saleItems, saleItems.sparePartId);
+          await safeAddColumn(saleItems, saleItems.subtotal);
+          await safeAddColumn(saleItems, saleItems.profit);
 
           // 5. Add columns to stock_movements
-          await m.addColumn(stockMovements, stockMovements.sparePartId);
-          await m.addColumn(stockMovements, stockMovements.movementType);
-          await m.addColumn(stockMovements, stockMovements.quantityBefore);
-          await m.addColumn(stockMovements, stockMovements.quantityAfter);
+          await safeAddColumn(stockMovements, stockMovements.sparePartId);
+          await safeAddColumn(stockMovements, stockMovements.movementType);
+          await safeAddColumn(stockMovements, stockMovements.quantityBefore);
+          await safeAddColumn(stockMovements, stockMovements.quantityAfter);
 
           // 6. Add columns to sync_queue
-          await m.addColumn(syncQueue, syncQueue.operationId);
-          await m.addColumn(syncQueue, syncQueue.ownerId);
-          await m.addColumn(syncQueue, syncQueue.entityType);
-          await m.addColumn(syncQueue, syncQueue.entityId);
-          await m.addColumn(syncQueue, syncQueue.operationType);
-          await m.addColumn(syncQueue, syncQueue.baseVersion);
-          await m.addColumn(syncQueue, syncQueue.dependsOn);
-          await m.addColumn(syncQueue, syncQueue.retryCount);
-          await m.addColumn(syncQueue, syncQueue.lastAttemptAt);
-          await m.addColumn(syncQueue, syncQueue.nextRetryAt);
-          await m.addColumn(syncQueue, syncQueue.claimedAt);
-          await m.addColumn(syncQueue, syncQueue.queueStatus);
-          await m.addColumn(syncQueue, syncQueue.errorCode);
-          await m.addColumn(syncQueue, syncQueue.errorMessage);
+          await safeAddColumn(syncQueue, syncQueue.operationId);
+          await safeAddColumn(syncQueue, syncQueue.ownerId);
+          await safeAddColumn(syncQueue, syncQueue.entityType);
+          await safeAddColumn(syncQueue, syncQueue.entityId);
+          await safeAddColumn(syncQueue, syncQueue.operationType);
+          await safeAddColumn(syncQueue, syncQueue.baseVersion);
+          await safeAddColumn(syncQueue, syncQueue.dependsOn);
+          await safeAddColumn(syncQueue, syncQueue.retryCount);
+          await safeAddColumn(syncQueue, syncQueue.lastAttemptAt);
+          await safeAddColumn(syncQueue, syncQueue.nextRetryAt);
+          await safeAddColumn(syncQueue, syncQueue.claimedAt);
+          await safeAddColumn(syncQueue, syncQueue.queueStatus);
+          await safeAddColumn(syncQueue, syncQueue.errorCode);
+          await safeAddColumn(syncQueue, syncQueue.errorMessage);
+
+          // 7. Ensure index exists for operation_id
+          try {
+            await customStatement('CREATE INDEX IF NOT EXISTS idx_sync_queue_op_id ON sync_queue (operation_id);');
+          } catch (_) {}
         }
       },
     );

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/constants.dart';
-import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
@@ -302,6 +301,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// Screen Intent Title Cluster
   Widget _buildHeaderCluster(BuildContext context) {
+    final l10n = context.l10n;
+
     return Column(
       children: [
         const SizedBox(height: 12),
@@ -310,7 +311,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         const SizedBox(height: 14),
         Text(
-          context.tr('እንኳን ደህና መጡ', 'Welcome to Kera Spare'),
+          l10n.loginTitle,
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -374,7 +375,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          foregroundColor: KeraColors.error,
+                          foregroundColor: KeraColors.navy900,
                         ),
                         icon: const Icon(Icons.settings_ethernet_rounded, size: 16),
                         label: const Text('Server Settings'),
@@ -384,7 +385,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          foregroundColor: KeraColors.error,
+                          foregroundColor: KeraColors.navy900,
                         ),
                         icon: const Icon(Icons.refresh_rounded, size: 16),
                         label: Text(l10n.retry),
@@ -572,7 +573,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           height: 24,
                           child: Checkbox(
                             value: _rememberMe,
-                            activeColor: KeraColors.actionBlue,
+                            activeColor: KeraColors.orange500,
+                            checkColor: KeraColors.navy900,
                             onChanged: (val) =>
                                 setState(() => _rememberMe = val ?? false),
                           ),
@@ -590,7 +592,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: () => context.push('/forgot-password'),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    foregroundColor: AdminColors.keraOrange,
+                    foregroundColor: KeraColors.orange700,
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                   ),
                   child: Text(
@@ -609,9 +611,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AdminColors.keraOrange,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AdminColors.keraOrange.withValues(alpha: 0.5),
+                  backgroundColor: KeraColors.brandOrange,
+                  foregroundColor: KeraColors.navy900,
+                  disabledBackgroundColor: KeraColors.brandOrange.withValues(alpha: 0.5),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(KeraRadii.md),
@@ -623,22 +625,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
                         ),
                       )
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            context.tr('ይግቡ', 'Login'),
+                            l10n.login,
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.3,
+                              color: KeraColors.navy900,
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                          const Icon(Icons.arrow_forward_rounded, size: 20, color: KeraColors.navy900),
                         ],
                       ),
               ),
@@ -649,13 +652,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                color: context.isDark ? const Color(0xFF0F264A) : KeraColors.navy50,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: context.borderColor),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.offline_bolt_outlined, size: 16, color: AdminColors.keraOrange),
+                  const Icon(Icons.offline_bolt_outlined, size: 16, color: KeraColors.brandOrange),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -733,7 +736,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             child: const Icon(
               Icons.fingerprint_rounded,
-              color: KeraColors.actionBlue,
+              color: KeraColors.navy800,
               size: 26,
             ),
           ),
@@ -766,10 +769,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               side: const BorderSide(color: KeraColors.borderOpaque),
             ),
-            icon: const Icon(Icons.touch_app_rounded, size: 16, color: KeraColors.actionBlue),
+            icon: const Icon(Icons.touch_app_rounded, size: 16, color: KeraColors.navy800),
             label: Text(
               'አንብብ',
-              style: KeraTypography.labelMedium(color: KeraColors.actionBlue).copyWith(
+              style: KeraTypography.labelMedium(color: KeraColors.navy800).copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -824,7 +827,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       Text(
                         l10n.dontHaveAccount,
-                        style: KeraTypography.labelMedium(color: KeraColors.actionBlue).copyWith(
+                        style: KeraTypography.labelMedium(color: KeraColors.orange700).copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -832,7 +835,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const Icon(
                         Icons.open_in_new_rounded,
                         size: 14,
-                        color: KeraColors.actionBlue,
+                        color: KeraColors.orange700,
                       ),
                     ],
                   ),
@@ -848,7 +851,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 6,
                 height: 6,
                 decoration: const BoxDecoration(
-                  color: Colors.blueGrey,
+                  color: KeraColors.brandNavy,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -1023,8 +1026,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ? Icons.check_circle_rounded
                               : Icons.error_rounded,
                           size: 16,
-                          color:
-                              testSuccess == true ? Colors.green : Colors.red,
+                          color: testSuccess == true
+                              ? KeraColors.brandNavy
+                              : KeraColors.orange700,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
@@ -1033,8 +1037,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               color: testSuccess == true
-                                  ? Colors.green
-                                  : Colors.red,
+                                  ? KeraColors.brandNavy
+                                  : KeraColors.orange700,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

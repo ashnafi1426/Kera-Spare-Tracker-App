@@ -135,8 +135,8 @@ class SuspendedAccountBannerWidget extends ConsumerWidget {
                 label: Text(l10n.telegramSupport),
                 style: OutlinedButton.styleFrom(
                   visualDensity: VisualDensity.compact,
-                  foregroundColor: const Color(0xFF0088CC),
-                  side: const BorderSide(color: Color(0xFF0088CC)),
+                  foregroundColor: AppTheme.primaryColor,
+                  side: const BorderSide(color: AppTheme.primaryColor),
                 ),
               ),
             ],

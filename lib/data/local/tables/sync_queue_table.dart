@@ -11,7 +11,7 @@ import 'enums.dart';
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get operationId =>
-      text().clientDefault(() => const Uuid().v4()).unique()();
+      text().clientDefault(() => const Uuid().v4()).nullable()();
   TextColumn get ownerId => text().nullable()();
   TextColumn get entityType => text().nullable()();
   TextColumn get tableTarget => text().named('table_name')();
