@@ -3425,6 +3425,270 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'አሁን ሞክር'**
   String get retrySync;
+
+  /// No description provided for @statusInStock.
+  ///
+  /// In am, this message translates to:
+  /// **'በክምችት አለ'**
+  String get statusInStock;
+
+  /// No description provided for @statusLowStock.
+  ///
+  /// In am, this message translates to:
+  /// **'አነስተኛ ክምችት'**
+  String get statusLowStock;
+
+  /// No description provided for @statusOutOfStock.
+  ///
+  /// In am, this message translates to:
+  /// **'አልቋል'**
+  String get statusOutOfStock;
+
+  /// No description provided for @statusSynced.
+  ///
+  /// In am, this message translates to:
+  /// **'የተገናኘ'**
+  String get statusSynced;
+
+  /// No description provided for @statusSyncing.
+  ///
+  /// In am, this message translates to:
+  /// **'በማመሳሰል ላይ...'**
+  String get statusSyncing;
+
+  /// No description provided for @statusPending.
+  ///
+  /// In am, this message translates to:
+  /// **'ያልተላከ'**
+  String get statusPending;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In am, this message translates to:
+  /// **'አልተሳካም'**
+  String get statusFailed;
+
+  /// No description provided for @statusConflict.
+  ///
+  /// In am, this message translates to:
+  /// **'ግጭት'**
+  String get statusConflict;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In am, this message translates to:
+  /// **'ከመስመር ውጭ'**
+  String get statusOffline;
+
+  /// No description provided for @statusActive.
+  ///
+  /// In am, this message translates to:
+  /// **'ንቁ'**
+  String get statusActive;
+
+  /// No description provided for @statusSuspended.
+  ///
+  /// In am, this message translates to:
+  /// **'የታገደ'**
+  String get statusSuspended;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In am, this message translates to:
+  /// **'እንደገና ሞክር'**
+  String get tryAgain;
+
+  /// No description provided for @stockIn.
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃ አስገባ'**
+  String get stockIn;
+
+  /// No description provided for @stockOut.
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃ አውጣ'**
+  String get stockOut;
+
+  /// No description provided for @offlineBannerNotice.
+  ///
+  /// In am, this message translates to:
+  /// **'ከመስመር ውጭ — ለውጦች በዚህ ስልክ ላይ ተቀምጠዋል'**
+  String get offlineBannerNotice;
+
+  /// No description provided for @cartNotEmptyPrompt.
+  ///
+  /// In am, this message translates to:
+  /// **'በጋሪዎ ውስጥ ዕቃዎች አሉ። ልሰርዛቸው?'**
+  String get cartNotEmptyPrompt;
+
+  /// No description provided for @tabHome.
+  ///
+  /// In am, this message translates to:
+  /// **'ዋና ገጽ'**
+  String get tabHome;
+
+  /// No description provided for @tabInventory.
+  ///
+  /// In am, this message translates to:
+  /// **'ዕቃዎች'**
+  String get tabInventory;
+
+  /// No description provided for @tabReports.
+  ///
+  /// In am, this message translates to:
+  /// **'ሪፖርቶች'**
+  String get tabReports;
+
+  /// No description provided for @tabMore.
+  ///
+  /// In am, this message translates to:
+  /// **'ተጨማሪ'**
+  String get tabMore;
+
+  /// No description provided for @navSell.
+  ///
+  /// In am, this message translates to:
+  /// **'ሽያጭ'**
+  String get navSell;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In am, this message translates to:
+  /// **'የአገልግሎት ውሎች'**
+  String get termsOfService;
+
+  /// No description provided for @termsOfServiceDescription.
+  ///
+  /// In am, this message translates to:
+  /// **'ኬራ ስፔር ትራከር በኢትዮጵያ ላሉ የከባድ መኪና እና አውቶሞቲቭ መለዋወጫ ነጋዴዎች የተዘጋጀ የሽያጭ እና የክምችት መቆጣጠሪያ መድረክ ነው። መረጃዎችህ በከፍተኛ ጥበቃ እና ሚስጥራዊነት ይያዛሉ።'**
+  String get termsOfServiceDescription;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In am, this message translates to:
+  /// **'የግላዊነት ፖሊሲ'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyDescription.
+  ///
+  /// In am, this message translates to:
+  /// **'የእያንዳንዱ የሱቅ ባለቤት መረጃ (ዕቃዎች፣ ሽያጮች፣ ዋጋዎች እና ሪፖርቶች) ሙሉ በሙሉ የተከለለ ሲሆን ሌሎች ባለቤቶች ወይም ያልተፈቀደላቸው አካላት ማየት አይችሉም። ከመስመር ውጭ የገቡ መረጃዎች የበይነመረብ ግንኙነት ሲገኝ ብቻ በደህንነት ይመሳሰላሉ።'**
+  String get privacyPolicyDescription;
+
+  /// No description provided for @appTagline.
+  ///
+  /// In am, this message translates to:
+  /// **'የከባድ መኪና እና ማሽነሪ መለዋወጫዎች መከታተያ'**
+  String get appTagline;
+
+  /// No description provided for @supportLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'ድጋፍ'**
+  String get supportLabel;
+
+  /// No description provided for @termsShort.
+  ///
+  /// In am, this message translates to:
+  /// **'ውሎች'**
+  String get termsShort;
+
+  /// No description provided for @privacyShort.
+  ///
+  /// In am, this message translates to:
+  /// **'ግላዊነት'**
+  String get privacyShort;
+
+  /// No description provided for @amharicLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'አማርኛ'**
+  String get amharicLabel;
+
+  /// No description provided for @englishLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'English'**
+  String get englishLabel;
+
+  /// No description provided for @welcomeHeadline.
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ንግድዎን ይከታተሉ፣ ይሽጡ እና ያሳድጉ'**
+  String get welcomeHeadline;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ለኬራ የመለዋወጫ ሱቆች ከመስመር ውጭ የሚሰራ ክምችት፣ ፈጣን ሽያጭ እና የመደርደሪያ አመልካች።'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @featurePosTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ፈጣን ሽያጭ መመዝገቢያ'**
+  String get featurePosTitle;
+
+  /// No description provided for @featurePosDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ለጅምላና ለችርቻሮ የተዘጋጀ ፈጣን የሽያጭ ደረሰኝ ማውጫ።'**
+  String get featurePosDesc;
+
+  /// No description provided for @featureInventoryTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የዕቃዎች መደርደሪያ ቁጥጥር'**
+  String get featureInventoryTitle;
+
+  /// No description provided for @featureInventoryDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'በዕቃ ቁጥር፣ በዓይነት፣ በክፍል እና በመደርደሪያ በፍጥነት ያግኙ።'**
+  String get featureInventoryDesc;
+
+  /// No description provided for @featureOfflineTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ያለ ኢንተርኔት ይሰራል'**
+  String get featureOfflineTitle;
+
+  /// No description provided for @featureOfflineDesc.
+  ///
+  /// In am, this message translates to:
+  /// **'ኔትወርክ ሲቋረጥም ያለማቋረጥ ይሽጡ፤ ሲገናኝ ራሱ ያመሳስላል።'**
+  String get featureOfflineDesc;
+
+  /// No description provided for @loginToAccount.
+  ///
+  /// In am, this message translates to:
+  /// **'ወደ መለያዎ ይግቡ'**
+  String get loginToAccount;
+
+  /// No description provided for @createNewAccount.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ የንግድ መለያ ይክፈቱ'**
+  String get createNewAccount;
+
+  /// No description provided for @keraHubLocation.
+  ///
+  /// In am, this message translates to:
+  /// **'አዲስ አበባ • ኬራ አውቶ ማዕከል'**
+  String get keraHubLocation;
+
+  /// No description provided for @systemReady.
+  ///
+  /// In am, this message translates to:
+  /// **'ስርዓቱ ዝግጁ ነው'**
+  String get systemReady;
+
+  /// No description provided for @taglineTrackManageGrow.
+  ///
+  /// In am, this message translates to:
+  /// **'ተከታተል • አስተዳድር • አሳድግ'**
+  String get taglineTrackManageGrow;
 }
 
 class _AppLocalizationsDelegate

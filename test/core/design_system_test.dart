@@ -119,9 +119,9 @@ void main() {
             body: Column(
               children: [
                 KeraStatusBadge.inStock(quantity: 15, unit: 'pcs'),
-                KeraStatusBadge.lowStock(quantity: 2),
-                KeraStatusBadge.outOfStock(),
-                KeraStatusBadge.syncPending(count: 3),
+                KeraStatusBadge.lowStock(quantity: 2, defaultLabel: 'አነስተኛ ክምችት'),
+                KeraStatusBadge.outOfStock(label: 'አልቋል'),
+                KeraStatusBadge.syncPending(count: 3, defaultLabel: 'ያልተላከ'),
               ],
             ),
           ),
@@ -148,6 +148,7 @@ void main() {
               brandName: 'CAT',
               shelfLocation: 'Shelf B-4',
               price: 3450,
+              currencySymbol: 'ብር',
               stockQuantity: 8,
               unit: 'pcs',
               onTap: () => tapped = true,

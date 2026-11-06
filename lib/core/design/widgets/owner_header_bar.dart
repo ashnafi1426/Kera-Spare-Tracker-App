@@ -32,7 +32,7 @@ class OwnerHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = context.isDark;
     final headerBg = isDark ? const Color(0xFF071322) : AdminColors.headerNavy;
-    final defaultSubtitle = context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker');
+    const defaultSubtitle = 'Kera · Spare Tracker';
 
     return Container(
       width: double.infinity,
@@ -83,7 +83,7 @@ class OwnerHeaderBar extends StatelessWidget {
                         Text(
                           businessName.isNotEmpty
                               ? businessName
-                              : context.tr('ተስፋዬ እና ልጆቹ', 'Tesfaye & Sons'),
+                              : 'Kera Spare Parts',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -114,7 +114,7 @@ class OwnerHeaderBar extends StatelessWidget {
                 ],
               ),
 
-              // Title Widget below top row (e.g. "ዕቃዎች", "ሽያጭ", Back button line)
+              // Title Widget below top row (e.g. title, search, or back button line)
               if (titleWidget != null) ...[
                 const SizedBox(height: 14),
                 titleWidget!,
@@ -160,7 +160,7 @@ class OwnerLanguageToggle extends ConsumerWidget {
             const Icon(Icons.language_rounded, size: 13, color: Colors.white),
             const SizedBox(width: 4),
             Text(
-              isAmharic ? 'EN' : 'አማ',
+              isAmharic ? 'EN' : 'AM',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 11,

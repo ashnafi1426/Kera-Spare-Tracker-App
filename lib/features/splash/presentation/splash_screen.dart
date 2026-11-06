@@ -1,109 +1,109 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/constants/constants.dart';
-import '../../../../core/design/design.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/tokens/kera_radii.dart';
+import '../../../../core/design/tokens/kera_spacing.dart';
+import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/language_selector_widget.dart';
 
-/// Industrial, high-performance splash screen for Kera Spare Tracker
-/// strictly matching Google Stitch Screen `4ee69d9cd07b4890a338fd75a5d1ad37`.
+/// Clean native mobile splash screen for Kera Spare Tracker.
+///
+/// Designed in the style of Google Pay and Square:
+/// - Brand Deep Navy (#061B3F) background
+/// - Centered crisp logo plate with rounded edges
+/// - Single-language localized brand title & tagline
+/// - Minimalist Brand Orange (#F7941D) circular loader
+/// - Offline-first version signature at the bottom
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+  final double? progressValue;
+
+  const SplashScreen({
+    super.key,
+    this.progressValue,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('[STARTUP] SplashScreen first frame rendered');
-    });
-
     return Scaffold(
-      backgroundColor: KeraColors.primaryNavy,
+      backgroundColor: KeraColors.navy900,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 1. Top System Ambient Header (Kera Hub & Offline Ready + Language)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: KeraColors.primaryNavyDark.withAlpha(160),
-                        borderRadius: KeraRadii.borderPill,
-                        border: Border.all(
-                          color: KeraColors.outlineVariant.withAlpha(60),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: KeraColors.utilityTeal,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              context.tr('አዲስ አበባ • ኬራ', 'Addis Ababa • Kera Hub'),
-                              overflow: TextOverflow.ellipsis,
-                              style: KeraTypography.labelSmall(color: KeraColors.textWhite).copyWith(
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+              // 1. Top subtle location identifier
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: KeraColors.navy800.withValues(alpha: 0.6),
+                    borderRadius: KeraRadii.borderPill,
+                    border: Border.all(
+                      color: KeraColors.navy600.withValues(alpha: 0.5),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  const LanguageSegmentedSwitch(),
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: KeraColors.orange500,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.keraHubLocation,
+                          overflow: TextOverflow.ellipsis,
+                          style: KeraTypography.labelSmall(color: Colors.white).copyWith(
+                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-              const Spacer(flex: 2),
-
-              // 2. Central Hero & Branding Cluster
+              // 2. Central Hero Branding Cluster
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const KeraLogoWidget(size: 88, borderRadius: 20),
-                  const SizedBox(height: KeraSpacing.lg),
-
-                  // Bilingual Brand Identity Titles
+                  const KeraLogoWidget(size: 96, borderRadius: 24),
+                  const SizedBox(height: KeraSpacing.xl),
                   Text(
-                    context.tr('ኬራ ስፔር ትራከር', 'Kera Spare Tracker'),
+                    l10n.appName,
                     textAlign: TextAlign.center,
-                    style: KeraTypography.headlineLarge(color: KeraColors.textWhite).copyWith(
+                    style: KeraTypography.headlineLarge(color: Colors.white).copyWith(
                       fontWeight: FontWeight.w800,
+                      fontSize: 26,
+                      letterSpacing: 0.3,
                     ),
                   ),
-                  const SizedBox(height: 6),
-
-                  // Exact Tagline: Track - Manage - Grow
+                  const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: KeraColors.primaryNavyDark.withAlpha(160),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: KeraColors.keraOrange.withAlpha(100)),
+                      color: KeraColors.navy800,
+                      borderRadius: KeraRadii.borderPill,
+                      border: Border.all(color: KeraColors.orange500.withValues(alpha: 0.5)),
                     ),
                     child: Text(
-                      context.tr('ተከታተል • አስተዳድር • አሳድግ', 'Track • Manage • Grow'),
+                      l10n.taglineTrackManageGrow,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: KeraColors.keraOrange,
-                        fontWeight: FontWeight.bold,
+                        color: KeraColors.orange500,
+                        fontWeight: FontWeight.w700,
                         fontSize: 13,
                         letterSpacing: 0.5,
                       ),
@@ -112,88 +112,55 @@ class SplashScreen extends StatelessWidget {
                 ],
               ),
 
-              const Spacer(flex: 3),
-
-              // 3. Bottom Technical Diagnostics & Loader Module
+              // 3. Bottom Loader & Offline Signature
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.actionBlue),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        l10n.splashLoading,
-                        style: KeraTypography.labelSmall(color: KeraColors.textWhite).copyWith(
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
+                  SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      value: progressValue,
+                      strokeWidth: 2.4,
+                      valueColor: const AlwaysStoppedAnimation<Color>(KeraColors.orange500),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.splashLoading,
+                    style: KeraTypography.labelSmall(
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ).copyWith(letterSpacing: 0.5),
                   ),
                   const SizedBox(height: KeraSpacing.lg),
-
-                  // Bento-style Metadata Strip
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: KeraColors.primaryNavyDark.withAlpha(180),
+                      color: KeraColors.navy800.withValues(alpha: 0.5),
                       borderRadius: KeraRadii.borderCard,
                       border: Border.all(
-                        color: KeraColors.outlineVariant.withAlpha(50),
-                        width: 1,
+                        color: KeraColors.navy600.withValues(alpha: 0.4),
                       ),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Server Connectivity Ping
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: KeraColors.utilityTeal,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  'Addis Ababa Server • Live',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: KeraTypography.labelSmall(color: KeraColors.textWhite),
-                                ),
-                              ),
-                            ],
-                          ),
+                        const Icon(
+                          Icons.bolt_rounded,
+                          size: 15,
+                          color: KeraColors.orange500,
                         ),
-                        const SizedBox(width: 8),
-                        // Version Marker
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.offline_bolt_rounded,
-                              size: 14,
-                              color: KeraColors.utilityTeal,
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'v${AppConstants.appVersion} · ${l10n.offlineBadge}',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'v${AppConstants.appVersion} Offline',
-                              style: KeraTypography.labelSmall(color: KeraColors.textMuted),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

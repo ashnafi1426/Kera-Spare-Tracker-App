@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-11-06T05:11:05.977Z",
-  "totalFilesWithViolations": 72,
+  "generatedAt": "2026-11-06T12:19:01.143Z",
+  "totalFilesWithViolations": 70,
   "totalNonNeutralColorReferences": 120,
-  "totalHardcodedHexReferences": 574,
+  "totalHardcodedHexReferences": 564,
   "totalFromARGBReferences": 0,
   "totalFromRGBOReferences": 0,
   "totalMaterialColorReferences": 0,
   "totalPrimariesReferences": 0,
-  "grandTotalViolations": 694,
+  "grandTotalViolations": 684,
   "files": [
     {
       "file": "lib/features/sales/presentation/screens/new_sale_screen.dart",
@@ -373,29 +373,7 @@
       "redesigned": false
     },
     {
-      "file": "lib/core/design/widgets/mobile_components.dart",
-      "nonNeutralColorsCount": 0,
-      "hexColorsCount": 5,
-      "fromARGBCount": 0,
-      "fromRGBOCount": 0,
-      "materialColorCount": 0,
-      "primariesCount": 0,
-      "totalViolations": 5,
-      "redesigned": false
-    },
-    {
       "file": "lib/features/admin/presentation/widgets/admin_header_bar.dart",
-      "nonNeutralColorsCount": 0,
-      "hexColorsCount": 5,
-      "fromARGBCount": 0,
-      "fromRGBOCount": 0,
-      "materialColorCount": 0,
-      "primariesCount": 0,
-      "totalViolations": 5,
-      "redesigned": false
-    },
-    {
-      "file": "lib/features/admin/presentation/widgets/admin_scaffold.dart",
       "nonNeutralColorsCount": 0,
       "hexColorsCount": 5,
       "fromARGBCount": 0,

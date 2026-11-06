@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,9 +24,10 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/pending_approval_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/welcome_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/dashboard/presentation/screens/business_dashboard_screen.dart';
 import '../../features/notifications/presentation/screens/notification_center_screen.dart';
 import '../../features/notifications/presentation/screens/notification_settings_screen.dart';
+import '../../features/parts/presentation/screens/inventory_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
 import '../../features/reports/presentation/screens/reports_screen.dart';
@@ -38,6 +40,7 @@ import '../../features/settings/presentation/screens/categories_management_scree
 import '../../features/settings/presentation/screens/language_selection_screen.dart';
 import '../../features/settings/presentation/screens/locations_management_screen.dart';
 import '../../features/settings/presentation/screens/security_sessions_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/splash/presentation/update_required_screen.dart';
 import '../../features/stock/presentation/screens/low_stock_screen.dart';
@@ -47,7 +50,11 @@ import '../../features/sync/presentation/screens/initial_sync_screen.dart';
 import '../../features/sync/presentation/screens/offline_dashboard_screen.dart';
 import '../../features/sync/presentation/screens/sync_center_screen.dart';
 import '../../features/sync/presentation/screens/sync_diagnostics_screen.dart';
+import '../design/screens/component_gallery_screen.dart';
+import '../design/widgets/bottom_nav.dart';
 import '../providers/app_config_provider.dart';
+
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNav');
 
 /// Helper ChangeNotifier that notifies GoRouter when Riverpod auth or config state changes.
 class _AuthRefreshNotifier extends ChangeNotifier {
@@ -62,6 +69,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refreshNotifier.dispose);
 
   return GoRouter(
+    navigatorKey: _rootNavigatorKey,
     initialLocation: '/',
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
@@ -131,11 +139,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/update-required',
         name: 'update-required',
         builder: (context, state) => const UpdateRequiredScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/change-password',
         name: 'change-password',
         builder: (context, state) {
@@ -144,26 +154,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/',
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/welcome',
         name: 'welcome',
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/forgot-password',
         name: 'forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/pending-approval',
         name: 'pending-approval',
         builder: (context, state) {
@@ -175,91 +190,171 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
+
+      // =======================================================================
+      // OWNER SHELL: 4 Stateful Branches (Home, Inventory, Reports, More)
+      // Note: Sell is NOT a branch; it pushes /sales/new to _rootNavigatorKey.
+      // =======================================================================
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: BottomNav(
+              currentIndex: navigationShell.currentIndex,
+              onTabSelected: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                );
+              },
+              onSellPressed: () => context.push('/sales/new'),
+            ),
+          );
+        },
+        branches: [
+          // Branch 0: Home
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                name: 'home',
+                builder: (context, state) => const BusinessDashboardScreen(),
+              ),
+            ],
+          ),
+          // Branch 1: Inventory
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/inventory',
+                name: 'inventory',
+                builder: (context, state) => const InventoryScreen(),
+              ),
+            ],
+          ),
+          // Branch 2: Reports
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/reports',
+                name: 'reports',
+                builder: (context, state) => const ReportsScreen(),
+              ),
+            ],
+          ),
+          // Branch 3: More (Settings)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: 'settings',
+                builder: (context, state) => const SettingsScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
+
+      // Root Checkout route above the shell with full screen and back/close prompt
       GoRoute(
-        path: '/reports',
-        name: 'reports',
-        builder: (context, state) => const ReportsScreen(),
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/sales/new',
+        name: 'sales-new',
+        builder: (context, state) => const NewSaleScreen(),
       ),
+
+      // Owner secondary routes (pushed above shell)
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/initial-sync',
         name: 'initial-sync',
         builder: (context, state) => const InitialSyncScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sync',
         name: 'sync-center',
         builder: (context, state) => const SyncCenterScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sync/conflicts',
         name: 'sync-conflicts',
         builder: (context, state) => const ConflictResolutionScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sync/diagnostics',
         name: 'sync-diagnostics',
         builder: (context, state) => const SyncDiagnosticsScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sync/offline',
         name: 'sync-offline',
         builder: (context, state) => const OfflineDashboardScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/profile',
         name: 'settings-profile',
         builder: (context, state) => const BusinessProfileScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/security',
         name: 'settings-security',
         builder: (context, state) => const SecuritySessionsScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/language',
         name: 'settings-language',
         builder: (context, state) => const LanguageSelectionScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationCenterScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/notifications/settings',
         name: 'notifications-settings',
         builder: (context, state) => const NotificationSettingsScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/brands',
         name: 'settings-brands',
         builder: (context, state) => const BrandsManagementScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/categories',
         name: 'settings-categories',
         builder: (context, state) => const CategoriesManagementScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/settings/locations',
         name: 'settings-locations',
         builder: (context, state) => const LocationsManagementScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/parts/add',
         name: 'parts-add',
         builder: (context, state) => const PartFormScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/parts/:id',
         name: 'parts-details',
         builder: (context, state) => PartDetailsScreen(
@@ -267,6 +362,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/parts/:id/edit',
         name: 'parts-edit',
         builder: (context, state) => PartFormScreen(
@@ -274,6 +370,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/parts/:id/history',
         name: 'parts-history',
         builder: (context, state) => StockHistoryScreen(
@@ -281,16 +378,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/stock/low',
         name: 'stock-low',
         builder: (context, state) => const LowStockScreen(),
       ),
       GoRoute(
-        path: '/sales/new',
-        name: 'sales-new',
-        builder: (context, state) => const NewSaleScreen(),
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/stock/low-stock',
+        name: 'stock-low-stock',
+        builder: (context, state) => const LowStockScreen(),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sales/success/:id',
         name: 'sales-success',
         builder: (context, state) => SaleSuccessScreen(
@@ -298,93 +398,135 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
         path: '/sales/:id',
         name: 'sales-details',
         builder: (context, state) => SaleDetailsScreen(
           saleId: state.pathParameters['id']!,
         ),
       ),
-      GoRoute(
-        path: '/stock/low-stock',
-        name: 'stock-low-stock',
-        builder: (context, state) => const LowStockScreen(),
-      ),
 
-      // Admin portal routes wrapped in responsive ShellRoute
-      ShellRoute(
-        builder: (context, state, child) => AdminScaffold(
-          currentRoute: state.matchedLocation,
-          child: child,
+      // Debug-only Component Gallery screen (not in release builds)
+      if (kDebugMode)
+        GoRoute(
+          parentNavigatorKey: _rootNavigatorKey,
+          path: '/debug/component-gallery',
+          name: 'component-gallery',
+          builder: (context, state) => const ComponentGalleryScreen(),
         ),
-        routes: [
-          GoRoute(
-            path: '/admin',
-            name: 'admin-dashboard',
-            builder: (context, state) => const AdminDashboardScreen(),
+
+      // =======================================================================
+      // ADMIN SHELL: 5 Stateful Branches (Dashboard, Owners, Catalog, Reports, Settings)
+      // =======================================================================
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => AdminScaffold(
+          currentRoute: state.matchedLocation,
+          child: navigationShell,
+        ),
+        branches: [
+          // Branch 0: Dashboard
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin',
+                name: 'admin-dashboard',
+                builder: (context, state) => const AdminDashboardScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/owners',
-            name: 'admin-owners',
-            builder: (context, state) => const AdminOwnersListScreen(),
+          // Branch 1: Owners
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/owners',
+                name: 'admin-owners',
+                builder: (context, state) => const AdminOwnersListScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/owners/add',
-            name: 'admin-owners-add',
-            builder: (context, state) => const AdminAddOwnerScreen(),
+          // Branch 2: Catalog
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/catalog',
+                name: 'admin-catalog',
+                builder: (context, state) => const AdminGlobalCatalogScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/owners/:id',
-            name: 'admin-owner-details',
-            builder: (context, state) => AdminOwnerDetailsScreen(
-              ownerId: state.pathParameters['id']!,
-            ),
+          // Branch 3: Reports
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/reports',
+                name: 'admin-reports',
+                builder: (context, state) => const AdminReportsScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/catalog',
-            name: 'admin-catalog',
-            builder: (context, state) => const AdminGlobalCatalogScreen(),
-          ),
-          GoRoute(
-            path: '/admin/settings',
-            name: 'admin-settings',
-            builder: (context, state) => const AdminSettingsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/audit-logs',
-            name: 'admin-audit-logs',
-            builder: (context, state) => const AdminAuditLogScreen(),
-          ),
-          GoRoute(
-            path: '/admin/account',
-            name: 'admin-account',
-            builder: (context, state) => const AdminAccountScreen(),
-          ),
-          GoRoute(
-            path: '/admin/reports',
-            name: 'admin-reports',
-            builder: (context, state) => const AdminReportsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/sync',
-            name: 'admin-sync-monitor',
-            builder: (context, state) => const AdminSyncMonitorScreen(),
-          ),
-          GoRoute(
-            path: '/admin/notifications',
-            name: 'admin-notifications',
-            builder: (context, state) => const AdminNotificationsScreen(),
-          ),
-          GoRoute(
-            path: '/admin/plans',
-            name: 'admin-plans',
-            builder: (context, state) => const AdminPlansScreen(),
-          ),
-          GoRoute(
-            path: '/admin/backup',
-            name: 'admin-backup',
-            builder: (context, state) => const AdminBackupScreen(),
+          // Branch 4: Settings
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/settings',
+                name: 'admin-settings',
+                builder: (context, state) => const AdminSettingsScreen(),
+              ),
+            ],
           ),
         ],
+      ),
+
+      // Admin secondary sub-routes (pushed to root navigator)
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/owners/add',
+        name: 'admin-owners-add',
+        builder: (context, state) => const AdminAddOwnerScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/owners/:id',
+        name: 'admin-owner-details',
+        builder: (context, state) => AdminOwnerDetailsScreen(
+          ownerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/audit-logs',
+        name: 'admin-audit-logs',
+        builder: (context, state) => const AdminAuditLogScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/account',
+        name: 'admin-account',
+        builder: (context, state) => const AdminAccountScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/sync',
+        name: 'admin-sync-monitor',
+        builder: (context, state) => const AdminSyncMonitorScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/notifications',
+        name: 'admin-notifications',
+        builder: (context, state) => const AdminNotificationsScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/plans',
+        name: 'admin-plans',
+        builder: (context, state) => const AdminPlansScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/admin/backup',
+        name: 'admin-backup',
+        builder: (context, state) => const AdminBackupScreen(),
       ),
     ],
   );

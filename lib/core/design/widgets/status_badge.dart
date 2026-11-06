@@ -24,10 +24,11 @@ enum StatusBadgeVariant {
 /// Implements Step 2 of the 2-Color Design System:
 /// - Never relies on color alone: EVERY status has an ICON and a TEXT LABEL.
 /// - Synced / Success / In stock: Soft Navy chip (#E6ECF7), check icon, Navy text (#0B2A5B).
-/// - Pending / Syncing: Soft Orange chip (#FFF1DC), sync/clock icon, Orange-700 text (#B35F00).
-/// - Low stock: Soft Orange chip (#FFF1DC), alert-triangle icon, Orange-700 text (#B35F00).
-/// - Out of stock / Failed / Conflict: Solid Orange chip (#F7941D), alert-octagon icon,
-///   bold Navy text (#061B3F), heavier border (1.5px).
+/// - Pending / Syncing: Soft Orange chip (#FFF1DC), sync/clock icon, Orange-700 text (#9A5000).
+/// - Low stock: Soft Orange chip (#FFF1DC), alert-triangle icon, Orange-700 text (#9A5000).
+/// - Out of stock: Solid Orange chip (#F7941D), inventory_2 icon, bold Navy text (#061B3F), heavier border (1.5px).
+/// - Failed: Solid Orange chip (#F7941D), sync_problem_rounded icon, bold Navy text (#061B3F).
+/// - Conflict: Solid Orange chip (#F7941D), report_rounded (octagon) icon, bold Navy text (#061B3F), heavier border (2.0px).
 /// - Offline: Navy outline chip, cloud-off icon, Navy text (#0B2A5B).
 class StatusBadge extends StatelessWidget {
   final String label;
@@ -47,12 +48,12 @@ class StatusBadge extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
   });
 
-  /// In Stock / Available (በክምችት አለ)
+  /// In Stock / Available
   factory StatusBadge.inStock({
     Key? key,
     required double quantity,
     String? unit,
-    String defaultLabel = 'በክምችት አለ',
+    String defaultLabel = 'In Stock',
   }) {
     final qtyStr = quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1);
     final text = unit != null && unit.isNotEmpty ? '$qtyStr $unit' : '$defaultLabel: $qtyStr';
@@ -66,11 +67,11 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Low Stock Warning (አነስተኛ ክምችት)
+  /// Low Stock Warning
   factory StatusBadge.lowStock({
     Key? key,
     required double quantity,
-    String defaultLabel = 'አነስተኛ ክምችት',
+    String defaultLabel = 'Low Stock',
   }) {
     final qtyStr = quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1);
     return StatusBadge(
@@ -83,10 +84,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Out of Stock / Depleted (አልቋል)
+  /// Out of Stock / Depleted
   factory StatusBadge.outOfStock({
     Key? key,
-    String label = 'አልቋል',
+    String label = 'Out of Stock',
   }) {
     return StatusBadge(
       key: key,
@@ -98,10 +99,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Cloud Synced / Up to Date (የተገናኘ / Synced)
+  /// Cloud Synced / Up to Date
   factory StatusBadge.synced({
     Key? key,
-    String label = 'የተገናኘ',
+    String label = 'Synced',
   }) {
     return StatusBadge(
       key: key,
@@ -113,10 +114,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Active Synchronization in Progress (በማመሳሰል ላይ / Syncing)
+  /// Active Synchronization in Progress
   factory StatusBadge.syncing({
     Key? key,
-    String label = 'በማመሳሰል ላይ...',
+    String label = 'Syncing...',
   }) {
     return StatusBadge(
       key: key,
@@ -128,11 +129,11 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Pending Sync in Outbox Queue (ያልተላከ / Pending)
+  /// Pending Sync in Outbox Queue
   factory StatusBadge.pending({
     Key? key,
     required int count,
-    String defaultLabel = 'ያልተላከ',
+    String defaultLabel = 'Pending',
   }) {
     return StatusBadge(
       key: key,
@@ -144,10 +145,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Sync Failed / Error (ያልተሳካ / Failed)
+  /// Sync Failed / Error
   factory StatusBadge.failed({
     Key? key,
-    String label = 'አልተሳካም',
+    String label = 'Failed',
   }) {
     return StatusBadge(
       key: key,
@@ -159,10 +160,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Discrepancy / Sync Conflict (ግጭት / Conflict)
+  /// Discrepancy / Sync Conflict
   factory StatusBadge.conflict({
     Key? key,
-    String label = 'ግጭት',
+    String label = 'Conflict',
   }) {
     return StatusBadge(
       key: key,
@@ -174,10 +175,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Device Offline (ከመስመር ውጭ / Offline)
+  /// Device Offline
   factory StatusBadge.offline({
     Key? key,
-    String label = 'ከመስመር ውጭ',
+    String label = 'Offline',
   }) {
     return StatusBadge(
       key: key,
@@ -189,10 +190,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Account Active (ንቁ / Active)
+  /// Account Active
   factory StatusBadge.active({
     Key? key,
-    String label = 'ንቁ (Active)',
+    String label = 'Active',
   }) {
     return StatusBadge(
       key: key,
@@ -204,10 +205,10 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  /// Account Suspended / Disabled (የታገደ / Suspended)
+  /// Account Suspended / Disabled
   factory StatusBadge.suspended({
     Key? key,
-    String label = 'የታገደ (Suspended)',
+    String label = 'Suspended',
   }) {
     return StatusBadge(
       key: key,
@@ -263,4 +264,3 @@ class StatusBadge extends StatelessWidget {
     );
   }
 }
-

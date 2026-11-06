@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/design/tokens/admin_spacing.dart';
+import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
-/// Responsive administrative layout shell supporting both mobile bottom navigation
-/// and wide-screen (web/tablet) NavigationRail navigation with automatic 15-minute
+/// Responsive administrative layout shell supporting both mobile 5-branch bottom navigation
+/// and wide-screen NavigationRail navigation with automatic 15-minute
 /// session inactivity security logout.
 class AdminScaffold extends ConsumerStatefulWidget {
   final Widget child;
@@ -70,14 +70,17 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
   int _getSelectedIndex() {
     if (widget.currentRoute.startsWith('/admin/owners')) return 1;
     if (widget.currentRoute.startsWith('/admin/catalog')) return 2;
+    if (widget.currentRoute.startsWith('/admin/reports') ||
+        widget.currentRoute.startsWith('/admin/sync')) {
+      return 3;
+    }
     if (widget.currentRoute.startsWith('/admin/settings') ||
         widget.currentRoute.startsWith('/admin/audit-logs') ||
         widget.currentRoute.startsWith('/admin/account') ||
-        widget.currentRoute.startsWith('/admin/reports') ||
-        widget.currentRoute.startsWith('/admin/sync') ||
         widget.currentRoute.startsWith('/admin/backup') ||
-        widget.currentRoute.startsWith('/admin/plans')) {
-      return 3;
+        widget.currentRoute.startsWith('/admin/plans') ||
+        widget.currentRoute.startsWith('/admin/notifications')) {
+      return 4;
     }
     return 0; // /admin
   }
@@ -94,6 +97,9 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
         context.go('/admin/catalog');
         break;
       case 3:
+        context.go('/admin/reports');
+        break;
+      case 4:
         context.go('/admin/settings');
         break;
     }
@@ -104,6 +110,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
     final l10n = AppLocalizations.of(context)!;
     final isWide = MediaQuery.of(context).size.width >= AdminSpacing.tabletBreakpoint;
     final selectedIndex = _getSelectedIndex();
+    final activeColor = context.isDark ? KeraColors.orange500 : KeraColors.navy800;
 
     final destinations = [
       NavigationRailDestination(
@@ -122,19 +129,14 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
         label: Text(l10n.adminCatalog),
       ),
       NavigationRailDestination(
+        icon: const Icon(Icons.bar_chart_outlined),
+        selectedIcon: const Icon(Icons.bar_chart_rounded),
+        label: Text(l10n.tabReports),
+      ),
+      NavigationRailDestination(
         icon: const Icon(Icons.settings_outlined),
         selectedIcon: const Icon(Icons.settings_suggest_rounded),
         label: Text(l10n.adminSettings),
-      ),
-      NavigationRailDestination(
-        icon: const Icon(Icons.history_edu_outlined),
-        selectedIcon: const Icon(Icons.history_edu_rounded),
-        label: Text(l10n.adminAuditLogs),
-      ),
-      NavigationRailDestination(
-        icon: const Icon(Icons.manage_accounts_outlined),
-        selectedIcon: const Icon(Icons.manage_accounts_rounded),
-        label: Text(l10n.adminAccount),
       ),
     ];
 
@@ -154,7 +156,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: AdminColors.primary.withValues(alpha: 0.12),
+                            color: KeraColors.navy100,
                             borderRadius: BorderRadius.circular(AdminSpacing.radiusCard),
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -167,7 +169,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AdminColors.infoTint,
+                            color: KeraColors.orange100,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
@@ -175,7 +177,7 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: AdminColors.primary,
+                              color: KeraColors.navy900,
                               letterSpacing: 1.1,
                             ),
                           ),
@@ -219,34 +221,34 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
               child: NavigationBar(
                 backgroundColor: context.cardBg,
                 surfaceTintColor: Colors.transparent,
-                indicatorColor: (context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy)
-                    .withValues(alpha: 0.15),
-                selectedIndex: selectedIndex > 3 ? 3 : selectedIndex,
+                indicatorColor: activeColor.withValues(alpha: 0.15),
+                selectedIndex: selectedIndex,
                 onDestinationSelected: (idx) => _onDestinationSelected(context, idx),
                 destinations: [
                   NavigationDestination(
-                    icon: Icon(Icons.home_outlined, color: context.textSecondaryColor),
-                    selectedIcon: Icon(Icons.home_rounded,
-                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
-                    label: context.tr('ዳሽቦርድ', 'Dashboard'),
+                    icon: Icon(Icons.dashboard_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.dashboard_rounded, color: activeColor),
+                    label: l10n.adminDashboard,
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.people_outline_rounded, color: context.textSecondaryColor),
-                    selectedIcon: Icon(Icons.people_alt_rounded,
-                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
-                    label: context.tr('ባለቤቶች', 'Owners'),
+                    selectedIcon: Icon(Icons.people_alt_rounded, color: activeColor),
+                    label: l10n.adminOwners,
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.sell_outlined, color: context.textSecondaryColor),
-                    selectedIcon: Icon(Icons.sell_rounded,
-                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
-                    label: context.tr('ብራንዶች', 'Brands'),
+                    icon: Icon(Icons.category_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.category_rounded, color: activeColor),
+                    label: l10n.adminCatalog,
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.bar_chart_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.bar_chart_rounded, color: activeColor),
+                    label: l10n.tabReports,
                   ),
                   NavigationDestination(
                     icon: Icon(Icons.settings_outlined, color: context.textSecondaryColor),
-                    selectedIcon: Icon(Icons.settings_rounded,
-                        color: context.isDark ? const Color(0xFF38BDF8) : AdminColors.headerNavy),
-                    label: context.tr('ቅንብሮች', 'Settings'),
+                    selectedIcon: Icon(Icons.settings_rounded, color: activeColor),
+                    label: l10n.adminSettings,
                   ),
                 ],
               ),

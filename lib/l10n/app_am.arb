@@ -1280,13 +1280,13 @@
   "@maintenanceBanner": {
     "description": "Maintenance banner text"
   },
-  "accountSuspendedTitle": "መለያዎ ታግዷል",
+  "accountSuspendedTitle": "መለያው ታግዷል",
   "@accountSuspendedTitle": {
-    "description": "Suspension alert title"
+    "description": "Title for suspended account banner"
   },
-  "accountSuspendedMessage": "መለያዎ በአስተዳዳሪው ታግዷል። የአካባቢዎ መረጃ በደህና ተቀምጧል እና ሊታይ ይችላል፣ ነገር ግን ማመሳሰል ቆሟል።",
+  "accountSuspendedMessage": "መለያዎ ታግዷል። ማመሳሰል ቆሟል፤ ነገር ግን የአካባቢዎ መረጃዎች ክፍት ሆነው ይቆያሉ እና መረጃ ማውጣት ይችላሉ።",
   "@accountSuspendedMessage": {
-    "description": "Suspension alert message"
+    "description": "Message for suspended account banner"
   },
   "suspensionReasonLabel": "ምክንያት፦ {reason}",
   "@suspensionReasonLabel": {
@@ -1621,14 +1621,6 @@
   "@pendingChangesCount": {
     "description": "Settings label for pending changes count"
   },
-  "accountSuspendedTitle": "መለያው ታግዷል",
-  "@accountSuspendedTitle": {
-    "description": "Title for suspended account banner"
-  },
-  "accountSuspendedMessage": "መለያዎ ታግዷል። ማመሳሰል ቆሟል፤ ነገር ግን የአካባቢዎ መረጃዎች ክፍት ሆነው ይቆያሉ እና መረጃ ማውጣት ይችላሉ።",
-  "@accountSuspendedMessage": {
-    "description": "Message for suspended account banner"
-  },
   "passwordChangedRemotelyTitle": "የይለፍ ቃል በሌላ ቦታ ተቀይሯል",
   "@passwordChangedRemotelyTitle": {
     "description": "Title for password changed remotely banner"
@@ -1761,5 +1753,49 @@
   "bestSellers": "ተፈላጊ መለዋወጫዎች",
   "recentTransactions": "የቅርብ ሽያጮች",
   "offlineModeActive": "ከመስመር ውጭ ይሰራል",
-  "retrySync": "አሁን ሞክር"
+  "retrySync": "አሁን ሞክር",
+  "statusInStock": "በክምችት አለ",
+  "statusLowStock": "አነስተኛ ክምችት",
+  "statusOutOfStock": "አልቋል",
+  "statusSynced": "የተገናኘ",
+  "statusSyncing": "በማመሳሰል ላይ...",
+  "statusPending": "ያልተላከ",
+  "statusFailed": "አልተሳካም",
+  "statusConflict": "ግጭት",
+  "statusOffline": "ከመስመር ውጭ",
+  "statusActive": "ንቁ",
+  "statusSuspended": "የታገደ",
+  "tryAgain": "እንደገና ሞክር",
+  "stockIn": "ዕቃ አስገባ",
+  "stockOut": "ዕቃ አውጣ",
+  "offlineBannerNotice": "ከመስመር ውጭ — ለውጦች በዚህ ስልክ ላይ ተቀምጠዋል",
+  "cartNotEmptyPrompt": "በጋሪዎ ውስጥ ዕቃዎች አሉ። ልሰርዛቸው?",
+  "tabHome": "ዋና ገጽ",
+  "tabInventory": "ዕቃዎች",
+  "tabReports": "ሪፖርቶች",
+  "tabMore": "ተጨማሪ",
+  "navSell": "ሽያጭ",
+  "termsOfService": "የአገልግሎት ውሎች",
+  "termsOfServiceDescription": "ኬራ ስፔር ትራከር በኢትዮጵያ ላሉ የከባድ መኪና እና አውቶሞቲቭ መለዋወጫ ነጋዴዎች የተዘጋጀ የሽያጭ እና የክምችት መቆጣጠሪያ መድረክ ነው። መረጃዎችህ በከፍተኛ ጥበቃ እና ሚስጥራዊነት ይያዛሉ።",
+  "privacyPolicy": "የግላዊነት ፖሊሲ",
+  "privacyPolicyDescription": "የእያንዳንዱ የሱቅ ባለቤት መረጃ (ዕቃዎች፣ ሽያጮች፣ ዋጋዎች እና ሪፖርቶች) ሙሉ በሙሉ የተከለለ ሲሆን ሌሎች ባለቤቶች ወይም ያልተፈቀደላቸው አካላት ማየት አይችሉም። ከመስመር ውጭ የገቡ መረጃዎች የበይነመረብ ግንኙነት ሲገኝ ብቻ በደህንነት ይመሳሰላሉ።",
+  "appTagline": "የከባድ መኪና እና ማሽነሪ መለዋወጫዎች መከታተያ",
+  "supportLabel": "ድጋፍ",
+  "termsShort": "ውሎች",
+  "privacyShort": "ግላዊነት",
+  "amharicLabel": "አማርኛ",
+  "englishLabel": "English",
+  "welcomeHeadline": "የመለዋወጫ ንግድዎን ይከታተሉ፣ ይሽጡ እና ያሳድጉ",
+  "welcomeSubtitle": "ለኬራ የመለዋወጫ ሱቆች ከመስመር ውጭ የሚሰራ ክምችት፣ ፈጣን ሽያጭ እና የመደርደሪያ አመልካች።",
+  "featurePosTitle": "ፈጣን ሽያጭ መመዝገቢያ",
+  "featurePosDesc": "ለጅምላና ለችርቻሮ የተዘጋጀ ፈጣን የሽያጭ ደረሰኝ ማውጫ።",
+  "featureInventoryTitle": "የዕቃዎች መደርደሪያ ቁጥጥር",
+  "featureInventoryDesc": "በዕቃ ቁጥር፣ በዓይነት፣ በክፍል እና በመደርደሪያ በፍጥነት ያግኙ።",
+  "featureOfflineTitle": "ያለ ኢንተርኔት ይሰራል",
+  "featureOfflineDesc": "ኔትወርክ ሲቋረጥም ያለማቋረጥ ይሽጡ፤ ሲገናኝ ራሱ ያመሳስላል።",
+  "loginToAccount": "ወደ መለያዎ ይግቡ",
+  "createNewAccount": "አዲስ የንግድ መለያ ይክፈቱ",
+  "keraHubLocation": "አዲስ አበባ • ኬራ አውቶ ማዕከል",
+  "systemReady": "ስርዓቱ ዝግጁ ነው",
+  "taglineTrackManageGrow": "ተከታተል • አስተዳድር • አሳድግ"
 }

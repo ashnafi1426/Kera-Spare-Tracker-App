@@ -90,6 +90,15 @@ void main() {
 
       expect(regressions, isEmpty,
           reason: 'Found color regressions against baseline:\n${regressions.join('\n')}');
+
+      final redesignedScreens = {
+        'lib/features/splash/presentation/splash_screen.dart',
+        'lib/features/auth/presentation/screens/welcome_screen.dart',
+      };
+      for (final screen in redesignedScreens) {
+        expect(currentViolations[screen] ?? 0, 0,
+            reason: '$screen is completed in Step 2 and must strictly have 0 violations');
+      }
     });
   });
 }

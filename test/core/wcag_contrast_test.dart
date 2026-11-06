@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kera_spare_tracker/core/design/tokens/kera_colors.dart';
 import 'package:kera_spare_tracker/core/design/tokens/kera_theme_colors.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 

@@ -1,20 +1,20 @@
 # Kera Spare Tracker — Extended Color Audit Baseline Report
 
-**Generated Date:** 2026-11-06T05:11:05.991Z
+**Generated Date:** 2026-11-06T12:19:01.145Z
 **Scope:** All Dart source files under `lib/` (excluding `lib/core/theme/` and `lib/core/design/tokens/`)
 
 ## Executive Summary
 
 | Violation Category | Count |
 | :--- | :---: |
-| **Files with Rogue Color References** | **72 files** |
+| **Files with Rogue Color References** | **70 files** |
 | **Rogue `Colors.<hue>` References** | **120** |
-| **Hardcoded `Color(0x...)` References** | **574** |
+| **Hardcoded `Color(0x...)` References** | **564** |
 | **`Color.fromARGB(...)` References** | **0** |
 | **`Color.fromRGBO(...)` References** | **0** |
 | **`MaterialColor` References** | **0** |
 | **`Colors.primaries` / `accents`** | **0** |
-| **Grand Total Violations** | **694** |
+| **Grand Total Violations** | **684** |
 
 ---
 
@@ -55,45 +55,43 @@
 | 31 | `lib/features/admin/presentation/widgets/admin_metric_tile.dart` | 0 | 6 | 0 | **6** | Pending Migration |
 | 32 | `lib/features/auth/presentation/widgets/session_banners.dart` | 6 | 0 | 0 | **6** | Pending Migration |
 | 33 | `lib/features/sales/presentation/screens/sale_details_screen.dart` | 6 | 0 | 0 | **6** | Pending Migration |
-| 34 | `lib/core/design/widgets/mobile_components.dart` | 0 | 5 | 0 | **5** | Pending Migration |
-| 35 | `lib/features/admin/presentation/widgets/admin_header_bar.dart` | 0 | 5 | 0 | **5** | Pending Migration |
-| 36 | `lib/features/admin/presentation/widgets/admin_scaffold.dart` | 0 | 5 | 0 | **5** | Pending Migration |
-| 37 | `lib/features/dashboard/presentation/widgets/dashboard_empty_onboarding.dart` | 0 | 5 | 0 | **5** | Pending Migration |
-| 38 | `lib/features/dashboard/presentation/widgets/dashboard_metrics_grid.dart` | 1 | 4 | 0 | **5** | Pending Migration |
-| 39 | `lib/features/reports/presentation/widgets/inventory_reports_sheet.dart` | 5 | 0 | 0 | **5** | Pending Migration |
-| 40 | `lib/features/settings/presentation/screens/settings_screen.dart` | 4 | 1 | 0 | **5** | Pending Migration |
-| 41 | `lib/features/sync/presentation/screens/conflict_resolution_screen.dart` | 5 | 0 | 0 | **5** | Pending Migration |
-| 42 | `lib/core/design/widgets/kera_app_footer.dart` | 0 | 4 | 0 | **4** | Pending Migration |
-| 43 | `lib/features/auth/presentation/screens/login_screen.dart` | 1 | 3 | 0 | **4** | Pending Migration |
-| 44 | `lib/features/auth/presentation/screens/pending_approval_screen.dart` | 0 | 4 | 0 | **4** | Pending Migration |
-| 45 | `lib/features/dashboard/presentation/widgets/dashboard_sales_trend.dart` | 2 | 2 | 0 | **4** | Pending Migration |
-| 46 | `lib/features/home/presentation/screens/home_screen.dart` | 0 | 4 | 0 | **4** | Pending Migration |
-| 47 | `lib/core/widgets/kera_loading_indicator.dart` | 0 | 3 | 0 | **3** | Pending Migration |
-| 48 | `lib/features/dashboard/presentation/widgets/dashboard_header.dart` | 3 | 0 | 0 | **3** | Pending Migration |
-| 49 | `lib/features/settings/presentation/screens/security_sessions_screen.dart` | 3 | 0 | 0 | **3** | Pending Migration |
-| 50 | `lib/core/widgets/server_config_dialog.dart` | 0 | 2 | 0 | **2** | Pending Migration |
-| 51 | `lib/features/admin/presentation/screens/admin_owners_list_screen.dart` | 0 | 2 | 0 | **2** | Pending Migration |
-| 52 | `lib/features/dashboard/presentation/widgets/dashboard_best_sellers.dart` | 0 | 2 | 0 | **2** | Pending Migration |
-| 53 | `lib/features/dashboard/presentation/widgets/dashboard_quick_actions.dart` | 1 | 1 | 0 | **2** | Pending Migration |
-| 54 | `lib/features/notifications/presentation/screens/notification_settings_screen.dart` | 1 | 1 | 0 | **2** | Pending Migration |
-| 55 | `lib/features/sales/presentation/screens/sale_success_screen.dart` | 1 | 1 | 0 | **2** | Pending Migration |
-| 56 | `lib/features/security/presentation/widgets/app_lock_settings_card.dart` | 2 | 0 | 0 | **2** | Pending Migration |
-| 57 | `lib/features/settings/presentation/screens/language_selection_screen.dart` | 2 | 0 | 0 | **2** | Pending Migration |
-| 58 | `lib/features/stock/presentation/dialogs/update_stock_dialog.dart` | 0 | 2 | 0 | **2** | Pending Migration |
-| 59 | `lib/main.dart` | 2 | 0 | 0 | **2** | Pending Migration |
-| 60 | `lib/core/design/widgets/kera_card.dart` | 1 | 0 | 0 | **1** | Pending Migration |
-| 61 | `lib/core/design/widgets/skeleton_loader.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 62 | `lib/core/widgets/announcement_banner_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 63 | `lib/core/widgets/kera_logo_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 64 | `lib/core/widgets/maintenance_banner_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 65 | `lib/features/auth/presentation/screens/change_password_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
-| 66 | `lib/features/auth/presentation/screens/register_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 67 | `lib/features/dashboard/presentation/widgets/dashboard_recent_sales.dart` | 1 | 0 | 0 | **1** | Pending Migration |
-| 68 | `lib/features/dashboard/presentation/widgets/dashboard_sync_error_sheet.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 69 | `lib/features/notifications/presentation/screens/notification_center_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
-| 70 | `lib/features/settings/presentation/screens/business_profile_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 71 | `lib/features/stock/presentation/screens/low_stock_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
-| 72 | `lib/features/sync/presentation/screens/initial_sync_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
+| 34 | `lib/features/admin/presentation/widgets/admin_header_bar.dart` | 0 | 5 | 0 | **5** | Pending Migration |
+| 35 | `lib/features/dashboard/presentation/widgets/dashboard_empty_onboarding.dart` | 0 | 5 | 0 | **5** | Pending Migration |
+| 36 | `lib/features/dashboard/presentation/widgets/dashboard_metrics_grid.dart` | 1 | 4 | 0 | **5** | Pending Migration |
+| 37 | `lib/features/reports/presentation/widgets/inventory_reports_sheet.dart` | 5 | 0 | 0 | **5** | Pending Migration |
+| 38 | `lib/features/settings/presentation/screens/settings_screen.dart` | 4 | 1 | 0 | **5** | Pending Migration |
+| 39 | `lib/features/sync/presentation/screens/conflict_resolution_screen.dart` | 5 | 0 | 0 | **5** | Pending Migration |
+| 40 | `lib/core/design/widgets/kera_app_footer.dart` | 0 | 4 | 0 | **4** | Pending Migration |
+| 41 | `lib/features/auth/presentation/screens/login_screen.dart` | 1 | 3 | 0 | **4** | Pending Migration |
+| 42 | `lib/features/auth/presentation/screens/pending_approval_screen.dart` | 0 | 4 | 0 | **4** | Pending Migration |
+| 43 | `lib/features/dashboard/presentation/widgets/dashboard_sales_trend.dart` | 2 | 2 | 0 | **4** | Pending Migration |
+| 44 | `lib/features/home/presentation/screens/home_screen.dart` | 0 | 4 | 0 | **4** | Pending Migration |
+| 45 | `lib/core/widgets/kera_loading_indicator.dart` | 0 | 3 | 0 | **3** | Pending Migration |
+| 46 | `lib/features/dashboard/presentation/widgets/dashboard_header.dart` | 3 | 0 | 0 | **3** | Pending Migration |
+| 47 | `lib/features/settings/presentation/screens/security_sessions_screen.dart` | 3 | 0 | 0 | **3** | Pending Migration |
+| 48 | `lib/core/widgets/server_config_dialog.dart` | 0 | 2 | 0 | **2** | Pending Migration |
+| 49 | `lib/features/admin/presentation/screens/admin_owners_list_screen.dart` | 0 | 2 | 0 | **2** | Pending Migration |
+| 50 | `lib/features/dashboard/presentation/widgets/dashboard_best_sellers.dart` | 0 | 2 | 0 | **2** | Pending Migration |
+| 51 | `lib/features/dashboard/presentation/widgets/dashboard_quick_actions.dart` | 1 | 1 | 0 | **2** | Pending Migration |
+| 52 | `lib/features/notifications/presentation/screens/notification_settings_screen.dart` | 1 | 1 | 0 | **2** | Pending Migration |
+| 53 | `lib/features/sales/presentation/screens/sale_success_screen.dart` | 1 | 1 | 0 | **2** | Pending Migration |
+| 54 | `lib/features/security/presentation/widgets/app_lock_settings_card.dart` | 2 | 0 | 0 | **2** | Pending Migration |
+| 55 | `lib/features/settings/presentation/screens/language_selection_screen.dart` | 2 | 0 | 0 | **2** | Pending Migration |
+| 56 | `lib/features/stock/presentation/dialogs/update_stock_dialog.dart` | 0 | 2 | 0 | **2** | Pending Migration |
+| 57 | `lib/main.dart` | 2 | 0 | 0 | **2** | Pending Migration |
+| 58 | `lib/core/design/widgets/kera_card.dart` | 1 | 0 | 0 | **1** | Pending Migration |
+| 59 | `lib/core/design/widgets/skeleton_loader.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 60 | `lib/core/widgets/announcement_banner_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 61 | `lib/core/widgets/kera_logo_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 62 | `lib/core/widgets/maintenance_banner_widget.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 63 | `lib/features/auth/presentation/screens/change_password_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
+| 64 | `lib/features/auth/presentation/screens/register_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 65 | `lib/features/dashboard/presentation/widgets/dashboard_recent_sales.dart` | 1 | 0 | 0 | **1** | Pending Migration |
+| 66 | `lib/features/dashboard/presentation/widgets/dashboard_sync_error_sheet.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 67 | `lib/features/notifications/presentation/screens/notification_center_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
+| 68 | `lib/features/settings/presentation/screens/business_profile_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 69 | `lib/features/stock/presentation/screens/low_stock_screen.dart` | 0 | 1 | 0 | **1** | Pending Migration |
+| 70 | `lib/features/sync/presentation/screens/initial_sync_screen.dart` | 1 | 0 | 0 | **1** | Pending Migration |
 
 ---
 *Baseline strictly locked in `test/color_audit_baseline.json`. Any violation increase fails the automated CI test.*

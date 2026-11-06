@@ -41,7 +41,7 @@ class KeraProductCard extends StatelessWidget {
     this.shelfLocation,
     this.photoPath,
     this.price,
-    this.currencySymbol = 'ብር',
+    this.currencySymbol = 'ETB',
     required this.stockQuantity,
     this.unit,
     this.isLowStock = false,
@@ -320,7 +320,7 @@ class KeraProductCard extends StatelessWidget {
 
   Widget _buildStockPill() {
     if (isOutOfStock || stockQuantity <= 0) {
-      return KeraStatusBadge.outOfStock(label: outOfStockLabel ?? 'ያለቀ');
+      return KeraStatusBadge.outOfStock(label: outOfStockLabel ?? 'Out of stock');
     } else if (isLowStock) {
       return KeraStatusBadge.lowStock(quantity: stockQuantity);
     } else {

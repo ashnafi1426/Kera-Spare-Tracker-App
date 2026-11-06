@@ -39,7 +39,7 @@ class KeraStatusBadge extends StatelessWidget {
     Key? key,
     required double quantity,
     String? unit,
-    String defaultLabel = 'በክምችት አለ',
+    String defaultLabel = 'In Stock',
   }) {
     final qtyStr = quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1);
     final text = unit != null && unit.isNotEmpty ? '$qtyStr $unit' : '$defaultLabel: $qtyStr';
@@ -57,7 +57,7 @@ class KeraStatusBadge extends StatelessWidget {
   factory KeraStatusBadge.lowStock({
     Key? key,
     required double quantity,
-    String defaultLabel = 'አነስተኛ ክምችት',
+    String defaultLabel = 'Low Stock',
   }) {
     final qtyStr = quantity.toStringAsFixed(quantity % 1 == 0 ? 0 : 1);
     return KeraStatusBadge(
@@ -73,7 +73,7 @@ class KeraStatusBadge extends StatelessWidget {
   /// Depleted stock indicator (Solid orange chip with bold navy text).
   factory KeraStatusBadge.outOfStock({
     Key? key,
-    String label = 'አልቋል',
+    String label = 'Out of Stock',
   }) {
     return KeraStatusBadge(
       key: key,
@@ -89,7 +89,7 @@ class KeraStatusBadge extends StatelessWidget {
   factory KeraStatusBadge.syncPending({
     Key? key,
     required int count,
-    String defaultLabel = 'ያልተላከ',
+    String defaultLabel = 'Pending',
   }) {
     return KeraStatusBadge(
       key: key,
@@ -104,7 +104,7 @@ class KeraStatusBadge extends StatelessWidget {
   /// Online synced badge (Navy soft chip).
   factory KeraStatusBadge.synced({
     Key? key,
-    String label = 'የተገናኘ',
+    String label = 'Synced',
   }) {
     return KeraStatusBadge(
       key: key,
@@ -119,7 +119,7 @@ class KeraStatusBadge extends StatelessWidget {
   /// Offline badge (Navy outline chip).
   factory KeraStatusBadge.offline({
     Key? key,
-    String label = 'ከመስመር ውጭ',
+    String label = 'Offline',
   }) {
     return KeraStatusBadge(
       key: key,

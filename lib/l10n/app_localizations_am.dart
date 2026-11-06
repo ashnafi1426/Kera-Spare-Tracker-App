@@ -1757,4 +1757,140 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get retrySync => 'አሁን ሞክር';
+
+  @override
+  String get statusInStock => 'በክምችት አለ';
+
+  @override
+  String get statusLowStock => 'አነስተኛ ክምችት';
+
+  @override
+  String get statusOutOfStock => 'አልቋል';
+
+  @override
+  String get statusSynced => 'የተገናኘ';
+
+  @override
+  String get statusSyncing => 'በማመሳሰል ላይ...';
+
+  @override
+  String get statusPending => 'ያልተላከ';
+
+  @override
+  String get statusFailed => 'አልተሳካም';
+
+  @override
+  String get statusConflict => 'ግጭት';
+
+  @override
+  String get statusOffline => 'ከመስመር ውጭ';
+
+  @override
+  String get statusActive => 'ንቁ';
+
+  @override
+  String get statusSuspended => 'የታገደ';
+
+  @override
+  String get tryAgain => 'እንደገና ሞክር';
+
+  @override
+  String get stockIn => 'ዕቃ አስገባ';
+
+  @override
+  String get stockOut => 'ዕቃ አውጣ';
+
+  @override
+  String get offlineBannerNotice => 'ከመስመር ውጭ — ለውጦች በዚህ ስልክ ላይ ተቀምጠዋል';
+
+  @override
+  String get cartNotEmptyPrompt => 'በጋሪዎ ውስጥ ዕቃዎች አሉ። ልሰርዛቸው?';
+
+  @override
+  String get tabHome => 'ዋና ገጽ';
+
+  @override
+  String get tabInventory => 'ዕቃዎች';
+
+  @override
+  String get tabReports => 'ሪፖርቶች';
+
+  @override
+  String get tabMore => 'ተጨማሪ';
+
+  @override
+  String get navSell => 'ሽያጭ';
+
+  @override
+  String get termsOfService => 'የአገልግሎት ውሎች';
+
+  @override
+  String get termsOfServiceDescription =>
+      'ኬራ ስፔር ትራከር በኢትዮጵያ ላሉ የከባድ መኪና እና አውቶሞቲቭ መለዋወጫ ነጋዴዎች የተዘጋጀ የሽያጭ እና የክምችት መቆጣጠሪያ መድረክ ነው። መረጃዎችህ በከፍተኛ ጥበቃ እና ሚስጥራዊነት ይያዛሉ።';
+
+  @override
+  String get privacyPolicy => 'የግላዊነት ፖሊሲ';
+
+  @override
+  String get privacyPolicyDescription =>
+      'የእያንዳንዱ የሱቅ ባለቤት መረጃ (ዕቃዎች፣ ሽያጮች፣ ዋጋዎች እና ሪፖርቶች) ሙሉ በሙሉ የተከለለ ሲሆን ሌሎች ባለቤቶች ወይም ያልተፈቀደላቸው አካላት ማየት አይችሉም። ከመስመር ውጭ የገቡ መረጃዎች የበይነመረብ ግንኙነት ሲገኝ ብቻ በደህንነት ይመሳሰላሉ።';
+
+  @override
+  String get appTagline => 'የከባድ መኪና እና ማሽነሪ መለዋወጫዎች መከታተያ';
+
+  @override
+  String get supportLabel => 'ድጋፍ';
+
+  @override
+  String get termsShort => 'ውሎች';
+
+  @override
+  String get privacyShort => 'ግላዊነት';
+
+  @override
+  String get amharicLabel => 'አማርኛ';
+
+  @override
+  String get englishLabel => 'English';
+
+  @override
+  String get welcomeHeadline => 'የመለዋወጫ ንግድዎን ይከታተሉ፣ ይሽጡ እና ያሳድጉ';
+
+  @override
+  String get welcomeSubtitle =>
+      'ለኬራ የመለዋወጫ ሱቆች ከመስመር ውጭ የሚሰራ ክምችት፣ ፈጣን ሽያጭ እና የመደርደሪያ አመልካች።';
+
+  @override
+  String get featurePosTitle => 'ፈጣን ሽያጭ መመዝገቢያ';
+
+  @override
+  String get featurePosDesc => 'ለጅምላና ለችርቻሮ የተዘጋጀ ፈጣን የሽያጭ ደረሰኝ ማውጫ።';
+
+  @override
+  String get featureInventoryTitle => 'የዕቃዎች መደርደሪያ ቁጥጥር';
+
+  @override
+  String get featureInventoryDesc =>
+      'በዕቃ ቁጥር፣ በዓይነት፣ በክፍል እና በመደርደሪያ በፍጥነት ያግኙ።';
+
+  @override
+  String get featureOfflineTitle => 'ያለ ኢንተርኔት ይሰራል';
+
+  @override
+  String get featureOfflineDesc => 'ኔትወርክ ሲቋረጥም ያለማቋረጥ ይሽጡ፤ ሲገናኝ ራሱ ያመሳስላል።';
+
+  @override
+  String get loginToAccount => 'ወደ መለያዎ ይግቡ';
+
+  @override
+  String get createNewAccount => 'አዲስ የንግድ መለያ ይክፈቱ';
+
+  @override
+  String get keraHubLocation => 'አዲስ አበባ • ኬራ አውቶ ማዕከል';
+
+  @override
+  String get systemReady => 'ስርዓቱ ዝግጁ ነው';
+
+  @override
+  String get taglineTrackManageGrow => 'ተከታተል • አስተዳድር • አሳድግ';
 }

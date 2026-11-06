@@ -1808,4 +1808,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retrySync => 'Retry Sync';
+
+  @override
+  String get statusInStock => 'In Stock';
+
+  @override
+  String get statusLowStock => 'Low Stock';
+
+  @override
+  String get statusOutOfStock => 'Out of Stock';
+
+  @override
+  String get statusSynced => 'Synced';
+
+  @override
+  String get statusSyncing => 'Syncing...';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusFailed => 'Failed';
+
+  @override
+  String get statusConflict => 'Conflict';
+
+  @override
+  String get statusOffline => 'Offline';
+
+  @override
+  String get statusActive => 'Active';
+
+  @override
+  String get statusSuspended => 'Suspended';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get stockIn => 'Stock In';
+
+  @override
+  String get stockOut => 'Stock Out';
+
+  @override
+  String get offlineBannerNotice => 'Offline — changes are saved on this phone';
+
+  @override
+  String get cartNotEmptyPrompt => 'You have items in the cart. Discard them?';
+
+  @override
+  String get tabHome => 'Home';
+
+  @override
+  String get tabInventory => 'Inventory';
+
+  @override
+  String get tabReports => 'Reports';
+
+  @override
+  String get tabMore => 'More';
+
+  @override
+  String get navSell => 'Sell';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get termsOfServiceDescription =>
+      'Kera Spare Tracker is an offline-first inventory and POS SaaS platform designed for automotive and heavy machinery spare parts businesses in Kera, Addis Ababa, Ethiopia. All tenant data is strictly isolated and encrypted.';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get privacyPolicyDescription =>
+      'Each owner’s data (inventory, sales, cost snapshots, and financial reports) is strictly tenant-isolated and cannot be viewed by other owners. Offline transactions sync securely when connectivity is restored.';
+
+  @override
+  String get appTagline => 'Heavy Machinery & Automotive Spare Parts POS';
+
+  @override
+  String get supportLabel => 'Support';
+
+  @override
+  String get termsShort => 'Terms';
+
+  @override
+  String get privacyShort => 'Privacy';
+
+  @override
+  String get amharicLabel => 'Amharic';
+
+  @override
+  String get englishLabel => 'English';
+
+  @override
+  String get welcomeHeadline => 'Track, Sell & Grow Your Spare Parts Shop';
+
+  @override
+  String get welcomeSubtitle =>
+      'Fast POS checkout, visual shelf location, and 100% offline-first reliability for Kera businesses.';
+
+  @override
+  String get featurePosTitle => 'Fast POS & Sales';
+
+  @override
+  String get featurePosDesc =>
+      'Instant retail & wholesale checkout with receipt generation.';
+
+  @override
+  String get featureInventoryTitle => 'Smart Shelf Locator';
+
+  @override
+  String get featureInventoryDesc =>
+      'Locate parts instantly by OEM part number, brand, and rack.';
+
+  @override
+  String get featureOfflineTitle => '100% Offline Reliable';
+
+  @override
+  String get featureOfflineDesc =>
+      'Keep selling uninterrupted even with zero connection; auto-syncs when online.';
+
+  @override
+  String get loginToAccount => 'Sign In to Account';
+
+  @override
+  String get createNewAccount => 'Register New Business';
+
+  @override
+  String get keraHubLocation => 'Addis Ababa • Kera Auto District';
+
+  @override
+  String get systemReady => 'System Ready';
+
+  @override
+  String get taglineTrackManageGrow => 'Track • Manage • Grow';
 }

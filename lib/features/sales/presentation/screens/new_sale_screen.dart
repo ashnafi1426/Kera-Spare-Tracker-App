@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/kera_colors.dart';
+import '../../../../core/design/widgets/confirm_sheet.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
@@ -47,6 +48,24 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => const _PartSearchPickerSheet(),
     );
+  }
+
+  Future<void> _handleClose() async {
+    final cart = ref.read(newSaleCartProvider);
+    if (cart.isNotEmpty) {
+      final shouldDiscard = await ConfirmSheet.show(
+        context,
+        title: context.l10n.cartNotEmptyPrompt,
+        message: 'Cart items will be removed if you exit checkout.',
+        confirmLabel: context.l10n.adminDiscard,
+        cancelLabel: context.l10n.cancel,
+      );
+      if (shouldDiscard != true) return;
+      ref.read(newSaleCartProvider.notifier).clear();
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _submitSale() async {
@@ -185,8 +204,14 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
     final totalCost = totalAmount - totalProfit;
     final totalUnits = cart.fold(0.0, (sum, i) => sum + i.quantity);
 
-    return Scaffold(
-      backgroundColor: context.scaffoldBg,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleClose();
+      },
+      child: Scaffold(
+        backgroundColor: context.scaffoldBg,
       body: SafeArea(
         top: false,
         child: Column(
@@ -210,11 +235,11 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
+                          Icons.close_rounded,
                           color: Colors.white,
-                          size: 20,
+                          size: 24,
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: _handleClose,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -604,6 +629,7 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                 ),
               ),
             ),
+      ),
     );
   }
 

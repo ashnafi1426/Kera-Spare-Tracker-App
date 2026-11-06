@@ -20,22 +20,18 @@ class KeraAppFooter extends ConsumerWidget {
   }
 
   void _showTermsDialog(BuildContext context) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.tr('የአገልግሎት ውሎች', 'Terms of Service')),
+        title: Text(l10n.termsOfService),
         content: SingleChildScrollView(
-          child: Text(
-            context.tr(
-              'ኬራ ስፔር ትራከር በኢትዮጵያ ላሉ የከባድ መኪና እና አውቶሞቲቭ መለዋወጫ ነጋዴዎች የተዘጋጀ የሽያጭ እና የክምችት መቆጣጠሪያ መድረክ ነው። መረጃዎችህ በከፍተኛ ጥበቃ እና ሚስጥራዊነት ይያዛሉ።',
-              'Kera Spare Tracker is an offline-first inventory and POS SaaS platform designed for automotive and heavy machinery spare parts businesses in Kera, Addis Ababa, Ethiopia. All tenant data is strictly isolated and encrypted.',
-            ),
-          ),
+          child: Text(l10n.termsOfServiceDescription),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(context.tr('እሺ', 'Close')),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -43,22 +39,18 @@ class KeraAppFooter extends ConsumerWidget {
   }
 
   void _showPrivacyDialog(BuildContext context) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(context.tr('የግላዊነት ፖሊሲ', 'Privacy Policy')),
+        title: Text(l10n.privacyPolicy),
         content: SingleChildScrollView(
-          child: Text(
-            context.tr(
-              'የእያንዳንዱ የሱቅ ባለቤት መረጃ (ዕቃዎች፣ ሽያጮች፣ ዋጋዎች እና ሪፖርቶች) ሙሉ በሙሉ የተከለለ ሲሆን ሌሎች ባለቤቶች ወይም ያልተፈቀደላቸው አካላት ማየት አይችሉም። ከመስመር ውጭ የገቡ መረጃዎች የበይነመረብ ግንኙነት ሲገኝ ብቻ በደህንነት ይመሳሰላሉ።',
-              'Each owner’s data (inventory, sales, cost snapshots, and financial reports) is strictly tenant-isolated and cannot be viewed by other owners. Offline transactions sync securely when connectivity is restored.',
-            ),
-          ),
+          child: Text(l10n.privacyPolicyDescription),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(context.tr('እሺ', 'Close')),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -68,55 +60,36 @@ class KeraAppFooter extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = context.isDark;
-    final footerBg = isDark ? const Color(0xFF071220) : const Color(0xFF0B2A5B);
-    final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFFA5B4CB);
+    final l10n = context.l10n;
+    final footerBg = isDark ? const Color(0xFF061B3F) : const Color(0xFF0B2A5B);
+    final textMuted = isDark ? const Color(0xFF9AA7BD) : const Color(0xFFD3DAE8);
 
     return Container(
       width: double.infinity,
       color: footerBg,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Logo & App Name
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const KeraLogoWidget(size: 28, borderRadius: 8),
-              const SizedBox(width: 10),
-              const Text(
-                AppConstants.appName,
+              KeraLogoWidget(size: 28),
+              SizedBox(width: 10),
+              Text(
+                'KERA SPARE TRACKER',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: KeraColors.brandOrange.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  'v${AppConstants.appVersion}',
-                  style: TextStyle(
-                    color: KeraColors.brandOrange,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            context.tr(
-              'የከባድ መኪና እና ማሽነሪ መለዋወጫዎች መከታተያ',
-              'Heavy Machinery & Automotive Spare Parts POS',
-            ),
+            l10n.appTagline,
             style: TextStyle(
               color: textMuted,
               fontSize: 11,
@@ -138,10 +111,10 @@ class KeraAppFooter extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.support_agent_rounded, size: 14, color: KeraColors.brandOrange),
+                    const Icon(Icons.support_agent_rounded, size: 14, color: KeraColors.orange500),
                     const SizedBox(width: 4),
                     Text(
-                      context.tr('ድጋፍ · Support', 'Support'),
+                      l10n.supportLabel,
                       style: TextStyle(color: textMuted, fontSize: 12),
                     ),
                   ],
@@ -150,14 +123,14 @@ class KeraAppFooter extends ConsumerWidget {
               InkWell(
                 onTap: () => _showTermsDialog(context),
                 child: Text(
-                  context.tr('የአገልግሎት ውሎች', 'Terms'),
+                  l10n.termsShort,
                   style: TextStyle(color: textMuted, fontSize: 12),
                 ),
               ),
               InkWell(
                 onTap: () => _showPrivacyDialog(context),
                 child: Text(
-                  context.tr('ግላዊነት', 'Privacy'),
+                  l10n.privacyShort,
                   style: TextStyle(color: textMuted, fontSize: 12),
                 ),
               ),
@@ -172,40 +145,44 @@ class KeraAppFooter extends ConsumerWidget {
               InkWell(
                 onTap: () => ref.read(localeControllerProvider.notifier).setLocale(const Locale('am')),
                 child: Text(
-                  'አማርኛ',
+                  l10n.amharicLabel,
                   style: TextStyle(
                     color: ref.watch(localeControllerProvider).languageCode == 'am'
-                        ? KeraColors.brandOrange
+                        ? KeraColors.orange500
                         : textMuted,
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: ref.watch(localeControllerProvider).languageCode == 'am'
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ),
-              Text('  •  ', style: TextStyle(color: textMuted, fontSize: 12)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text('·', style: TextStyle(color: textMuted, fontSize: 12)),
+              ),
               InkWell(
                 onTap: () => ref.read(localeControllerProvider.notifier).setLocale(const Locale('en')),
                 child: Text(
-                  'English',
+                  l10n.englishLabel,
                   style: TextStyle(
                     color: ref.watch(localeControllerProvider).languageCode == 'en'
-                        ? KeraColors.brandOrange
+                        ? KeraColors.orange500
                         : textMuted,
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: ref.watch(localeControllerProvider).languageCode == 'en'
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-
-          // Copyright
+          const SizedBox(height: 12),
           Text(
-            '© 2026 Kera Spare Tracker. All rights reserved. Addis Ababa, Ethiopia.',
-            textAlign: TextAlign.center,
+            'Version ${AppConstants.appVersion} (${AppConstants.appBuildNumber}) · Offline-First Engine',
             style: TextStyle(
-              color: textMuted.withValues(alpha: 0.7),
+              color: textMuted.withValues(alpha: 0.6),
               fontSize: 10,
             ),
           ),

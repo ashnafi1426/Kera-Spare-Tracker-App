@@ -57,7 +57,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: KeraTypography.fontEthiopic,
-      fontFamilyFallback: [KeraTypography.fontLatin, 'sans-serif'],
+      fontFamilyFallback: KeraTypography.fontFallbacks,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: KeraColors.navy50,
       canvasColor: KeraColors.navy50,
@@ -84,7 +84,7 @@ class AppTheme {
         scrolledUnderElevation: 2,
         titleTextStyle: TextStyle(
           fontFamily: KeraTypography.fontEthiopic,
-      fontFamilyFallback: [KeraTypography.fontLatin, 'sans-serif'],
+      fontFamilyFallback: KeraTypography.fontFallbacks,
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -290,7 +290,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: KeraTypography.fontEthiopic,
-      fontFamilyFallback: [KeraTypography.fontLatin, 'sans-serif'],
+      fontFamilyFallback: KeraTypography.fontFallbacks,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: darkSurface,
       canvasColor: darkSurface,
@@ -315,6 +315,8 @@ class AppTheme {
         centerTitle: false,
         scrolledUnderElevation: 1,
         titleTextStyle: TextStyle(
+          fontFamily: KeraTypography.fontEthiopic,
+          fontFamilyFallback: KeraTypography.fontFallbacks,
           color: darkTextPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w700,

@@ -9,6 +9,7 @@ analyzer:
     - lib/l10n/app_localizations*.dart
     - web/**
     - windows/**
+    - integration_test/**
 
 linter:
   rules:

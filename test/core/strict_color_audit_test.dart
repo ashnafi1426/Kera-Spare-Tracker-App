@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/design/tokens/kera_colors.dart';
 import 'package:kera_spare_tracker/core/design/tokens/kera_theme_colors.dart';
 import 'package:kera_spare_tracker/core/design/widgets/mobile_components.dart';
-import 'package:kera_spare_tracker/core/design/widgets/status_badge.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 
 void main() {
@@ -42,7 +41,7 @@ void main() {
 
       // Low Stock
       await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: StatusBadge.lowStock(quantity: 3)),
+        home: Scaffold(body: StatusBadge.lowStock(quantity: 3, defaultLabel: 'አነስተኛ ክምችት')),
       ));
       expect(find.text('አነስተኛ ክምችት: 3'), findsOneWidget);
       expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);

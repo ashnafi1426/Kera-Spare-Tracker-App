@@ -39,7 +39,7 @@ class KeraColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color border = Color(0xFFD3DAE8);
   static const Color textMutedColor = Color(0xFF4A5B78);
-  static const Color disabledColor = Color(0xFF9AA7BD);
+  static const Color disabledColor = textSecondary; // #4A5B78 (exceeds WCAG 3:1 on disabled containers)
 
   // --- Structural Navy Aliases ---
   static const Color brandNavy = navy800;

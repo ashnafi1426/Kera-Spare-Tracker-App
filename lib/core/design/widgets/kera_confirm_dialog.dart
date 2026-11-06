@@ -24,8 +24,8 @@ class KeraConfirmDialog extends StatefulWidget {
     super.key,
     required this.title,
     required this.message,
-    this.confirmLabel = 'አረጋግጥ (Confirm)',
-    this.cancelLabel = 'ይቅር (Cancel)',
+    this.confirmLabel = 'Confirm',
+    this.cancelLabel = 'Cancel',
     this.isDestructive = false,
     this.requireReason = false,
     this.reasonLabel,
@@ -39,8 +39,8 @@ class KeraConfirmDialog extends StatefulWidget {
     BuildContext context, {
     required String title,
     required String message,
-    String confirmLabel = 'አረጋግጥ (Confirm)',
-    String cancelLabel = 'ይቅር (Cancel)',
+    String confirmLabel = 'Confirm',
+    String cancelLabel = 'Cancel',
     bool isDestructive = false,
     bool requireReason = false,
     String? reasonLabel,
@@ -153,12 +153,12 @@ class _KeraConfirmDialogState extends State<KeraConfirmDialog> {
                 const SizedBox(height: KeraSpacing.lg),
                 KeraTextField(
                   controller: _reasonController,
-                  label: widget.reasonLabel ?? 'ምክንያት / Reason',
-                  hintText: widget.reasonHint ?? 'የእርምጃውን ምክንያት ያስገቡ...',
+                  label: widget.reasonLabel ?? 'Reason',
+                  hintText: widget.reasonHint ?? 'Enter reason for this action...',
                   maxLines: 2,
                   validator: (val) {
                     if (val == null || val.trim().isEmpty) {
-                      return 'ምክንያት ማስገባት ግዴታ ነው (Reason required)';
+                      return 'Reason is required';
                     }
                     return null;
                   },

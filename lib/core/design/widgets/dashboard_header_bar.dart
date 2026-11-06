@@ -124,7 +124,7 @@ class DashboardHeaderBar extends StatelessWidget {
                 const OwnerThemeToggle(),
                 const SizedBox(width: 6),
 
-                // Language Switcher (EN / አማ)
+                // Language Switcher (EN / AM)
                 const OwnerLanguageToggle(),
 
                 // Custom Trailing Action (e.g. Notification Bell, Sync Pill)

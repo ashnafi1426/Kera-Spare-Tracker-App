@@ -23,7 +23,7 @@ class KeraErrorState extends StatelessWidget {
     this.title,
     this.errorCode,
     this.onRetry,
-    this.retryLabel = 'እንደገና ይሞክሩ (Retry)',
+    this.retryLabel = 'Retry',
     this.onSecondaryAction,
     this.secondaryActionLabel,
     this.secondaryActionIcon,
