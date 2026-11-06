@@ -41,6 +41,15 @@ class KeraColors {
   static const Color textMutedColor = Color(0xFF4A5B78);
   static const Color disabledColor = textSecondary; // #4A5B78 (exceeds WCAG 3:1 on disabled containers)
 
+  // --- Splash Screen & Ambient Gradients ---
+  static const Color splashRadialNavy = Color(0xFF0F2B58);
+  static const Color splashBgLightWarm = Color(0xFFFFF9F2);
+  static const Color splashBgLightNeutral = Color(0xFFFCFDFE);
+
+  // --- Registration & Auth Mobile Redesign ---
+  static const Color inputBg = Color(0xFFF8FAFC);
+  static const Color flagContainerBg = Color(0xFFEFF3F8);
+
   // --- Structural Navy Aliases ---
   static const Color brandNavy = navy800;
   static const Color brandNavyDark = navy900;

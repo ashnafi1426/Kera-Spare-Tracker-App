@@ -705,13 +705,13 @@
     {
       "file": "lib/features/auth/presentation/screens/register_screen.dart",
       "nonNeutralColorsCount": 0,
-      "hexColorsCount": 1,
+      "hexColorsCount": 0,
       "fromARGBCount": 0,
       "fromRGBOCount": 0,
       "materialColorCount": 0,
       "primariesCount": 0,
-      "totalViolations": 1,
-      "redesigned": false
+      "totalViolations": 0,
+      "redesigned": true
     },
     {
       "file": "lib/features/dashboard/presentation/widgets/dashboard_recent_sales.dart",

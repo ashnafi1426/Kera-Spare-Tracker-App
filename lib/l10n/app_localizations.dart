@@ -3687,8 +3687,176 @@ abstract class AppLocalizations {
   /// No description provided for @taglineTrackManageGrow.
   ///
   /// In am, this message translates to:
-  /// **'ተከታተል • አስተዳድር • አሳድግ'**
+  /// **'መከታተል • ማስተዳደር • ማሳደግ'**
   String get taglineTrackManageGrow;
+
+  /// No description provided for @splashPreparing.
+  ///
+  /// In am, this message translates to:
+  /// **'ስርዓቱ እየተዘጋጀ ነው...'**
+  String get splashPreparing;
+
+  /// No description provided for @offlineReadySync.
+  ///
+  /// In am, this message translates to:
+  /// **'Offline-Ready Sync'**
+  String get offlineReadySync;
+
+  /// No description provided for @addisAbabaLocation.
+  ///
+  /// In am, this message translates to:
+  /// **'Addis Ababa, Ethiopia'**
+  String get addisAbabaLocation;
+
+  /// No description provided for @merchantRegistration.
+  ///
+  /// In am, this message translates to:
+  /// **'የነጋዴ ምዝገባ'**
+  String get merchantRegistration;
+
+  /// No description provided for @offlineReady.
+  ///
+  /// In am, this message translates to:
+  /// **'Offline Ready'**
+  String get offlineReady;
+
+  /// No description provided for @stepOfTwo.
+  ///
+  /// In am, this message translates to:
+  /// **'{step} ከ 2'**
+  String stepOfTwo(String step);
+
+  /// No description provided for @registerHeroTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመመዝገቢያ ፖርታል'**
+  String get registerHeroTitle;
+
+  /// No description provided for @registerHeroSubtitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የመለዋወጫ ንግድዎን በዲጂታል መንገድ ማስተዳደር ይጀምሩ።'**
+  String get registerHeroSubtitle;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In am, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @personalInfoAmharic.
+  ///
+  /// In am, this message translates to:
+  /// **'የግል መረጃ'**
+  String get personalInfoAmharic;
+
+  /// No description provided for @fullNameLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'Full Name / ሙሉ ስም'**
+  String get fullNameLabel;
+
+  /// No description provided for @enterFullNameHint.
+  ///
+  /// In am, this message translates to:
+  /// **'ሙሉ ስምዎን ያስገቡ'**
+  String get enterFullNameHint;
+
+  /// No description provided for @fullNameRequired.
+  ///
+  /// In am, this message translates to:
+  /// **'ሙሉ ስም ማስገባት ግዴታ ነው'**
+  String get fullNameRequired;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'Phone Number / ስልክ ቁጥር'**
+  String get phoneLabel;
+
+  /// No description provided for @phoneInputHint.
+  ///
+  /// In am, this message translates to:
+  /// **'9XX XXX XXX'**
+  String get phoneInputHint;
+
+  /// No description provided for @businessInformation.
+  ///
+  /// In am, this message translates to:
+  /// **'Business Information'**
+  String get businessInformation;
+
+  /// No description provided for @businessInfoAmharic.
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ መረጃ'**
+  String get businessInfoAmharic;
+
+  /// No description provided for @businessNameLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'Business Name / የንግድ ስም'**
+  String get businessNameLabel;
+
+  /// No description provided for @enterBusinessNamePlaceholder.
+  ///
+  /// In am, this message translates to:
+  /// **'የንግድ ስም ያስገቡ'**
+  String get enterBusinessNamePlaceholder;
+
+  /// No description provided for @passwordInputLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'Password / የይለፍ ቃል'**
+  String get passwordInputLabel;
+
+  /// No description provided for @createPasswordPlaceholder.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ይፍጠሩ'**
+  String get createPasswordPlaceholder;
+
+  /// No description provided for @confirmPasswordInputLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'Confirm Password / የይለፍ ቃል ያረጋግጡ'**
+  String get confirmPasswordInputLabel;
+
+  /// No description provided for @confirmPasswordPlaceholder.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃልዎን ያረጋግጡ'**
+  String get confirmPasswordPlaceholder;
+
+  /// No description provided for @termsAgreementLine1.
+  ///
+  /// In am, this message translates to:
+  /// **'I agree to the Terms of Service & Privacy Policy'**
+  String get termsAgreementLine1;
+
+  /// No description provided for @termsAgreementLine2.
+  ///
+  /// In am, this message translates to:
+  /// **'የአገልግሎት መብቶችን እና የግላዊነት ፖሊሲን እስማማለሁ'**
+  String get termsAgreementLine2;
+
+  /// No description provided for @createAccountAction.
+  ///
+  /// In am, this message translates to:
+  /// **'Create Account / መለያ ይፍጠሩ'**
+  String get createAccountAction;
+
+  /// No description provided for @alreadyHaveAccountPrefix.
+  ///
+  /// In am, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccountPrefix;
+
+  /// No description provided for @signInHighlight.
+  ///
+  /// In am, this message translates to:
+  /// **'Sign In'**
+  String get signInHighlight;
 }
 
 class _AppLocalizationsDelegate

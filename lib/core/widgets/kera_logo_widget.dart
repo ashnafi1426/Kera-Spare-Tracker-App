@@ -9,17 +9,20 @@ class KeraLogoWidget extends StatelessWidget {
   final double size;
   final double borderRadius;
   final Color? backgroundColor;
+  final bool showShadow;
+  final EdgeInsetsGeometry? padding;
 
   const KeraLogoWidget({
     super.key,
     this.size = 38,
     this.borderRadius = 8,
     this.backgroundColor,
+    this.showShadow = true,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
-    // In dark mode or light mode, a crisp white plate guarantees logo visibility
     final effectiveBg = backgroundColor ?? Colors.white;
 
     // In tests, avoid hanging ImageStream decoder
@@ -32,15 +35,17 @@ class KeraLogoWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBg,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 4,
-            offset: Offset(0, 1),
-          ),
-        ],
+        boxShadow: showShadow
+            ? const [
+                BoxShadow(
+                  color: Color(0x14000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
+                ),
+              ]
+            : null,
       ),
-      padding: EdgeInsets.all(size * 0.08),
+      padding: padding ?? EdgeInsets.all(size * 0.08),
       clipBehavior: Clip.antiAlias,
       child: isTestEnvironment
           ? Icon(

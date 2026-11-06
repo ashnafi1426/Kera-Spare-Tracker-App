@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
-import 'package:kera_spare_tracker/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:kera_spare_tracker/features/splash/presentation/splash_screen.dart';
 import 'package:kera_spare_tracker/l10n/app_localizations.dart';
 
 class StaticLocaleNotifier extends LocaleController {
@@ -30,7 +30,13 @@ void main() {
     outDir.createSync(recursive: true);
   }
 
-  testWidgets('Capture welcome_dark_am', (tester) async {
+  Future<void> captureOne(
+    WidgetTester tester, {
+    required Widget widget,
+    required bool isDark,
+    required Locale locale,
+    required String fileName,
+  }) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0;
 
@@ -39,17 +45,17 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          localeControllerProvider.overrideWith(() => StaticLocaleNotifier(const Locale('am'))),
+          localeControllerProvider.overrideWith(() => StaticLocaleNotifier(locale)),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.darkTheme,
+          theme: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('am'),
+          locale: locale,
           home: RepaintBoundary(
             key: boundaryKey,
-            child: const WelcomeScreen(),
+            child: widget,
           ),
         ),
       ),
@@ -64,12 +70,22 @@ void main() {
       final image = await boundary.toImage(pixelRatio: 1.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData != null) {
-        final file = File('docs/ui-check/screen1_splash_onboarding/welcome_dark_am.png');
+        final file = File('docs/ui-check/screen1_splash_onboarding/$fileName');
         file.writeAsBytesSync(byteData.buffer.asUint8List());
         // ignore: avoid_print
-        print('📸 Captured: welcome_dark_am.png (${byteData.lengthInBytes} bytes)');
+        print('📸 Captured $fileName (${byteData.lengthInBytes} bytes)');
       }
     }
+  }
+
+  testWidgets('Capture splash_dark_am', (tester) async {
+    await captureOne(
+      tester,
+      widget: const SplashScreen(progressValue: 0.65),
+      isDark: true,
+      locale: const Locale('am'),
+      fileName: 'splash_dark_am.png',
+    );
     exit(0);
   });
 }

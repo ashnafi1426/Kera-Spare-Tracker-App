@@ -1946,4 +1946,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taglineTrackManageGrow => 'Track • Manage • Grow';
+
+  @override
+  String get splashPreparing => 'System is preparing...';
+
+  @override
+  String get offlineReadySync => 'Offline-Ready Sync';
+
+  @override
+  String get addisAbabaLocation => 'Addis Ababa, Ethiopia';
+
+  @override
+  String get merchantRegistration => 'Merchant Registration';
+
+  @override
+  String get offlineReady => 'Offline Ready';
+
+  @override
+  String stepOfTwo(String step) {
+    return '$step of 2';
+  }
+
+  @override
+  String get registerHeroTitle => 'የመመዝገቢያ ፖርታል';
+
+  @override
+  String get registerHeroSubtitle =>
+      'Start managing your spare parts business digitally.';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get personalInfoAmharic => 'የግል መረጃ';
+
+  @override
+  String get fullNameLabel => 'Full Name / ሙሉ ስም';
+
+  @override
+  String get enterFullNameHint => 'Enter your full name';
+
+  @override
+  String get fullNameRequired => 'Full name is required';
+
+  @override
+  String get phoneLabel => 'Phone Number / ስልክ ቁጥር';
+
+  @override
+  String get phoneInputHint => '9XX XXX XXX';
+
+  @override
+  String get businessInformation => 'Business Information';
+
+  @override
+  String get businessInfoAmharic => 'የንግድ መረጃ';
+
+  @override
+  String get businessNameLabel => 'Business Name / የንግድ ስም';
+
+  @override
+  String get enterBusinessNamePlaceholder => 'Enter business name';
+
+  @override
+  String get passwordInputLabel => 'Password / የይለፍ ቃል';
+
+  @override
+  String get createPasswordPlaceholder => 'Create a password';
+
+  @override
+  String get confirmPasswordInputLabel => 'Confirm Password / የይለፍ ቃል ያረጋግጡ';
+
+  @override
+  String get confirmPasswordPlaceholder => 'Confirm your password';
+
+  @override
+  String get termsAgreementLine1 =>
+      'I agree to the Terms of Service & Privacy Policy';
+
+  @override
+  String get termsAgreementLine2 => 'የአገልግሎት መብቶችን እና የግላዊነት ፖሊሲን እስማማለሁ';
+
+  @override
+  String get createAccountAction => 'Create Account / መለያ ይፍጠሩ';
+
+  @override
+  String get alreadyHaveAccountPrefix => 'Already have an account?';
+
+  @override
+  String get signInHighlight => 'Sign In';
 }

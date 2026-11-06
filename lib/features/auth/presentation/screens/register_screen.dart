@@ -3,19 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/tokens/kera_colors.dart';
-import '../../../../core/design/tokens/kera_radii.dart';
-import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/language_selector_widget.dart';
 import '../controllers/auth_controller.dart';
 
-/// Stitch Design: Screen 4 — Business Registration / የንግድ ምዝገባ
-/// Allows new spare parts business owners in Kera to register their store.
+/// Pixel-perfect native mobile registration screen strictly matching Stitch Design Page 02.
+///
+/// Layout:
+/// - Clean ambient background with subtle warmth and top ambient glow
+/// - Top App Bar: Back arrow, Kera Logo + "Kera Spare" & "Merchant Registration", Language Switcher Pill, Support Headset
+/// - Stepper & Status Bar: "1 of 2" indicator with progress track, "Offline Ready" soft-orange chip
+/// - Hero Title & Warehouse Graphic Banner: Ethiopian title & subtitle with stylized 3D warehouse rack illustration
+/// - Main Form Card: White rounded container with subtle border & soft elevation
+///   - Section 1: Personal Information (Full Name, Phone Number with Ethiopian flag pill)
+///   - Section 2: Business Information (Business Name, Password, Confirm Password with visibility toggles)
+///   - Terms of Service & Privacy Policy agreement checkbox
+///   - Primary CTA: Deep Navy "Create Account / መለያ ይፍጠሩ →" full-width pill button
+/// - Footer: "Already have an account? Sign In" (with Orange highlight)
+/// - Bottom Fluid Accent Waves in Brand Navy & Orange
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -25,11 +34,14 @@ class RegisterScreen extends ConsumerStatefulWidget {
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _businessNameController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _businessNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _agreedToTerms = true;
   bool _isLoading = false;
   bool _isOfflineError = false;
@@ -37,20 +49,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
-    _businessNameController.dispose();
+    _fullNameController.dispose();
     _phoneController.dispose();
+    _businessNameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  int _calculateStrength(String pass) {
-    if (pass.isEmpty) return 0;
-    int score = 0;
-    if (pass.length >= 6) score++;
-    if (RegExp(r'[a-zA-Z]').hasMatch(pass) && RegExp(r'[0-9]').hasMatch(pass)) score++;
-    if (pass.length >= 8 && RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(pass)) score++;
-    return score;
   }
 
   Future<void> _handleRegister() async {
@@ -58,13 +62,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _errorMessage = null;
       _isOfflineError = false;
     });
+
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('እባክዎን በመመሪያ እና ደንብ ይስማሙ (Please accept terms)'),
-          backgroundColor: KeraColors.warning,
+          content: Text(
+            'እባክዎን በአገልግሎት መመሪያ እና ደንብ ይስማሙ (Please agree to terms)',
+            style: TextStyle(fontFamily: KeraTypography.fontEthiopic),
+          ),
+          backgroundColor: KeraColors.orange700,
         ),
       );
       return;
@@ -73,8 +81,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final l10n = context.l10n;
     setState(() => _isLoading = true);
 
+    // Normalize phone number: if entered as 9XXXXXXXX or 09XXXXXXXX, ensure proper format
+    String phone = _phoneController.text.trim();
+    if (phone.startsWith('0')) {
+      phone = phone.substring(1);
+    }
+
     final result = await ref.read(authControllerProvider.notifier).register(
-          phoneNumber: _phoneController.text.trim(),
+          phoneNumber: phone,
           businessName: _businessNameController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -86,7 +100,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       onSuccess: (_) {
         context.go('/pending-approval', extra: {
           'businessName': _businessNameController.text.trim(),
-          'phoneNumber': _phoneController.text.trim(),
+          'phoneNumber': phone,
         });
       },
       onFailure: (failure) {
@@ -106,8 +120,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           return;
         }
 
-        if (failure.code == 'SERVER_UNREACHABLE' ||
-            failure is NetworkFailure) {
+        if (failure.code == 'SERVER_UNREACHABLE' || failure is NetworkFailure) {
           setState(() {
             _isOfflineError = true;
             _errorMessage = failure.message;
@@ -136,50 +149,99 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
     return Scaffold(
-      backgroundColor: context.scaffoldBg,
-      body: Column(
+      backgroundColor: isDark ? KeraColors.navy900 : KeraColors.navy50,
+      body: Stack(
         children: [
-          // Top Bar (Stitch Screen 4 Header)
-          _buildTopBanner(context),
-
-          // Main Scrollable Canvas
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KeraSpacing.lg,
-                vertical: KeraSpacing.md,
+          // Background ambient gradient
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: isDark
+                    ? const RadialGradient(
+                        center: Alignment(0, -0.6),
+                        radius: 1.2,
+                        colors: [
+                          KeraColors.splashRadialNavy,
+                          KeraColors.navy900,
+                        ],
+                      )
+                    : const RadialGradient(
+                        center: Alignment(0, -0.7),
+                        radius: 1.1,
+                        colors: [
+                          KeraColors.splashBgLightWarm,
+                          KeraColors.splashBgLightNeutral,
+                          KeraColors.navy50,
+                        ],
+                      ),
               ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Step Progress Header (Step 1 of 2)
-                      _buildStepProgress(context),
-                      const SizedBox(height: KeraSpacing.md),
+            ),
+          ),
 
-                      // Title & Orientation Banner
-                      _buildTitleHeader(context),
-                      const SizedBox(height: KeraSpacing.md),
+          // Main scrollable content
+          SafeArea(
+            child: Column(
+              children: [
+                // Top App Bar
+                _buildTopAppBar(context),
 
-                      // Error Banner (if any)
-                      if (_errorMessage != null) ...[
-                        _buildErrorBanner(context),
-                        const SizedBox(height: KeraSpacing.md),
-                      ],
+                // Scrollable Form Canvas
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // 1. Stepper & Offline Badge Row
+                            _buildStepAndStatusRow(context),
+                            const SizedBox(height: 14),
 
-                      // Registration Form Container
-                      _buildRegistrationForm(context),
-                      const SizedBox(height: KeraSpacing.lg),
+                            // 2. Hero Title & Warehouse Graphic Banner
+                            _buildHeroBanner(context),
+                            const SizedBox(height: 16),
 
-                      // Footer with Login Link & Offline Guarantee
-                      _buildFooter(context),
-                      const SizedBox(height: KeraSpacing.md),
-                    ],
+                            // 3. Error Banner (if error occurred)
+                            if (_errorMessage != null) ...[
+                              _buildErrorBanner(context),
+                              const SizedBox(height: 12),
+                            ],
+
+                            // 4. Main Form Card
+                            _buildMainFormCard(context),
+                            const SizedBox(height: 20),
+
+                            // 5. Bottom Sign In Footer Link
+                            _buildSignInFooter(context),
+                            const SizedBox(height: 48), // Padding above bottom wave
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          // Bottom Decorative Accent Wave (Brand Navy & Orange)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 18,
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _BottomWavePainter(isDark: isDark),
               ),
             ),
           ),
@@ -188,160 +250,356 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildTopBanner(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Top App Bar
+  // ---------------------------------------------------------------------------
+  Widget _buildTopAppBar(BuildContext context) {
     final isDark = context.isDark;
+    final l10n = context.l10n;
+
     return Container(
-      color: isDark ? const Color(0xFF071322) : KeraColors.primaryNavy,
-      child: SafeArea(
-        bottom: false,
-        child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: KeraSpacing.sm),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/login');
-                  }
-                },
-                tooltip: 'ወደ ኋላ ተመለስ / Back',
-              ),
-              const KeraLogoWidget(size: 28, borderRadius: 6),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'ኬራ ስፔር / Kera Spare',
-                  overflow: TextOverflow.ellipsis,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      child: Row(
+        children: [
+          // Back button
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back_rounded,
+              color: isDark ? Colors.white : KeraColors.navy900,
+              size: 24,
+            ),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/login');
+              }
+            },
+            tooltip: 'ወደ ኋላ / Back',
+          ),
+
+          // Brand Logo & Text Cluster
+          const KeraLogoWidget(
+            size: 36,
+            borderRadius: 9,
+            showShadow: false,
+            backgroundColor: Colors.transparent,
+            padding: EdgeInsets.zero,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Kera Spare',
                   style: TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
+                    color: isDark ? Colors.white : KeraColors.navy900,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const LanguageSegmentedSwitch(),
-            ],
+                Text(
+                  l10n.merchantRegistration,
+                  style: const TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: KeraColors.textMutedColor,
+                  ),
+                ),
+              ],
+            ),
           ),
+
+          // Language Selector Pill
+          _buildLanguagePill(context),
+          const SizedBox(width: 8),
+
+          // Support Headset Button
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: isDark ? KeraColors.navy800 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.4)
+                    : KeraColors.border,
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                Icons.headset_mic_outlined,
+                size: 20,
+                color: isDark ? Colors.white : KeraColors.navy800,
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('የደንበኞች ድጋፍ: +251 911 000 000 / support@keraspares.com'),
+                    backgroundColor: KeraColors.navy800,
+                  ),
+                );
+              },
+              tooltip: 'ድጋፍ / Support',
+            ),
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguagePill(BuildContext context) {
+    final isDark = context.isDark;
+    final currentLocale = ref.watch(localeControllerProvider);
+    final isAmharic = currentLocale.languageCode == 'am';
+
+    return InkWell(
+      onTap: () {
+        ref.read(localeControllerProvider.notifier).toggleLocale();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: isDark ? KeraColors.navy800 : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? KeraColors.navy600.withValues(alpha: 0.4)
+                : KeraColors.border,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.language_rounded,
+              size: 16,
+              color: isDark ? Colors.white : KeraColors.navy800,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              isAmharic ? 'አማ/EN' : 'EN/አማ',
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : KeraColors.navy900,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStepProgress(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  // ---------------------------------------------------------------------------
+  // Stepper & Status Row
+  // ---------------------------------------------------------------------------
+  Widget _buildStepAndStatusRow(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              context.tr('ደረጃ 1 ከ 2', 'Step 1 of 2'),
-              style: KeraTypography.labelLarge(color: KeraColors.actionBlue).copyWith(
-                fontWeight: FontWeight.w700,
+        // Step number circle badge: "1"
+        Container(
+          width: 24,
+          height: 24,
+          decoration: const BoxDecoration(
+            color: KeraColors.navy800,
+            shape: BoxShape.circle,
+          ),
+          child: const Center(
+            child: Text(
+              '1',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
               ),
             ),
-            Text(
-              context.tr('የንግድ መረጃ', 'Business Information'),
-              style: KeraTypography.bodySmall(color: context.textSecondaryColor).copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            Expanded(
+        const SizedBox(width: 8),
+
+        // Text "of 2"
+        Text(
+          l10n.stepOfTwo('1').replaceFirst('1 ', ''), // Renders "of 2" or "ከ 2"
+          style: TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+          ),
+        ),
+        const SizedBox(width: 12),
+
+        // Thin horizontal step indicator bar
+        Container(
+          width: 100,
+          height: 3.5,
+          decoration: BoxDecoration(
+            color: isDark
+                ? KeraColors.navy800
+                : KeraColors.border.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
               child: Container(
-                height: 5,
                 decoration: BoxDecoration(
-                  color: KeraColors.actionBlue,
-                  borderRadius: BorderRadius.circular(KeraRadii.full),
+                  color: KeraColors.navy800,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Container(
-                height: 5,
-                decoration: BoxDecoration(
-                  color: KeraColors.borderOpaque,
-                  borderRadius: BorderRadius.circular(KeraRadii.full),
+          ),
+        ),
+
+        const Spacer(),
+
+        // Offline Ready pill chip
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+          decoration: BoxDecoration(
+            color: KeraColors.orange100,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: KeraColors.orange500.withValues(alpha: 0.4),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.bolt_rounded,
+                size: 14,
+                color: KeraColors.orange700,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                l10n.offlineReady,
+                style: const TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: KeraColors.orange700,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildTitleHeader(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Hero Banner (Title & Warehouse Graphic)
+  // ---------------------------------------------------------------------------
+  Widget _buildHeroBanner(BuildContext context) {
+    final isDark = context.isDark;
     final l10n = context.l10n;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Stack(
+      alignment: Alignment.centerRight,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: KeraColors.actionBlueTint,
-            borderRadius: BorderRadius.circular(KeraRadii.md),
-          ),
-          child: const Icon(
-            Icons.app_registration_rounded,
-            color: KeraColors.actionBlue,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: KeraSpacing.sm),
-        Expanded(
+        // Left Title & Subtitle
+        Padding(
+          padding: const EdgeInsets.only(right: 96.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.registerTitle,
-                style: KeraTypography.headlineSmall(color: KeraColors.textPrimary).copyWith(
-                  fontWeight: FontWeight.w700,
+                l10n.registerHeroTitle,
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontEthiopic,
+                  fontSize: 23,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                  color: isDark ? Colors.white : KeraColors.navy900,
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
-                l10n.registerSubtitle,
-                style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+                l10n.registerHeroSubtitle,
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w500,
+                  color: isDark
+                      ? KeraColors.navy100.withValues(alpha: 0.9)
+                      : KeraColors.textMutedColor,
+                  height: 1.3,
+                ),
               ),
             ],
           ),
+        ),
+
+        // Stylized Warehouse Rack Graphic
+        const SizedBox(
+          width: 90,
+          height: 64,
+          child: _WarehouseIllustration(),
         ),
       ],
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Error Banner
+  // ---------------------------------------------------------------------------
   Widget _buildErrorBanner(BuildContext context) {
     final l10n = context.l10n;
 
     return Container(
-      padding: const EdgeInsets.all(KeraSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: KeraColors.errorLight,
-        borderRadius: BorderRadius.circular(KeraRadii.lg),
-        border: Border.all(color: KeraColors.error.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: KeraColors.orange500.withValues(alpha: 0.6),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline_rounded, color: KeraColors.error, size: 22),
-          const SizedBox(width: KeraSpacing.sm),
+          const Icon(
+            Icons.info_outline_rounded,
+            color: KeraColors.orange700,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               _errorMessage!,
-              style: KeraTypography.labelLarge(color: KeraColors.error).copyWith(
+              style: const TextStyle(
+                fontFamily: KeraTypography.fontEthiopic,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
+                color: KeraColors.orange700,
               ),
             ),
           ),
@@ -351,7 +609,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                foregroundColor: KeraColors.error,
+                foregroundColor: KeraColors.orange700,
               ),
               icon: const Icon(Icons.refresh_rounded, size: 16),
               label: Text(l10n.retry),
@@ -363,31 +621,93 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildRegistrationForm(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Main Form Card
+  // ---------------------------------------------------------------------------
+  Widget _buildMainFormCard(BuildContext context) {
+    final isDark = context.isDark;
     final l10n = context.l10n;
 
-    return KeraCard(
-      padding: const EdgeInsets.all(KeraSpacing.lg),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? KeraColors.navy800 : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.4)
+              : KeraColors.border.withValues(alpha: 0.7),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : KeraColors.navy800.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Field 1: Business / Shop Name
-            Text(
-              l10n.businessName,
-              style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+            // =================================================================
+            // SECTION 1: Personal Information
+            // =================================================================
+            _buildSectionHeader(
+              context,
+              icon: Icons.person_rounded,
+              title: l10n.personalInformation,
+              subtitle: l10n.personalInfoAmharic,
             ),
+            const SizedBox(height: 14),
+
+            // Field 1: Full Name / ሙሉ ስም *
+            _buildFieldLabel(context, label: l10n.fullNameLabel, isRequired: true),
             const SizedBox(height: 6),
-            TextFormField(
+            _buildInputField(
+              context,
+              controller: _fullNameController,
+              hintText: l10n.enterFullNameHint,
+              prefixIcon: Icons.person_outline_rounded,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return l10n.fullNameRequired;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Field 2: Phone Number / ስልክ ቁጥር *
+            _buildFieldLabel(context, label: l10n.phoneLabel, isRequired: true),
+            const SizedBox(height: 6),
+            _buildPhoneInputField(context),
+            const SizedBox(height: 20),
+
+            // =================================================================
+            // SECTION 2: Business Information
+            // =================================================================
+            _buildSectionHeader(
+              context,
+              icon: Icons.business_center_rounded,
+              title: l10n.businessInformation,
+              subtitle: l10n.businessInfoAmharic,
+            ),
+            const SizedBox(height: 14),
+
+            // Field 3: Business Name / የንግድ ስም *
+            _buildFieldLabel(context, label: l10n.businessNameLabel, isRequired: true),
+            const SizedBox(height: 6),
+            _buildInputField(
+              context,
               controller: _businessNameController,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                hintText: l10n.businessNameHint,
-                prefixIcon: const Icon(Icons.storefront_outlined, color: KeraColors.textSecondary),
-              ),
+              hintText: l10n.enterBusinessNamePlaceholder,
+              prefixIcon: Icons.storefront_outlined,
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
                   return l10n.businessNameRequired;
@@ -395,123 +715,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.info_outline_rounded, size: 13, color: KeraColors.textSecondary),
-                const SizedBox(width: 4),
-                Text(
-                  'የንግድ ፍቃድ ላይ ያለውን ስም ያስገቡ',
-                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: KeraSpacing.md),
+            const SizedBox(height: 16),
 
-            // Field 2: Phone Number
-            Text(
-              l10n.phoneNumber,
-              style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            // Field 4: Password / የይለፍ ቃል *
+            _buildFieldLabel(context, label: l10n.passwordInputLabel, isRequired: true),
             const SizedBox(height: 6),
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              style: KeraTypography.bodyLarge(color: KeraColors.textPrimary).copyWith(fontFamily: 'monospace'),
-              decoration: InputDecoration(
-                hintText: l10n.phoneNumberHint,
-                prefixIcon: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: const BoxDecoration(
-                    color: KeraColors.surfaceSubtle,
-                    borderRadius: BorderRadius.horizontal(
-                      left: Radius.circular(KeraRadii.md),
-                    ),
-                    border: Border(
-                      right: BorderSide(color: KeraColors.borderOpaque),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '+251',
-                        style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'ET',
-                        style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) {
-                  return l10n.phoneRequired;
-                }
-                return Validators.validateEthiopianPhone(val) != null
-                    ? l10n.phoneInvalid
-                    : null;
-              },
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'የኤስኤምኤስ (SMS) ማረጋገጫ ኮድ ይላካል',
-              style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: KeraSpacing.md),
-
-            // Field 3: Password
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.password,
-                  style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  'ጠንካራ / Strong',
-                  style: KeraTypography.bodySmall(color: KeraColors.success).copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            TextFormField(
+            _buildInputField(
+              context,
               controller: _passwordController,
-              obscureText: _obscurePassword,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: l10n.passwordHint,
-                prefixIcon: const Icon(Icons.lock_outline_rounded, color: KeraColors.textSecondary),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: KeraColors.textSecondary,
-                  ),
-                  onPressed: () {
-                    setState(() => _obscurePassword = !_obscurePassword);
-                  },
+              hintText: l10n.createPasswordPlaceholder,
+              prefixIcon: Icons.lock_outline_rounded,
+              isObscure: _obscurePassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+                  size: 20,
                 ),
+                onPressed: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
               ),
               validator: (val) {
                 if (val == null || val.isEmpty) {
@@ -523,89 +748,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 6),
-            // Dynamic Password strength bar indicator
-            Builder(
-              builder: (context) {
-                final strength = _calculateStrength(_passwordController.text);
-                final label = strength == 3
-                    ? context.tr('ጠንካራ የይለፍ ቃል', 'Strong password')
-                    : (strength == 2
-                        ? context.tr('መካከለኛ የይለፍ ቃል', 'Medium password')
-                        : (strength == 1
-                            ? context.tr('ደካማ የይለፍ ቃል', 'Weak password')
-                            : ''));
-                final barColor = strength == 3
-                    ? KeraColors.brandNavy
-                    : (strength == 2 ? KeraColors.brandOrange : KeraColors.orange700);
+            const SizedBox(height: 16),
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: strength >= 1 ? barColor : context.borderColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Container(
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: strength >= 2 ? barColor : context.borderColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Container(
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: strength >= 3 ? barColor : context.borderColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (label.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: barColor,
-                        ),
-                      ),
-                    ],
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: KeraSpacing.md),
-
-            // Field 4: Confirm Password
-            Text(
-              l10n.confirmPassword,
-              style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            // Field 5: Confirm Password / የይለፍ ቃል ያረጋግጡ *
+            _buildFieldLabel(context, label: l10n.confirmPasswordInputLabel, isRequired: true),
             const SizedBox(height: 6),
-            TextFormField(
+            _buildInputField(
+              context,
               controller: _confirmPasswordController,
-              obscureText: _obscurePassword,
-              decoration: InputDecoration(
-                hintText: l10n.confirmPassword,
-                prefixIcon: const Icon(Icons.verified_user_outlined, color: KeraColors.textSecondary),
+              hintText: l10n.confirmPasswordPlaceholder,
+              prefixIcon: Icons.shield_outlined,
+              isObscure: _obscureConfirmPassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+                  size: 20,
+                ),
+                onPressed: () {
+                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                },
               ),
               validator: (val) {
                 if (val != _passwordController.text) {
@@ -614,93 +778,383 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: KeraSpacing.md),
+            const SizedBox(height: 20),
 
+            // =================================================================
             // Terms & Conditions Checkbox
-            InkWell(
-              onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
-              borderRadius: BorderRadius.circular(KeraRadii.sm),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Checkbox(
-                        value: _agreedToTerms,
-                        activeColor: KeraColors.brandOrange,
-                        checkColor: KeraColors.navy900,
-                        onChanged: (val) =>
-                            setState(() => _agreedToTerms = val ?? false),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          text: context.tr('በኬራ መለዋወጫ ', 'I agree to Kera Spare '),
-                          style: KeraTypography.bodySmall(color: context.textPrimaryColor),
-                          children: [
-                            TextSpan(
-                              text: context.tr('መመሪያ እና ደንብ', 'Terms & Conditions'),
-                              style: KeraTypography.bodySmall(color: KeraColors.orange700).copyWith(
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                            TextSpan(
-                              text: context.tr(' ተስማምቻለሁ', ''),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            // =================================================================
+            _buildTermsCheckbox(context),
+            const SizedBox(height: 20),
+
+            // =================================================================
+            // Primary Submit CTA Button: "Create Account / መለያ ይፍጠሩ →"
+            // =================================================================
+            _buildCreateAccountButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Section Header with Round Icon Badge & Underline Divider
+  // ---------------------------------------------------------------------------
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    final isDark = context.isDark;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.35)
+                    : KeraColors.navy100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isDark ? Colors.white : KeraColors.navy800,
               ),
             ),
-            const SizedBox(height: KeraSpacing.lg),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleRegister,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: KeraColors.brandOrange,
-                  foregroundColor: KeraColors.navy900,
-                  disabledBackgroundColor: KeraColors.brandOrange.withValues(alpha: 0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KeraRadii.md),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: KeraTypography.fontLatin,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : KeraColors.navy900,
+                    ),
                   ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontFamily: KeraTypography.fontEthiopic,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: KeraColors.textMutedColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.3)
+              : KeraColors.border.withValues(alpha: 0.5),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Field Label with Required Asterisk
+  // ---------------------------------------------------------------------------
+  Widget _buildFieldLabel(
+    BuildContext context, {
+    required String label,
+    required bool isRequired,
+  }) {
+    final isDark = context.isDark;
+
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : KeraColors.navy900,
+          ),
+        ),
+        if (isRequired) ...[
+          const SizedBox(width: 4),
+          const Text(
+            '*',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: KeraColors.orange700,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Reusable Rounded Input Field
+  // ---------------------------------------------------------------------------
+  Widget _buildInputField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String hintText,
+    required IconData prefixIcon,
+    Widget? suffixIcon,
+    bool isObscure = false,
+    String? Function(String?)? validator,
+  }) {
+    final isDark = context.isDark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? KeraColors.navy900.withValues(alpha: 0.5) : KeraColors.inputBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.4)
+              : KeraColors.border,
+          width: 1,
+        ),
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isObscure,
+        validator: validator,
+        style: TextStyle(
+          fontFamily: KeraTypography.fontLatin,
+          fontSize: 14,
+          color: isDark ? Colors.white : KeraColors.navy900,
+        ),
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 13,
+            color: KeraColors.textMutedColor,
+          ),
+          prefixIcon: Icon(
+            prefixIcon,
+            size: 20,
+            color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+          ),
+          suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phone Input Field with Ethiopian Flag Dropdown Pill
+  // ---------------------------------------------------------------------------
+  Widget _buildPhoneInputField(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Row(
+      children: [
+        // Flag pill
+        Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: isDark
+                ? KeraColors.navy900.withValues(alpha: 0.6)
+                : KeraColors.flagContainerBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? KeraColors.navy600.withValues(alpha: 0.4)
+                  : KeraColors.border,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                '🇪🇹',
+                style: TextStyle(fontSize: 17),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '+251',
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : KeraColors.navy900,
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            context.tr('ይመዝገቡ', 'Register Business'),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: KeraColors.navy900,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20, color: KeraColors.navy900),
-                        ],
+              ),
+              const SizedBox(width: 3),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 16,
+                color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+
+        // Phone input text container
+        Expanded(
+          child: Container(
+            height: 48,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? KeraColors.navy900.withValues(alpha: 0.5)
+                  : KeraColors.inputBg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.4)
+                    : KeraColors.border,
+                width: 1,
+              ),
+            ),
+            child: TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : KeraColors.navy900,
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                hintText: l10n.phoneInputHint,
+                hintStyle: const TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 13,
+                  letterSpacing: 0.5,
+                  color: KeraColors.textMutedColor,
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return l10n.phoneRequired;
+                }
+                return Validators.validateEthiopianPhone(val) != null
+                    ? l10n.phoneInvalid
+                    : null;
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Terms of Service & Privacy Policy Checkbox
+  // ---------------------------------------------------------------------------
+  Widget _buildTermsCheckbox(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return InkWell(
+      onTap: () => setState(() => _agreedToTerms = !_agreedToTerms),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              margin: const EdgeInsets.only(top: 2),
+              decoration: BoxDecoration(
+                color: _agreedToTerms
+                    ? KeraColors.navy800
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: _agreedToTerms
+                      ? KeraColors.navy800
+                      : (isDark ? KeraColors.navy100 : KeraColors.border),
+                  width: 1.5,
+                ),
+              ),
+              child: _agreedToTerms
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 14,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: 'I agree to the ',
+                      style: TextStyle(
+                        fontFamily: KeraTypography.fontLatin,
+                        fontSize: 12,
+                        color: isDark ? Colors.white : KeraColors.navy900,
                       ),
+                      children: const [
+                        TextSpan(
+                          text: 'Terms of Service',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: KeraColors.navy600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(text: ' & '),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: KeraColors.navy600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.termsAgreementLine2,
+                    style: const TextStyle(
+                      fontFamily: KeraTypography.fontEthiopic,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
+                      color: KeraColors.textMutedColor,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -709,51 +1163,271 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Create Account CTA Button
+  // ---------------------------------------------------------------------------
+  Widget _buildCreateAccountButton(BuildContext context) {
     final l10n = context.l10n;
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: () => context.go('/login'),
-              borderRadius: BorderRadius.circular(KeraRadii.sm),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l10n.alreadyHaveAccount,
-                      style: KeraTypography.labelLarge(color: KeraColors.actionBlue).copyWith(
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _handleRegister,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: KeraColors.navy900,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: KeraColors.navy900.withValues(alpha: 0.6),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Row(
+                children: [
+                  const Icon(
+                    Icons.person_add_alt_1_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.createAccountAction,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: KeraTypography.fontLatin,
+                        fontSize: 14.5,
                         fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                        color: Colors.white,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.login_rounded, size: 16, color: KeraColors.actionBlue),
-                  ],
-                ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KeraSpacing.md),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.offline_bolt_rounded, size: 16, color: KeraColors.textSecondary),
-            const SizedBox(width: 6),
-            Text(
-              'የኢንተርኔት መቆራረጥ ቢያጋጥም መረጃዎ በስልክዎ ይቀመጣል',
-              style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Bottom Sign In Footer Link
+  // ---------------------------------------------------------------------------
+  Widget _buildSignInFooter(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Center(
+      child: InkWell(
+        onTap: () => context.go('/login'),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${l10n.alreadyHaveAccountPrefix} ',
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+                ),
+              ),
+              Text(
+                l10n.signInHighlight,
+                style: const TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: KeraColors.orange600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Stylized Warehouse Rack Illustration (Vector Painter)
+// =============================================================================
+class _WarehouseIllustration extends StatelessWidget {
+  const _WarehouseIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
+    return CustomPaint(
+      painter: _WarehouseRackPainter(isDark: isDark),
+    );
+  }
+}
+
+class _WarehouseRackPainter extends CustomPainter {
+  final bool isDark;
+
+  const _WarehouseRackPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Ambient glow behind rack
+    final glowPaint = Paint()
+      ..color = isDark
+          ? KeraColors.navy600.withValues(alpha: 0.15)
+          : KeraColors.navy100.withValues(alpha: 0.4)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+    canvas.drawCircle(Offset(w * 0.7, h * 0.5), 28, glowPaint);
+
+    // Rack frame (Steel uprights)
+    final rackPaint = Paint()
+      ..color = isDark
+          ? KeraColors.navy600
+          : KeraColors.navy600.withValues(alpha: 0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final rackX = w * 0.45;
+    final rackW = w * 0.5;
+
+    // Uprights
+    canvas.drawLine(Offset(rackX, h * 0.1), Offset(rackX, h * 0.9), rackPaint);
+    canvas.drawLine(Offset(rackX + rackW, h * 0.1), Offset(rackX + rackW, h * 0.9), rackPaint);
+
+    // Shelves
+    canvas.drawLine(Offset(rackX, h * 0.35), Offset(rackX + rackW, h * 0.35), rackPaint);
+    canvas.drawLine(Offset(rackX, h * 0.65), Offset(rackX + rackW, h * 0.65), rackPaint);
+    canvas.drawLine(Offset(rackX, h * 0.9), Offset(rackX + rackW, h * 0.9), rackPaint);
+
+    // Top shelf boxes
+    final boxPaint = Paint()
+      ..color = isDark ? KeraColors.navy800 : KeraColors.navy100
+      ..style = PaintingStyle.fill;
+    final boxBorder = Paint()
+      ..color = isDark ? KeraColors.navy600 : KeraColors.border
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final box1 = RRect.fromRectAndRadius(
+      Rect.fromLTWH(rackX + 4, h * 0.15, rackW * 0.4, h * 0.18),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(box1, boxPaint);
+    canvas.drawRRect(box1, boxBorder);
+
+    final box2 = RRect.fromRectAndRadius(
+      Rect.fromLTWH(rackX + rackW * 0.5, h * 0.15, rackW * 0.42, h * 0.18),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(box2, boxPaint);
+    canvas.drawRRect(box2, boxBorder);
+
+    // Middle shelf boxes
+    final box3 = RRect.fromRectAndRadius(
+      Rect.fromLTWH(rackX + 4, h * 0.42, rackW * 0.5, h * 0.20),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(box3, boxPaint);
+    canvas.drawRRect(box3, boxBorder);
+
+    // Stylized Wheel / Gear in foreground (Brand Navy & Orange)
+    final wheelCenter = Offset(w * 0.28, h * 0.68);
+    final tirePaint = Paint()
+      ..color = isDark ? Colors.white : KeraColors.navy900
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.5;
+    canvas.drawCircle(wheelCenter, 14, tirePaint);
+
+    final hubPaint = Paint()
+      ..color = KeraColors.orange500
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(wheelCenter, 6, hubPaint);
+
+    final hubCenterPaint = Paint()
+      ..color = isDark ? KeraColors.navy900 : Colors.white
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(wheelCenter, 2.5, hubCenterPaint);
+
+    // Orange accent cart/skid under the wheel
+    final skidPaint = Paint()
+      ..color = KeraColors.orange500
+      ..style = PaintingStyle.fill;
+    final skidRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.15, h * 0.82, w * 0.35, 4),
+      const Radius.circular(2),
+    );
+    canvas.drawRRect(skidRect, skidPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _WarehouseRackPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+
+// =============================================================================
+// Bottom Ambient Wave Painter (Brand Navy & Orange Swooshes)
+// =============================================================================
+class _BottomWavePainter extends CustomPainter {
+  final bool isDark;
+
+  const _BottomWavePainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Navy Wave
+    final navyPaint = Paint()
+      ..color = isDark ? KeraColors.navy800 : KeraColors.navy900
+      ..style = PaintingStyle.fill;
+
+    final navyPath = Path()
+      ..moveTo(0, h * 0.4)
+      ..quadraticBezierTo(w * 0.25, h * 0.8, w * 0.55, h * 0.3)
+      ..quadraticBezierTo(w * 0.8, -h * 0.1, w, h * 0.5)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(navyPath, navyPaint);
+
+    // Orange Accent Wave
+    final orangePaint = Paint()
+      ..color = KeraColors.orange500
+      ..style = PaintingStyle.fill;
+
+    final orangePath = Path()
+      ..moveTo(w * 0.3, h)
+      ..quadraticBezierTo(w * 0.55, h * 0.4, w * 0.8, h * 0.6)
+      ..quadraticBezierTo(w * 0.92, h * 0.75, w, h * 0.2)
+      ..lineTo(w, h)
+      ..close();
+    canvas.drawPath(orangePath, orangePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BottomWavePainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

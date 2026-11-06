@@ -803,5 +803,40 @@
   "createNewAccount": "Register New Business",
   "keraHubLocation": "Addis Ababa • Kera Auto District",
   "systemReady": "System Ready",
-  "taglineTrackManageGrow": "Track • Manage • Grow"
+  "taglineTrackManageGrow": "Track • Manage • Grow",
+  "splashPreparing": "System is preparing...",
+  "offlineReadySync": "Offline-Ready Sync",
+  "addisAbabaLocation": "Addis Ababa, Ethiopia",
+  "merchantRegistration": "Merchant Registration",
+  "offlineReady": "Offline Ready",
+  "stepOfTwo": "{step} of 2",
+  "@stepOfTwo": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "registerHeroTitle": "የመመዝገቢያ ፖርታል",
+  "registerHeroSubtitle": "Start managing your spare parts business digitally.",
+  "personalInformation": "Personal Information",
+  "personalInfoAmharic": "የግል መረጃ",
+  "fullNameLabel": "Full Name / ሙሉ ስም",
+  "enterFullNameHint": "Enter your full name",
+  "fullNameRequired": "Full name is required",
+  "phoneLabel": "Phone Number / ስልክ ቁጥር",
+  "phoneInputHint": "9XX XXX XXX",
+  "businessInformation": "Business Information",
+  "businessInfoAmharic": "የንግድ መረጃ",
+  "businessNameLabel": "Business Name / የንግድ ስም",
+  "enterBusinessNamePlaceholder": "Enter business name",
+  "passwordInputLabel": "Password / የይለፍ ቃል",
+  "createPasswordPlaceholder": "Create a password",
+  "confirmPasswordInputLabel": "Confirm Password / የይለፍ ቃል ያረጋግጡ",
+  "confirmPasswordPlaceholder": "Confirm your password",
+  "termsAgreementLine1": "I agree to the Terms of Service & Privacy Policy",
+  "termsAgreementLine2": "የአገልግሎት መብቶችን እና የግላዊነት ፖሊሲን እስማማለሁ",
+  "createAccountAction": "Create Account / መለያ ይፍጠሩ",
+  "alreadyHaveAccountPrefix": "Already have an account?",
+  "signInHighlight": "Sign In"
 }
