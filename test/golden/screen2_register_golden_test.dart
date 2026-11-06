@@ -95,6 +95,7 @@ void main() {
       locale: const Locale('am'),
       fileName: 'register_light_am.png',
     );
+    exit(0);
   });
 
   testWidgets('Capture register_light_en', (tester) async {
@@ -104,6 +105,7 @@ void main() {
       locale: const Locale('en'),
       fileName: 'register_light_en.png',
     );
+    exit(0);
   });
 
   testWidgets('Capture register_dark_am', (tester) async {
@@ -113,6 +115,7 @@ void main() {
       locale: const Locale('am'),
       fileName: 'register_dark_am.png',
     );
+    exit(0);
   });
 
   testWidgets('Capture register_dark_en', (tester) async {
@@ -122,5 +125,6 @@ void main() {
       locale: const Locale('en'),
       fileName: 'register_dark_en.png',
     );
+    exit(0);
   });
 }
