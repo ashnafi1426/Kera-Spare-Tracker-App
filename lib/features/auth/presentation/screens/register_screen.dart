@@ -452,34 +452,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
           ),
         ),
-        const SizedBox(width: 12),
 
-        // Thin horizontal step indicator bar
-        Container(
-          width: 100,
-          height: 3.5,
-          decoration: BoxDecoration(
-            color: isDark
-                ? KeraColors.navy800
-                : KeraColors.border.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: KeraColors.navy800,
-                  borderRadius: BorderRadius.circular(2),
+        // Responsive horizontal step indicator bar
+        Expanded(
+          child: Container(
+            height: 3.5,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? KeraColors.navy800
+                  : KeraColors.border.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: 0.5,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: KeraColors.navy800,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-
-        const Spacer(),
 
         // Offline Ready pill chip
         Container(
