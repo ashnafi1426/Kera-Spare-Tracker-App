@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/design/design.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
+import 'package:kera_spare_tracker/core/widgets/kera_image_widget.dart';
 
 void main() {
   group('Kera Design Tokens Test', () {
@@ -222,6 +223,27 @@ void main() {
 
       await tester.tap(find.text('+ Add Part'));
       expect(actionTriggered, isTrue);
+    });
+
+    testWidgets('KeraPartImage safely handles double.infinity width and height', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
+            body: SizedBox(
+              width: 300,
+              height: 200,
+              child: KeraPartImage(
+                width: double.infinity,
+                height: 200,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(KeraPartImage), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

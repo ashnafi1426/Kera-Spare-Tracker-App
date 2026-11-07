@@ -848,7 +848,7 @@ class _BusinessDashboardScreenState
   // --- Recent Activity / Transactions Section ---
   Widget _buildRecentTransactionsSection({
     required BuildContext context,
-    required AsyncValue<dynamic> recentSalesAsync,
+    required AsyncValue<List<SaleModel>> recentSalesAsync,
     required bool isDark,
   }) {
     return Padding(
@@ -902,8 +902,7 @@ class _BusinessDashboardScreenState
             const SizedBox(height: 14),
 
             recentSalesAsync.when(
-              data: (salesList) {
-                final sales = (salesList as List<dynamic>?) ?? [];
+              data: (sales) {
                 if (sales.isEmpty) {
                   return _buildEmptyTransactionsView(context);
                 }
@@ -938,12 +937,12 @@ class _BusinessDashboardScreenState
     );
   }
 
-  Widget _buildTransactionRow(BuildContext context, dynamic sale) {
-    final isSynced = sale.isSynced == true;
-    final total = sale.totalAmount as num? ?? 0;
+  Widget _buildTransactionRow(BuildContext context, SaleModel sale) {
+    final total = sale.totalAmount;
+    final profit = sale.totalProfit;
     final receipt = sale.receiptNumber ?? 'KS-SALE';
-    final itemsCount = sale.items?.length ?? 0;
-    final firstItem = (sale.items != null && sale.items.isNotEmpty)
+    final itemsCount = sale.items.length;
+    final firstItem = sale.items.isNotEmpty
         ? sale.items.first.partNameSnapshot
         : context.tr('የተለያዩ ዕቃዎች', 'Spare Parts');
 
@@ -997,7 +996,7 @@ class _BusinessDashboardScreenState
             ),
             const SizedBox(width: 8),
 
-            // Price & Sync Badge
+            // Price & Profit
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -1015,25 +1014,24 @@ class _BusinessDashboardScreenState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      isSynced
-                          ? Icons.check_circle_rounded
-                          : Icons.access_time_rounded,
-                      size: 11,
-                      color: isSynced
+                      profit >= 0
+                          ? Icons.trending_up_rounded
+                          : Icons.trending_down_rounded,
+                      size: 12,
+                      color: profit >= 0
                           ? KeraColors.green600
-                          : KeraColors.amber600,
+                          : KeraColors.red600,
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      isSynced
-                          ? context.tr('ተልኳል', 'Synced')
-                          : context.tr('አልተላከም', 'Pending'),
+                      '${profit >= 0 ? "+" : ""}${_formatNumber(profit)} ETB',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: isSynced
+                        color: profit >= 0
                             ? KeraColors.green600
-                            : KeraColors.amber700,
+                            : KeraColors.red600,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                     ),
                   ],
