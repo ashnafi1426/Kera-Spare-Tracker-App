@@ -95,6 +95,7 @@ void main() {
         'lib/features/splash/presentation/splash_screen.dart',
         'lib/features/auth/presentation/screens/welcome_screen.dart',
         'lib/features/auth/presentation/screens/register_screen.dart',
+        'lib/features/auth/presentation/screens/login_screen.dart',
       };
       for (final screen in redesignedScreens) {
         expect(currentViolations[screen] ?? 0, 0,

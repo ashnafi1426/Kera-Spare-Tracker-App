@@ -451,14 +451,14 @@
     },
     {
       "file": "lib/features/auth/presentation/screens/login_screen.dart",
-      "nonNeutralColorsCount": 1,
-      "hexColorsCount": 3,
+      "nonNeutralColorsCount": 0,
+      "hexColorsCount": 0,
       "fromARGBCount": 0,
       "fromRGBOCount": 0,
       "materialColorCount": 0,
       "primariesCount": 0,
-      "totalViolations": 4,
-      "redesigned": false
+      "totalViolations": 0,
+      "redesigned": true
     },
     {
       "file": "lib/features/auth/presentation/screens/pending_approval_screen.dart",

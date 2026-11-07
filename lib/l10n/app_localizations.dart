@@ -3857,6 +3857,114 @@ abstract class AppLocalizations {
   /// In am, this message translates to:
   /// **'Sign In'**
   String get signInHighlight;
+
+  /// No description provided for @welcomeBackGreetingAm.
+  ///
+  /// In am, this message translates to:
+  /// **'እንኳን ደህና መጡ!'**
+  String get welcomeBackGreetingAm;
+
+  /// No description provided for @welcomeBackCaps.
+  ///
+  /// In am, this message translates to:
+  /// **'WELCOME BACK'**
+  String get welcomeBackCaps;
+
+  /// No description provided for @loginHeroSubtitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የዕቃዎችዎን ክምችትና ሽያጭ ለማስተዳደር ይግቡ'**
+  String get loginHeroSubtitle;
+
+  /// No description provided for @phoneLabelWithAm.
+  ///
+  /// In am, this message translates to:
+  /// **'ስልክ ቁጥር / Phone Number'**
+  String get phoneLabelWithAm;
+
+  /// No description provided for @passwordLabelWithAm.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል / Password'**
+  String get passwordLabelWithAm;
+
+  /// No description provided for @enterYourPasswordHint.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃልዎን ያስገቡ'**
+  String get enterYourPasswordHint;
+
+  /// No description provided for @rememberMeAm.
+  ///
+  /// In am, this message translates to:
+  /// **'አስታውሰኝ'**
+  String get rememberMeAm;
+
+  /// No description provided for @rememberMeEn.
+  ///
+  /// In am, this message translates to:
+  /// **'Remember me'**
+  String get rememberMeEn;
+
+  /// No description provided for @forgotPasswordAm.
+  ///
+  /// In am, this message translates to:
+  /// **'የይለፍ ቃል ረሱ?'**
+  String get forgotPasswordAm;
+
+  /// No description provided for @forgotPinOrange.
+  ///
+  /// In am, this message translates to:
+  /// **'Forgot PIN?'**
+  String get forgotPinOrange;
+
+  /// No description provided for @logInCta.
+  ///
+  /// In am, this message translates to:
+  /// **'ግቡ / Log In'**
+  String get logInCta;
+
+  /// No description provided for @secureReliableTitle.
+  ///
+  /// In am, this message translates to:
+  /// **'ደህንነት የተረጋገጠ /'**
+  String get secureReliableTitle;
+
+  /// No description provided for @secureReliableAccess.
+  ///
+  /// In am, this message translates to:
+  /// **'Secure & Reliable Access'**
+  String get secureReliableAccess;
+
+  /// No description provided for @secureReliableSubtitle.
+  ///
+  /// In am, this message translates to:
+  /// **'የእርስዎ መረጃ የተጠበቀና ሚስጥራዊ ነው'**
+  String get secureReliableSubtitle;
+
+  /// No description provided for @biometricLoginLabel.
+  ///
+  /// In am, this message translates to:
+  /// **'እክ / Touch ID Login'**
+  String get biometricLoginLabel;
+
+  /// No description provided for @dontHaveAccountAmEn.
+  ///
+  /// In am, this message translates to:
+  /// **'አካውንት የለዎትም? • Don\'t have an account?'**
+  String get dontHaveAccountAmEn;
+
+  /// No description provided for @registerShopLink.
+  ///
+  /// In am, this message translates to:
+  /// **'መመዝገብ ይጀምሩ / Register Shop ›'**
+  String get registerShopLink;
+
+  /// No description provided for @keraDistrictFooter.
+  ///
+  /// In am, this message translates to:
+  /// **'KERA AUTOMOTIVE DISTRICT • ADDIS ABABA'**
+  String get keraDistrictFooter;
 }
 
 class _AppLocalizationsDelegate

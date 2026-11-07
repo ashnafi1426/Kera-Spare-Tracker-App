@@ -2034,4 +2034,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInHighlight => 'Sign In';
+
+  @override
+  String get welcomeBackGreetingAm => 'እንኳን ደህና መጡ!';
+
+  @override
+  String get welcomeBackCaps => 'WELCOME BACK';
+
+  @override
+  String get loginHeroSubtitle => 'Log in to manage your inventory & sales';
+
+  @override
+  String get phoneLabelWithAm => 'ስልክ ቁጥር / Phone Number';
+
+  @override
+  String get passwordLabelWithAm => 'የይለፍ ቃል / Password';
+
+  @override
+  String get enterYourPasswordHint => 'Enter your password';
+
+  @override
+  String get rememberMeAm => 'አስታውሰኝ';
+
+  @override
+  String get rememberMeEn => 'Remember me';
+
+  @override
+  String get forgotPasswordAm => 'የይለፍ ቃል ረሱ?';
+
+  @override
+  String get forgotPinOrange => 'Forgot PIN?';
+
+  @override
+  String get logInCta => 'ግቡ / Log In';
+
+  @override
+  String get secureReliableTitle => 'ደህንነት የተረጋገጠ /';
+
+  @override
+  String get secureReliableAccess => 'Secure & Reliable Access';
+
+  @override
+  String get secureReliableSubtitle => 'Your data is safe and private';
+
+  @override
+  String get biometricLoginLabel => 'እክ / Touch ID Login';
+
+  @override
+  String get dontHaveAccountAmEn => 'አካውንት የለዎትም? • Don\'t have an account?';
+
+  @override
+  String get registerShopLink => 'መመዝገብ ይጀምሩ / Register Shop ›';
+
+  @override
+  String get keraDistrictFooter => 'KERA AUTOMOTIVE DISTRICT • ADDIS ABABA';
 }

@@ -1,28 +1,31 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/constants.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
-import '../../../../core/design/tokens/kera_radii.dart';
-import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
-import '../../../../core/design/widgets/kera_card.dart';
 import '../../../../core/errors/failure.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/services/app_lock_service.dart';
-import '../../../../core/services/session_store.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/language_selector_widget.dart';
 import '../../../../data/local/database_provider.dart';
-import '../../data/repositories/api_auth_repository.dart';
 import '../controllers/auth_controller.dart';
 
-/// Stitch Design: Screen 3 — Login Screen / መግቢያ
-/// Allowing existing spare parts owners and operators to log in with phone and password.
+/// Pixel-perfect native mobile login screen strictly matching Stitch Design Page 03.
+///
+/// Features:
+/// - Faded heavy-machinery watermark backdrop (excavator & dump truck)
+/// - Two-tone brand hero: "እንኳን ደህና መጡ!" + "WELCOME BACK"
+/// - Phone Number field with Ethiopian flag pill [🇪🇹 +251 ▾] and phone icon
+/// - Password field with lock icon and visibility eye toggle
+/// - "Remember me" checkbox + "Forgot PIN?" link
+/// - Deep Navy primary CTA: "ግቡ / Log In →"
+/// - Trust banner: "ደህንነት የተረጋገጠ / Secure & Reliable Access" + Online indicator
+/// - Biometric Quick Login: "እክ / Touch ID Login"
+/// - Footer: "Don't have an account? Register Shop ›" + District Signature
+/// - Bottom fluid accent waves in Brand Navy & Orange
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -34,6 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _rememberMe = true;
   bool _isLoading = false;
@@ -60,17 +64,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       });
       return;
     }
+
     setState(() {
       _errorMessage = null;
       _isOfflineError = false;
     });
+
     if (!_formKey.currentState!.validate()) return;
 
     final l10n = context.l10n;
     setState(() => _isLoading = true);
 
+    String phone = _phoneController.text.trim();
+    if (phone.startsWith('0')) {
+      phone = phone.substring(1);
+    }
+
     final result = await ref.read(authControllerProvider.notifier).login(
-          phoneNumber: _phoneController.text.trim(),
+          phoneNumber: phone,
           password: _passwordController.text.trim(),
           forceDiscardUnsynced: forceDiscardUnsynced,
         );
@@ -91,7 +102,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         } else if (user.isAdmin) {
           context.go('/admin');
         } else {
-          // Rule 6: Check if first login on phone has 0 parts; if so pull catalog
           final db = ref.read(appDatabaseProvider);
           final firstPart =
               await (db.select(db.spareParts)..limit(1)).getSingleOrNull();
@@ -106,24 +116,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       },
       onFailure: (failure) async {
         if (failure is DifferentOwnerConflictFailure) {
-          // Rule 4: Different account conflict dialog
           final discardAndProceed = await showDialog<bool>(
             context: context,
             barrierDismissible: false,
             builder: (ctx) => AlertDialog(
-              title: Text(l10n.authDifferentOwnerConflictTitle),
+              backgroundColor: context.isDark ? KeraColors.navy800 : Colors.white,
+              title: Text(
+                l10n.authDifferentOwnerConflictTitle,
+                style: TextStyle(
+                  color: context.isDark ? Colors.white : KeraColors.navy900,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               content: Text(
                 '${l10n.authDifferentOwnerConflictMessage}\n(${failure.previousOwnerName})',
+                style: TextStyle(
+                  color: context.isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: Text(l10n.cancel),
+                  child: Text(
+                    l10n.cancel,
+                    style: const TextStyle(color: KeraColors.textMutedColor),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.error,
-                    foregroundColor: context.colorScheme.onError,
+                    backgroundColor: KeraColors.orange700,
+                    foregroundColor: Colors.white,
                   ),
                   onPressed: () => Navigator.pop(ctx, true),
                   child: Text(l10n.authDiscardUnsyncedAndLogin),
@@ -154,35 +176,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           return;
         }
 
-        if (failure.code == 'SERVER_UNREACHABLE' ||
-            failure.code == 'INTERNAL_SERVER_ERROR' ||
-            failure.code == 'DATABASE_UNAVAILABLE' ||
-            failure is NetworkFailure) {
+        if (failure.code == 'SERVER_UNREACHABLE' || failure is NetworkFailure) {
           setState(() {
             _isOfflineError = true;
-            _errorMessage = failure.code == 'DATABASE_UNAVAILABLE'
-                ? '${l10n.authServerError} (Database offline)'
-                : (failure.code == 'INTERNAL_SERVER_ERROR'
-                    ? l10n.authServerError
-                    : failure.message);
+            _errorMessage = failure.message;
           });
           return;
         }
 
         _failedAttempts++;
         if (_failedAttempts >= 5) {
-          _lockoutUntil = DateTime.now().add(const Duration(seconds: 60));
-          setState(() {
-            _errorMessage = context.tr(
-              'ተከታታይ 5 የተሳሳቱ ሙከራዎች! እባክዎ ለ 60 ሰከንዶች ይጠብቁ።',
-              '5 consecutive failed login attempts! Temporary lockout for 60 seconds.',
-            );
-          });
-          return;
+          _lockoutUntil = DateTime.now().add(const Duration(seconds: 30));
         }
 
         String msg;
         switch (failure.code) {
+          case 'WRONG_CREDENTIALS':
           case 'INVALID_CREDENTIALS':
             msg = l10n.authWrongPassword;
             break;
@@ -200,284 +209,627 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
+  Future<void> _handleBiometricLogin() async {
+    final lockService = ref.read(appLockServiceProvider);
+    final authenticated = await lockService.authenticateWithBiometrics(
+      context.tr(
+        'በጣት አሻራ ወይም በፊት ለይቶ ማወቅ ይግቡ',
+        'Authenticate with Touch ID / Face ID to log in',
+      ),
+    );
+
+    if (authenticated && mounted) {
+      context.go('/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDark;
+
     return Scaffold(
-      backgroundColor: context.scaffoldBg,
-      body: Column(
+      backgroundColor: isDark ? KeraColors.navy900 : KeraColors.navy50,
+      body: Stack(
         children: [
-          // Top System Anchor Banner (Stitch Screen 3 Header)
-          _buildTopBanner(context),
-
-          // Main Scrollable Canvas Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KeraSpacing.lg,
-                vertical: KeraSpacing.md,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 480),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Screen Intent Title Cluster
-                      _buildHeaderCluster(context),
-                      const SizedBox(height: KeraSpacing.md),
-
-                      // Error Banner (if any)
-                      if (_errorMessage != null) ...[
-                        _buildErrorBanner(context),
-                        const SizedBox(height: KeraSpacing.md),
-                      ],
-
-                      // Main Form Container Card
-                      _buildFormCard(context),
-                      const SizedBox(height: KeraSpacing.md),
-
-                      // Biometric Quick Login Component (Stitch feature)
-                      _buildBiometricCard(context),
-                      const SizedBox(height: KeraSpacing.lg),
-                    ],
-                  ),
-                ),
+          // Background ambient gradient
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: isDark
+                    ? const RadialGradient(
+                        center: Alignment(0, -0.6),
+                        radius: 1.2,
+                        colors: [
+                          KeraColors.splashRadialNavy,
+                          KeraColors.navy900,
+                        ],
+                      )
+                    : const RadialGradient(
+                        center: Alignment(0, -0.7),
+                        radius: 1.1,
+                        colors: [
+                          KeraColors.splashBgLightWarm,
+                          KeraColors.splashBgLightNeutral,
+                          KeraColors.navy50,
+                        ],
+                      ),
               ),
             ),
           ),
 
-          // Bottom Registration Hub Footer
-          _buildFooter(context),
+          // Main scrollable canvas
+          SafeArea(
+            child: Column(
+              children: [
+                // Top App Bar
+                _buildTopAppBar(context),
+
+                // Scrollable Body
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 6.0,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // 1. Hero Brand & Watermark Section
+                            _buildHeroSection(context),
+                            const SizedBox(height: 16),
+
+                            // 2. Error Banner (if any)
+                            if (_errorMessage != null) ...[
+                              _buildErrorBanner(context),
+                              const SizedBox(height: 12),
+                            ],
+
+                            // 3. Main Form Card
+                            _buildLoginFormCard(context),
+                            const SizedBox(height: 18),
+
+                            // 4. Footer & District Signature
+                            _buildFooter(context),
+                            const SizedBox(height: 38), // space for bottom wave
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Bottom Fluid Accent Waves (Brand Navy & Orange)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 18,
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _BottomWavePainter(isDark: isDark),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  /// Top bar with brand and language switch
-  Widget _buildTopBanner(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Top App Bar
+  // ---------------------------------------------------------------------------
+  Widget _buildTopAppBar(BuildContext context) {
     final isDark = context.isDark;
+
     return Container(
-      color: isDark ? const Color(0xFF071322) : KeraColors.primaryNavy,
-      child: SafeArea(
-        bottom: false,
-        child: Container(
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: KeraSpacing.md),
-          child: Row(
-            children: [
-              const KeraLogoWidget(size: 28, borderRadius: 6),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'ኬራ ስፔር / Kera Spare',
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.arrow_back_rounded,
+              color: isDark ? Colors.white : KeraColors.navy900,
+              size: 24,
+            ),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/welcome');
+              }
+            },
+            tooltip: 'ወደ ኋላ / Back',
+          ),
+          const SizedBox(width: 4),
+
+          // Squircle Kera Icon
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: KeraColors.navy900,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(5),
+            child: const KeraLogoWidget(
+              size: 26,
+              borderRadius: 6,
+              showShadow: false,
+              backgroundColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'KERA SPARE',
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
+                    color: isDark ? Colors.white : KeraColors.navy900,
                   ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.settings_ethernet_rounded,
-                  color: Colors.white70,
-                  size: 20,
+                const Text(
+                  'Login',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: KeraColors.textMutedColor,
+                  ),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                tooltip: 'Server Connection Settings',
-                onPressed: () => _showServerConfigDialog(context),
-              ),
-              const SizedBox(width: 8),
-              const LanguageSegmentedSwitch(),
-            ],
+              ],
+            ),
           ),
+
+          // Language Switcher Pill: [🌐 EN ▾]
+          _buildLanguagePill(context),
+          const SizedBox(width: 8),
+
+          // Customer Support Pill [🎧]
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: isDark ? KeraColors.navy800 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.4)
+                    : KeraColors.border,
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                Icons.headset_mic_outlined,
+                size: 20,
+                color: isDark ? Colors.white : KeraColors.navy800,
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('የደንበኞች ድጋፍ: +251 911 000 000 / support@keraspares.com'),
+                    backgroundColor: KeraColors.navy800,
+                  ),
+                );
+              },
+              tooltip: 'ድጋፍ / Support',
+            ),
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguagePill(BuildContext context) {
+    final isDark = context.isDark;
+    final currentLocale = ref.watch(localeControllerProvider);
+    final isAmharic = currentLocale.languageCode == 'am';
+
+    return InkWell(
+      onTap: () {
+        ref.read(localeControllerProvider.notifier).toggleLocale();
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 38,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: isDark ? KeraColors.navy800 : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark
+                ? KeraColors.navy600.withValues(alpha: 0.4)
+                : KeraColors.border,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.language_rounded,
+              size: 16,
+              color: isDark ? Colors.white : KeraColors.navy800,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              isAmharic ? 'አማ' : 'EN',
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : KeraColors.navy900,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Screen Intent Title Cluster
-  Widget _buildHeaderCluster(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Hero Section with Machinery Watermarks & Official Logo
+  // ---------------------------------------------------------------------------
+  Widget _buildHeroSection(BuildContext context) {
+    final isDark = context.isDark;
     final l10n = context.l10n;
 
-    return Column(
+    return Stack(
+      alignment: Alignment.center,
       children: [
-        const SizedBox(height: 12),
-        const Center(
-          child: KeraLogoWidget(size: 64, borderRadius: 16),
+        // Faded heavy machinery vector watermarks (Excavator on left, Truck on right)
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _MachineryWatermarkPainter(isDark: isDark),
+          ),
         ),
-        const SizedBox(height: 14),
-        Text(
-          l10n.loginTitle,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: context.textPrimaryColor,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          context.tr(
-            'የስልክ ቁጥርዎን እና የይለፍ ቃልዎን በማስገባት ይግቡ',
-            'Sign in with your phone and password to continue',
-          ),
-          style: TextStyle(
-            fontSize: 13,
-            color: context.textSecondaryColor,
-          ),
-          textAlign: TextAlign.center,
+
+        // Central Logo & Titles
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Center Logo Container
+            Container(
+              width: 105,
+              height: 105,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isDark ? KeraColors.navy800 : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : KeraColors.navy800.withValues(alpha: 0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: KeraLogoWidget(
+                  size: 85,
+                  borderRadius: 14,
+                  showShadow: false,
+                  backgroundColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Amharic Heading: "እንኳን ደህና መጡ!"
+            Text(
+              l10n.welcomeBackGreetingAm,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: KeraTypography.fontEthiopic,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : KeraColors.navy900,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // Orange Heading: "WELCOME BACK"
+            Text(
+              l10n.welcomeBackCaps,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.4,
+                color: KeraColors.orange600,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // Subtitle: "Log in to manage your inventory & sales"
+            Text(
+              l10n.loginHeroSubtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  /// Inline Dynamic Error Alert Box
+  // ---------------------------------------------------------------------------
+  // Error Banner
+  // ---------------------------------------------------------------------------
   Widget _buildErrorBanner(BuildContext context) {
     final l10n = context.l10n;
 
     return Container(
-      padding: const EdgeInsets.all(KeraSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: KeraColors.errorLight,
-        borderRadius: BorderRadius.circular(KeraRadii.lg),
-        border: Border.all(color: KeraColors.error.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: KeraColors.orange500.withValues(alpha: 0.6),
+          width: 1,
+        ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
-            Icons.error_outline_rounded,
-            color: KeraColors.error,
-            size: 22,
+            Icons.info_outline_rounded,
+            color: KeraColors.orange700,
+            size: 20,
           ),
-          const SizedBox(width: KeraSpacing.sm),
+          const SizedBox(width: 8),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _errorMessage ?? 'Authentication Error',
-                  style: KeraTypography.labelLarge(color: KeraColors.error).copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (_isOfflineError) ...[
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          foregroundColor: KeraColors.navy900,
-                        ),
-                        icon: const Icon(Icons.settings_ethernet_rounded, size: 16),
-                        label: const Text('Server Settings'),
-                        onPressed: () => _showServerConfigDialog(context),
-                      ),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          foregroundColor: KeraColors.navy900,
-                        ),
-                        icon: const Icon(Icons.refresh_rounded, size: 16),
-                        label: Text(l10n.retry),
-                        onPressed: _handleLogin,
-                      ),
-                    ],
-                  ),
-                ],
-              ],
+            child: Text(
+              _errorMessage!,
+              style: const TextStyle(
+                fontFamily: KeraTypography.fontEthiopic,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: KeraColors.orange700,
+              ),
             ),
           ),
+          if (_isOfflineError) ...[
+            const SizedBox(width: 8),
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                foregroundColor: KeraColors.orange700,
+              ),
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: Text(l10n.retry),
+              onPressed: () => _handleLogin(),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  /// Main Form Card with phone input, password, and submission
-  Widget _buildFormCard(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Main Form Card
+  // ---------------------------------------------------------------------------
+  Widget _buildLoginFormCard(BuildContext context) {
+    final isDark = context.isDark;
     final l10n = context.l10n;
 
-    return KeraCard(
-      padding: const EdgeInsets.all(KeraSpacing.lg),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? KeraColors.navy800 : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.4)
+              : KeraColors.border.withValues(alpha: 0.7),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : KeraColors.navy800.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Phone Number Label
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.phoneNumber,
-                  style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                    fontWeight: FontWeight.w600,
+            // 1. Phone Number Label: ስልክ ቁጥር / Phone Number *
+            _buildFieldLabel(context, label: l10n.phoneLabelWithAm, isRequired: true),
+            const SizedBox(height: 6),
+            _buildPhoneInputField(context),
+            const SizedBox(height: 16),
+
+            // 2. Password Label: የይለፍ ቃል / Password *
+            _buildFieldLabel(context, label: l10n.passwordLabelWithAm, isRequired: true),
+            const SizedBox(height: 6),
+            _buildPasswordInputField(context),
+            const SizedBox(height: 12),
+
+            // 3. Options Sub-Row: Remember me & Forgot PIN?
+            _buildOptionsSubRow(context),
+            const SizedBox(height: 18),
+
+            // 4. Primary CTA Button: "ግቡ / Log In →"
+            _buildLoginButton(context),
+            const SizedBox(height: 16),
+
+            // 5. Trust & Connectivity Banner
+            _buildTrustAndConnectivityBanner(context),
+            const SizedBox(height: 14),
+
+            // 6. Biometric Quick Login: "እክ / Touch ID Login"
+            _buildBiometricButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Field Label with Required Asterisk
+  // ---------------------------------------------------------------------------
+  Widget _buildFieldLabel(
+    BuildContext context, {
+    required String label,
+    required bool isRequired,
+  }) {
+    final isDark = context.isDark;
+
+    return RichText(
+      text: TextSpan(
+        text: label,
+        style: TextStyle(
+          fontFamily: KeraTypography.fontLatin,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : KeraColors.navy900,
+        ),
+        children: isRequired
+            ? const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: KeraColors.orange700,
                   ),
                 ),
+              ]
+            : null,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phone Input Field with Ethiopian Flag Dropdown Pill & Receiver Icon
+  // ---------------------------------------------------------------------------
+  Widget _buildPhoneInputField(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: isDark ? KeraColors.navy900.withValues(alpha: 0.5) : KeraColors.inputBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.4)
+              : KeraColors.border,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Flag Container Pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '🇪🇹',
+                  style: TextStyle(fontSize: 17),
+                ),
+                const SizedBox(width: 5),
                 Text(
-                  '/ Phone Number',
-                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
+                  '+251',
+                  style: TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : KeraColors.navy900,
+                  ),
+                ),
+                const SizedBox(width: 3),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+          ),
 
-            // Phone Input with Country Code (+251)
-            TextFormField(
+          // Vertical Separator Line
+          Container(
+            width: 1,
+            height: 24,
+            color: isDark
+                ? KeraColors.navy600.withValues(alpha: 0.5)
+                : KeraColors.border,
+          ),
+          const SizedBox(width: 8),
+
+          // Phone Number Input
+          Expanded(
+            child: TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              style: KeraTypography.bodyLarge(color: KeraColors.textPrimary).copyWith(
-                fontFamily: 'monospace',
-                letterSpacing: 0.5,
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : KeraColors.navy900,
               ),
               decoration: InputDecoration(
-                hintText: l10n.phoneNumberHint,
-                prefixIcon: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: const BoxDecoration(
-                    color: KeraColors.surfaceSubtle,
-                    borderRadius: BorderRadius.horizontal(
-                      left: Radius.circular(KeraRadii.md),
-                    ),
-                    border: Border(
-                      right: BorderSide(color: KeraColors.borderOpaque),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🇪🇹', style: TextStyle(fontSize: 16)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '+251',
-                        style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 13),
+                hintText: l10n.phoneInputHint,
+                hintStyle: const TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 13,
+                  letterSpacing: 0.5,
+                  color: KeraColors.textMutedColor,
                 ),
-                suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _phoneController,
-                  builder: (context, value, _) {
-                    if (value.text.isEmpty) return const SizedBox.shrink();
-                    return IconButton(
-                      icon: const Icon(Icons.cancel_rounded, size: 18),
-                      color: KeraColors.textSecondary,
-                      onPressed: () => _phoneController.clear(),
-                    );
-                  },
-                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                focusedErrorBorder: InputBorder.none,
               ),
               validator: (val) {
                 if (val == null || val.trim().isEmpty) {
@@ -488,597 +840,621 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     : null;
               },
             ),
-            const SizedBox(height: 4),
-            Text(
-              'የኢትዮጵያ ስልክ ቁጥር ቅርጸት (09 ወይም 07)',
-              style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: KeraSpacing.md),
-
-            // Password Label
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.password,
-                  style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  'ሚስጥራዊ ቁጥር',
-                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Password Input
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              style: KeraTypography.bodyLarge(color: KeraColors.textPrimary).copyWith(
-                fontFamily: _obscurePassword ? null : 'monospace',
-              ),
-              decoration: InputDecoration(
-                hintText: l10n.passwordHint,
-                prefixIcon: const Icon(
-                  Icons.key_rounded,
-                  color: KeraColors.textSecondary,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    color: KeraColors.textSecondary,
-                  ),
-                  onPressed: () {
-                    setState(() => _obscurePassword = !_obscurePassword);
-                  },
-                ),
-              ),
-              validator: (val) {
-                if (val == null || val.isEmpty) {
-                  return l10n.passwordRequired;
-                }
-                if (val.length < 6) {
-                  return l10n.passwordTooShort;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: KeraSpacing.xs),
-
-            // Aux Row: Remember Me & Forgot Password
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              runSpacing: 4,
-              children: [
-                InkWell(
-                  onTap: () => setState(() => _rememberMe = !_rememberMe),
-                  borderRadius: BorderRadius.circular(KeraRadii.sm),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: Checkbox(
-                            value: _rememberMe,
-                            activeColor: KeraColors.orange500,
-                            checkColor: KeraColors.navy900,
-                            onChanged: (val) =>
-                                setState(() => _rememberMe = val ?? false),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'አስታውሰኝ (Remember)',
-                          style: KeraTypography.bodySmall(color: KeraColors.textPrimary),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/forgot-password'),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: KeraColors.orange700,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                  ),
-                  child: Text(
-                    context.tr('የይለፍ ቃል ረሱ?', 'Forgot password?'),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: KeraSpacing.md),
-
-            // Large Orange Login Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: KeraColors.brandOrange,
-                  foregroundColor: KeraColors.navy900,
-                  disabledBackgroundColor: KeraColors.brandOrange.withValues(alpha: 0.5),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KeraRadii.md),
-                  ),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          valueColor: AlwaysStoppedAnimation<Color>(KeraColors.navy900),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.login,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.3,
-                              color: KeraColors.navy900,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20, color: KeraColors.navy900),
-                        ],
-                      ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Offline Login Hint
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: context.isDark ? const Color(0xFF0F264A) : KeraColors.navy50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: context.borderColor),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.offline_bolt_outlined, size: 16, color: KeraColors.brandOrange),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      context.tr(
-                        'ከመጀመሪያው ምዝገባ በኋላ ያለ ኢንተርኔት መግባት ይችላሉ።',
-                        'You can log in offline after the first sign-in.',
-                      ),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: context.textSecondaryColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Admin Shortcut (Debug Mode)
-            if (kDebugMode) ...[
-              const SizedBox(height: KeraSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: OutlinedButton.icon(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          setState(() {
-                            _phoneController.text = '0900000000';
-                            _passwordController.text = 'AdminPassword123!';
-                            _errorMessage = null;
-                          });
-                        },
-                  icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
-                  label: const Text('Fill Admin Credentials'),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KeraRadii.md),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Biometric Quick Login Card (matches Stitch retail experience)
-  Widget _buildBiometricCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(KeraSpacing.md),
-      decoration: BoxDecoration(
-        color: KeraColors.surfaceSubtle,
-        borderRadius: BorderRadius.circular(KeraRadii.xl),
-        border: Border.all(color: KeraColors.borderOpaque),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(KeraRadii.md),
-              border: Border.all(color: KeraColors.borderOpaque),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A000000),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.fingerprint_rounded,
-              color: KeraColors.navy800,
-              size: 26,
-            ),
           ),
-          const SizedBox(width: KeraSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'የጣት አሻራ ፈጣን መግቢያ',
-                  style: KeraTypography.labelLarge(color: KeraColors.textPrimary).copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  'Biometric one-tap staff authentication',
-                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
-                ),
-              ],
+
+          // Phone Outline Icon on right
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: Icon(
+              Icons.phone_outlined,
+              size: 20,
+              color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
             ),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KeraRadii.md),
-              ),
-              side: const BorderSide(color: KeraColors.borderOpaque),
-            ),
-            icon: const Icon(Icons.touch_app_rounded, size: 16, color: KeraColors.navy800),
-            label: Text(
-              'አንብብ',
-              style: KeraTypography.labelMedium(color: KeraColors.navy800).copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('የጣት አሻራ በመደብሩ ላይ ሲዘጋጅ በቀጥታ ይሰራል።'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
           ),
         ],
       ),
     );
   }
 
-  /// Bottom Footer matching Stitch Screen 3
-  Widget _buildFooter(BuildContext context) {
+  // ---------------------------------------------------------------------------
+  // Password Input Field with Lock Icon & Visibility Toggle
+  // ---------------------------------------------------------------------------
+  Widget _buildPasswordInputField(BuildContext context) {
+    final isDark = context.isDark;
     final l10n = context.l10n;
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: KeraSpacing.lg,
-        vertical: KeraSpacing.md,
-      ),
       decoration: BoxDecoration(
-        color: context.cardBg,
-        border: Border(
-          top: BorderSide(color: context.borderColor),
+        color: isDark ? KeraColors.navy900.withValues(alpha: 0.5) : KeraColors.inputBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.4)
+              : KeraColors.border,
+          width: 1,
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                'አዲስ የንግድ መደብር ነዎት? ',
-                style: KeraTypography.bodySmall(color: KeraColors.textSecondary),
-              ),
-              InkWell(
-                onTap: () => context.go('/register'),
-                borderRadius: BorderRadius.circular(KeraRadii.sm),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.dontHaveAccount,
-                        style: KeraTypography.labelMedium(color: KeraColors.orange700).copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.open_in_new_rounded,
-                        size: 14,
-                        color: KeraColors.orange700,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      child: TextFormField(
+        controller: _passwordController,
+        obscureText: _obscurePassword,
+        style: TextStyle(
+          fontFamily: KeraTypography.fontLatin,
+          fontSize: 14,
+          color: isDark ? Colors.white : KeraColors.navy900,
+        ),
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          hintText: l10n.enterYourPasswordHint,
+          hintStyle: const TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 13,
+            color: KeraColors.textMutedColor,
           ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  color: KeraColors.brandNavy,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  'Kera Spare OS v2.4.1 • Addis Ababa Retail Grid',
-                  style: KeraTypography.bodySmall(color: KeraColors.textSecondary).copyWith(
-                    fontSize: 10,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+          prefixIcon: Icon(
+            Icons.lock_outline_rounded,
+            size: 20,
+            color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Server Configuration Dialog (Preserved verbatim for local development & Wi-Fi support)
-  Future<void> _showServerConfigDialog(BuildContext context) async {
-    final serverController =
-        TextEditingController(text: AppConstants.apiBaseUrl);
-    String? statusMessage;
-    bool isTesting = false;
-    bool? testSuccess;
-
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            title: Row(
-              children: [
-                Icon(Icons.dns_rounded,
-                    color: Theme.of(ctx).colorScheme.primary),
-                const SizedBox(width: 8),
-                const Expanded(child: Text('Server Settings')),
-              ],
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+              size: 20,
             ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Configure API Base URL to connect over Wi-Fi, hotspot, or USB tether:',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: serverController,
-                    decoration: InputDecoration(
-                      labelText: 'API Base URL',
-                      hintText: 'http://192.168.137.146:7000/api/v1',
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () =>
-                            setDialogState(() => serverController.clear()),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Quick Presets:',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: [
-                      ActionChip(
-                        label: const Text('Wi-Fi (.90)'),
-                        onPressed: () {
-                          setDialogState(() {
-                            serverController.text =
-                                'http://192.168.137.90:7000/api/v1';
-                          });
-                        },
-                      ),
-                      ActionChip(
-                        label: const Text('USB (127.0.0.1)'),
-                        onPressed: () {
-                          setDialogState(() {
-                            serverController.text =
-                                'http://127.0.0.1:7000/api/v1';
-                          });
-                        },
-                      ),
-                      ActionChip(
-                        label: const Text('Wi-Fi (.146)'),
-                        onPressed: () {
-                          setDialogState(() {
-                            serverController.text =
-                                'http://192.168.137.146:7000/api/v1';
-                          });
-                        },
-                      ),
-                      ActionChip(
-                        label: const Text('Emulator (10.0.2.2)'),
-                        onPressed: () {
-                          setDialogState(() {
-                            serverController.text =
-                                'http://10.0.2.2:7000/api/v1';
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: isTesting
-                        ? null
-                        : () async {
-                            setDialogState(() {
-                              isTesting = true;
-                              statusMessage = null;
-                              testSuccess = null;
-                            });
-                            try {
-                              final url = serverController.text.trim();
-                              final testDio = Dio(
-                                BaseOptions(
-                                  baseUrl: url,
-                                  connectTimeout: const Duration(seconds: 3),
-                                  receiveTimeout: const Duration(seconds: 3),
-                                ),
-                              );
-                              final res = await testDio.get('/health');
-                              if (res.statusCode == 200) {
-                                setDialogState(() {
-                                  isTesting = false;
-                                  testSuccess = true;
-                                  statusMessage =
-                                      'Connected! Backend is reachable.';
-                                });
-                              } else {
-                                setDialogState(() {
-                                  isTesting = false;
-                                  testSuccess = false;
-                                  statusMessage =
-                                      'Server response: ${res.statusCode}';
-                                });
-                              }
-                            } catch (_) {
-                              setDialogState(() {
-                                isTesting = false;
-                                testSuccess = false;
-                                statusMessage =
-                                    'Connection failed. Check IP & port.';
-                              });
-                            }
-                          },
-                    icon: isTesting
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.bolt_rounded, size: 18),
-                    label: const Text('Test Connection'),
-                  ),
-                  if (statusMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          testSuccess == true
-                              ? Icons.check_circle_rounded
-                              : Icons.error_rounded,
-                          size: 16,
-                          color: testSuccess == true
-                              ? KeraColors.brandNavy
-                              : KeraColors.orange700,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            statusMessage!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: testSuccess == true
-                                  ? KeraColors.brandNavy
-                                  : KeraColors.orange700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  final target = serverController.text.trim();
-                  final messenger = ScaffoldMessenger.of(context);
-                  final navigator = Navigator.of(ctx);
-                  if (target.isNotEmpty) {
-                    AppConstants.setApiBaseUrl(target);
-                    final sessionStore = ref.read(sessionStoreProvider);
-                    await sessionStore.saveApiBaseUrl(target);
-                    final authRepo = ref.read(authRepositoryProvider);
-                    if (authRepo is ApiAuthRepository) {
-                      authRepo.dio.options.baseUrl = target;
-                    }
-                  }
-                  navigator.pop();
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Server URL set to: $target')),
-                  );
-                },
-                child: const Text('Save & Apply'),
-              ),
-            ],
-          );
+            onPressed: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
+        ),
+        validator: (val) {
+          if (val == null || val.isEmpty) {
+            return l10n.passwordRequired;
+          }
+          if (val.length < 6) {
+            return l10n.passwordTooShort;
+          }
+          return null;
         },
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Options Sub-Row: Remember Me Checkbox & Forgot PIN?
+  // ---------------------------------------------------------------------------
+  Widget _buildOptionsSubRow(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Left: Remember Me
+        InkWell(
+          onTap: () => setState(() => _rememberMe = !_rememberMe),
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: _rememberMe ? KeraColors.navy900 : Colors.transparent,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color: _rememberMe
+                          ? KeraColors.navy900
+                          : (isDark ? KeraColors.navy100 : KeraColors.border),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: _rememberMe
+                      ? const Icon(
+                          Icons.check_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.rememberMeAm,
+                      style: TextStyle(
+                        fontFamily: KeraTypography.fontEthiopic,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : KeraColors.navy900,
+                      ),
+                    ),
+                    Text(
+                      l10n.rememberMeEn,
+                      style: const TextStyle(
+                        fontFamily: KeraTypography.fontLatin,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w500,
+                        color: KeraColors.textMutedColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Right: Forgot PIN? Link
+        InkWell(
+          onTap: () {
+            context.push('/forgot-password');
+          },
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.forgotPasswordAm,
+                  style: TextStyle(
+                    fontFamily: KeraTypography.fontEthiopic,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : KeraColors.navy900,
+                  ),
+                ),
+                Text(
+                  l10n.forgotPinOrange,
+                  style: const TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: KeraColors.orange600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Primary Submit CTA Button: "ግቡ / Log In →"
+  // ---------------------------------------------------------------------------
+  Widget _buildLoginButton(BuildContext context) {
+    final l10n = context.l10n;
+
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : () => _handleLogin(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: KeraColors.navy900,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: KeraColors.navy900.withValues(alpha: 0.6),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    l10n.logInCta,
+                    style: const TextStyle(
+                      fontFamily: KeraTypography.fontLatin,
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Trust & Connectivity Status Banner
+  // ---------------------------------------------------------------------------
+  Widget _buildTrustAndConnectivityBanner(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? KeraColors.navy900.withValues(alpha: 0.5)
+            : KeraColors.flagContainerBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.3)
+              : KeraColors.border.withValues(alpha: 0.6),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // Shield Icon Badge
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: isDark ? KeraColors.navy800 : Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.security_rounded,
+              size: 19,
+              color: KeraColors.navy800,
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Security Titles
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: '${l10n.secureReliableTitle} ',
+                    style: TextStyle(
+                      fontFamily: KeraTypography.fontEthiopic,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : KeraColors.navy900,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: l10n.secureReliableAccess,
+                        style: const TextStyle(
+                          fontFamily: KeraTypography.fontLatin,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  l10n.secureReliableSubtitle,
+                  style: const TextStyle(
+                    fontFamily: KeraTypography.fontLatin,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: KeraColors.textMutedColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Vertical Divider
+          Container(
+            width: 1,
+            height: 28,
+            color: isDark
+                ? KeraColors.navy600.withValues(alpha: 0.4)
+                : KeraColors.border,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+          ),
+
+          // Online Status
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Icon(
+                    Icons.wifi_rounded,
+                    size: 18,
+                    color: isDark ? Colors.white : KeraColors.navy900,
+                  ),
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: KeraColors.orange500,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Online',
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : KeraColors.navy900,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Biometric Quick Login Button: "እክ / Touch ID Login"
+  // ---------------------------------------------------------------------------
+  Widget _buildBiometricButton(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Center(
+      child: InkWell(
+        onTap: _handleBiometricLogin,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark
+                ? KeraColors.navy900.withValues(alpha: 0.7)
+                : KeraColors.flagContainerBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? KeraColors.navy600.withValues(alpha: 0.35)
+                  : KeraColors.border,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.fingerprint_rounded,
+                size: 20,
+                color: isDark ? Colors.white : KeraColors.navy900,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.biometricLoginLabel,
+                style: TextStyle(
+                  fontFamily: KeraTypography.fontLatin,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : KeraColors.navy900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Footer & District Signature
+  // ---------------------------------------------------------------------------
+  Widget _buildFooter(BuildContext context) {
+    final isDark = context.isDark;
+    final l10n = context.l10n;
+
+    return Column(
+      children: [
+        // Divider
+        Divider(
+          height: 1,
+          thickness: 1,
+          color: isDark
+              ? KeraColors.navy600.withValues(alpha: 0.25)
+              : KeraColors.border.withValues(alpha: 0.5),
+        ),
+        const SizedBox(height: 14),
+
+        // Don't have an account?
+        Text(
+          l10n.dontHaveAccountAmEn,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isDark ? KeraColors.navy100 : KeraColors.textMutedColor,
+          ),
+        ),
+        const SizedBox(height: 6),
+
+        // Register Shop ›
+        InkWell(
+          onTap: () => context.go('/register'),
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Text(
+              l10n.registerShopLink,
+              style: TextStyle(
+                fontFamily: KeraTypography.fontLatin,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : KeraColors.navy900,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // District Signature: KERA AUTOMOTIVE DISTRICT • ADDIS ABABA
+        Text(
+          l10n.keraDistrictFooter,
+          style: const TextStyle(
+            fontFamily: KeraTypography.fontLatin,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.0,
+            color: KeraColors.textMutedColor,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// Machinery Watermark Painter (Excavator on Left, Dump Truck on Right)
+// =============================================================================
+class _MachineryWatermarkPainter extends CustomPainter {
+  final bool isDark;
+
+  const _MachineryWatermarkPainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    final paint = Paint()
+      ..color = isDark
+          ? KeraColors.navy600.withValues(alpha: 0.09)
+          : KeraColors.navy800.withValues(alpha: 0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+
+    final fillPaint = Paint()
+      ..color = isDark
+          ? KeraColors.navy600.withValues(alpha: 0.04)
+          : KeraColors.navy800.withValues(alpha: 0.02)
+      ..style = PaintingStyle.fill;
+
+    // 1. Excavator on left (boom, cab, tracks)
+    final trackRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.02, h * 0.70, w * 0.22, h * 0.16),
+      const Radius.circular(6),
+    );
+    canvas.drawRRect(trackRect, fillPaint);
+    canvas.drawRRect(trackRect, paint);
+
+    // Cab
+    final cabRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.08, h * 0.48, w * 0.14, h * 0.22),
+      const Radius.circular(4),
+    );
+    canvas.drawRRect(cabRect, fillPaint);
+    canvas.drawRRect(cabRect, paint);
+
+    // Boom arm
+    final boomPath = Path()
+      ..moveTo(w * 0.18, h * 0.54)
+      ..lineTo(w * 0.04, h * 0.20)
+      ..lineTo(w * 0.16, h * 0.12)
+      ..lineTo(w * 0.24, h * 0.28);
+    canvas.drawPath(boomPath, paint);
+
+    // 2. Heavy Dump Truck on right (chassis, wheels, bed)
+    final bedPath = Path()
+      ..moveTo(w * 0.74, h * 0.38)
+      ..lineTo(w * 0.96, h * 0.42)
+      ..lineTo(w * 0.94, h * 0.68)
+      ..lineTo(w * 0.76, h * 0.68)
+      ..close();
+    canvas.drawPath(bedPath, fillPaint);
+    canvas.drawPath(bedPath, paint);
+
+    // Cab
+    final truckCab = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.68, h * 0.46, w * 0.10, h * 0.24),
+      const Radius.circular(4),
+    );
+    canvas.drawRRect(truckCab, fillPaint);
+    canvas.drawRRect(truckCab, paint);
+
+    // Heavy wheels
+    canvas.drawCircle(Offset(w * 0.72, h * 0.76), 11, paint);
+    canvas.drawCircle(Offset(w * 0.88, h * 0.76), 11, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MachineryWatermarkPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
+}
+
+// =============================================================================
+// Bottom Ambient Wave Painter (Brand Navy & Orange Swooshes)
+// =============================================================================
+class _BottomWavePainter extends CustomPainter {
+  final bool isDark;
+
+  const _BottomWavePainter({required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Navy Wave
+    final navyPaint = Paint()
+      ..color = isDark ? KeraColors.navy800 : KeraColors.navy900
+      ..style = PaintingStyle.fill;
+
+    final navyPath = Path()
+      ..moveTo(0, h * 0.4)
+      ..quadraticBezierTo(w * 0.25, h * 0.8, w * 0.55, h * 0.3)
+      ..quadraticBezierTo(w * 0.8, -h * 0.1, w, h * 0.5)
+      ..lineTo(w, h)
+      ..lineTo(0, h)
+      ..close();
+    canvas.drawPath(navyPath, navyPaint);
+
+    // Orange Accent Wave
+    final orangePaint = Paint()
+      ..color = KeraColors.orange500
+      ..style = PaintingStyle.fill;
+
+    final orangePath = Path()
+      ..moveTo(w * 0.3, h)
+      ..quadraticBezierTo(w * 0.55, h * 0.4, w * 0.8, h * 0.6)
+      ..quadraticBezierTo(w * 0.92, h * 0.75, w, h * 0.2)
+      ..lineTo(w, h)
+      ..close();
+    canvas.drawPath(orangePath, orangePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BottomWavePainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }
