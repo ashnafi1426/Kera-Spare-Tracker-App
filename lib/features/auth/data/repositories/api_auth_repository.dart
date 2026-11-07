@@ -843,23 +843,31 @@ class ApiAuthRepository implements AuthRepository {
       }
 
       // 2. Offline-First: Read securely stored session without blocking on the network (Rule 3)
-      final session = await _sessionStore.readSession();
+      final session = await _sessionStore.readSession().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => null,
+      );
       debugPrint(
         '[STARTUP] ApiAuthRepository currentUser() sessionStore.read: ${sw.elapsedMilliseconds}ms',
       );
       if (session == null || session.userProfile == null) {
         _authStateController.add(null);
+        
         return const Result.success(null);
       }
 
       final user = AuthUser.fromJson(session.userProfile!);
       var resolvedUser = user;
 
+      // 3. Check profile in local SQLite database with safety timeout
       final profile = await (db.select(
         db.profiles,
-      )..where((t) => t.id.equals(user.id))).getSingleOrNull();
+      )..where((t) => t.id.equals(user.id))).getSingleOrNull().timeout(
+        const Duration(milliseconds: 1500),
+        onTimeout: () => null,
+      );
 
-      // 3. For owners: verify that local profile exists in Drift SQLite (Rule 3)
+      // 4. For owners: verify that local profile exists in Drift SQLite (Rule 3)
       if (!user.isAdmin) {
         if (profile == null) {
           debugPrint(
@@ -878,13 +886,14 @@ class ApiAuthRepository implements AuthRepository {
       _cachedUser = resolvedUser;
       _authStateController.add(resolvedUser);
 
-      // 4. If tokens were cleared due to expiry/theft, notify needsLogin state
+      // 5. If tokens were cleared due to expiry/theft, notify needsLogin state
       if (session.refreshToken.isEmpty) {
         setNeedsLogin(true);
       }
 
       return Result.success(resolvedUser);
     } catch (e) {
+      debugPrint('[STARTUP] ApiAuthRepository currentUser() error: $e');
       _authStateController.add(null);
       return const Result.success(null);
     }

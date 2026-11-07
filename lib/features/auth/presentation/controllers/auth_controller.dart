@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/result.dart';
+import '../../../../data/local/database_manager.dart';
 import '../../../../data/local/database_provider.dart';
 import '../../data/repositories/api_auth_repository.dart';
 import '../../domain/models/auth_user.dart';
@@ -8,7 +9,10 @@ import '../../domain/repositories/auth_repository.dart';
 
 /// Provider for ApiAuthRepository connecting to Node.js backend.
 final apiAuthRepositoryProvider = Provider<ApiAuthRepository>((ref) {
-  final db = ref.watch(appDatabaseProvider);
+  // Use DatabaseManager directly for auth repository to eliminate circular dependency:
+  // authControllerProvider -> authRepositoryProvider -> apiAuthRepositoryProvider ->
+  // appDatabaseProvider -> currentOwnerIdProvider -> authControllerProvider
+  final db = DatabaseManager.instance.getDatabase();
   final repo = ApiAuthRepository(db: db);
   ref.onDispose(repo.dispose);
   return repo;
