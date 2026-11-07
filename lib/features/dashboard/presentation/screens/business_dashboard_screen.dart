@@ -15,6 +15,7 @@ import '../../../parts/presentation/providers/parts_providers.dart';
 import '../../../reports/domain/models/report_period.dart';
 import '../../../reports/domain/models/sales_summary.dart';
 import '../../../reports/presentation/providers/reports_providers.dart';
+import '../../../sales/domain/models/sale_model.dart';
 import '../../../sales/presentation/providers/sales_providers.dart';
 import '../providers/dashboard_providers.dart';
 

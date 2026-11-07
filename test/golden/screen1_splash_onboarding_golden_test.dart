@@ -76,6 +76,9 @@ void main() {
         print('📸 Captured $fileName (${byteData.lengthInBytes} bytes)');
       }
     }
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 50));
   }
 
   testWidgets('Capture splash_dark_am', (tester) async {
@@ -86,6 +89,5 @@ void main() {
       locale: const Locale('am'),
       fileName: 'splash_dark_am.png',
     );
-    exit(0);
   });
 }

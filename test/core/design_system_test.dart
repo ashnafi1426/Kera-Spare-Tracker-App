@@ -9,16 +9,15 @@ void main() {
       expect(KeraColors.primaryNavy, const Color(0xFF0B2A5B));
       expect(KeraColors.keraOrange, const Color(0xFFF7941D));
       expect(KeraColors.actionBlue, const Color(0xFF0B2A5B));
-      expect(KeraColors.utilityTeal, const Color(0xFF0B2A5B));
-      expect(KeraColors.surfaceCanvas, const Color(0xFFF3F5FA));
+      expect(KeraColors.surfaceCanvas, const Color(0xFFF8FAFC));
       expect(KeraColors.surfacePure, const Color(0xFFFFFFFF));
-      expect(KeraColors.outlineBorder, const Color(0xFFD3DAE8));
-      expect(KeraColors.stockInBg, const Color(0xFFE6ECF7));
-      expect(KeraColors.stockInText, const Color(0xFF0B2A5B));
-      expect(KeraColors.stockLowBg, const Color(0xFFFFF1DC));
-      expect(KeraColors.stockLowText, const Color(0xFF9A5000));
-      expect(KeraColors.stockOutBg, const Color(0xFFF7941D));
-      expect(KeraColors.stockOutText, const Color(0xFF061B3F));
+      expect(KeraColors.outlineBorder, const Color(0xFFE2E8F0));
+      expect(KeraColors.stockInBg, const Color(0xFFECFDF5));
+      expect(KeraColors.stockInText, const Color(0xFF047857));
+      expect(KeraColors.stockLowBg, const Color(0xFFFFFBEB));
+      expect(KeraColors.stockLowText, const Color(0xFFB45309));
+      expect(KeraColors.stockOutBg, const Color(0xFFFEF2F2));
+      expect(KeraColors.stockOutText, const Color(0xFFB91C1C));
     });
 
     test('KeraTypography uses NotoSansEthiopic and proper scale', () {
@@ -55,7 +54,7 @@ void main() {
       expect(theme.scaffoldBackgroundColor, KeraColors.surfaceCanvas);
       expect(theme.colorScheme.primary, KeraColors.primaryNavy);
       expect(theme.colorScheme.secondary, KeraColors.keraOrange);
-      expect(theme.colorScheme.tertiary, KeraColors.navy600);
+      expect(theme.colorScheme.tertiary, KeraColors.green600);
       expect(theme.appBarTheme.backgroundColor, KeraColors.primaryNavy);
       expect(theme.cardTheme.color, KeraColors.surfacePure);
     });

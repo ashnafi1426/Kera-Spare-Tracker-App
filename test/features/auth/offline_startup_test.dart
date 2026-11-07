@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kera_spare_tracker/core/design/widgets/bottom_nav.dart';
 import 'package:kera_spare_tracker/core/services/session_store.dart';
 import 'package:kera_spare_tracker/data/local/app_database.dart';
 import 'package:kera_spare_tracker/data/local/database_provider.dart';
@@ -13,7 +14,6 @@ import 'package:kera_spare_tracker/features/auth/data/repositories/api_auth_repo
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:kera_spare_tracker/features/dashboard/presentation/screens/business_dashboard_screen.dart';
-import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/providers/inventory_providers.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/screens/inventory_screen.dart';
 import 'package:kera_spare_tracker/main.dart';
@@ -155,9 +155,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // 6. Verify that HomeScreen and its tabs (Dashboard, Inventory) are mounted immediately!
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(BottomNav), findsOneWidget);
     expect(find.byType(BusinessDashboardScreen), findsOneWidget);
-    expect(find.byType(InventoryScreen, skipOffstage: false), findsOneWidget);
+    await tester.tap(find.descendant(of: find.byType(BottomNav), matching: find.byIcon(Icons.inventory_2_outlined))); await tester.pumpAndSettle(); expect(find.byType(InventoryScreen), findsOneWidget);
 
     // 7. Cleanly unmount widget tree and flush any stream query close timers
     await tester.pumpWidget(const SizedBox.shrink());
