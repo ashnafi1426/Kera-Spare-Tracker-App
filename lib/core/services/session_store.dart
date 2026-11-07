@@ -67,15 +67,26 @@ class SessionStore {
   SessionStore({FlutterSecureStorage? storage})
       : _storage = storage ?? defaultSecureStorage;
 
+  Future<String?> _safeRead(String key, {Duration timeout = const Duration(milliseconds: 1000)}) async {
+    try {
+      return await _storage.read(key: key).timeout(timeout, onTimeout: () => null);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Returns a stable device ID unique to this physical installation.
   /// Generated via UUID v4 on first launch and permanently stored.
   Future<String> getOrCreateDeviceId() async {
     if (_cachedDeviceId != null) return _cachedDeviceId!;
     try {
-      String? id = await _storage.read(key: keyDeviceId);
+      String? id = await _safeRead(keyDeviceId);
       if (id == null || id.isEmpty) {
         id = const Uuid().v4();
-        await _storage.write(key: keyDeviceId, value: id);
+        await _storage.write(key: keyDeviceId, value: id).timeout(
+          const Duration(milliseconds: 1500),
+          onTimeout: () {},
+        );
       }
       _cachedDeviceId = id;
       return id;
@@ -89,9 +100,9 @@ class SessionStore {
   /// Fast synchronous-like local check: returns true if a session flag exists.
   Future<bool> hasSession() async {
     try {
-      final flag = await _storage.read(key: keyHasSession);
+      final flag = await _safeRead(keyHasSession);
       if (flag == 'true') return true;
-      final token = await _storage.read(key: keyRefreshToken);
+      final token = await _safeRead(keyRefreshToken);
       return token != null && token.isNotEmpty;
     } catch (_) {
       return false;
@@ -169,14 +180,17 @@ class SessionStore {
     try {
       Map<String, String> all = {};
       try {
-        all = await _storage.readAll();
+        all = await _storage.readAll().timeout(
+          const Duration(milliseconds: 1500),
+          onTimeout: () => {},
+        );
       } catch (_) {}
 
-      final token = all[keyAccessToken] ?? await _storage.read(key: keyAccessToken);
-      final refresh = all[keyRefreshToken] ?? await _storage.read(key: keyRefreshToken);
-      String? ownerId = all[keyOwnerId] ?? await _storage.read(key: keyOwnerId);
+      final token = all[keyAccessToken] ?? await _safeRead(keyAccessToken);
+      final refresh = all[keyRefreshToken] ?? await _safeRead(keyRefreshToken);
+      String? ownerId = all[keyOwnerId] ?? await _safeRead(keyOwnerId);
 
-      final sessionJson = all[keyUserSession] ?? await _storage.read(key: keyUserSession);
+      final sessionJson = all[keyUserSession] ?? await _safeRead(keyUserSession);
       Map<String, dynamic>? userMap;
       if (sessionJson != null && sessionJson.isNotEmpty) {
         try {
@@ -195,15 +209,15 @@ class SessionStore {
         _cachedDeviceId = deviceId;
       }
 
-      final lastOnlineStr = all[keyLastOnlineAt] ?? await _storage.read(key: keyLastOnlineAt);
+      final lastOnlineStr = all[keyLastOnlineAt] ?? await _safeRead(keyLastOnlineAt);
       final lastOnline = lastOnlineStr != null ? DateTime.tryParse(lastOnlineStr) : null;
-      final maxDaysStr = all[keyOfflineMaxDays] ?? await _storage.read(key: keyOfflineMaxDays);
+      final maxDaysStr = all[keyOfflineMaxDays] ?? await _safeRead(keyOfflineMaxDays);
       final maxDays = maxDaysStr != null ? int.tryParse(maxDaysStr) ?? 90 : 90;
 
-      final accessExp = all[keyAccessTokenExpiresAt] ?? await _storage.read(key: keyAccessTokenExpiresAt);
-      final refreshExp = all[keyRefreshTokenExpiresAt] ?? await _storage.read(key: keyRefreshTokenExpiresAt);
-      final ownerPhone = all[keyOwnerPhone] ?? await _storage.read(key: keyOwnerPhone);
-      final ownerBiz = all[keyOwnerBusinessName] ?? await _storage.read(key: keyOwnerBusinessName);
+      final accessExp = all[keyAccessTokenExpiresAt] ?? await _safeRead(keyAccessTokenExpiresAt);
+      final refreshExp = all[keyRefreshTokenExpiresAt] ?? await _safeRead(keyRefreshTokenExpiresAt);
+      final ownerPhone = all[keyOwnerPhone] ?? await _safeRead(keyOwnerPhone);
+      final ownerBiz = all[keyOwnerBusinessName] ?? await _safeRead(keyOwnerBusinessName);
 
       return SessionData(
         accessToken: token ?? '',
@@ -296,10 +310,6 @@ class SessionStore {
 
   /// Retrieves persisted working API base URL if previously saved.
   Future<String?> getSavedApiBaseUrl() async {
-    try {
-      return await _storage.read(key: keyApiBaseUrl);
-    } catch (_) {
-      return null;
-    }
+    return _safeRead(keyApiBaseUrl, timeout: const Duration(milliseconds: 800));
   }
 }

@@ -93,6 +93,7 @@ class KeraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isEnabled = onPressed != null && !isLoading;
 
     Color bg;
@@ -101,30 +102,30 @@ class KeraButton extends StatelessWidget {
 
     switch (variant) {
       case KeraButtonVariant.primary:
-        bg = isEnabled ? KeraColors.orange500 : KeraColors.disabledColor;
-        fg = isEnabled ? KeraColors.navy900 : KeraColors.textMutedColor;
+        bg = isEnabled ? KeraColors.orange500 : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+        fg = isEnabled ? Colors.white : (isDark ? const Color(0xFF64748B) : KeraColors.textMutedColor);
         break;
       case KeraButtonVariant.secondary:
-        bg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
-        fg = isEnabled ? KeraColors.textWhite : KeraColors.textMutedColor;
+        bg = isEnabled ? (isDark ? const Color(0xFF1E385C) : KeraColors.navy800) : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+        fg = isEnabled ? Colors.white : (isDark ? const Color(0xFF64748B) : KeraColors.textMutedColor);
         break;
       case KeraButtonVariant.teal:
-        bg = isEnabled ? KeraColors.orange500 : KeraColors.disabledColor;
-        fg = isEnabled ? KeraColors.navy900 : KeraColors.textMutedColor;
+        bg = isEnabled ? KeraColors.green600 : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+        fg = isEnabled ? Colors.white : (isDark ? const Color(0xFF64748B) : KeraColors.textMutedColor);
         break;
       case KeraButtonVariant.outlined:
         bg = Colors.transparent;
-        fg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
+        fg = isEnabled ? (isDark ? Colors.white : KeraColors.navy800) : KeraColors.disabledColor;
         side = BorderSide(
-          color: isEnabled ? KeraColors.navy800 : KeraColors.border,
+          color: isEnabled ? (isDark ? const Color(0xFF334155) : KeraColors.navy800) : KeraColors.border,
           width: 1.5,
         );
         break;
       case KeraButtonVariant.destructive:
-        bg = Colors.transparent;
-        fg = isEnabled ? KeraColors.navy800 : KeraColors.disabledColor;
+        bg = isDark ? const Color(0xFF450A0A) : KeraColors.red50;
+        fg = isEnabled ? (isDark ? const Color(0xFFFCA5A5) : KeraColors.red600) : KeraColors.disabledColor;
         side = BorderSide(
-          color: isEnabled ? KeraColors.navy800 : KeraColors.border,
+          color: isEnabled ? (isDark ? const Color(0xFFDC2626) : KeraColors.red600) : KeraColors.border,
           width: 1.5,
         );
         break;

@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// Custom ThemeExtension implementing Kera Spare Tracker's strict 2-color brand palette.
+/// Custom ThemeExtension implementing Kera Spare Tracker's modern executive brand palette.
 ///
-/// Brand specifications (strictly sampled from logo):
-/// - Brand color 1 (NAVY):
-///   - navy-900: #061B3F (Dark canvas & high-contrast deep text)
-///   - navy-800: #0B2A5B (MAIN navy: structure, app bar, active tab, icons, series 1)
-///   - navy-600: #1D4A8A (Mid navy: secondary outlines, focused borders)
-///   - navy-100: #E6ECF7 (Soft navy tint: in-stock / synced status chips, active pill fill)
-///   - navy-50:  #F3F5FA (Light neutral canvas)
-/// - Brand color 2 (ORANGE):
-///   - orange-500: #F7941D (MAIN orange: single primary CTA, highlights, attention, series 2)
-///   - orange-600: #E07F00 (Orange pressed / hover state)
-///   - orange-700: #B35F00 (High-contrast orange text on light surfaces - WCAG AA)
-///   - orange-100: #FFF1DC (Soft orange tint: pending / low stock status chips)
-/// - Neutrals:
-///   - white:     #FFFFFF (Cards, plates, on-navy text)
-///   - border:    #D3DAE8 (Crisp 1px card and input outlines)
-///   - textMuted: #4A5B78 (Subtitles, part numbers, bilingual captions)
-///   - disabled:  #9AA7BD (Disabled buttons, inactive elements)
+/// Design specifications:
+/// - Brand Primary: Deep Navy Blue (#0B2A5B, #061B3F)
+/// - Brand Accent: Professional Orange (#F7941D, #E07F00)
+/// - Canvas: Clean light grey / off-white (#F8FAFC)
+/// - Cards: White (#FFFFFF) with refined subtle elevation
+/// - Success / Synced / In-Stock: Professional Green (#10B981, #047857)
+/// - Warning / Pending / Low-Stock: Professional Amber (#F59E0B, #B45309)
+/// - Alert / Error / Depleted: Professional Red (#EF4444, #B91C1C)
 class KeraThemeColors extends ThemeExtension<KeraThemeColors> {
   // Navy Palette
   final Color navy900;
@@ -43,7 +34,7 @@ class KeraThemeColors extends ThemeExtension<KeraThemeColors> {
   final Color textMuted;
   final Color disabled;
 
-  // Semantic Status Tokens (Strictly 2-color: No red/green/yellow)
+  // Semantic Status Tokens
   final Color statusSyncedBg;
   final Color statusSyncedText;
   final Color statusSyncedBorder;
@@ -104,71 +95,76 @@ class KeraThemeColors extends ThemeExtension<KeraThemeColors> {
     navy900: Color(0xFF061B3F),
     navy800: Color(0xFF0B2A5B),
     navy600: Color(0xFF1D4A8A),
-    navy100: Color(0xFFE6ECF7),
-    navy50: Color(0xFFF3F5FA),
+    navy100: Color(0xFFE8EEF8),
+    navy50: Color(0xFFF8FAFC),
     orange500: Color(0xFFF7941D),
     orange600: Color(0xFFE07F00),
-    orange700: Color(0xFF9A5000),
+    orange700: Color(0xFFB45309),
     orange100: Color(0xFFFFF1DC),
     surfaceWhite: Color(0xFFFFFFFF),
-    pageBackground: Color(0xFFF3F5FA),
+    pageBackground: Color(0xFFF8FAFC),
     cardBackground: Color(0xFFFFFFFF),
-    border: Color(0xFFD3DAE8),
-    textPrimary: Color(0xFF0B2A5B),
-    textSecondary: Color(0xFF4A5B78),
-    textMuted: Color(0xFF4A5B78),
-    disabled: Color(0xFF9AA7BD),
-    statusSyncedBg: Color(0xFFE6ECF7),
-    statusSyncedText: Color(0xFF0B2A5B),
-    statusSyncedBorder: Color(0xFFD3DAE8),
-    statusPendingBg: Color(0xFFFFF1DC),
-    statusPendingText: Color(0xFF9A5000),
-    statusPendingBorder: Color(0xFFF7941D),
-    statusLowStockBg: Color(0xFFFFF1DC),
-    statusLowStockText: Color(0xFF9A5000),
-    statusLowStockBorder: Color(0xFFE07F00),
-    statusAlertBg: Color(0xFFF7941D),
-    statusAlertText: Color(0xFF061B3F),
-    statusAlertBorder: Color(0xFF9A5000),
-    statusOfflineBg: Color(0xFFFFFFFF),
-    statusOfflineText: Color(0xFF0B2A5B),
-    statusOfflineBorder: Color(0xFF0B2A5B),
+    border: Color(0xFFE2E8F0),
+    textPrimary: Color(0xFF0F172A),
+    textSecondary: Color(0xFF64748B),
+    textMuted: Color(0xFF94A3B8),
+    disabled: Color(0xFF94A3B8),
+    // Synced: Professional Green
+    statusSyncedBg: Color(0xFFECFDF5),
+    statusSyncedText: Color(0xFF047857),
+    statusSyncedBorder: Color(0xFFA7F3D0),
+    // Pending: Professional Amber
+    statusPendingBg: Color(0xFFFFFBEB),
+    statusPendingText: Color(0xFFB45309),
+    statusPendingBorder: Color(0xFFFDE68A),
+    // Low Stock: Professional Amber
+    statusLowStockBg: Color(0xFFFFFBEB),
+    statusLowStockText: Color(0xFFB45309),
+    statusLowStockBorder: Color(0xFFFDE68A),
+    // Out of Stock / Alert: Professional Red
+    statusAlertBg: Color(0xFFFEF2F2),
+    statusAlertText: Color(0xFFB91C1C),
+    statusAlertBorder: Color(0xFFFECACA),
+    // Offline: Muted Navy
+    statusOfflineBg: Color(0xFFF1F5F9),
+    statusOfflineText: Color(0xFF475569),
+    statusOfflineBorder: Color(0xFFCBD5E1),
   );
 
   /// Dark theme tokens.
   static const KeraThemeColors dark = KeraThemeColors(
-    navy900: Color(0xFF061B3F),
+    navy900: Color(0xFF091424),
     navy800: Color(0xFF0B2A5B),
     navy600: Color(0xFF1D4A8A),
-    navy100: Color(0xFFE6ECF7),
-    navy50: Color(0xFFF3F5FA),
+    navy100: Color(0xFF1E385C),
+    navy50: Color(0xFF0D1B2E),
     orange500: Color(0xFFF7941D),
     orange600: Color(0xFFE07F00),
-    orange700: Color(0xFF9A5000),
-    orange100: Color(0xFFFFF1DC),
+    orange700: Color(0xFFB45309),
+    orange100: Color(0xFF332314),
     surfaceWhite: Color(0xFF102138),
-    pageBackground: Color(0xFF061B3F),
+    pageBackground: Color(0xFF091424),
     cardBackground: Color(0xFF102138),
     border: Color(0xFF1E385C),
-    textPrimary: Color(0xFFF1F5F9),
+    textPrimary: Color(0xFFF8FAFC),
     textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF94A3B8),
-    disabled: Color(0xFF64748B),
-    statusSyncedBg: Color(0xFF0B2A5B),
-    statusSyncedText: Color(0xFFF1F5F9),
-    statusSyncedBorder: Color(0xFF1D4A8A),
-    statusPendingBg: Color(0x33F7941D),
-    statusPendingText: Color(0xFFF7941D),
-    statusPendingBorder: Color(0xFFF7941D),
-    statusLowStockBg: Color(0x33F7941D),
-    statusLowStockText: Color(0xFFF7941D),
-    statusLowStockBorder: Color(0xFFE07F00),
-    statusAlertBg: Color(0xFFF7941D),
-    statusAlertText: Color(0xFF061B3F),
-    statusAlertBorder: Color(0xFF9A5000),
-    statusOfflineBg: Color(0xFF061B3F),
-    statusOfflineText: Color(0xFFF1F5F9),
-    statusOfflineBorder: Color(0xFF1D4A8A),
+    textMuted: Color(0xFF64748B),
+    disabled: Color(0xFF475569),
+    statusSyncedBg: Color(0xFF064E3B),
+    statusSyncedText: Color(0xFF6EE7B7),
+    statusSyncedBorder: Color(0xFF059669),
+    statusPendingBg: Color(0xFF451A03),
+    statusPendingText: Color(0xFFFCD34D),
+    statusPendingBorder: Color(0xFFD97706),
+    statusLowStockBg: Color(0xFF451A03),
+    statusLowStockText: Color(0xFFFCD34D),
+    statusLowStockBorder: Color(0xFFD97706),
+    statusAlertBg: Color(0xFF450A0A),
+    statusAlertText: Color(0xFFFCA5A5),
+    statusAlertBorder: Color(0xFFDC2626),
+    statusOfflineBg: Color(0xFF1E293B),
+    statusOfflineText: Color(0xFF94A3B8),
+    statusOfflineBorder: Color(0xFF334155),
   );
 
   @override
@@ -284,4 +280,3 @@ class KeraThemeColors extends ThemeExtension<KeraThemeColors> {
     );
   }
 }
-

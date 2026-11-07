@@ -122,7 +122,7 @@ class SyncCenterScreen extends ConsumerWidget {
                   height: 6,
                   decoration: BoxDecoration(
                     color: isOnline
-                        ? KeraColors.tealAccent
+                        ? KeraColors.green500
                         : KeraColors.warningAmber,
                     shape: BoxShape.circle,
                   ),
@@ -182,7 +182,7 @@ class SyncCenterScreen extends ConsumerWidget {
                                 ? Icons.cloud_done_rounded
                                 : Icons.cloud_off_rounded,
                             color: isOnline
-                                ? KeraColors.tealAccent
+                                ? KeraColors.green500
                                 : Colors.amber.shade300,
                             size: 22,
                           ),
@@ -203,7 +203,7 @@ class SyncCenterScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: pendingCount > 0
                               ? Colors.amber.shade400
-                              : KeraColors.tealAccent,
+                              : KeraColors.green500,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(

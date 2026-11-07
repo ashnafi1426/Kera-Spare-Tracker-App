@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/providers/app_config_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
+import '../../auth/presentation/controllers/auth_controller.dart';
 
 /// Pixel-perfect native mobile splash screen matching the Stitch Design Page 01.
 ///
@@ -15,16 +20,99 @@ import '../../../../core/widgets/kera_logo_widget.dart';
 /// - Two-tone brand title: "Kera" (Navy) + "Spare Tracker" (Orange)
 /// - Bilingual Amharic subtitle: "የቄራ መለዋወጫ መከታተያ"
 /// - Tagline pill badge: "መከታተል • ማስተዳደር • ማሳደግ"
-/// - Sleek horizontal gradient progress bar (Navy -> Orange)
+/// - Sleek horizontal gradient progress bar (Navy -> Orange) with smooth loading animation
 /// - Status line: "[✓] ስርዓቱ እየተዘጋጀ ነው... • Offline-Ready Sync"
 /// - Version & district signature: "v1.0.0 • Addis Ababa, Ethiopia"
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   final double? progressValue;
 
   const SplashScreen({
     super.key,
     this.progressValue,
   });
+
+  @override
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _progressController;
+  Animation<double>? _progressAnimation;
+  Timer? _safetyTimer;
+  bool _hasNavigated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.progressValue == null) {
+      _progressController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1400),
+      );
+      _progressAnimation = CurvedAnimation(
+        parent: _progressController!,
+        curve: Curves.easeInOutCubic,
+      );
+
+      _progressController!.forward().then((_) {
+        _attemptNavigation();
+      });
+
+      // Safety fallback timer: guarantees navigation never hangs on any physical device
+      _safetyTimer = Timer(const Duration(milliseconds: 2200), () {
+        _attemptNavigation();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _safetyTimer?.cancel();
+    _progressController?.dispose();
+    super.dispose();
+  }
+
+  void _attemptNavigation() {
+    if (!mounted || _hasNavigated) return;
+
+    final router = GoRouter.maybeOf(context);
+    final location = router?.state.matchedLocation ?? '/';
+    if (location != '/') {
+      _hasNavigated = true;
+      return;
+    }
+
+    final authState = ref.read(authControllerProvider);
+    // If still actively loading and within safety timer window, retry shortly
+    if (authState.isLoading && (_safetyTimer != null && _safetyTimer!.isActive)) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _attemptNavigation();
+      });
+      return;
+    }
+
+    _hasNavigated = true;
+
+    final configState = ref.read(appConfigNotifierProvider);
+    if (configState.value?.config.isUpdateRequired ?? false) {
+      context.go('/update-required');
+      return;
+    }
+
+    final user = authState.value;
+    if (user != null) {
+      if (user.mustChangePassword) {
+        context.go('/change-password');
+      } else if (user.isAdmin) {
+        context.go('/admin');
+      } else {
+        context.go('/home');
+      }
+    } else {
+      context.go('/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,21 +304,43 @@ class SplashScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(3),
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: progressValue ?? 0.65,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                isDark ? Colors.white : KeraColors.navy900,
-                                KeraColors.orange500,
-                              ],
+                      child: widget.progressValue != null
+                          ? FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: widget.progressValue!,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      isDark ? Colors.white : KeraColors.navy900,
+                                      KeraColors.orange500,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                            )
+                          : AnimatedBuilder(
+                              animation: _progressAnimation!,
+                              builder: (context, _) {
+                                final factor = _progressAnimation!.value.clamp(0.05, 1.0);
+                                return FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor: factor,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          isDark ? Colors.white : KeraColors.navy900,
+                                          KeraColors.orange500,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        ),
-                      ),
                     ),
 
                     const SizedBox(height: 14),

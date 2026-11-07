@@ -506,16 +506,16 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                                 children: [
                                   Text(
                                     context.tr('የተጣራ ትርፍ (Profit)', 'Net Profit'),
-                                    style: TextStyle(
-                                      color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
+                                    style: const TextStyle(
+                                      color: KeraColors.green600,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   Text(
                                     '+${totalProfit.toStringAsFixed(0)} ETB',
-                                    style: TextStyle(
-                                      color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
+                                    style: const TextStyle(
+                                      color: KeraColors.green600,
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -602,26 +602,26 @@ class _NewSaleScreenState extends ConsumerState<NewSaleScreen> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submitSale,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: KeraColors.brandOrange,
-                    foregroundColor: KeraColors.navy900,
+                    backgroundColor: KeraColors.orange500,
+                    foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: _isSubmitting
-                      ? const KeraLoadingIndicator.small(color: KeraColors.navy900)
+                      ? const KeraLoadingIndicator.small(color: Colors.white)
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.check_circle_outline_rounded, size: 20),
+                            const Icon(Icons.check_circle_outline_rounded, size: 20, color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
                               context.tr('ሽያጭ አስቀምጥ', 'Complete Sale'),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: KeraColors.navy900,
+                                color: Colors.white,
                               ),
                             ),
                           ],

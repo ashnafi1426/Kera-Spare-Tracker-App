@@ -80,9 +80,9 @@ class BottomNav extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: KeraColors.orange500.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
+                            color: KeraColors.orange500.withValues(alpha: 0.35),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -91,7 +91,7 @@ class BottomNav extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.point_of_sale_rounded,
-                            color: KeraColors.navy900,
+                            color: Colors.white,
                             size: 22,
                           ),
                           Text(
@@ -99,7 +99,7 @@ class BottomNav extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: KeraColors.navy900,
+                              color: Colors.white,
                               height: 1.1,
                             ),
                           ),

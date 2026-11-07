@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/network_monitor.dart';
 import '../../../../data/local/database_provider.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../data/services/sync_coordinator_service.dart';
 import '../../data/services/sync_push_service.dart';
 
 enum SyncUIState {
@@ -47,6 +49,8 @@ class SyncStatusState {
 class SyncStatusController extends Notifier<SyncStatusState> {
   StreamSubscription? _onlineSub;
   StreamSubscription? _pendingSub;
+  Timer? _debounceTimer;
+  bool _isProcessing = false;
 
   @override
   SyncStatusState build() {
@@ -55,6 +59,7 @@ class SyncStatusController extends Notifier<SyncStatusState> {
 
     _onlineSub?.cancel();
     _onlineSub = monitor.onConnectivityChanged.listen((online) {
+      final wasOffline = !state.isOnline;
       state = state.copyWith(
         isOnline: online,
         status: !online
@@ -63,6 +68,15 @@ class SyncStatusController extends Notifier<SyncStatusState> {
                 ? SyncUIState.idle
                 : state.status),
       );
+
+      // Automated silent sync loop:
+      // When network switches from offline to online, or reconnects with pending mutations
+      if (online && (wasOffline || state.pendingCount > 0)) {
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(seconds: 3), () {
+          triggerSync(silent: true);
+        });
+      }
     });
 
     _pendingSub?.cancel();
@@ -71,6 +85,7 @@ class SyncStatusController extends Notifier<SyncStatusState> {
     });
 
     ref.onDispose(() {
+      _debounceTimer?.cancel();
       _onlineSub?.cancel();
       _pendingSub?.cancel();
     });
@@ -78,17 +93,49 @@ class SyncStatusController extends Notifier<SyncStatusState> {
     return const SyncStatusState();
   }
 
-  Future<bool> triggerSync() async {
+  /// Triggers a synchronization cycle.
+  /// If [silent] is true, errors are logged quietly without alerting the UI.
+  /// If [silent] is false, UI state transitions to syncing/error with snackbar feedback.
+  Future<bool> triggerSync({bool silent = false}) async {
+    if (_isProcessing) return false;
+    _isProcessing = true;
+
     if (!state.isOnline) {
-      state = state.copyWith(
-        status: SyncUIState.offline,
-        lastError: 'No internet connection',
-      );
+      _isProcessing = false;
+      if (!silent) {
+        state = state.copyWith(
+          status: SyncUIState.offline,
+          lastError: 'No internet connection. Changes safely preserved in local offline cache.',
+        );
+      }
       return false;
     }
 
-    state = state.copyWith(status: SyncUIState.syncing, lastError: null);
+    if (!silent) {
+      state = state.copyWith(status: SyncUIState.syncing, lastError: null);
+    }
+
     try {
+      final user = ref.read(authControllerProvider).value;
+      if (user != null) {
+        final coordinator = ref.read(syncCoordinatorServiceProvider);
+        final res = await coordinator.synchronize(ownerId: user.id);
+        if (res.isSuccess) {
+          state = state.copyWith(
+            status: SyncUIState.idle,
+            lastSyncedAt: DateTime.now(),
+            lastError: null,
+          );
+          return true;
+        } else {
+          state = state.copyWith(
+            status: silent ? SyncUIState.idle : SyncUIState.error,
+            lastError: res.failureOrNull?.message ?? 'Sync failed',
+          );
+          return false;
+        }
+      }
+
       final pushService = ref.read(syncPushServiceProvider);
       final result = await pushService.pushPendingQueue();
 
@@ -96,21 +143,24 @@ class SyncStatusController extends Notifier<SyncStatusState> {
         state = state.copyWith(
           status: SyncUIState.idle,
           lastSyncedAt: DateTime.now(),
+          lastError: null,
         );
         return true;
       } else {
         state = state.copyWith(
-          status: SyncUIState.error,
+          status: silent ? SyncUIState.idle : SyncUIState.error,
           lastError: result.failureOrNull?.message ?? 'Sync failed',
         );
         return false;
       }
     } catch (e) {
       state = state.copyWith(
-        status: SyncUIState.error,
+        status: silent ? SyncUIState.idle : SyncUIState.error,
         lastError: e.toString(),
       );
       return false;
+    } finally {
+      _isProcessing = false;
     }
   }
 }

@@ -111,14 +111,20 @@ class SyncCoordinatorService {
       // 3. PUSH: Process pending queue in dependency order with DB lease
       final pushResult = await _pushPendingOutbox(ownerId);
       if (pushResult.isFailure) {
-        return Result.failure(pushResult.failureOrNull!);
+        if (pushResult.failureOrNull is AuthFailure) {
+          return Result.failure(pushResult.failureOrNull!);
+        }
+        failures += 1;
+      } else {
+        totalPushed = pushResult.valueOrNull ?? 0;
       }
-      totalPushed = pushResult.valueOrNull ?? 0;
 
       // 4. PULL: Fetch server updates since cursor and apply in ONE transaction
       final pullResult = await _pullServerChanges(ownerId);
       if (pullResult.isSuccess) {
         totalPulled = pullResult.valueOrNull ?? 0;
+      } else if (pullResult.isFailure && pushResult.isFailure) {
+        return Result.failure(pullResult.failureOrNull!);
       }
 
       // 5. PHOTOS: Upload pending product photos separately after records are synced
@@ -133,7 +139,7 @@ class SyncCoordinatorService {
           photosUploaded: photosUploaded,
           conflictCount: conflicts,
           failedCount: failures,
-          isSuccess: true,
+          isSuccess: failures == 0,
         ),
       );
     } catch (e) {

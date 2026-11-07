@@ -15,7 +15,7 @@ enum KeraStatusBadgeType {
 }
 
 /// Compact status pill for stock availability, sync status, and category tags.
-/// Strictly conforms to the 2-color brand system with Icon + Label pairing.
+/// Adheres to modern executive mobile design standards with Icon + Label pairing.
 class KeraStatusBadge extends StatelessWidget {
   final String label;
   final IconData? icon;
@@ -31,10 +31,10 @@ class KeraStatusBadge extends StatelessWidget {
     required this.backgroundColor,
     required this.textColor,
     this.border,
-    this.padding = KeraSpacing.badgePadding,
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
   });
 
-  /// In-Stock indicator (Navy soft chip).
+  /// In-Stock indicator (Professional Green chip).
   factory KeraStatusBadge.inStock({
     Key? key,
     required double quantity,
@@ -49,11 +49,11 @@ class KeraStatusBadge extends StatelessWidget {
       icon: Icons.check_circle_rounded,
       backgroundColor: KeraColors.stockInBg,
       textColor: KeraColors.stockInText,
-      border: Border.all(color: KeraColors.border),
+      border: Border.all(color: KeraColors.stockInBorder),
     );
   }
 
-  /// Low Stock indicator (Soft orange chip).
+  /// Low Stock indicator (Professional Amber chip).
   factory KeraStatusBadge.lowStock({
     Key? key,
     required double quantity,
@@ -66,11 +66,11 @@ class KeraStatusBadge extends StatelessWidget {
       icon: Icons.warning_amber_rounded,
       backgroundColor: KeraColors.stockLowBg,
       textColor: KeraColors.stockLowText,
-      border: Border.all(color: KeraColors.orange600),
+      border: Border.all(color: KeraColors.stockLowBorder),
     );
   }
 
-  /// Depleted stock indicator (Solid orange chip with bold navy text).
+  /// Depleted stock indicator (Professional Red chip).
   factory KeraStatusBadge.outOfStock({
     Key? key,
     String label = 'Out of Stock',
@@ -81,11 +81,11 @@ class KeraStatusBadge extends StatelessWidget {
       icon: Icons.error_outline_rounded,
       backgroundColor: KeraColors.stockOutBg,
       textColor: KeraColors.stockOutText,
-      border: Border.all(color: KeraColors.orange700, width: 1.5),
+      border: Border.all(color: KeraColors.stockOutBorder),
     );
   }
 
-  /// Unsynced offline queue pending badge (Soft orange chip).
+  /// Unsynced offline queue pending badge (Amber chip).
   factory KeraStatusBadge.syncPending({
     Key? key,
     required int count,
@@ -97,11 +97,11 @@ class KeraStatusBadge extends StatelessWidget {
       icon: Icons.access_time_rounded,
       backgroundColor: KeraColors.syncPendingBg,
       textColor: KeraColors.syncPendingText,
-      border: Border.all(color: KeraColors.orange500),
+      border: Border.all(color: KeraColors.syncPendingBorder),
     );
   }
 
-  /// Online synced badge (Navy soft chip).
+  /// Online synced badge (Emerald Green chip).
   factory KeraStatusBadge.synced({
     Key? key,
     String label = 'Synced',
@@ -112,11 +112,11 @@ class KeraStatusBadge extends StatelessWidget {
       icon: Icons.check_circle_rounded,
       backgroundColor: KeraColors.syncSuccessBg,
       textColor: KeraColors.syncSuccessText,
-      border: Border.all(color: KeraColors.border),
+      border: Border.all(color: KeraColors.syncSuccessBorder),
     );
   }
 
-  /// Offline badge (Navy outline chip).
+  /// Offline badge (Muted chip).
   factory KeraStatusBadge.offline({
     Key? key,
     String label = 'Offline',
@@ -125,9 +125,9 @@ class KeraStatusBadge extends StatelessWidget {
       key: key,
       label: label,
       icon: Icons.cloud_off_rounded,
-      backgroundColor: Colors.transparent,
-      textColor: KeraColors.navy800,
-      border: Border.all(color: KeraColors.navy800, width: 1.5),
+      backgroundColor: const Color(0xFFF1F5F9),
+      textColor: const Color(0xFF475569),
+      border: Border.all(color: const Color(0xFFCBD5E1)),
     );
   }
 
@@ -153,13 +153,23 @@ class KeraStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final resolvedBg = isDark && backgroundColor == Colors.transparent
-        ? Colors.transparent
-        : (isDark && backgroundColor == KeraColors.stockInBg
-            ? KeraColors.navy800
-            : backgroundColor);
-    final resolvedText = isDark && textColor == KeraColors.stockInText
-        ? Colors.white
+    final resolvedBg = isDark
+        ? (backgroundColor == KeraColors.stockInBg
+            ? const Color(0xFF064E3B)
+            : backgroundColor == KeraColors.stockLowBg
+                ? const Color(0xFF451A03)
+                : backgroundColor == KeraColors.stockOutBg
+                    ? const Color(0xFF450A0A)
+                    : backgroundColor)
+        : backgroundColor;
+    final resolvedText = isDark
+        ? (textColor == KeraColors.stockInText
+            ? const Color(0xFF6EE7B7)
+            : textColor == KeraColors.stockLowText
+                ? const Color(0xFFFCD34D)
+                : textColor == KeraColors.stockOutText
+                    ? const Color(0xFFFCA5A5)
+                    : textColor)
         : textColor;
 
     return Container(
@@ -184,9 +194,7 @@ class KeraStatusBadge extends StatelessWidget {
           Text(
             label,
             style: KeraTypography.labelSmall(color: resolvedText).copyWith(
-              fontWeight: backgroundColor == KeraColors.stockOutBg
-                  ? FontWeight.w700
-                  : FontWeight.w600,
+              fontWeight: FontWeight.w600,
               fontSize: 11,
               letterSpacing: 0.1,
             ),

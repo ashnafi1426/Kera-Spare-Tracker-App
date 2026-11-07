@@ -449,8 +449,8 @@ class _SaleDetailsScreenState extends ConsumerState<SaleDetailsScreen> {
                                 '${l10n.lineProfit}: ${CurrencyFormatter.formatEtb(item.lineProfit)}',
                                 style: KeraTypography.bodySmall().copyWith(
                                   color: item.lineProfit >= 0
-                                      ? KeraColors.brandNavy
-                                      : KeraColors.orange700,
+                                      ? KeraColors.green600
+                                      : KeraColors.red600,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

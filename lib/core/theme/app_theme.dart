@@ -6,11 +6,16 @@ import '../design/tokens/kera_spacing.dart';
 import '../design/tokens/kera_theme_colors.dart';
 import '../design/tokens/kera_typography.dart';
 
-/// Centralized application theme for Kera Spare Tracker.
-/// Strictly implements the TWO-COLOR brand palette sampled from the logo:
-/// - Brand Color 1: NAVY (#0B2A5B main, #061B3F dark background, #1D4A8A mid, #E6ECF7 tint)
-/// - Brand Color 2: ORANGE (#F7941D main CTA, #E07F00 pressed, #B35F00 AA text, #FFF1DC soft tint)
-/// - Neutrals: White #FFFFFF, Page #F3F5FA, Border #D3DAE8, Muted text #4A5B78, Disabled #9AA7BD.
+/// Centralized modern executive theme for Kera Spare Tracker.
+///
+/// Implements the professional mobile inventory design system:
+/// - Primary: Deep Navy Blue (#0B2A5B)
+/// - Accent: Professional Orange (#F7941D)
+/// - Canvas: Clean light grey / off-white (#F8FAFC)
+/// - Cards: Pure White (#FFFFFF) with subtle shadows & rounded corners
+/// - Success: Professional Green (#10B981, #047857)
+/// - Warning: Amber (#F59E0B, #B45309)
+/// - Error: Professional Red (#EF4444, #DC2626)
 class AppTheme {
   AppTheme._();
 
@@ -19,14 +24,14 @@ class AppTheme {
   static const Color keraOrange = KeraColors.orange500;   // #F7941D
   static const Color primaryColor = KeraColors.navy800;
   static const Color secondaryColor = KeraColors.orange500;
-  static const Color errorColor = KeraColors.orange700;
+  static const Color errorColor = KeraColors.red600;
 
-  // 2-Color Chart Palette (Theme-aware access: Series 1 = Navy, Series 2 = Orange)
-  static const Color chartLineRevenue = KeraColors.orange500; // Orange for revenue / series 2
-  static const Color chartLineProfit = KeraColors.navy800;   // Navy for profit / series 1
-  static const Color chartLineCost = KeraColors.navy600;     // Navy tint for secondary series
+  // Chart Palette (Series 1 = Navy, Series 2 = Orange, Series 3 = Green)
+  static const Color chartLineRevenue = KeraColors.orange500;
+  static const Color chartLineProfit = KeraColors.green600;
+  static const Color chartLineCost = KeraColors.navy800;
 
-  /// Light theme for the application adhering strictly to the 2-color brand system.
+  /// Light theme for the application.
   static ThemeData get lightTheme {
     const colorScheme = ColorScheme(
       brightness: Brightness.light,
@@ -35,23 +40,23 @@ class AppTheme {
       primaryContainer: KeraColors.navy100,
       onPrimaryContainer: KeraColors.navy800,
       secondary: KeraColors.orange500,
-      onSecondary: KeraColors.navy900, // Contrast rule: Navy text on orange
+      onSecondary: Colors.white,
       secondaryContainer: KeraColors.orange100,
       onSecondaryContainer: KeraColors.orange700,
-      tertiary: KeraColors.navy600,
+      tertiary: KeraColors.green600,
       onTertiary: Colors.white,
       surface: KeraColors.white,
-      onSurface: KeraColors.navy800,
+      onSurface: KeraColors.textPrimary,
       onSurfaceVariant: KeraColors.textMutedColor,
-      error: KeraColors.orange700,
+      error: KeraColors.red600,
       onError: Colors.white,
       outline: KeraColors.border,
       outlineVariant: KeraColors.navy100,
       surfaceContainerLowest: KeraColors.white,
-      surfaceContainerLow: KeraColors.navy50,
-      surfaceContainer: KeraColors.navy50,
-      surfaceContainerHigh: KeraColors.navy100,
-      surfaceContainerHighest: KeraColors.navy100,
+      surfaceContainerLow: KeraColors.surfaceSubtle,
+      surfaceContainer: KeraColors.surfaceContainer,
+      surfaceContainerHigh: KeraColors.surfaceContainerHigh,
+      surfaceContainerHighest: KeraColors.surfaceContainerHighest,
     );
 
     return ThemeData(
@@ -59,8 +64,8 @@ class AppTheme {
       fontFamily: KeraTypography.fontEthiopic,
       fontFamilyFallback: KeraTypography.fontFallbacks,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: KeraColors.navy50,
-      canvasColor: KeraColors.navy50,
+      scaffoldBackgroundColor: KeraColors.surfaceCanvas,
+      canvasColor: KeraColors.surfaceCanvas,
       cardColor: KeraColors.white,
       dividerColor: KeraColors.border,
       extensions: const <ThemeExtension<dynamic>>[
@@ -84,7 +89,7 @@ class AppTheme {
         scrolledUnderElevation: 2,
         titleTextStyle: TextStyle(
           fontFamily: KeraTypography.fontEthiopic,
-      fontFamilyFallback: KeraTypography.fontFallbacks,
+          fontFamilyFallback: KeraTypography.fontFallbacks,
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -101,14 +106,14 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: KeraColors.orange500,
-          foregroundColor: KeraColors.navy900, // Navy bold text on orange per contrast rule
+          foregroundColor: Colors.white,
           minimumSize: const Size(KeraSpacing.minTouchTarget, KeraSpacing.minTouchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           elevation: 0,
           shape: const RoundedRectangleBorder(
             borderRadius: KeraRadii.borderButton,
           ),
-          textStyle: KeraTypography.labelLarge(color: KeraColors.navy900).copyWith(
+          textStyle: KeraTypography.labelLarge(color: Colors.white).copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -118,7 +123,7 @@ class AppTheme {
           foregroundColor: KeraColors.navy800,
           minimumSize: const Size(KeraSpacing.minTouchTarget, KeraSpacing.minTouchTarget),
           side: const BorderSide(color: KeraColors.navy800, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           shape: const RoundedRectangleBorder(
             borderRadius: KeraRadii.borderButton,
           ),
@@ -131,7 +136,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: KeraColors.orange700,
           minimumSize: const Size(KeraSpacing.minTouchTarget, KeraSpacing.minTouchTarget),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           textStyle: KeraTypography.labelLarge(color: KeraColors.orange700).copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -144,7 +149,7 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        checkColor: WidgetStateProperty.all(KeraColors.navy900),
+        checkColor: WidgetStateProperty.all(Colors.white),
         side: const BorderSide(color: KeraColors.border, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
@@ -188,18 +193,18 @@ class AppTheme {
         ),
         errorBorder: const OutlineInputBorder(
           borderRadius: KeraRadii.borderInput,
-          borderSide: BorderSide(color: KeraColors.orange700, width: 1.5),
+          borderSide: BorderSide(color: KeraColors.red600, width: 1.5),
         ),
         focusedErrorBorder: const OutlineInputBorder(
           borderRadius: KeraRadii.borderInput,
-          borderSide: BorderSide(color: KeraColors.orange700, width: 2),
+          borderSide: BorderSide(color: KeraColors.red600, width: 2),
         ),
         labelStyle: KeraTypography.bodyMedium(color: KeraColors.textMutedColor),
         hintStyle: KeraTypography.bodyMedium(color: KeraColors.disabledColor),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: KeraColors.orange500,
-        foregroundColor: KeraColors.navy900,
+        foregroundColor: Colors.white,
         elevation: 3,
         sizeConstraints: BoxConstraints.tightFor(
           width: 56,
@@ -240,7 +245,7 @@ class AppTheme {
         side: const BorderSide(color: KeraColors.border, width: 1),
         shape: const RoundedRectangleBorder(borderRadius: KeraRadii.borderMicro),
         labelStyle: KeraTypography.labelMedium(),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: KeraColors.white,
@@ -260,28 +265,28 @@ class AppTheme {
     );
   }
 
-  /// Dark theme for the application strictly adhering to the 2-color brand system.
+  /// Dark theme for the application.
   static ThemeData get darkTheme {
-    const darkSurface = KeraColors.navy900;       // #061B3F
-    const darkCard = Color(0xFF102138);           // Slightly lighter navy card
-    const darkBorder = Color(0xFF1E385C);         // Crisp navy border
-    const darkTextPrimary = Color(0xFFF1F5F9);    // Near-white text
-    const darkTextSecondary = Color(0xFF94A3B8);  // Soft navy-gray text
+    const darkSurface = KeraColors.darkCanvas;
+    const darkCard = KeraColors.darkCard;
+    const darkBorder = KeraColors.darkBorder;
+    const darkTextPrimary = KeraColors.darkTextPrimary;
+    const darkTextSecondary = KeraColors.darkTextSecondary;
 
     const colorScheme = ColorScheme(
       brightness: Brightness.dark,
       primary: KeraColors.orange500,
-      onPrimary: KeraColors.navy900,
+      onPrimary: Colors.white,
       primaryContainer: KeraColors.navy800,
       onPrimaryContainer: Colors.white,
       secondary: KeraColors.orange500,
-      onSecondary: KeraColors.navy900,
+      onSecondary: Colors.white,
       secondaryContainer: KeraColors.navy800,
       onSecondaryContainer: Colors.white,
       surface: darkCard,
       onSurface: darkTextPrimary,
       onSurfaceVariant: darkTextSecondary,
-      error: KeraColors.orange700,
+      error: KeraColors.red500,
       onError: Colors.white,
       outline: darkBorder,
       outlineVariant: Color(0xFF264773),
@@ -303,7 +308,7 @@ class AppTheme {
         color: darkCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           side: const BorderSide(color: darkBorder, width: 1),
         ),
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
@@ -329,15 +334,15 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: KeraColors.orange500,
-          foregroundColor: KeraColors.navy900,
+          foregroundColor: Colors.white,
           minimumSize: const Size(KeraSpacing.minTouchTarget, KeraSpacing.minTouchTarget),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -349,10 +354,10 @@ class AppTheme {
           side: const BorderSide(color: darkBorder, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(14),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -375,7 +380,7 @@ class AppTheme {
           }
           return Colors.transparent;
         }),
-        checkColor: WidgetStateProperty.all(KeraColors.navy900),
+        checkColor: WidgetStateProperty.all(Colors.white),
         side: const BorderSide(color: darkBorder, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
@@ -384,27 +389,27 @@ class AppTheme {
         fillColor: darkCard,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: KeraColors.orange500, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: KeraColors.orange700),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: KeraColors.red500),
         ),
         labelStyle: const TextStyle(fontSize: 15, color: darkTextSecondary),
         hintStyle: const TextStyle(fontSize: 14, color: darkTextSecondary),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: KeraColors.orange500,
-        foregroundColor: KeraColors.navy900,
+        foregroundColor: Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),

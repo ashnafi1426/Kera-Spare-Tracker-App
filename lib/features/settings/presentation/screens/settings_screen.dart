@@ -18,6 +18,7 @@ import '../../../parts/presentation/providers/inventory_providers.dart';
 import '../../../parts/presentation/widgets/sample_parts_dialog.dart';
 import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../../sync/data/services/sync_push_service.dart';
+import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../data/services/export_backup_service.dart';
 import '../providers/business_profile_provider.dart';
 import '../widgets/profile_photo_avatar.dart';
@@ -649,29 +650,78 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: KeraColors.primaryNavy,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final pushState = ref.watch(syncPushControllerProvider);
+                        final isSyncing = pushState.isPushing;
+
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: KeraColors.primaryNavy,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: isSyncing
+                                ? null
+                                : () async {
+                                    context.showSnackBar(
+                                      context.tr(
+                                        'የደመና ግንኙነትን በመፈተሽ ላይ...',
+                                        'Verifying connection and syncing data...',
+                                      ),
+                                    );
+
+                                    final success = await ref
+                                        .read(syncPushControllerProvider.notifier)
+                                        .pushNow();
+
+                                    if (!context.mounted) return;
+
+                                    if (success) {
+                                      final count = ref
+                                          .read(syncPushControllerProvider)
+                                          .lastSyncedCount;
+                                      context.showSnackBar(
+                                        context.tr(
+                                          'ማመሳሰል በተሳካ ሁኔታ ተጠናቋል! $count መረጃዎች ተረጋግጠዋል',
+                                          'Sync complete! $count item(s) verified and backed up.',
+                                        ),
+                                      );
+                                    } else {
+                                      final err = ref
+                                              .read(syncPushControllerProvider)
+                                              .lastError ??
+                                          context.tr('ማመሳሰል አልተሳካም', 'Sync failed');
+                                      context.showSnackBar(
+                                        err,
+                                        isError: true,
+                                      );
+                                    }
+                                  },
+                            icon: isSyncing
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.sync_rounded, size: 18),
+                            label: Text(
+                              isSyncing
+                                  ? context.tr('በማመሳሰል ላይ...', 'Syncing...')
+                                  : context.tr('አሁን አመሳስል', 'Sync Now'),
+                              style: KeraTypography.titleSmall(color: Colors.white),
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          ref.read(syncPushServiceProvider).pushPendingQueue();
-                          context.showSnackBar(
-                            context.tr('ማመሳሰል ተጀምሯል...', 'Syncing with server...'),
-                          );
-                        },
-                        icon: const Icon(Icons.sync_rounded, size: 18),
-                        label: Text(
-                          context.tr('አሁን አመሳስል', 'Sync Now'),
-                          style: KeraTypography.titleSmall(color: Colors.white),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
