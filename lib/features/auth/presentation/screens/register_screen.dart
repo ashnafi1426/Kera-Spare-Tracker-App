@@ -10,21 +10,6 @@ import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
 import '../controllers/auth_controller.dart';
-
-/// Pixel-perfect native mobile registration screen strictly matching Stitch Design Page 02.
-///
-/// Layout:
-/// - Clean ambient background with subtle warmth and top ambient glow
-/// - Top App Bar: Back arrow, Kera Logo + "Kera Spare" & "Merchant Registration", Language Switcher Pill, Support Headset
-/// - Stepper & Status Bar: "1 of 2" indicator with progress track, "Offline Ready" soft-orange chip
-/// - Hero Title & Warehouse Graphic Banner: Ethiopian title & subtitle with stylized 3D warehouse rack illustration
-/// - Main Form Card: White rounded container with subtle border & soft elevation
-///   - Section 1: Personal Information (Full Name, Phone Number with Ethiopian flag pill)
-///   - Section 2: Business Information (Business Name, Password, Confirm Password with visibility toggles)
-///   - Terms of Service & Privacy Policy agreement checkbox
-///   - Primary CTA: Deep Navy "Create Account / መለያ ይፍጠሩ →" full-width pill button
-/// - Footer: "Already have an account? Sign In" (with Orange highlight)
-/// - Bottom Fluid Accent Waves in Brand Navy & Orange
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
