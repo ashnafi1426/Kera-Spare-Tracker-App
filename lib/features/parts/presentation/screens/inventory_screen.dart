@@ -161,14 +161,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
-        backgroundColor: KeraColors.brandOrange,
-        foregroundColor: KeraColors.navy900,
+        backgroundColor: KeraColors.orange500,
+        foregroundColor: Colors.white,
         elevation: 3,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_rounded, size: 32),
+        icon: const Icon(Icons.add_rounded, size: 22),
+        label: Text(
+          context.tr('ዕቃ ጨምር', 'Add Part'),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
       ),
       body: SafeArea(
         top: false,

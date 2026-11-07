@@ -1005,8 +1005,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                 : '${profit.toStringAsFixed(0)} ETB',
                             style: TextStyle(
                               color: profit >= 0
-                                  ? (isDark ? Colors.white : KeraColors.navy800)
-                                  : KeraColors.orange700,
+                                  ? KeraColors.green600
+                                  : KeraColors.red600,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1079,24 +1079,24 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _savePart,
               style: ElevatedButton.styleFrom(
-                backgroundColor: KeraColors.brandOrange,
-                foregroundColor: KeraColors.navy900,
+                backgroundColor: KeraColors.orange500,
+                foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               child: _isLoading
-                  ? const KeraLoadingIndicator.small(color: KeraColors.navy900)
+                  ? const KeraLoadingIndicator.small(color: Colors.white)
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.check_circle_outline_rounded, size: 20),
+                        const Icon(Icons.check_circle_outline_rounded, size: 20, color: Colors.white),
                         const SizedBox(width: 8),
                         Text(
                           context.tr('አስቀምጥ', 'Save Part'),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: KeraColors.navy900,
+                            color: Colors.white,
                           ),
                         ),
                       ],

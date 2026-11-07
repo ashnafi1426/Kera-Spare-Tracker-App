@@ -48,8 +48,8 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: KeraColors.brandOrange,
-              foregroundColor: KeraColors.navy900,
+              backgroundColor: KeraColors.red600,
+              foregroundColor: Colors.white,
               textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
             onPressed: () => Navigator.pop(ctx, true),
@@ -365,8 +365,8 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: KeraColors.brandOrange,
-                              foregroundColor: KeraColors.navy900,
+                              backgroundColor: KeraColors.orange500,
+                              foregroundColor: Colors.white,
                               textStyle: const TextStyle(fontWeight: FontWeight.bold),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: const RoundedRectangleBorder(
