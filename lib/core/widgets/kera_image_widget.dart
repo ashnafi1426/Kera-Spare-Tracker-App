@@ -206,8 +206,8 @@ class KeraPartImage extends StatelessWidget {
       );
     }
 
-    final cacheW = (width * 2).round();
-    final cacheH = (height * 2).round();
+    final cacheW = (width.isFinite && width > 0) ? (width * 2).round().clamp(16, 4096) : null;
+    final cacheH = (height.isFinite && height > 0) ? (height * 2).round().clamp(16, 4096) : null;
 
     // 1. Try local file if available
     if (localPath != null && localPath!.isNotEmpty) {
