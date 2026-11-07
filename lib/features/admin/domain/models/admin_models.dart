@@ -108,8 +108,8 @@ class AdminOwnerSummary {
       partsCount: (json['partsCount'] as num?)?.toInt() ?? 0,
       salesCount: (json['salesCount'] as num?)?.toInt() ?? 0,
       status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),
-      lastSyncAt: json['lastSyncAt'] != null
-          ? DateTime.tryParse(json['lastSyncAt'].toString())
+      lastSyncAt: (json['lastSyncAt'] ?? json['last_sync_at'] ?? json['lastSync']) != null
+          ? DateTime.tryParse((json['lastSyncAt'] ?? json['last_sync_at'] ?? json['lastSync']).toString())
           : null,
       failedSyncCount: (json['failedSyncCount'] as num?)?.toInt() ?? 0,
       appVersion: json['appVersion'] as String?,
