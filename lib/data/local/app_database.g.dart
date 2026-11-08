@@ -8875,6 +8875,942 @@ class AppSettingsCompanion extends UpdateCompanion<AppSetting> {
   }
 }
 
+class $InventoryImagesTable extends InventoryImages
+    with TableInfo<$InventoryImagesTable, InventoryImageLocal> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryImagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => const Uuid().v4(),
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _partIdMeta = const VerificationMeta('partId');
+  @override
+  late final GeneratedColumn<String> partId = GeneratedColumn<String>(
+    'part_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localFilePathMeta = const VerificationMeta(
+    'localFilePath',
+  );
+  @override
+  late final GeneratedColumn<String> localFilePath = GeneratedColumn<String>(
+    'local_file_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localThumbnailPathMeta =
+      const VerificationMeta('localThumbnailPath');
+  @override
+  late final GeneratedColumn<String> localThumbnailPath =
+      GeneratedColumn<String>(
+        'local_thumbnail_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _remoteImageIdMeta = const VerificationMeta(
+    'remoteImageId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteImageId = GeneratedColumn<String>(
+    'remote_image_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remoteImageUrlMeta = const VerificationMeta(
+    'remoteImageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> remoteImageUrl = GeneratedColumn<String>(
+    'remote_image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thumbnailUrlMeta = const VerificationMeta(
+    'thumbnailUrl',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnailUrl = GeneratedColumn<String>(
+    'thumbnail_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageTypeMeta = const VerificationMeta(
+    'imageType',
+  );
+  @override
+  late final GeneratedColumn<String> imageType = GeneratedColumn<String>(
+    'image_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('inventory'),
+  );
+  static const VerificationMeta _isPrimaryMeta = const VerificationMeta(
+    'isPrimary',
+  );
+  @override
+  late final GeneratedColumn<bool> isPrimary = GeneratedColumn<bool>(
+    'is_primary',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_primary" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _uploadStatusMeta = const VerificationMeta(
+    'uploadStatus',
+  );
+  @override
+  late final GeneratedColumn<String> uploadStatus = GeneratedColumn<String>(
+    'upload_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending_upload'),
+  );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _errorMessageMeta = const VerificationMeta(
+    'errorMessage',
+  );
+  @override
+  late final GeneratedColumn<String> errorMessage = GeneratedColumn<String>(
+    'error_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerId,
+    partId,
+    localFilePath,
+    localThumbnailPath,
+    remoteImageId,
+    remoteImageUrl,
+    thumbnailUrl,
+    imageType,
+    isPrimary,
+    uploadStatus,
+    retryCount,
+    errorMessage,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_images';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryImageLocal> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('part_id')) {
+      context.handle(
+        _partIdMeta,
+        partId.isAcceptableOrUnknown(data['part_id']!, _partIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_partIdMeta);
+    }
+    if (data.containsKey('local_file_path')) {
+      context.handle(
+        _localFilePathMeta,
+        localFilePath.isAcceptableOrUnknown(
+          data['local_file_path']!,
+          _localFilePathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_localFilePathMeta);
+    }
+    if (data.containsKey('local_thumbnail_path')) {
+      context.handle(
+        _localThumbnailPathMeta,
+        localThumbnailPath.isAcceptableOrUnknown(
+          data['local_thumbnail_path']!,
+          _localThumbnailPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remote_image_id')) {
+      context.handle(
+        _remoteImageIdMeta,
+        remoteImageId.isAcceptableOrUnknown(
+          data['remote_image_id']!,
+          _remoteImageIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remote_image_url')) {
+      context.handle(
+        _remoteImageUrlMeta,
+        remoteImageUrl.isAcceptableOrUnknown(
+          data['remote_image_url']!,
+          _remoteImageUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('thumbnail_url')) {
+      context.handle(
+        _thumbnailUrlMeta,
+        thumbnailUrl.isAcceptableOrUnknown(
+          data['thumbnail_url']!,
+          _thumbnailUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('image_type')) {
+      context.handle(
+        _imageTypeMeta,
+        imageType.isAcceptableOrUnknown(data['image_type']!, _imageTypeMeta),
+      );
+    }
+    if (data.containsKey('is_primary')) {
+      context.handle(
+        _isPrimaryMeta,
+        isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta),
+      );
+    }
+    if (data.containsKey('upload_status')) {
+      context.handle(
+        _uploadStatusMeta,
+        uploadStatus.isAcceptableOrUnknown(
+          data['upload_status']!,
+          _uploadStatusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
+    if (data.containsKey('error_message')) {
+      context.handle(
+        _errorMessageMeta,
+        errorMessage.isAcceptableOrUnknown(
+          data['error_message']!,
+          _errorMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryImageLocal map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryImageLocal(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      partId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}part_id'],
+      )!,
+      localFilePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_file_path'],
+      )!,
+      localThumbnailPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_thumbnail_path'],
+      ),
+      remoteImageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_image_id'],
+      ),
+      remoteImageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_image_url'],
+      ),
+      thumbnailUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail_url'],
+      ),
+      imageType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_type'],
+      )!,
+      isPrimary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_primary'],
+      )!,
+      uploadStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}upload_status'],
+      )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
+      errorMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_message'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $InventoryImagesTable createAlias(String alias) {
+    return $InventoryImagesTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryImageLocal extends DataClass
+    implements Insertable<InventoryImageLocal> {
+  final String id;
+  final String ownerId;
+  final String partId;
+  final String localFilePath;
+  final String? localThumbnailPath;
+  final String? remoteImageId;
+  final String? remoteImageUrl;
+  final String? thumbnailUrl;
+  final String imageType;
+  final bool isPrimary;
+  final String uploadStatus;
+  final int retryCount;
+  final String? errorMessage;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  const InventoryImageLocal({
+    required this.id,
+    required this.ownerId,
+    required this.partId,
+    required this.localFilePath,
+    this.localThumbnailPath,
+    this.remoteImageId,
+    this.remoteImageUrl,
+    this.thumbnailUrl,
+    required this.imageType,
+    required this.isPrimary,
+    required this.uploadStatus,
+    required this.retryCount,
+    this.errorMessage,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['part_id'] = Variable<String>(partId);
+    map['local_file_path'] = Variable<String>(localFilePath);
+    if (!nullToAbsent || localThumbnailPath != null) {
+      map['local_thumbnail_path'] = Variable<String>(localThumbnailPath);
+    }
+    if (!nullToAbsent || remoteImageId != null) {
+      map['remote_image_id'] = Variable<String>(remoteImageId);
+    }
+    if (!nullToAbsent || remoteImageUrl != null) {
+      map['remote_image_url'] = Variable<String>(remoteImageUrl);
+    }
+    if (!nullToAbsent || thumbnailUrl != null) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl);
+    }
+    map['image_type'] = Variable<String>(imageType);
+    map['is_primary'] = Variable<bool>(isPrimary);
+    map['upload_status'] = Variable<String>(uploadStatus);
+    map['retry_count'] = Variable<int>(retryCount);
+    if (!nullToAbsent || errorMessage != null) {
+      map['error_message'] = Variable<String>(errorMessage);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    return map;
+  }
+
+  InventoryImagesCompanion toCompanion(bool nullToAbsent) {
+    return InventoryImagesCompanion(
+      id: Value(id),
+      ownerId: Value(ownerId),
+      partId: Value(partId),
+      localFilePath: Value(localFilePath),
+      localThumbnailPath: localThumbnailPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localThumbnailPath),
+      remoteImageId: remoteImageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteImageId),
+      remoteImageUrl: remoteImageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteImageUrl),
+      thumbnailUrl: thumbnailUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnailUrl),
+      imageType: Value(imageType),
+      isPrimary: Value(isPrimary),
+      uploadStatus: Value(uploadStatus),
+      retryCount: Value(retryCount),
+      errorMessage: errorMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorMessage),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+    );
+  }
+
+  factory InventoryImageLocal.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryImageLocal(
+      id: serializer.fromJson<String>(json['id']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      partId: serializer.fromJson<String>(json['partId']),
+      localFilePath: serializer.fromJson<String>(json['localFilePath']),
+      localThumbnailPath: serializer.fromJson<String?>(
+        json['localThumbnailPath'],
+      ),
+      remoteImageId: serializer.fromJson<String?>(json['remoteImageId']),
+      remoteImageUrl: serializer.fromJson<String?>(json['remoteImageUrl']),
+      thumbnailUrl: serializer.fromJson<String?>(json['thumbnailUrl']),
+      imageType: serializer.fromJson<String>(json['imageType']),
+      isPrimary: serializer.fromJson<bool>(json['isPrimary']),
+      uploadStatus: serializer.fromJson<String>(json['uploadStatus']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
+      errorMessage: serializer.fromJson<String?>(json['errorMessage']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'partId': serializer.toJson<String>(partId),
+      'localFilePath': serializer.toJson<String>(localFilePath),
+      'localThumbnailPath': serializer.toJson<String?>(localThumbnailPath),
+      'remoteImageId': serializer.toJson<String?>(remoteImageId),
+      'remoteImageUrl': serializer.toJson<String?>(remoteImageUrl),
+      'thumbnailUrl': serializer.toJson<String?>(thumbnailUrl),
+      'imageType': serializer.toJson<String>(imageType),
+      'isPrimary': serializer.toJson<bool>(isPrimary),
+      'uploadStatus': serializer.toJson<String>(uploadStatus),
+      'retryCount': serializer.toJson<int>(retryCount),
+      'errorMessage': serializer.toJson<String?>(errorMessage),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+    };
+  }
+
+  InventoryImageLocal copyWith({
+    String? id,
+    String? ownerId,
+    String? partId,
+    String? localFilePath,
+    Value<String?> localThumbnailPath = const Value.absent(),
+    Value<String?> remoteImageId = const Value.absent(),
+    Value<String?> remoteImageUrl = const Value.absent(),
+    Value<String?> thumbnailUrl = const Value.absent(),
+    String? imageType,
+    bool? isPrimary,
+    String? uploadStatus,
+    int? retryCount,
+    Value<String?> errorMessage = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+  }) => InventoryImageLocal(
+    id: id ?? this.id,
+    ownerId: ownerId ?? this.ownerId,
+    partId: partId ?? this.partId,
+    localFilePath: localFilePath ?? this.localFilePath,
+    localThumbnailPath: localThumbnailPath.present
+        ? localThumbnailPath.value
+        : this.localThumbnailPath,
+    remoteImageId: remoteImageId.present
+        ? remoteImageId.value
+        : this.remoteImageId,
+    remoteImageUrl: remoteImageUrl.present
+        ? remoteImageUrl.value
+        : this.remoteImageUrl,
+    thumbnailUrl: thumbnailUrl.present ? thumbnailUrl.value : this.thumbnailUrl,
+    imageType: imageType ?? this.imageType,
+    isPrimary: isPrimary ?? this.isPrimary,
+    uploadStatus: uploadStatus ?? this.uploadStatus,
+    retryCount: retryCount ?? this.retryCount,
+    errorMessage: errorMessage.present ? errorMessage.value : this.errorMessage,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  InventoryImageLocal copyWithCompanion(InventoryImagesCompanion data) {
+    return InventoryImageLocal(
+      id: data.id.present ? data.id.value : this.id,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      partId: data.partId.present ? data.partId.value : this.partId,
+      localFilePath: data.localFilePath.present
+          ? data.localFilePath.value
+          : this.localFilePath,
+      localThumbnailPath: data.localThumbnailPath.present
+          ? data.localThumbnailPath.value
+          : this.localThumbnailPath,
+      remoteImageId: data.remoteImageId.present
+          ? data.remoteImageId.value
+          : this.remoteImageId,
+      remoteImageUrl: data.remoteImageUrl.present
+          ? data.remoteImageUrl.value
+          : this.remoteImageUrl,
+      thumbnailUrl: data.thumbnailUrl.present
+          ? data.thumbnailUrl.value
+          : this.thumbnailUrl,
+      imageType: data.imageType.present ? data.imageType.value : this.imageType,
+      isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
+      uploadStatus: data.uploadStatus.present
+          ? data.uploadStatus.value
+          : this.uploadStatus,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
+      errorMessage: data.errorMessage.present
+          ? data.errorMessage.value
+          : this.errorMessage,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryImageLocal(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('partId: $partId, ')
+          ..write('localFilePath: $localFilePath, ')
+          ..write('localThumbnailPath: $localThumbnailPath, ')
+          ..write('remoteImageId: $remoteImageId, ')
+          ..write('remoteImageUrl: $remoteImageUrl, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('imageType: $imageType, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('uploadStatus: $uploadStatus, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ownerId,
+    partId,
+    localFilePath,
+    localThumbnailPath,
+    remoteImageId,
+    remoteImageUrl,
+    thumbnailUrl,
+    imageType,
+    isPrimary,
+    uploadStatus,
+    retryCount,
+    errorMessage,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryImageLocal &&
+          other.id == this.id &&
+          other.ownerId == this.ownerId &&
+          other.partId == this.partId &&
+          other.localFilePath == this.localFilePath &&
+          other.localThumbnailPath == this.localThumbnailPath &&
+          other.remoteImageId == this.remoteImageId &&
+          other.remoteImageUrl == this.remoteImageUrl &&
+          other.thumbnailUrl == this.thumbnailUrl &&
+          other.imageType == this.imageType &&
+          other.isPrimary == this.isPrimary &&
+          other.uploadStatus == this.uploadStatus &&
+          other.retryCount == this.retryCount &&
+          other.errorMessage == this.errorMessage &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
+}
+
+class InventoryImagesCompanion extends UpdateCompanion<InventoryImageLocal> {
+  final Value<String> id;
+  final Value<String> ownerId;
+  final Value<String> partId;
+  final Value<String> localFilePath;
+  final Value<String?> localThumbnailPath;
+  final Value<String?> remoteImageId;
+  final Value<String?> remoteImageUrl;
+  final Value<String?> thumbnailUrl;
+  final Value<String> imageType;
+  final Value<bool> isPrimary;
+  final Value<String> uploadStatus;
+  final Value<int> retryCount;
+  final Value<String?> errorMessage;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> rowid;
+  const InventoryImagesCompanion({
+    this.id = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.partId = const Value.absent(),
+    this.localFilePath = const Value.absent(),
+    this.localThumbnailPath = const Value.absent(),
+    this.remoteImageId = const Value.absent(),
+    this.remoteImageUrl = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.imageType = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    this.uploadStatus = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryImagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String ownerId,
+    required String partId,
+    required String localFilePath,
+    this.localThumbnailPath = const Value.absent(),
+    this.remoteImageId = const Value.absent(),
+    this.remoteImageUrl = const Value.absent(),
+    this.thumbnailUrl = const Value.absent(),
+    this.imageType = const Value.absent(),
+    this.isPrimary = const Value.absent(),
+    this.uploadStatus = const Value.absent(),
+    this.retryCount = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : ownerId = Value(ownerId),
+       partId = Value(partId),
+       localFilePath = Value(localFilePath);
+  static Insertable<InventoryImageLocal> custom({
+    Expression<String>? id,
+    Expression<String>? ownerId,
+    Expression<String>? partId,
+    Expression<String>? localFilePath,
+    Expression<String>? localThumbnailPath,
+    Expression<String>? remoteImageId,
+    Expression<String>? remoteImageUrl,
+    Expression<String>? thumbnailUrl,
+    Expression<String>? imageType,
+    Expression<bool>? isPrimary,
+    Expression<String>? uploadStatus,
+    Expression<int>? retryCount,
+    Expression<String>? errorMessage,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (partId != null) 'part_id': partId,
+      if (localFilePath != null) 'local_file_path': localFilePath,
+      if (localThumbnailPath != null)
+        'local_thumbnail_path': localThumbnailPath,
+      if (remoteImageId != null) 'remote_image_id': remoteImageId,
+      if (remoteImageUrl != null) 'remote_image_url': remoteImageUrl,
+      if (thumbnailUrl != null) 'thumbnail_url': thumbnailUrl,
+      if (imageType != null) 'image_type': imageType,
+      if (isPrimary != null) 'is_primary': isPrimary,
+      if (uploadStatus != null) 'upload_status': uploadStatus,
+      if (retryCount != null) 'retry_count': retryCount,
+      if (errorMessage != null) 'error_message': errorMessage,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryImagesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? ownerId,
+    Value<String>? partId,
+    Value<String>? localFilePath,
+    Value<String?>? localThumbnailPath,
+    Value<String?>? remoteImageId,
+    Value<String?>? remoteImageUrl,
+    Value<String?>? thumbnailUrl,
+    Value<String>? imageType,
+    Value<bool>? isPrimary,
+    Value<String>? uploadStatus,
+    Value<int>? retryCount,
+    Value<String?>? errorMessage,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return InventoryImagesCompanion(
+      id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
+      partId: partId ?? this.partId,
+      localFilePath: localFilePath ?? this.localFilePath,
+      localThumbnailPath: localThumbnailPath ?? this.localThumbnailPath,
+      remoteImageId: remoteImageId ?? this.remoteImageId,
+      remoteImageUrl: remoteImageUrl ?? this.remoteImageUrl,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      imageType: imageType ?? this.imageType,
+      isPrimary: isPrimary ?? this.isPrimary,
+      uploadStatus: uploadStatus ?? this.uploadStatus,
+      retryCount: retryCount ?? this.retryCount,
+      errorMessage: errorMessage ?? this.errorMessage,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (partId.present) {
+      map['part_id'] = Variable<String>(partId.value);
+    }
+    if (localFilePath.present) {
+      map['local_file_path'] = Variable<String>(localFilePath.value);
+    }
+    if (localThumbnailPath.present) {
+      map['local_thumbnail_path'] = Variable<String>(localThumbnailPath.value);
+    }
+    if (remoteImageId.present) {
+      map['remote_image_id'] = Variable<String>(remoteImageId.value);
+    }
+    if (remoteImageUrl.present) {
+      map['remote_image_url'] = Variable<String>(remoteImageUrl.value);
+    }
+    if (thumbnailUrl.present) {
+      map['thumbnail_url'] = Variable<String>(thumbnailUrl.value);
+    }
+    if (imageType.present) {
+      map['image_type'] = Variable<String>(imageType.value);
+    }
+    if (isPrimary.present) {
+      map['is_primary'] = Variable<bool>(isPrimary.value);
+    }
+    if (uploadStatus.present) {
+      map['upload_status'] = Variable<String>(uploadStatus.value);
+    }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
+    if (errorMessage.present) {
+      map['error_message'] = Variable<String>(errorMessage.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryImagesCompanion(')
+          ..write('id: $id, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('partId: $partId, ')
+          ..write('localFilePath: $localFilePath, ')
+          ..write('localThumbnailPath: $localThumbnailPath, ')
+          ..write('remoteImageId: $remoteImageId, ')
+          ..write('remoteImageUrl: $remoteImageUrl, ')
+          ..write('thumbnailUrl: $thumbnailUrl, ')
+          ..write('imageType: $imageType, ')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('uploadStatus: $uploadStatus, ')
+          ..write('retryCount: $retryCount, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8890,6 +9826,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncMetaTable syncMeta = $SyncMetaTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $InventoryImagesTable inventoryImages = $InventoryImagesTable(
+    this,
+  );
   late final Index idxPartsName = Index(
     'idx_parts_name',
     'CREATE INDEX idx_parts_name ON spare_parts (name)',
@@ -9002,11 +9941,24 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_sync_state_owner_id',
     'CREATE INDEX idx_sync_state_owner_id ON sync_state (owner_id)',
   );
+  late final Index idxInvImagesOwnerPart = Index(
+    'idx_inv_images_owner_part',
+    'CREATE INDEX idx_inv_images_owner_part ON inventory_images (owner_id, part_id)',
+  );
+  late final Index idxInvImagesPartPrimary = Index(
+    'idx_inv_images_part_primary',
+    'CREATE INDEX idx_inv_images_part_primary ON inventory_images (part_id, is_primary)',
+  );
+  late final Index idxInvImagesUploadStatus = Index(
+    'idx_inv_images_upload_status',
+    'CREATE INDEX idx_inv_images_upload_status ON inventory_images (upload_status)',
+  );
   late final PartsDao partsDao = PartsDao(this as AppDatabase);
   late final StockDao stockDao = StockDao(this as AppDatabase);
   late final SalesDao salesDao = SalesDao(this as AppDatabase);
   late final SyncQueueDao syncQueueDao = SyncQueueDao(this as AppDatabase);
   late final SettingsDao settingsDao = SettingsDao(this as AppDatabase);
+  late final ImagesDao imagesDao = ImagesDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -9024,6 +9976,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncMeta,
     syncState,
     appSettings,
+    inventoryImages,
     idxPartsName,
     idxPartsPartNumber,
     idxPartsBrandId,
@@ -9052,6 +10005,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxSyncQueueStatus,
     idxSyncQueueCreatedAt,
     idxSyncStateOwnerId,
+    idxInvImagesOwnerPart,
+    idxInvImagesPartPrimary,
+    idxInvImagesUploadStatus,
   ];
 }
 
@@ -13258,6 +14214,452 @@ typedef $$AppSettingsTableProcessedTableManager =
       AppSetting,
       PrefetchHooks Function()
     >;
+typedef $$InventoryImagesTableCreateCompanionBuilder =
+    InventoryImagesCompanion Function({
+      Value<String> id,
+      required String ownerId,
+      required String partId,
+      required String localFilePath,
+      Value<String?> localThumbnailPath,
+      Value<String?> remoteImageId,
+      Value<String?> remoteImageUrl,
+      Value<String?> thumbnailUrl,
+      Value<String> imageType,
+      Value<bool> isPrimary,
+      Value<String> uploadStatus,
+      Value<int> retryCount,
+      Value<String?> errorMessage,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$InventoryImagesTableUpdateCompanionBuilder =
+    InventoryImagesCompanion Function({
+      Value<String> id,
+      Value<String> ownerId,
+      Value<String> partId,
+      Value<String> localFilePath,
+      Value<String?> localThumbnailPath,
+      Value<String?> remoteImageId,
+      Value<String?> remoteImageUrl,
+      Value<String?> thumbnailUrl,
+      Value<String> imageType,
+      Value<bool> isPrimary,
+      Value<String> uploadStatus,
+      Value<int> retryCount,
+      Value<String?> errorMessage,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$InventoryImagesTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryImagesTable> {
+  $$InventoryImagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partId => $composableBuilder(
+    column: $table.partId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localThumbnailPath => $composableBuilder(
+    column: $table.localThumbnailPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteImageId => $composableBuilder(
+    column: $table.remoteImageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteImageUrl => $composableBuilder(
+    column: $table.remoteImageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageType => $composableBuilder(
+    column: $table.imageType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPrimary => $composableBuilder(
+    column: $table.isPrimary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uploadStatus => $composableBuilder(
+    column: $table.uploadStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$InventoryImagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryImagesTable> {
+  $$InventoryImagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partId => $composableBuilder(
+    column: $table.partId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localThumbnailPath => $composableBuilder(
+    column: $table.localThumbnailPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteImageId => $composableBuilder(
+    column: $table.remoteImageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteImageUrl => $composableBuilder(
+    column: $table.remoteImageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageType => $composableBuilder(
+    column: $table.imageType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPrimary => $composableBuilder(
+    column: $table.isPrimary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uploadStatus => $composableBuilder(
+    column: $table.uploadStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InventoryImagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryImagesTable> {
+  $$InventoryImagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get partId =>
+      $composableBuilder(column: $table.partId, builder: (column) => column);
+
+  GeneratedColumn<String> get localFilePath => $composableBuilder(
+    column: $table.localFilePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get localThumbnailPath => $composableBuilder(
+    column: $table.localThumbnailPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remoteImageId => $composableBuilder(
+    column: $table.remoteImageId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remoteImageUrl => $composableBuilder(
+    column: $table.remoteImageUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get thumbnailUrl => $composableBuilder(
+    column: $table.thumbnailUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get imageType =>
+      $composableBuilder(column: $table.imageType, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPrimary =>
+      $composableBuilder(column: $table.isPrimary, builder: (column) => column);
+
+  GeneratedColumn<String> get uploadStatus => $composableBuilder(
+    column: $table.uploadStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$InventoryImagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryImagesTable,
+          InventoryImageLocal,
+          $$InventoryImagesTableFilterComposer,
+          $$InventoryImagesTableOrderingComposer,
+          $$InventoryImagesTableAnnotationComposer,
+          $$InventoryImagesTableCreateCompanionBuilder,
+          $$InventoryImagesTableUpdateCompanionBuilder,
+          (
+            InventoryImageLocal,
+            BaseReferences<
+              _$AppDatabase,
+              $InventoryImagesTable,
+              InventoryImageLocal
+            >,
+          ),
+          InventoryImageLocal,
+          PrefetchHooks Function()
+        > {
+  $$InventoryImagesTableTableManager(
+    _$AppDatabase db,
+    $InventoryImagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryImagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryImagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryImagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> partId = const Value.absent(),
+                Value<String> localFilePath = const Value.absent(),
+                Value<String?> localThumbnailPath = const Value.absent(),
+                Value<String?> remoteImageId = const Value.absent(),
+                Value<String?> remoteImageUrl = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> imageType = const Value.absent(),
+                Value<bool> isPrimary = const Value.absent(),
+                Value<String> uploadStatus = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryImagesCompanion(
+                id: id,
+                ownerId: ownerId,
+                partId: partId,
+                localFilePath: localFilePath,
+                localThumbnailPath: localThumbnailPath,
+                remoteImageId: remoteImageId,
+                remoteImageUrl: remoteImageUrl,
+                thumbnailUrl: thumbnailUrl,
+                imageType: imageType,
+                isPrimary: isPrimary,
+                uploadStatus: uploadStatus,
+                retryCount: retryCount,
+                errorMessage: errorMessage,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                required String ownerId,
+                required String partId,
+                required String localFilePath,
+                Value<String?> localThumbnailPath = const Value.absent(),
+                Value<String?> remoteImageId = const Value.absent(),
+                Value<String?> remoteImageUrl = const Value.absent(),
+                Value<String?> thumbnailUrl = const Value.absent(),
+                Value<String> imageType = const Value.absent(),
+                Value<bool> isPrimary = const Value.absent(),
+                Value<String> uploadStatus = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryImagesCompanion.insert(
+                id: id,
+                ownerId: ownerId,
+                partId: partId,
+                localFilePath: localFilePath,
+                localThumbnailPath: localThumbnailPath,
+                remoteImageId: remoteImageId,
+                remoteImageUrl: remoteImageUrl,
+                thumbnailUrl: thumbnailUrl,
+                imageType: imageType,
+                isPrimary: isPrimary,
+                uploadStatus: uploadStatus,
+                retryCount: retryCount,
+                errorMessage: errorMessage,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$InventoryImagesTable, InventoryImageLocal>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $InventoryImagesTable,
+                    InventoryImageLocal
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$InventoryImagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryImagesTable,
+      InventoryImageLocal,
+      $$InventoryImagesTableFilterComposer,
+      $$InventoryImagesTableOrderingComposer,
+      $$InventoryImagesTableAnnotationComposer,
+      $$InventoryImagesTableCreateCompanionBuilder,
+      $$InventoryImagesTableUpdateCompanionBuilder,
+      (
+        InventoryImageLocal,
+        BaseReferences<
+          _$AppDatabase,
+          $InventoryImagesTable,
+          InventoryImageLocal
+        >,
+      ),
+      InventoryImageLocal,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13286,4 +14688,6 @@ class $AppDatabaseManager {
       $$SyncStateTableTableManager(_db, _db.syncState);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$InventoryImagesTableTableManager get inventoryImages =>
+      $$InventoryImagesTableTableManager(_db, _db.inventoryImages);
 }

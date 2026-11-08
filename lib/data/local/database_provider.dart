@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/parts/presentation/providers/metadata_providers.dart';
 import 'app_database.dart';
+import 'daos/images_dao.dart';
 import 'daos/parts_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
@@ -39,4 +40,9 @@ final syncQueueDaoProvider = Provider<SyncQueueDao>((ref) {
 /// Provider for SettingsDao.
 final settingsDaoProvider = Provider<SettingsDao>((ref) {
   return ref.watch(appDatabaseProvider).settingsDao;
+});
+
+/// Provider for ImagesDao.
+final imagesDaoProvider = Provider<ImagesDao>((ref) {
+  return ref.watch(appDatabaseProvider).imagesDao;
 });

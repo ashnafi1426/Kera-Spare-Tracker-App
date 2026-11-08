@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables/inventory_images_table.dart';
+import '../tables/spare_parts_table.dart';
 
 part 'images_dao.g.dart';
 
