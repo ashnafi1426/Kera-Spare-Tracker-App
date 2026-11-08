@@ -13,6 +13,10 @@ import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/models/picker_item.dart';
+import '../../../../core/widgets/image_management_widgets.dart';
+import '../../../../core/services/image_management_service.dart';
+import '../../../../data/local/database_provider.dart';
+import '../../../../data/local/app_database.dart';
 import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
 
@@ -56,6 +60,8 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
   // Selection states
   String? _photoLocalPath;
   String? _photoUrl;
+  List<InventoryImagePickerItem> _partImages = [];
+  final List<String> _removedImageIds = [];
   PickerItem? _selectedBrand;
   PickerItem? _selectedCategory;
   PickerItem? _selectedLocation;
@@ -111,6 +117,26 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       _notesController.text = part.notes ?? '';
       _photoLocalPath = part.photoLocalPath;
       _photoUrl = part.photoUrl;
+
+      // Load existing multi-images for this spare part
+      final existingDbImages = await ref.read(imagesDaoProvider).getImagesForPart(ownerId, widget.partId!);
+      if (existingDbImages.isNotEmpty) {
+        _partImages = existingDbImages.map((e) => InventoryImagePickerItem(
+          id: e.id,
+          localPath: e.localFilePath,
+          remoteUrl: e.remoteImageUrl,
+          isPrimary: e.isPrimary,
+        )).toList();
+      } else if (_photoLocalPath != null || _photoUrl != null) {
+        _partImages = [
+          InventoryImagePickerItem(
+            id: 'initial_primary',
+            localPath: _photoLocalPath,
+            remoteUrl: _photoUrl,
+            isPrimary: true,
+          ),
+        ];
+      }
 
       // Resolve brand, category, location labels if present
       if (part.brandId != null) {
@@ -221,7 +247,9 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
 
   Future<void> _showPhotoPickerSheet() async {
     final l10n = context.l10n;
-    final imageService = ref.read(imageServiceProvider);
+    final ownerId = ref.read(currentOwnerIdProvider);
+    final tempPartId = widget.partId ?? 'new_${DateTime.now().millisecondsSinceEpoch}';
+    final imageService = ref.read(imageManagementServiceProvider);
 
     await showModalBottomSheet<void>(
       context: context,
@@ -251,11 +279,24 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                 subtitle: const Text('በካሜራ ፎቶ አንሳ'),
                 onTap: () async {
                   Navigator.pop(ctx);
-                  final photo = await imageService.captureOrPickPhoto(
+                  final newImages = await imageService.captureOrPickInventoryImages(
                     source: ImageSource.camera,
+                    ownerId: ownerId,
+                    partId: tempPartId,
+                    isPrimaryIfFirst: _partImages.isEmpty,
                   );
-                  if (photo != null && mounted) {
-                    setState(() => _photoLocalPath = photo.fullPath);
+                  if (newImages.isNotEmpty && mounted) {
+                    setState(() {
+                      for (final img in newImages) {
+                        _partImages.add(InventoryImagePickerItem(
+                          id: img.id,
+                          localPath: img.localFilePath,
+                          remoteUrl: img.remoteImageUrl,
+                          isPrimary: img.isPrimary || _partImages.isEmpty,
+                        ));
+                      }
+                      _updatePrimaryPointers();
+                    });
                   }
                 },
               ),
@@ -265,14 +306,27 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                   child: Icon(Icons.photo_library_rounded, color: Color(0xFF0C2340)),
                 ),
                 title: const Text('ከስልክ ማዕከለ-ስዕላት ምረጥ'),
-                subtitle: const Text('ፎቶ ከስልክ ምረጥ'),
+                subtitle: const Text('ፎቶ ከስልክ ምረጥ (ብዙ ፎቶ ይቻላል)'),
                 onTap: () async {
                   Navigator.pop(ctx);
-                  final photo = await imageService.captureOrPickPhoto(
+                  final newImages = await imageService.captureOrPickInventoryImages(
                     source: ImageSource.gallery,
+                    ownerId: ownerId,
+                    partId: tempPartId,
+                    isPrimaryIfFirst: _partImages.isEmpty,
                   );
-                  if (photo != null && mounted) {
-                    setState(() => _photoLocalPath = photo.fullPath);
+                  if (newImages.isNotEmpty && mounted) {
+                    setState(() {
+                      for (final img in newImages) {
+                        _partImages.add(InventoryImagePickerItem(
+                          id: img.id,
+                          localPath: img.localFilePath,
+                          remoteUrl: img.remoteImageUrl,
+                          isPrimary: img.isPrimary || _partImages.isEmpty,
+                        ));
+                      }
+                      _updatePrimaryPointers();
+                    });
                   }
                 },
               ),
@@ -281,6 +335,44 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         ),
       ),
     );
+  }
+
+  void _updatePrimaryPointers() {
+    if (_partImages.isEmpty) {
+      _photoLocalPath = null;
+      _photoUrl = null;
+      return;
+    }
+
+    final primary = _partImages.firstWhere(
+      (img) => img.isPrimary,
+      orElse: () => _partImages.first,
+    );
+
+    _photoLocalPath = primary.localPath;
+    _photoUrl = primary.remoteUrl;
+  }
+
+  void _setPrimaryImage(int index) {
+    if (index < 0 || index >= _partImages.length) return;
+    setState(() {
+      _partImages = List.generate(_partImages.length, (i) {
+        return _partImages[i].copyWith(isPrimary: i == index);
+      });
+      _updatePrimaryPointers();
+    });
+  }
+
+  void _removeImage(int index) {
+    if (index < 0 || index >= _partImages.length) return;
+    setState(() {
+      final removed = _partImages.removeAt(index);
+      _removedImageIds.add(removed.id);
+      if (removed.isPrimary && _partImages.isNotEmpty) {
+        _partImages[0] = _partImages[0].copyWith(isPrimary: true);
+      }
+      _updatePrimaryPointers();
+    });
   }
 
   Future<void> _pickBrand() async {

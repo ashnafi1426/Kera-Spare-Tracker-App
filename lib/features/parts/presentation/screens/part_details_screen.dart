@@ -172,7 +172,7 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
               // 1. Hero Showcase Container (Stitch Screen 16)
-              _buildHeroShowcase(part, hasPhoto, brandName),
+              _buildHeroShowcase(part, hasPhoto, brandName, ref.watch(partImagesStreamProvider(part.id)).value ?? []),
               const SizedBox(height: 16),
 
               // 2. Part Name & Number Header
@@ -449,7 +449,15 @@ class _PartDetailsScreenState extends ConsumerState<PartDetailsScreen> {
     );
   }
 
-  Widget _buildHeroShowcase(PartItem part, bool hasPhoto, String? brandName) {
+  Widget _buildHeroShowcase(PartItem part, bool hasPhoto, String? brandName, [List<InventoryImageLocal> images = const []]) {
+    if (images.isNotEmpty) {
+      return InventoryImageGallery(
+        images: images,
+        fallbackLocalPath: part.photoLocalPath,
+        fallbackPhotoUrl: part.photoUrl,
+        partName: part.displayName,
+      );
+    }
     return Container(
       width: double.infinity,
       height: 220,
