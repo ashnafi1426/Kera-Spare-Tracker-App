@@ -537,9 +537,33 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       setState(() => _isLoading = false);
 
       if (result.isSuccess) {
-        final newId = result.valueOrNull?.id;
-        if (_photoLocalPath != null && newId != null) {
-          unawaited(repo.uploadPartPhoto(partId: newId, filePath: _photoLocalPath!));
+        final savedPartId = widget.partId ?? result.valueOrNull?.id;
+        final imagesDao = ref.read(imagesDaoProvider);
+
+        for (final remId in _removedImageIds) {
+          unawaited(imagesDao.markPendingDeletion(remId));
+        }
+
+        for (final item in _partImages) {
+          if (item.localPath != null && savedPartId != null) {
+            final companion = InventoryImagesCompanion(
+              id: drift.Value(item.id),
+              ownerId: drift.Value(ownerId),
+              partId: drift.Value(savedPartId),
+              localFilePath: drift.Value(item.localPath!),
+              isPrimary: drift.Value(item.isPrimary),
+              uploadStatus: const drift.Value('pending_upload'),
+              createdAt: drift.Value(DateTime.now()),
+              updatedAt: drift.Value(DateTime.now()),
+            );
+            await imagesDao.into(imagesDao.inventoryImages).insertOnConflictUpdate(companion);
+          }
+        }
+
+        unawaited(ref.read(imageManagementServiceProvider).syncPendingImages(ownerId));
+
+        if (_photoLocalPath != null && savedPartId != null) {
+          unawaited(repo.uploadPartPhoto(partId: savedPartId, filePath: _photoLocalPath!));
         }
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
@@ -572,9 +596,33 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       setState(() => _isLoading = false);
 
       if (result.isSuccess) {
-        final newId = result.valueOrNull?.id;
-        if (_photoLocalPath != null && newId != null) {
-          unawaited(repo.uploadPartPhoto(partId: newId, filePath: _photoLocalPath!));
+        final savedPartId = widget.partId ?? result.valueOrNull?.id;
+        final imagesDao = ref.read(imagesDaoProvider);
+
+        for (final remId in _removedImageIds) {
+          unawaited(imagesDao.markPendingDeletion(remId));
+        }
+
+        for (final item in _partImages) {
+          if (item.localPath != null && savedPartId != null) {
+            final companion = InventoryImagesCompanion(
+              id: drift.Value(item.id),
+              ownerId: drift.Value(ownerId),
+              partId: drift.Value(savedPartId),
+              localFilePath: drift.Value(item.localPath!),
+              isPrimary: drift.Value(item.isPrimary),
+              uploadStatus: const drift.Value('pending_upload'),
+              createdAt: drift.Value(DateTime.now()),
+              updatedAt: drift.Value(DateTime.now()),
+            );
+            await imagesDao.into(imagesDao.inventoryImages).insertOnConflictUpdate(companion);
+          }
+        }
+
+        unawaited(ref.read(imageManagementServiceProvider).syncPendingImages(ownerId));
+
+        if (_photoLocalPath != null && savedPartId != null) {
+          unawaited(repo.uploadPartPhoto(partId: savedPartId, filePath: _photoLocalPath!));
         }
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
@@ -716,110 +764,13 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   children: [
-                    // 1. Photo Picker Dashed/Rounded Container (3 Add spare part.png)
-                    GestureDetector(
-                      onTap: _showPhotoPickerSheet,
-                      child: Container(
-                        height: 110,
-                        decoration: BoxDecoration(
-                          color: context.cardBg,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: context.borderColor,
-                            width: 1.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: _photoLocalPath != null
-                            ? Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Image.file(
-                                    File(_photoLocalPath!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: CircleAvatar(
-                                      radius: 16,
-                                      backgroundColor: Colors.black54,
-                                      child: IconButton(
-                                        padding: EdgeInsets.zero,
-                                        icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                                        onPressed: () => setState(() => _photoLocalPath = null),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : (_photoUrl != null && _photoUrl!.isNotEmpty)
-                                ? Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      KeraPartImage(
-                                        remoteUrl: _photoUrl,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        borderRadius: 0,
-                                      ),
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: CircleAvatar(
-                                          radius: 16,
-                                          backgroundColor: Colors.black54,
-                                          child: IconButton(
-                                            padding: EdgeInsets.zero,
-                                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
-                                            onPressed: () => setState(() => _photoUrl = null),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.camera_alt_outlined,
-                                      color: isDark ? Colors.white : const Color(0xFF0C2340),
-                                      size: 24,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    context.tr('ፎቶ ጨምር (አማራጭ)', 'Add Photo (Optional)'),
-                                    style: TextStyle(
-                                      color: context.textPrimaryColor,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    context.tr('ካሜራ ወይም ከስልክ ማዕከለ-ስዕላት ምረጥ', 'Take photo or choose from gallery'),
-                                    style: TextStyle(
-                                      color: context.textSecondaryColor,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
+                    // 1. Multi-Image Photo Picker Grid with Primary selection & thumbnails
+                    InventoryImagePickerGrid(
+                      images: _partImages,
+                      onAddPressed: _showPhotoPickerSheet,
+                      onRemovePressed: _removeImage,
+                      onSetPrimary: _setPrimaryImage,
+                      isDark: isDark,
                     ),
                     const SizedBox(height: 12),
 
