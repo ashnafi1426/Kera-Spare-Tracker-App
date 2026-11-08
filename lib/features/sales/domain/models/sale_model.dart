@@ -13,6 +13,7 @@ class SaleModel {
   final String? paymentMethod;
   final String? notes;
   final List<SaleItemModel> items;
+  final bool isSynced;
 
   const SaleModel({
     required this.id,
@@ -26,6 +27,7 @@ class SaleModel {
     this.paymentMethod,
     this.notes,
     this.items = const [],
+    this.isSynced = true,
   });
 
   /// Total count of parts sold across all line items.

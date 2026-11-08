@@ -493,8 +493,31 @@ class LocalSalesRepository implements SalesRepository {
           ..where((t) => t.ownerId.equals(ownerId) & t.deletedAt.isNull())
           ..orderBy([(t) => OrderingTerm.desc(t.soldAt)]))
         .watch()
-        .map(
-          (rows) => rows
+        .asyncMap((rows) async {
+          if (rows.isEmpty) return <SaleModel>[];
+          final saleIds = rows.map((s) => s.id).toList();
+          final allItems = await (db.select(db.saleItems)
+                ..where((i) => i.saleId.isIn(saleIds) & i.deletedAt.isNull()))
+              .get();
+
+          final itemsBySaleId = <String, List<SaleItemModel>>{};
+          for (final i in allItems) {
+            itemsBySaleId.putIfAbsent(i.saleId, () => []).add(
+              SaleItemModel(
+                id: i.id,
+                saleId: i.saleId,
+                partId: i.partId,
+                partNameSnapshot: i.partNameSnapshot,
+                unitPrice: i.unitPrice,
+                unitCost: i.unitCost,
+                quantity: i.quantity,
+                lineTotal: i.lineTotal,
+                lineProfit: i.lineProfit,
+              ),
+            );
+          }
+
+          return rows
               .map(
                 (s) => SaleModel(
                   id: s.id,
@@ -507,10 +530,11 @@ class LocalSalesRepository implements SalesRepository {
                   totalProfit: s.totalProfit,
                   paymentMethod: s.paymentMethod,
                   notes: s.notes,
+                  items: itemsBySaleId[s.id] ?? const [],
                 ),
               )
-              .toList(),
-        );
+              .toList();
+        });
   }
 
   @override
@@ -527,8 +551,31 @@ class LocalSalesRepository implements SalesRepository {
           startDate: startDate,
           endDate: endDate,
         )
-        .map(
-          (rows) => rows
+        .asyncMap((rows) async {
+          if (rows.isEmpty) return <SaleModel>[];
+          final saleIds = rows.map((s) => s.id).toList();
+          final allItems = await (db.select(db.saleItems)
+                ..where((i) => i.saleId.isIn(saleIds) & i.deletedAt.isNull()))
+              .get();
+
+          final itemsBySaleId = <String, List<SaleItemModel>>{};
+          for (final i in allItems) {
+            itemsBySaleId.putIfAbsent(i.saleId, () => []).add(
+              SaleItemModel(
+                id: i.id,
+                saleId: i.saleId,
+                partId: i.partId,
+                partNameSnapshot: i.partNameSnapshot,
+                unitPrice: i.unitPrice,
+                unitCost: i.unitCost,
+                quantity: i.quantity,
+                lineTotal: i.lineTotal,
+                lineProfit: i.lineProfit,
+              ),
+            );
+          }
+
+          return rows
               .map(
                 (s) => SaleModel(
                   id: s.id,
@@ -541,10 +588,11 @@ class LocalSalesRepository implements SalesRepository {
                   totalProfit: s.totalProfit,
                   paymentMethod: s.paymentMethod,
                   notes: s.notes,
+                  items: itemsBySaleId[s.id] ?? const [],
                 ),
               )
-              .toList(),
-        );
+              .toList();
+        });
   }
 
   @override

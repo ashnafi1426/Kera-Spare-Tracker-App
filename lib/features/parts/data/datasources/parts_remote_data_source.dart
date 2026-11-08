@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/errors/failure.dart';
@@ -58,6 +59,49 @@ class PartsRemoteDataSource {
     } catch (e) {
       return Result.failure(ServerFailure(
         message: 'Unexpected error: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  /// Uploads a photo for a part to the backend server storage.
+  Future<Result<String>> uploadPartPhoto({
+    required String partId,
+    required String filePath,
+  }) async {
+    try {
+      await _attachAuthHeader();
+      final file = File(filePath);
+      if (!file.existsSync()) {
+        return Result.failure(ValidationFailure(message: 'File not found: $filePath'));
+      }
+
+      final fileName = file.path.split(Platform.pathSeparator).last;
+      final formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(filePath, filename: fileName),
+      });
+
+      final response = await _dio.post('/parts/$partId/photo', data: formData);
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        final photoUrl = (data is Map && data['data'] is Map)
+            ? (data['data']['photoUrl'] as String?)
+            : null;
+        if (photoUrl != null) {
+          return Result.success(photoUrl);
+        }
+      }
+      return Result.failure(ServerFailure(
+        message: 'Failed to upload photo: HTTP ${response.statusCode}',
+      ));
+    } on DioException catch (e) {
+      return Result.failure(NetworkFailure(
+        message: e.message ?? 'Network error uploading photo',
+        cause: e,
+      ));
+    } catch (e) {
+      return Result.failure(ServerFailure(
+        message: 'Unexpected photo upload error: $e',
         cause: e,
       ));
     }

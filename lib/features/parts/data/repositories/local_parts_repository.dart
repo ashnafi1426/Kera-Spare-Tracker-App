@@ -10,21 +10,25 @@ import '../../domain/models/paged_result.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/repositories/parts_repository.dart';
 import '../datasources/parts_local_data_source.dart';
+import '../datasources/parts_remote_data_source.dart';
 
 /// Clean Architecture implementation of [PartsRepository] backed by [PartsLocalDataSource].
 /// All reads strictly query SQLite reactive streams, and all writes execute atomic
 /// transactions saving to the local database and the sync outbox.
 class LocalPartsRepository implements PartsRepository {
   final PartsLocalDataSource localDataSource;
+  final PartsRemoteDataSource remoteDataSource;
   final AppDatabase db;
   final Uuid uuid;
 
   LocalPartsRepository({
     required this.db,
     PartsLocalDataSource? localDataSource,
+    PartsRemoteDataSource? remoteDataSource,
     this.uuid = const Uuid(),
-  }) : localDataSource =
-            localDataSource ?? PartsLocalDataSource(db: db, uuid: uuid);
+  })  : localDataSource =
+            localDataSource ?? PartsLocalDataSource(db: db, uuid: uuid),
+        remoteDataSource = remoteDataSource ?? PartsRemoteDataSource();
 
   @override
   Stream<List<PartItem>> watchActiveParts(String ownerId) {
@@ -262,22 +266,22 @@ class LocalPartsRepository implements PartsRepository {
   }) async {
     try {
       final List<Map<String, String>> templateParts = [
-        {'nameAm': 'ተርቦቻርጀር ስብስብ', 'nameEn': 'Turbocharger Assembly Kit', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '14000', 'sell': '21000'},
-        {'nameAm': 'የዘይት ማጣሪያ', 'nameEn': 'Oil Filter Heavy Duty', 'brand': 'CAT', 'cat': 'Filters', 'shelf': 'Shelf 1', 'buy': '450', 'sell': '700'},
-        {'nameAm': 'የናፍጣ ማጣሪያ', 'nameEn': 'Fuel Filter Secondary', 'brand': 'CTP', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '650', 'sell': '950'},
-        {'nameAm': 'የሃይድሮሊክ ሲሊንደር ማሸጊያ', 'nameEn': 'Hydraulic Cylinder Seal Kit', 'brand': 'Hitachi', 'cat': 'Seals & Gaskets', 'shelf': 'Shelf 3', 'buy': '2400', 'sell': '3800'},
-        {'nameAm': 'የትራክ ሮለር', 'nameEn': 'Track Roller Assembly', 'brand': 'Doosan', 'cat': 'Undercarriage', 'shelf': 'Shelf 5', 'buy': '8500', 'sell': '12500'},
-        {'nameAm': 'የኢንጀክተር ኖዝል', 'nameEn': 'Fuel Injector Nozzle', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '3200', 'sell': '4900'},
-        {'nameAm': 'አልተርኔተር 24V', 'nameEn': 'Alternator 24V 60A', 'brand': 'Develon', 'cat': 'Electrical', 'shelf': 'Shelf 6', 'buy': '7200', 'sell': '11000'},
-        {'nameAm': 'እስጣርተር ሞተር', 'nameEn': 'Starter Motor 24V 7.5kW', 'brand': 'SANY', 'cat': 'Electrical', 'shelf': 'Shelf 2', 'buy': '11500', 'sell': '16800'},
-        {'nameAm': 'የፒስተን ሪንግ', 'nameEn': 'Piston Ring Set STD', 'brand': 'CTP', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '1800', 'sell': '2900'},
-        {'nameAm': 'የውሃ ፓምፕ', 'nameEn': 'Water Pump Assembly', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '5400', 'sell': '8200'},
-        {'nameAm': 'የባሊ ጥርስ', 'nameEn': 'Bucket Tooth Tiger', 'brand': 'SANY', 'cat': 'Undercarriage', 'shelf': 'Shelf 1', 'buy': '1200', 'sell': '1950'},
-        {'nameAm': 'የውጭ አየር ማጣሪያ', 'nameEn': 'Air Filter Outer Element', 'brand': 'Doosan', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '1100', 'sell': '1750'},
-        {'nameAm': 'ዋና ቤሪንግ ስብስብ', 'nameEn': 'Main Bearing Set Standard', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '3600', 'sell': '5500'},
-        {'nameAm': 'የሃይድሮሊክ ዋና ፓምፕ ቫልቭ', 'nameEn': 'Hydraulic Pump Relief Valve', 'brand': 'Hitachi', 'cat': 'Hydraulic', 'shelf': 'Shelf 1', 'buy': '4200', 'sell': '6400'},
-        {'nameAm': 'የፍሬን ዲስክ', 'nameEn': 'Brake Friction Disc', 'brand': 'Develon', 'cat': 'Hardware & Fasteners', 'shelf': 'Shelf 5', 'buy': '2100', 'sell': '3300'},
-        {'nameAm': 'የቀበቶ መወጠሪያ', 'nameEn': 'Fan Belt Tensioner Pulley', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 6', 'buy': '1450', 'sell': '2300'},
+        {'nameAm': 'የፍሬን ዲስክ', 'nameEn': 'Brake Disc', 'brand': 'CAT', 'cat': 'Hardware & Fasteners', 'shelf': 'Shelf 4', 'buy': '14000', 'sell': '21000', 'photoUrl': '/uploads/parts/samples/brake_disc.jpg', 'forcedQty': '0'},
+        {'nameAm': 'አልተርኔተር', 'nameEn': 'Alternator', 'brand': 'CAT', 'cat': 'Electrical', 'shelf': 'Shelf 1', 'buy': '450', 'sell': '700', 'photoUrl': '/uploads/parts/samples/alternator.jpg', 'forcedQty': '13'},
+        {'nameAm': 'ባትሪ', 'nameEn': 'Car Battery', 'brand': 'CTP', 'cat': 'Electrical', 'shelf': 'Shelf 2', 'buy': '650', 'sell': '950', 'photoUrl': '/uploads/parts/samples/car_battery.jpg', 'forcedQty': '16'},
+        {'nameAm': 'የዘይት ማጣሪያ', 'nameEn': 'Oil Filter', 'brand': 'HT', 'cat': 'Filters', 'shelf': 'Shelf 3', 'buy': '2400', 'sell': '3800', 'photoUrl': '/uploads/parts/samples/oil_filter.jpg', 'forcedQty': '5'},
+        {'nameAm': 'ተርቦቻርጀር ስብስብ', 'nameEn': 'Turbocharger Assembly Kit', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '14000', 'sell': '21000', 'photoUrl': '/uploads/parts/samples/brake_disc.jpg'},
+        {'nameAm': 'የናፍጣ ማጣሪያ', 'nameEn': 'Fuel Filter Secondary', 'brand': 'CTP', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '650', 'sell': '950', 'photoUrl': '/uploads/parts/samples/oil_filter.jpg'},
+        {'nameAm': 'የሃይድሮሊክ ሲሊንደር ማሸጊያ', 'nameEn': 'Hydraulic Cylinder Seal Kit', 'brand': 'Hitachi', 'cat': 'Seals & Gaskets', 'shelf': 'Shelf 3', 'buy': '2400', 'sell': '3800', 'photoUrl': ''},
+        {'nameAm': 'የትራክ ሮለር', 'nameEn': 'Track Roller Assembly', 'brand': 'Doosan', 'cat': 'Undercarriage', 'shelf': 'Shelf 5', 'buy': '8500', 'sell': '12500', 'photoUrl': ''},
+        {'nameAm': 'የኢንጀክተር ኖዝል', 'nameEn': 'Fuel Injector Nozzle', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '3200', 'sell': '4900', 'photoUrl': ''},
+        {'nameAm': 'አልተርኔተር 24V', 'nameEn': 'Alternator 24V 60A', 'brand': 'Develon', 'cat': 'Electrical', 'shelf': 'Shelf 6', 'buy': '7200', 'sell': '11000', 'photoUrl': '/uploads/parts/samples/alternator.jpg'},
+        {'nameAm': 'እስጣርተር ሞተር', 'nameEn': 'Starter Motor 24V 7.5kW', 'brand': 'SANY', 'cat': 'Electrical', 'shelf': 'Shelf 2', 'buy': '11500', 'sell': '16800', 'photoUrl': ''},
+        {'nameAm': 'የፒስተን ሪንግ', 'nameEn': 'Piston Ring Set STD', 'brand': 'CTP', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '1800', 'sell': '2900', 'photoUrl': ''},
+        {'nameAm': 'የውሃ ፓምፕ', 'nameEn': 'Water Pump Assembly', 'brand': 'CAT', 'cat': 'Engine', 'shelf': 'Shelf 4', 'buy': '5400', 'sell': '8200', 'photoUrl': ''},
+        {'nameAm': 'የባሊ ጥርስ', 'nameEn': 'Bucket Tooth Tiger', 'brand': 'SANY', 'cat': 'Undercarriage', 'shelf': 'Shelf 1', 'buy': '1200', 'sell': '1950', 'photoUrl': ''},
+        {'nameAm': 'የውጭ አየር ማጣሪያ', 'nameEn': 'Air Filter Outer Element', 'brand': 'Doosan', 'cat': 'Filters', 'shelf': 'Shelf 2', 'buy': '1100', 'sell': '1750', 'photoUrl': '/uploads/parts/samples/oil_filter.jpg'},
+        {'nameAm': 'ዋና ቤሪንግ ስብስብ', 'nameEn': 'Main Bearing Set Standard', 'brand': 'IPD', 'cat': 'Engine', 'shelf': 'Shelf 3', 'buy': '3600', 'sell': '5500', 'photoUrl': ''},
       ];
 
       final now = DateTime.now();
@@ -286,11 +290,17 @@ class LocalPartsRepository implements PartsRepository {
       for (var i = 0; i < count; i++) {
         final id = uuid.v4();
         final template = templateParts[i % templateParts.length];
-        final name = '${template["nameAm"]} · ${template["nameEn"]} #${i + 1}';
-        final partNumber = '${template["brand"]}-${1000 + i * 11}';
+        final name = (i < 4)
+            ? template['nameEn']!
+            : '${template['nameAm']} · ${template['nameEn']} #${i + 1}';
+        final partNumber = (i < 4)
+            ? '${template['brand']}-${1000 + i * 11}'
+            : '${template['brand']}-${1000 + i * 11}';
 
         final double qty;
-        if (i % 10 == 0) {
+        if (template.containsKey('forcedQty')) {
+          qty = double.parse(template['forcedQty']!);
+        } else if (i % 10 == 0) {
           qty = 0.0;
         } else if (i % 5 == 0) {
           qty = ((i % 4) + 1).toDouble();
@@ -309,6 +319,7 @@ class LocalPartsRepository implements PartsRepository {
             ownerId: Value(ownerId),
             name: Value(name),
             partNumber: Value(partNumber),
+            photoUrl: Value(template['photoUrl']?.isNotEmpty == true ? template['photoUrl'] : null),
             customLocation: Value(template['shelf'] ?? 'Shelf 1'),
             description: Value(
                 'Sample ${template["nameEn"]} replacement for heavy machinery'),
@@ -375,6 +386,37 @@ class LocalPartsRepository implements PartsRepository {
     } catch (e) {
       return Result.failure(DatabaseFailure(
         message: 'Failed to clear test parts: $e',
+        cause: e,
+      ));
+    }
+  }
+
+  @override
+  Future<Result<String>> uploadPartPhoto({
+    required String partId,
+    required String filePath,
+  }) async {
+    try {
+      final res = await remoteDataSource.uploadPartPhoto(
+        partId: partId,
+        filePath: filePath,
+      );
+      if (res.isSuccess && res.valueOrNull != null) {
+        final url = res.valueOrNull!;
+        // Update local database with backend URL
+        await db.partsDao.updatePart(
+          SparePartsCompanion(
+            id: Value(partId),
+            photoUrl: Value(url),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
+        return Result.success(url);
+      }
+      return res;
+    } catch (e) {
+      return Result.failure(ServerFailure(
+        message: 'Could not upload part photo to backend: $e',
         cause: e,
       ));
     }

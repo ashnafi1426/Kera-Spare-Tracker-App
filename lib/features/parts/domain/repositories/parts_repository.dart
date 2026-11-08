@@ -85,4 +85,10 @@ abstract class PartsRepository {
 
   /// Clears all seeded test parts for the current owner.
   Future<Result<int>> clearTestParts(String ownerId);
+
+  /// Uploads a photo file to the backend server and returns the photo URL.
+  Future<Result<String>> uploadPartPhoto({
+    required String partId,
+    required String filePath,
+  });
 }

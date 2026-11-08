@@ -117,8 +117,14 @@ export async function getPartPhoto(req, res, next) {
       throw new NotFoundError('No photo associated with this spare part');
     }
 
-    const filename = path.basename(part.photoUrl);
-    const filePath = path.resolve(config.uploadDir, 'parts', part.ownerId, filename);
+    let filePath;
+    if (part.photoUrl.includes('samples/')) {
+      const filename = path.basename(part.photoUrl);
+      filePath = path.resolve(config.uploadDir, 'parts', 'samples', filename);
+    } else {
+      const filename = path.basename(part.photoUrl);
+      filePath = path.resolve(config.uploadDir, 'parts', part.ownerId, filename);
+    }
 
     if (!fs.existsSync(filePath)) {
       throw new NotFoundError('Photo file not found on server storage');

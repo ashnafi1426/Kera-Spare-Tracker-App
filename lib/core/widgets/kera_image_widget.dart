@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import '../constants/constants.dart';
 import '../design/tokens/kera_colors.dart';
 
-/// Helper to convert relative or local paths to fully qualified URLs or valid local paths.
+// Helper to convert relative or local paths to fully qualified URLs or valid local paths.
 String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
   if (pathOrUrl == null || pathOrUrl.trim().isEmpty) return null;
   var clean = pathOrUrl.trim().replaceAll(r'\', '/');
 
-  // 1. If already full http(s) URL
+  // 1. If already an asset
+  if (clean.startsWith('assets/')) {
+    return clean;
+  }
+
+  // 2. If already full http(s) URL
   if (clean.startsWith('http://') || clean.startsWith('https://')) {
     if (cacheBust && !clean.contains('?t=')) {
       final sep = clean.contains('?') ? '&' : '?';
@@ -17,7 +22,7 @@ String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
     return clean;
   }
 
-  // 2. Check if local device file path (especially on Android where paths start with /data or /storage)
+  // 3. Check if local device file path (especially on Android where paths start with /data or /storage)
   try {
     final localFile = File(clean);
     if (localFile.existsSync()) {
@@ -25,7 +30,7 @@ String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
     }
   } catch (_) {}
 
-  // 3. If server relative URL (e.g. /uploads/profiles/... or /uploads/parts/...)
+  // 4. If server relative URL (e.g. /uploads/profiles/... or /uploads/parts/...)
   if (clean.startsWith('uploads') ||
       clean.startsWith('/uploads') ||
       clean.startsWith('api/v1/uploads') ||
@@ -232,6 +237,19 @@ class KeraPartImage extends StatelessWidget {
 
     // 2. Try remote URL or resolved path
     final resolved = resolveImageUrl(remoteUrl);
+    if (resolved != null && resolved.startsWith('assets/')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset(
+          resolved,
+          width: width,
+          height: height,
+          fit: fit,
+          errorBuilder: (ctx, err, stack) => placeholder(),
+        ),
+      );
+    }
+
     if (resolved != null && resolved.startsWith('http')) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -242,7 +260,20 @@ class KeraPartImage extends StatelessWidget {
           cacheWidth: cacheW,
           cacheHeight: cacheH,
           fit: fit,
-          errorBuilder: (ctx, err, stack) => placeholder(),
+          errorBuilder: (ctx, err, stack) {
+            // Intelligent fallback to bundled sample image if backend network is unreachable
+            final lower = (remoteUrl ?? '').toLowerCase();
+            if (lower.contains('brake')) {
+              return Image.asset('assets/images/parts/brake_disc.jpg', width: width, height: height, fit: fit);
+            } else if (lower.contains('alternator')) {
+              return Image.asset('assets/images/parts/alternator.jpg', width: width, height: height, fit: fit);
+            } else if (lower.contains('battery')) {
+              return Image.asset('assets/images/parts/car_battery.jpg', width: width, height: height, fit: fit);
+            } else if (lower.contains('filter')) {
+              return Image.asset('assets/images/parts/oil_filter.jpg', width: width, height: height, fit: fit);
+            }
+            return placeholder();
+          },
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return Container(
@@ -265,6 +296,30 @@ class KeraPartImage extends StatelessWidget {
             );
           },
         ),
+      );
+    }
+
+    // Check if remoteUrl or path matched any sample
+    final lower = (remoteUrl ?? localPath ?? '').toLowerCase();
+    if (lower.contains('brake')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset('assets/images/parts/brake_disc.jpg', width: width, height: height, fit: fit),
+      );
+    } else if (lower.contains('alternator')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset('assets/images/parts/alternator.jpg', width: width, height: height, fit: fit),
+      );
+    } else if (lower.contains('battery')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset('assets/images/parts/car_battery.jpg', width: width, height: height, fit: fit),
+      );
+    } else if (lower.contains('filter')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset('assets/images/parts/oil_filter.jpg', width: width, height: height, fit: fit),
       );
     }
 

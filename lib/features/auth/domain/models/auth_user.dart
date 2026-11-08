@@ -26,6 +26,10 @@ class AuthUser {
 
   bool get isSuspended => status.toUpperCase() == 'SUSPENDED';
 
+  String get name => businessName;
+
+  String? get photoUrl => avatarUrl;
+
   AuthUser copyWith({
     String? id,
     String? ownerId,

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,8 +23,10 @@ import '../providers/parts_providers.dart';
 import '../widgets/inventory_filter_sheet.dart';
 import '../widgets/sample_parts_dialog.dart';
 
-
-
+/// Commercial Enterprise Inventory Screen for Kera Spare Tracker.
+/// Fixed dark navy curved masthead, 4 KPI cards (Total, In Stock, Low Stock, Out of Stock),
+/// search bar, filter pills, sorting, real product images fetched from backend or local,
+/// and floating "+ Add Part" button.
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
 
@@ -37,7 +38,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
-  final bool _isGridView = false;
 
   @override
   void initState() {
@@ -89,7 +89,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     SamplePartsDialog.show(context);
   }
 
-
   void _showBarcodeScannerModal() {
     final textController = TextEditingController();
     showDialog(
@@ -97,7 +96,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       builder: (ctx) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.qr_code_scanner_rounded, color: KeraColors.actionBlue),
+            const Icon(Icons.qr_code_scanner_rounded, color: KeraColors.brandOrange),
             const SizedBox(width: 8),
             Text(
               context.tr('የባርኮድ / OEM ፍለጋ', 'Barcode & OEM Search'),
@@ -121,7 +120,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               controller: textController,
               autofocus: true,
               decoration: const InputDecoration(
-                hintText: 'e.g. 1R-0716, 202-0120...',
+                hintText: 'e.g. CAT-1000, 1R-0716...',
                 prefixIcon: Icon(Icons.numbers_rounded),
                 border: OutlineInputBorder(borderRadius: KeraRadii.borderInput),
               ),
@@ -142,6 +141,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 ref.read(inventoryFilterProvider.notifier).setQuery(query);
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0C2340),
+              foregroundColor: Colors.white,
+            ),
             child: Text(context.tr('ፈልግ', 'Search')),
           ),
         ],
@@ -149,61 +152,165 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
+  Future<void> _handleExport() async {
+    final ownerId = ref.read(currentOwnerIdProvider);
+    if (ownerId.isEmpty) return;
+    try {
+      context.showSnackBar(context.tr('ወደ ውጭ በመላክ ላይ...', 'Exporting CSV...'));
+      final file = await ref.read(exportBackupServiceProvider).exportInventoryCsv(ownerId: ownerId);
+      if (mounted) {
+        context.showSnackBar(context.tr('ፋይል ተቀምጧል: ${file.path}', 'File exported: ${file.path}'));
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showSnackBar(context.tr('ወደ ውጭ መላክ አልተሳካም: $e', 'Export failed: $e'), isError: true);
+      }
+    }
+  }
+
+  Future<void> _handleCardAction(String action, PartItem part) async {
+    if (action == 'view') {
+      final result = await context.push('/parts/${part.id}');
+      if (result == true && mounted) {
+        await ref.read(inventoryListProvider.notifier).refresh();
+      }
+    } else if (action == 'edit') {
+      final result = await context.push('/parts/${part.id}/edit');
+      if (result == true && mounted) {
+        await ref.read(inventoryListProvider.notifier).refresh();
+      }
+    } else if (action == 'delete') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(context.tr('ዕቃ ሰርዝ?', 'Delete Part?')),
+          content: Text(context.tr('ይህን ዕቃ መሰረዝ እርግጠኛ ነዎት?', 'Are you sure you want to delete this part?')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(context.tr('ተመለስ', 'Cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(backgroundColor: KeraColors.error),
+              child: Text(context.tr('ሰርዝ', 'Delete')),
+            ),
+          ],
+        ),
+      );
+      if (confirmed == true && mounted) {
+        final res = await ref.read(partsRepositoryProvider).deletePart(
+              ownerId: ref.read(currentOwnerIdProvider),
+              id: part.id,
+            );
+        if (res.isSuccess && mounted) {
+          context.showSnackBar(context.tr('ዕቃው ተሰርዟል', 'Part deleted'));
+          await ref.read(inventoryListProvider.notifier).refresh();
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
-
     final filter = ref.watch(inventoryFilterProvider);
     final state = ref.watch(inventoryListProvider);
     final authUser = ref.watch(authControllerProvider).value;
     final pendingSync = ref.watch(pendingSyncCountProvider).value ?? 0;
+
+    final allParts = ref.watch(partsStreamProvider).value ?? [];
+    final allCount = allParts.length;
+    final inStockCount = allParts.where((p) => p.cachedQuantity > (p.lowStockLevel ?? 5) && p.cachedQuantity > 0).length;
+    final lowStockCount = allParts.where((p) => p.cachedQuantity > 0 && p.cachedQuantity <= (p.lowStockLevel ?? 5)).length;
+    final outOfStockCount = allParts.where((p) => p.cachedQuantity <= 0).length;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'inventory_screen_fab',
         onPressed: () => context.push('/parts/add'),
-        backgroundColor: KeraColors.orange500,
+        backgroundColor: const Color(0xFFF7941D),
         foregroundColor: Colors.white,
-        elevation: 3,
+        elevation: 4,
         icon: const Icon(Icons.add_rounded, size: 22),
         label: Text(
           context.tr('ዕቃ ጨምር', 'Add Part'),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
         ),
       ),
       body: SafeArea(
         top: false,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. Navy Industrial App Header (2 Inventory.png)
-            _buildNavyHeader(
-              context: context,
-              authUser: authUser,
-              pendingSync: pendingSync,
-              l10n: l10n,
-              filter: filter,
-            ),
+            // 1. Pinned Dark Navy Curved Masthead (Stays fixed at top)
+            _buildPinnedMasthead(context, authUser),
 
             // System Alert Banners
             const MaintenanceBannerWidget(),
             const SuspendedAccountBannerWidget(),
             const AnnouncementBannerWidget(),
 
-            // Quick Filter Chips Row (2 Inventory.png)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-              child: _buildFilterChipsRow(filter, state, l10n, colorScheme),
-            ),
-
-            // 5. Main Paginated Inventory List or Grid View
+            // 2. Top-Clamped Body Content (CustomScrollView with ClampingScrollPhysics)
             Expanded(
               child: RefreshIndicator(
-                color: KeraColors.actionBlue,
-                onRefresh: () =>
-                    ref.read(inventoryListProvider.notifier).refresh(),
-                child: _buildInventoryBody(context, state, filter, l10n),
+                color: const Color(0xFFF7941D),
+                onRefresh: () => ref.read(inventoryListProvider.notifier).refresh(),
+                child: ScrollConfiguration(
+                  behavior: const ScrollBehavior().copyWith(overscroll: false),
+                  child: CustomScrollView(
+                    controller: _scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    slivers: [
+                      // Section A: Title, Pending & Export Row
+                      SliverToBoxAdapter(
+                        child: _buildInventoryTitleRow(context, pendingSync),
+                      ),
+
+                      // Section B: 4 KPI Cards (2x2 Grid)
+                      SliverToBoxAdapter(
+                        child: _buildKpiGrid(
+                          context,
+                          allCount: allCount,
+                          inStockCount: inStockCount,
+                          lowStockCount: lowStockCount,
+                          outOfStockCount: outOfStockCount,
+                          filter: filter,
+                        ),
+                      ),
+
+                      // Section C: Search Bar
+                      SliverToBoxAdapter(
+                        child: _buildSearchBar(),
+                      ),
+
+                      // Section D: Filter Status Pills
+                      SliverToBoxAdapter(
+                        child: _buildFilterPills(
+                          filter: filter,
+                          allCount: allCount,
+                          inStockCount: inStockCount,
+                          lowStockCount: lowStockCount,
+                          outOfStockCount: outOfStockCount,
+                        ),
+                      ),
+
+                      // Section E: Filter & Sort Action Row
+                      SliverToBoxAdapter(
+                        child: _buildFilterAndSortRow(filter),
+                      ),
+
+                      // Section F: Products List or Empty States
+                      _buildProductsListSliver(state, filter, l10n),
+
+                      // Bottom spacing so FAB and navigation bar don't obscure content
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 90),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -212,501 +319,918 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  Widget _buildNavyHeader({
-    required BuildContext context,
-    required dynamic authUser,
-    required int pendingSync,
-    required dynamic l10n,
-    required InventoryFilter filter,
-  }) {
-    final businessName = authUser?.businessName ?? context.tr('ተስፋዬ እና ልጆቹ', 'Tesfaye & Sons');
-    final partsCount = ref.watch(inventoryListProvider).items.length;
+  // 1. PINNED DARK NAVY MASTHEAD
+  Widget _buildPinnedMasthead(BuildContext context, dynamic authUser) {
     final isDark = context.isDark;
-
     return Container(
-      color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1F000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
         bottom: 16,
         left: 16,
         right: 16,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          // Top Row: Logo + Business Name + Subtitle (2 Inventory.png)
+          // Logo squircle
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              'assets/images/logo.png',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => const Icon(
+                Icons.settings_suggest_rounded,
+                color: Color(0xFF0C2340),
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Title & Tagline
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Kera Spare Tracker',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Text(
+                      'Track • Manage • Grow',
+                      style: TextStyle(
+                        color: Color(0xFFA5B4CB),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      width: 14,
+                      height: 2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7941D),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Theme toggle
+          const OwnerThemeToggle(),
+          const SizedBox(width: 4),
+          // Notification bell with unread badge 2
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 22),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                onPressed: () => context.push('/notifications'),
+              ),
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFDC2626),
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                  child: const Text(
+                    '2',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 4),
+          // Profile Avatar
+          GestureDetector(
+            onTap: () => context.push('/settings'),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              child: KeraAvatarWidget(
+                photoUrl: authUser?.photoUrl,
+                name: authUser?.businessName ?? 'Admin',
+                radius: 17,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 2. INVENTORY TITLE + PENDING & EXPORT BUTTONS
+  Widget _buildInventoryTitleRow(BuildContext context, int pendingSync) {
+    final isDark = context.isDark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.tr('ዕቃዎች', 'Inventory'),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: isDark ? Colors.white : const Color(0xFF0C2340),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.tr('የመለዋወጫ ዕቃዎችዎን ያስተዳድሩ', 'Manage your spare parts inventory'),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Pending pill + Export button
           Row(
             children: [
               Container(
-                width: 38,
-                height: 38,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.settings_suggest_rounded,
-                    color: Color(0xFF0C2340),
-                    size: 24,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: 14,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF0C2340),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Pending ($pendingSync)',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : const Color(0xFF0C2340),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: _handleExport,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0C2340),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x1F0C2340),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
                   ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.download_rounded, color: Colors.white, size: 15),
+                      SizedBox(width: 4),
+                      Text(
+                        'Export',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 3. 4 KPI SUMMARY CARDS (2x2 Grid)
+  Widget _buildKpiGrid(
+    BuildContext context, {
+    required int allCount,
+    required int inStockCount,
+    required int lowStockCount,
+    required int outOfStockCount,
+    required InventoryFilter filter,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildKpiCard(
+                  title: context.tr('ጠቅላላ ዕቃዎች', 'Total Items'),
+                  count: allCount,
+                  icon: Icons.inventory_2_rounded,
+                  accentColor: const Color(0xFF2563EB),
+                  bgLight: const Color(0xFFEFF6FF),
+                  borderLight: const Color(0xFFDBEAFE),
+                  bgDark: const Color(0xFF0F1E36),
+                  borderDark: const Color(0xFF1E3A8A),
+                  isSelected: filter.stockFilter == StockFilter.all,
+                  onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.all),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      businessName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.2,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      context.tr('ከራ · Kera Spare Tracker', 'Kera · Spare Tracker'),
-                      style: const TextStyle(
-                        color: Color(0xFFA5B4CB),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                child: _buildKpiCard(
+                  title: context.tr('ክምችት ያለው', 'In Stock'),
+                  count: inStockCount,
+                  icon: Icons.check_circle_rounded,
+                  accentColor: const Color(0xFF16A34A),
+                  bgLight: const Color(0xFFF0FDF4),
+                  borderLight: const Color(0xFFDCFCE7),
+                  bgDark: const Color(0xFF06231A),
+                  borderDark: const Color(0xFF14532D),
+                  isSelected: filter.stockFilter == StockFilter.inStock,
+                  onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.inStock),
                 ),
               ),
-              const SizedBox(width: 6),
-              const OwnerThemeToggle(),
-              const SizedBox(width: 6),
-              const OwnerLanguageToggle(),
             ],
           ),
-          const SizedBox(height: 16),
-
-          // Title Row: ዕቃዎች & count on left, Sync & Export on right
+          const SizedBox(height: 10),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.tr('ዕቃዎች', 'Inventory'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    context.tr('$partsCount ዕቃዎች', '$partsCount items'),
-                    style: const TextStyle(
-                      color: Color(0xFFA5B4CB),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: _buildKpiCard(
+                  title: context.tr('ሊያልቅ ነው', 'Low Stock'),
+                  count: lowStockCount,
+                  icon: Icons.warning_rounded,
+                  accentColor: const Color(0xFFF59E0B),
+                  bgLight: const Color(0xFFFFFBEB),
+                  borderLight: const Color(0xFFFEF3C7),
+                  bgDark: const Color(0xFF261908),
+                  borderDark: const Color(0xFF78350F),
+                  isSelected: filter.stockFilter == StockFilter.lowStock,
+                  onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.lowStock),
+                ),
               ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E3557),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      pendingSync == 0
-                          ? context.tr('ተመሳስሏል', 'Synced')
-                          : context.tr('ያልተመሳሰለ $pendingSync', 'Pending $pendingSync'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () async {
-                      final ownerId = ref.read(currentOwnerIdProvider);
-                      if (ownerId.isEmpty) return;
-                      try {
-                        context.showSnackBar(context.tr('ወደ ውጭ በመላክ ላይ...', 'Exporting CSV...'));
-                        final file = await ref.read(exportBackupServiceProvider).exportInventoryCsv(ownerId: ownerId);
-                        if (context.mounted) {
-                          context.showSnackBar(context.tr('ፋይል ተቀምጧል: ${file.path}', 'File exported: ${file.path}'));
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          context.showSnackBar(context.tr('ወደ ውጭ መላክ አልተሳካም: $e', 'Export failed: $e'), isError: true);
-                        }
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white54),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.download_rounded, color: Colors.white, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            context.tr('ወደ ውጭ ላክ', 'Export'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (kDebugMode) ...[
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: _handleSeedParts,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF7941D).withValues(alpha: 0.25),
-                          border: Border.all(color: const Color(0xFFF7941D)),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.science_rounded, color: isDark ? KeraColors.brandOrange : KeraColors.orange700, size: 16),
-                            const SizedBox(width: 4),
-                            Text(
-                              context.tr('ናሙና (Dev)', 'Sample (Dev)'),
-                              style: TextStyle(
-                                color: isDark ? KeraColors.brandOrange : KeraColors.orange700,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildKpiCard(
+                  title: context.tr('ያለቀ', 'Out of Stock'),
+                  count: outOfStockCount,
+                  icon: Icons.cancel_rounded,
+                  accentColor: const Color(0xFFDC2626),
+                  bgLight: const Color(0xFFFEF2F2),
+                  borderLight: const Color(0xFFFEE2E2),
+                  bgDark: const Color(0xFF260D0D),
+                  borderDark: const Color(0xFF7F1D1D),
+                  isSelected: filter.stockFilter == StockFilter.outOfStock,
+                  onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.outOfStock),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-
-          // Search Bar: ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ
-          _buildSearchBar(l10n),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar(dynamic l10n) {
-    final isDark = context.isDark;
-    return Container(
-      height: 46,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _onSearchChanged,
-        style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
-        decoration: InputDecoration(
-          hintText: context.tr('ስም፣ ቁጥር፣ ብራንድ፣ አካባቢ', 'Search name, OEM, brand, shelf...'),
-          hintStyle: TextStyle(color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8), fontSize: 13),
-          prefixIcon: Icon(Icons.search_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), size: 20),
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_searchController.text.isNotEmpty)
-                IconButton(
-                  icon: Icon(Icons.clear_rounded, size: 18, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                  onPressed: _onClearSearch,
-                ),
-              IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded, size: 18, color: Color(0xFFF58220)),
-                tooltip: 'Scan barcode',
-                onPressed: _showBarcodeScannerModal,
-              ),
-            ],
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChipsRow(
-    InventoryFilter filter,
-    InventoryListState state,
-    dynamic l10n,
-    ColorScheme colorScheme,
-  ) {
-    final partsList = ref.watch(partsStreamProvider).value ?? [];
-    final allCount = partsList.length;
-    final inStockCount = partsList.where((p) => p.isInStock).length;
-    final lowStockCount = partsList.where((p) => p.isLowStock).length;
-    final outOfStockCount = partsList.where((p) => p.isOutOfStock).length;
-    final activeFilterCount = filter.filterCount;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          // Filter Sheet Launcher button with active badge
-          InkWell(
-            onTap: () => InventoryFilterSheet.show(context),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: activeFilterCount > 0
-                    ? const Color(0xFFF7941D)
-                    : (context.isDark ? const Color(0xFF1E293B) : Colors.white),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: activeFilterCount > 0
-                      ? const Color(0xFFF7941D)
-                      : (context.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.tune_rounded,
-                    size: 16,
-                    color: activeFilterCount > 0 ? Colors.white : context.textPrimaryColor,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    context.tr('አጣራ', 'Filters'),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: activeFilterCount > 0 ? Colors.white : context.textPrimaryColor,
-                    ),
-                  ),
-                  if (activeFilterCount > 0) ...[
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '$activeFilterCount',
-                        style: const TextStyle(
-                          color: Color(0xFFF7941D),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // All (ሁሉም) Chip
-          _buildPillChip(
-            label: context.tr('ሁሉም ($allCount)', 'All ($allCount)'),
-            isSelected: filter.stockFilter == StockFilter.all,
-            onTap: () {
-              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.all);
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // In Stock (ክምችት ያለው) Chip
-          _buildPillChip(
-            label: context.tr('ክምችት ያለው ($inStockCount)', 'In Stock ($inStockCount)'),
-            isSelected: filter.stockFilter == StockFilter.inStock,
-            onTap: () {
-              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.inStock);
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // Low Stock (ሊያልቅ ነው) Chip
-          _buildPillChip(
-            label: context.tr('ሊያልቅ ነው ($lowStockCount)', 'Low Stock ($lowStockCount)'),
-            isSelected: filter.stockFilter == StockFilter.lowStock,
-            isWarningPill: true,
-            onTap: () {
-              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.lowStock);
-            },
-          ),
-          const SizedBox(width: 8),
-
-          // Out of Stock (ያለቀ) Chip
-          _buildPillChip(
-            label: context.tr('ያለቀ ($outOfStockCount)', 'Out of Stock ($outOfStockCount)'),
-            isSelected: filter.stockFilter == StockFilter.outOfStock,
-            isErrorPill: true,
-            onTap: () {
-              ref.read(inventoryFilterProvider.notifier).setStockFilter(StockFilter.outOfStock);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPillChip({
-    required String label,
+  Widget _buildKpiCard({
+    required String title,
+    required int count,
+    required IconData icon,
+    required Color accentColor,
+    required Color bgLight,
+    required Color borderLight,
+    required Color bgDark,
+    required Color borderDark,
     required bool isSelected,
-    bool isWarningPill = false,
-    bool isErrorPill = false,
     required VoidCallback onTap,
   }) {
     final isDark = context.isDark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
-              : isWarningPill
-                  ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
-                  : isErrorPill
-                      ? (isDark ? const Color(0xFF4C0519) : const Color(0xFFFFE4E6))
-                      : (isDark ? const Color(0xFF1E293B) : Colors.white),
-          borderRadius: BorderRadius.circular(20),
+          color: isDark ? bgDark : bgLight,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF0C2340))
-                : isWarningPill
-                    ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A))
-                    : isErrorPill
-                        ? (isDark ? const Color(0xFF9F1239) : const Color(0xFFFECDD3))
-                        : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            color: isSelected ? accentColor : (isDark ? borderDark : borderLight),
+            width: isSelected ? 1.8 : 1.0,
           ),
         ),
-        child: Text(
-          label,
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: accentColor.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildMiniBarChart(accentColor),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniBarChart(Color color) {
+    final heights = [8.0, 13.0, 18.0, 24.0];
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: heights.map((h) {
+        return Container(
+          margin: const EdgeInsets.only(left: 2.5),
+          width: 3.5,
+          height: h,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // 4. SEARCH BAR
+  Widget _buildSearchBar() {
+    final isDark = context.isDark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A0C2340),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: _onSearchChanged,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-            color: isSelected
-                ? Colors.white
-                : isWarningPill
-                    ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
-                    : isErrorPill
-                        ? (isDark ? const Color(0xFFFB7185) : const Color(0xFFE11D48))
-                        : context.textPrimaryColor,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+            fontSize: 14,
+          ),
+          decoration: InputDecoration(
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: Color(0xFF64748B),
+              size: 22,
+            ),
+            hintText: 'Search by part name, OEM, brand...',
+            hintStyle: const TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 13.5,
+            ),
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.clear_rounded, size: 18),
+                    onPressed: _onClearSearch,
+                  ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: Color(0xFF0C2340),
+                    size: 22,
+                  ),
+                  tooltip: 'Scan barcode or QR code',
+                  onPressed: _showBarcodeScannerModal,
+                ),
+              ],
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 13),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildInventoryBody(
-    BuildContext context,
+  // 5. FILTER PILLS ROW
+  Widget _buildFilterPills({
+    required InventoryFilter filter,
+    required int allCount,
+    required int inStockCount,
+    required int lowStockCount,
+    required int outOfStockCount,
+  }) {
+    final pills = [
+      (label: context.tr('ሁሉም ($allCount)', 'All ($allCount)'), filter: StockFilter.all, hasIcon: true),
+      (label: context.tr('ክምችት ያለው ($inStockCount)', 'In Stock ($inStockCount)'), filter: StockFilter.inStock, hasIcon: false),
+      (label: context.tr('ሊያልቅ ነው ($lowStockCount)', 'Low Stock ($lowStockCount)'), filter: StockFilter.lowStock, hasIcon: false),
+      (label: context.tr('ያለቀ ($outOfStockCount)', 'Out of Stock ($outOfStockCount)'), filter: StockFilter.outOfStock, hasIcon: false),
+    ];
+
+    final isDark = context.isDark;
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: pills.map((p) {
+            final isSelected = filter.stockFilter == p.filter;
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: InkWell(
+                onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(p.filter),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFFF7941D)
+                        : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFFF7941D)
+                          : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFF7941D).withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (p.hasIcon && isSelected) ...[
+                        const Icon(Icons.grid_view_rounded, size: 15, color: Colors.white),
+                        const SizedBox(width: 5),
+                      ],
+                      Text(
+                        p.label,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  // 6. FILTER & SORT OPTION ROW
+  Widget _buildFilterAndSortRow(InventoryFilter filter) {
+    final isDark = context.isDark;
+    final sortLabel = switch (filter.sortBy) {
+      PartsSortBy.newest => 'Recently Added',
+      PartsSortBy.name => 'Name (A-Z)',
+      PartsSortBy.quantity => 'Quantity',
+      PartsSortBy.price => 'Price',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Filter button
+          InkWell(
+            onTap: () => InventoryFilterSheet.show(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: filter.filterCount > 0
+                      ? const Color(0xFFF7941D)
+                      : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.tune_rounded, size: 16, color: Color(0xFF64748B)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Filter',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF64748B)),
+                ],
+              ),
+            ),
+          ),
+          // Sort button
+          PopupMenuButton<PartsSortBy>(
+            onSelected: (sort) {
+              ref.read(inventoryFilterProvider.notifier).setSort(
+                    sort,
+                    ascending: sort == PartsSortBy.name ? true : false,
+                  );
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: PartsSortBy.newest, child: Text('Recently Added')),
+              PopupMenuItem(value: PartsSortBy.name, child: Text('Name (A-Z)')),
+              PopupMenuItem(value: PartsSortBy.quantity, child: Text('Quantity')),
+              PopupMenuItem(value: PartsSortBy.price, child: Text('Price')),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.swap_vert_rounded, size: 16, color: Color(0xFF64748B)),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Sort by: $sortLabel',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF64748B)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 7. PRODUCT CARD
+  Widget _buildProductCard(PartItem part) {
+    final isOutOfStock = part.isOutOfStock || part.cachedQuantity <= 0;
+    final isLowStock = !isOutOfStock && (part.isLowStock || part.cachedQuantity <= 5);
+    final isDark = context.isDark;
+
+    final oemText = (part.partNumber != null && part.partNumber!.isNotEmpty)
+        ? part.partNumber!
+        : (part.brandName != null ? part.brandName! : 'OEM');
+    final locationText = part.customLocation ?? 'Shelf 1';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _handleCardAction('view', part),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Product Photo Thumbnail (64x64)
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: KeraPartImage(
+                  localPath: part.photoLocalPath,
+                  remoteUrl: part.photoUrl,
+                  width: 64,
+                  height: 64,
+                  borderRadius: 12,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Middle Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      part.displayName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF0C2340),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$oemText • $locationText',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    // Stock badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isOutOfStock
+                            ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
+                            : isLowStock
+                                ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
+                                : (isDark ? const Color(0xFF052E16) : const Color(0xFFDCFCE7)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isOutOfStock
+                                ? Icons.error_outline_rounded
+                                : isLowStock
+                                    ? Icons.warning_amber_rounded
+                                    : Icons.check_circle_outline_rounded,
+                            size: 13,
+                            color: isOutOfStock
+                                ? const Color(0xFFDC2626)
+                                : isLowStock
+                                    ? const Color(0xFFD97706)
+                                    : const Color(0xFF16A34A),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isOutOfStock
+                                ? context.tr('ያለቀ', 'Out of Stock')
+                                : isLowStock
+                                    ? context.tr('ሊያልቅ ነው', 'Low Stock')
+                                    : context.tr('ክምችት ያለው', 'In Stock'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: isOutOfStock
+                                  ? const Color(0xFFDC2626)
+                                  : isLowStock
+                                      ? const Color(0xFFD97706)
+                                      : const Color(0xFF16A34A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Right side: Price & quantity + more menu
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${(part.sellingPrice ?? 0).toStringAsFixed(0)} ETB',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0C2340),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${part.cachedQuantity.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 4),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert_rounded, size: 20, color: Color(0xFF64748B)),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    onSelected: (val) => _handleCardAction(val, part),
+                    itemBuilder: (ctx) => const [
+                      PopupMenuItem(value: 'view', child: Text('View Details')),
+                      PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 8. PRODUCTS LIST SLIVER
+  Widget _buildProductsListSliver(
     InventoryListState state,
     InventoryFilter filter,
     dynamic l10n,
   ) {
     if (state.isLoading && state.items.isEmpty) {
-      return KeraLoadingView(
-        message: context.tr('ዕቃዎችን በመጫን ላይ...', 'Loading inventory items...'),
+      return const SliverFillRemaining(
+        child: Center(child: KeraLoadingIndicator()),
       );
     }
 
     if (state.errorMessage != null && state.items.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline_rounded,
-                  size: 48, color: KeraColors.error),
-              const SizedBox(height: 12),
-              Text(
-                state.errorMessage!,
-                textAlign: TextAlign.center,
-                style: KeraTypography.bodyMedium(color: context.textPrimaryColor),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () =>
-                    ref.read(inventoryListProvider.notifier).refresh(),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.retry),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: KeraColors.actionBlue,
-                  foregroundColor: Colors.white,
+      return SliverFillRemaining(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline_rounded, size: 48, color: KeraColors.error),
+                const SizedBox(height: 12),
+                Text(
+                  state.errorMessage!,
+                  textAlign: TextAlign.center,
+                  style: KeraTypography.bodyMedium(color: context.textPrimaryColor),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () => ref.read(inventoryListProvider.notifier).refresh(),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(l10n.retry),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0C2340),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
     if (state.items.isEmpty) {
-      final isFiltered = filter.hasActiveFilters ||
-          (_searchController.text.trim().isNotEmpty);
-
-      if (isFiltered) {
-        // Stitch Screen 19: Search Results Empty State
-        return _buildSearchEmptyState(l10n);
-      } else {
-        // Stitch Screen 18: Fresh Store Empty Inventory State
-        return _buildStoreEmptyState(l10n);
-      }
+      final isFiltered = filter.hasActiveFilters || (_searchController.text.trim().isNotEmpty);
+      return SliverFillRemaining(
+        child: isFiltered ? _buildSearchEmptyState(l10n) : _buildStoreEmptyState(l10n),
+      );
     }
 
-    // High performance list or grid with pagination indicator
     final itemCount = state.items.length + (state.hasMore ? 1 : 0);
-
-    if (_isGridView) {
-      return GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.72,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-        ),
-        itemCount: itemCount,
-        itemBuilder: (context, index) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
           if (index >= state.items.length) {
             return const Center(
               child: Padding(
@@ -716,240 +1240,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             );
           }
           final part = state.items[index];
-          return _buildProductCard(part, isGrid: true);
+          return _buildProductCard(part);
         },
-      );
-    }
-
-    return ListView.separated(
-      controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-      itemCount: itemCount,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        if (index >= state.items.length) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: KeraLoadingIndicator.small(),
-            ),
-          );
-        }
-        final part = state.items[index];
-        return _buildProductCard(part, isGrid: false);
-      },
-    );
-  }
-
-  Widget _buildProductCard(PartItem part, {required bool isGrid}) {
-    final isOutOfStock = part.isOutOfStock || part.cachedQuantity <= 0;
-    final isLowStock = !isOutOfStock && (part.isLowStock || part.cachedQuantity <= 5);
-    final isDark = context.isDark;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () async {
-        final result = await context.push('/parts/${part.id}');
-        if (result == true && mounted) {
-          final container = ProviderScope.containerOf(context);
-          await container.read(inventoryListProvider.notifier).refresh();
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: context.cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.borderColor),
-          boxShadow: [
-            BoxShadow(
-              color: isDark ? const Color(0x22000000) : const Color(0x060C2340),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Left: Squircle Part Image Thumbnail
-            KeraPartImage(
-              localPath: part.photoLocalPath,
-              remoteUrl: part.photoUrl,
-              width: 50,
-              height: 50,
-              borderRadius: 14,
-            ),
-            const SizedBox(width: 12),
-
-            // Middle: Name, Number & Brand, Location
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          part.displayName,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (part.isDemo)
-                        Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: KeraColors.brandOrange.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'DEMO',
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: KeraColors.brandOrange),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${context.tr("ቁጥር", "No.")} ${part.partNumber?.isNotEmpty == true ? part.partNumber : "-"} · ${part.brandName?.isNotEmpty == true ? part.brandName : ""}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.textSecondaryColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (part.customLocation != null && part.customLocation!.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(Icons.place_outlined, size: 12, color: context.textSecondaryColor),
-                        const SizedBox(width: 2),
-                        Text(
-                          part.customLocation!,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.textSecondaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Right: Price, Quantity, Status Badge
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${(part.sellingPrice ?? 0).toStringAsFixed(0)} ETB',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimaryColor,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${part.cachedQuantity.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isOutOfStock
-                        ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
-                        : isLowStock
-                            ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
-                            : (isDark ? const Color(0xFF052E16) : const Color(0xFFDCFCE7)),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    isOutOfStock
-                        ? context.tr('አልቋል', 'Out of Stock')
-                        : isLowStock
-                            ? context.tr('ሊያልቅ ነው', 'Low Stock')
-                            : context.tr('በቂ', 'In Stock'),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: isOutOfStock
-                          ? (isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626))
-                          : isLowStock
-                              ? (isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706))
-                              : (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert_rounded, size: 18, color: context.textSecondaryColor),
-              onSelected: (val) async {
-                if (val == 'view') {
-                  final result = await context.push('/parts/${part.id}');
-                  if (result == true && mounted) {
-                    await ref.read(inventoryListProvider.notifier).refresh();
-                  }
-                } else if (val == 'edit') {
-                  final result = await context.push('/parts/${part.id}/edit');
-                  if (result == true && mounted) {
-                    await ref.read(inventoryListProvider.notifier).refresh();
-                  }
-                } else if (val == 'delete') {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: Text(context.tr('ዕቃ ሰርዝ?', 'Delete Part?')),
-                      content: Text(context.tr('ይህን ዕቃ መሰረዝ እርግጠኛ ነዎት?', 'Are you sure you want to delete this part?')),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(context.tr('ተመለስ', 'Cancel'))),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: KeraColors.error),
-                          child: Text(context.tr('ሰርዝ', 'Delete')),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirmed == true && mounted) {
-                    final res = await ref.read(partsRepositoryProvider).deletePart(
-                      ownerId: ref.read(currentOwnerIdProvider),
-                      id: part.id,
-                    );
-                    if (res.isSuccess && mounted) {
-                      context.showSnackBar(context.tr('ዕቃው ተሰርዟል', 'Part deleted'));
-                      await ref.read(inventoryListProvider.notifier).refresh();
-                    }
-                  }
-                }
-              },
-              itemBuilder: (ctx) => [
-                PopupMenuItem(value: 'view', child: Text(context.tr('ዝርዝር አሳይ', 'View Details'))),
-                PopupMenuItem(value: 'edit', child: Text(context.tr('አስተካክል', 'Edit'))),
-                PopupMenuItem(value: 'delete', child: Text(context.tr('ሰርዝ', 'Delete'), style: const TextStyle(color: Colors.red))),
-              ],
-            ),
-          ],
-        ),
+        childCount: itemCount,
       ),
     );
   }
 
-  /// Stitch Screen 18: Empty Inventory State (ባዶ መጋዘን)
   Widget _buildStoreEmptyState(dynamic l10n) {
     return Center(
       child: SingleChildScrollView(
@@ -961,13 +1258,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               width: 90,
               height: 90,
               decoration: const BoxDecoration(
-                color: KeraColors.surfaceMuted,
+                color: Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.inventory_2_outlined,
                 size: 46,
-                color: KeraColors.primaryNavy,
+                color: Color(0xFF0C2340),
               ),
             ),
             const SizedBox(height: 20),
@@ -994,7 +1291,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   icon: const Icon(Icons.add_rounded),
                   label: Text(l10n.add),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: KeraColors.actionBlue,
+                    backgroundColor: const Color(0xFF0C2340),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
@@ -1016,7 +1313,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  /// Stitch Screen 19: Search Results Empty State (የዕቃዎች ፍለጋ ውጤቶች)
   Widget _buildSearchEmptyState(dynamic l10n) {
     return Center(
       child: SingleChildScrollView(
@@ -1028,13 +1324,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               width: 80,
               height: 80,
               decoration: const BoxDecoration(
-                color: KeraColors.surfaceMuted,
+                color: Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.search_off_rounded,
                 size: 40,
-                color: KeraColors.actionBlue,
+                color: Color(0xFF0C2340),
               ),
             ),
             const SizedBox(height: 20),
@@ -1058,8 +1354,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               icon: const Icon(Icons.refresh_rounded),
               label: Text(l10n.resetFilters),
               style: OutlinedButton.styleFrom(
-                foregroundColor: KeraColors.actionBlue,
-                side: const BorderSide(color: KeraColors.actionBlue),
+                foregroundColor: const Color(0xFF0C2340),
+                side: const BorderSide(color: Color(0xFF0C2340)),
               ),
             ),
           ],
@@ -1068,4 +1364,3 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 }
-

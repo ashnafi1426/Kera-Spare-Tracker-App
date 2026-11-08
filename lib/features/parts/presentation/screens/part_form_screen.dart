@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/app_picker_bottom_sheet.dart';
+import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/models/picker_item.dart';
@@ -53,6 +55,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
 
   // Selection states
   String? _photoLocalPath;
+  String? _photoUrl;
   PickerItem? _selectedBrand;
   PickerItem? _selectedCategory;
   PickerItem? _selectedLocation;
@@ -107,6 +110,7 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       _sizeSpecsController.text = part.sizeSpecs ?? '';
       _notesController.text = part.notes ?? '';
       _photoLocalPath = part.photoLocalPath;
+      _photoUrl = part.photoUrl;
 
       // Resolve brand, category, location labels if present
       if (part.brandId != null) {
@@ -441,6 +445,10 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       setState(() => _isLoading = false);
 
       if (result.isSuccess) {
+        final newId = result.valueOrNull?.id;
+        if (_photoLocalPath != null && newId != null) {
+          unawaited(repo.uploadPartPhoto(partId: newId, filePath: _photoLocalPath!));
+        }
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
       } else {
@@ -472,6 +480,10 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
       setState(() => _isLoading = false);
 
       if (result.isSuccess) {
+        final newId = result.valueOrNull?.id;
+        if (_photoLocalPath != null && newId != null) {
+          unawaited(repo.uploadPartPhoto(partId: newId, filePath: _photoLocalPath!));
+        }
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
       } else {
@@ -656,7 +668,32 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
                                   ),
                                 ],
                               )
-                            : Column(
+                            : (_photoUrl != null && _photoUrl!.isNotEmpty)
+                                ? Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      KeraPartImage(
+                                        remoteUrl: _photoUrl,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        borderRadius: 0,
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: CircleAvatar(
+                                          radius: 16,
+                                          backgroundColor: Colors.black54,
+                                          child: IconButton(
+                                            padding: EdgeInsets.zero,
+                                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 18),
+                                            onPressed: () => setState(() => _photoUrl = null),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(

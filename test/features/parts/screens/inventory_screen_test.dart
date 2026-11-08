@@ -3,6 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/utils/result.dart';
+import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
+import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/inventory_filter.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/paged_result.dart';
 import 'package:kera_spare_tracker/features/parts/domain/models/part_item.dart';
@@ -15,13 +17,33 @@ import 'package:mocktail/mocktail.dart';
 
 class MockPartsRepository extends Mock implements PartsRepository {}
 
+class _FakeAuthController extends AuthController {
+  final AuthUser? user;
+  _FakeAuthController(this.user);
+  @override
+  Future<AuthUser?> build() async => user;
+}
+
+const mockUser = AuthUser(
+  id: 'test_owner',
+  ownerId: 'test_owner',
+  phoneNumber: '+251911000000',
+  role: 'OWNER',
+  businessName: 'Kera Spare Tracker',
+  status: 'ACTIVE',
+);
+
 Widget _buildTestApp({
   required Widget child,
   required MockPartsRepository mockRepo,
+  List<PartItem> parts = const [],
 }) {
   return ProviderScope(
     overrides: [
+      authControllerProvider.overrideWith(() => _FakeAuthController(mockUser)),
       partsRepositoryProvider.overrideWithValue(mockRepo),
+      partsStreamProvider.overrideWith((ref) => Stream.value(parts)),
+      pendingSyncCountProvider.overrideWith((ref) => Stream.value(0)),
       currentOwnerIdProvider.overrideWithValue('test_owner'),
       brandsStreamProvider.overrideWith((ref) => Stream.value([])),
       categoriesStreamProvider.overrideWith((ref) => Stream.value([])),
@@ -98,6 +120,7 @@ void main() {
       _buildTestApp(
         child: const InventoryScreen(),
         mockRepo: mockRepo,
+        parts: sampleParts,
       ),
     );
     await tester.pumpAndSettle();
@@ -105,11 +128,11 @@ void main() {
     // Verify Search bar
     expect(find.byType(TextField), findsOneWidget);
 
-    // Verify Quick Stock Chips
-    expect(find.textContaining('ሁሉም'), findsOneWidget);
-    expect(find.textContaining('ክምችት ያለው'), findsOneWidget);
+    // Verify Quick Stock Chips & KPI cards
+    expect(find.textContaining('ሁሉም'), findsWidgets);
+    expect(find.textContaining('ክምችት ያለው'), findsWidgets);
     expect(find.textContaining('ሊያልቅ ነው'), findsWidgets);
-    expect(find.textContaining('ያለቀ'), findsOneWidget);
+    expect(find.textContaining('ያለቀ'), findsWidgets);
 
     // Verify Parts rendered
     expect(find.text('Oil Filter CAT'), findsOneWidget);
