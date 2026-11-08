@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/constants.dart';
+import 'daos/images_dao.dart';
 import 'daos/parts_dao.dart';
 import 'daos/sales_dao.dart';
 import 'daos/settings_dao.dart';
@@ -13,6 +14,7 @@ import 'tables/app_settings_table.dart';
 import 'tables/brands_table.dart';
 import 'tables/categories_table.dart';
 import 'tables/enums.dart';
+import 'tables/inventory_images_table.dart';
 import 'tables/locations_table.dart';
 import 'tables/profiles_table.dart';
 import 'tables/sale_items_table.dart';
@@ -41,6 +43,7 @@ part 'app_database.g.dart';
     SyncMeta,
     SyncState,
     AppSettings,
+    InventoryImages,
   ],
   daos: [
     PartsDao,
@@ -48,6 +51,7 @@ part 'app_database.g.dart';
     SalesDao,
     SyncQueueDao,
     SettingsDao,
+    ImagesDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -61,7 +65,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -162,6 +166,14 @@ class AppDatabase extends _$AppDatabase {
             await customStatement('CREATE INDEX IF NOT EXISTS idx_sync_queue_op_id ON sync_queue (operation_id);');
           } catch (_) {}
         }
+
+        if (from < 3) {
+          try {
+            await m.createTable(inventoryImages);
+          } catch (e) {
+            debugPrint('[Migration] Failed to create inventoryImages table: $e');
+          }
+        }
       },
     );
   }
@@ -177,6 +189,7 @@ class AppDatabase extends _$AppDatabase {
   /// or discarding unsynced changes.
   Future<void> clearAllOwnerData() async {
     await transaction(() async {
+      await delete(inventoryImages).go();
       await delete(syncQueue).go();
       await delete(saleItems).go();
       await delete(sales).go();
