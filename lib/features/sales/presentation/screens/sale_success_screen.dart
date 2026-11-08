@@ -596,7 +596,7 @@ class SaleSuccessScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () => context.pushReplacement('/sales/new'),
+                  onPressed: () => context.go('/sales'),
                 ),
                 const SizedBox(height: 10),
 

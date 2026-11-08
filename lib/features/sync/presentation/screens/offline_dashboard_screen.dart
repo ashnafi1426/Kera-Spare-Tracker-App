@@ -598,7 +598,7 @@ class OfflineDashboardScreen extends ConsumerWidget {
 
           // Operational Reassurance Callout
           InkWell(
-            onTap: () => context.push('/sales/new'),
+            onTap: () => context.go('/sales'),
             borderRadius: BorderRadius.circular(8),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -858,7 +858,7 @@ class OfflineDashboardScreen extends ConsumerWidget {
             // Action 1: Cash POS
             Expanded(
               child: InkWell(
-                onTap: () => context.push('/sales/new'),
+                onTap: () => context.go('/sales'),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   height: 96,

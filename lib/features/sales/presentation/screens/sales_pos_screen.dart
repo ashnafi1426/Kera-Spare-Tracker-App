@@ -1807,7 +1807,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
             ),
             GestureDetector(
               onTap: () {
-                context.push('/sales');
+                context.go('/sales');
               },
               child: const Row(
                 children: [
