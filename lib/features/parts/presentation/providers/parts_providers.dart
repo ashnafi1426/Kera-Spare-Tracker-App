@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/image_service.dart';
+import '../../../../data/local/app_database.dart';
 import '../../../../data/local/database_provider.dart';
 import '../../data/datasources/parts_local_data_source.dart';
 import '../../data/repositories/local_parts_repository.dart';
@@ -45,4 +46,12 @@ final localDashboardMetricsProvider =
     return result.valueOrNull;
   }
   return null;
+});
+
+/// Stream of all images associated with a spare part directly from SQLite.
+final partImagesStreamProvider =
+    StreamProvider.family<List<InventoryImageLocal>, String>((ref, partId) {
+  final ownerId = ref.watch(currentOwnerIdProvider);
+  final imagesDao = ref.watch(imagesDaoProvider);
+  return imagesDao.watchImagesForPart(ownerId, partId);
 });

@@ -445,10 +445,59 @@ class SyncCoordinatorService {
     }
   }
 
-  /// Uploads local photos for synced parts via resumable multipart POST
+  /// Uploads local photos and multi-image inventory queue via resumable multipart POST
   Future<int> _uploadPendingPhotos(String ownerId) async {
     int uploaded = 0;
     try {
+      // 1. Process multi-image inventory queue from inventory_images table
+      final pendingImages = await db.imagesDao.getPendingUploads(ownerId);
+      for (final imgRecord in pendingImages) {
+        if (imgRecord.retryCount >= 5) continue;
+
+        final file = File(imgRecord.localFilePath);
+        if (!await file.exists()) {
+          await db.imagesDao.markUploadFailed(imgRecord.id, 'Local file missing');
+          continue;
+        }
+
+        await db.imagesDao.markUploading(imgRecord.id);
+
+        try {
+          final fileName = imgRecord.localFilePath.split(Platform.pathSeparator).last;
+          final formData = FormData.fromMap({
+            'images': await MultipartFile.fromFile(file.path, filename: fileName),
+          });
+
+          final uploadRes = await dio.post(
+            '/spare-parts/${imgRecord.partId}/images',
+            data: formData,
+          );
+
+          if ((uploadRes.statusCode == 200 || uploadRes.statusCode == 201) && uploadRes.data['success'] == true) {
+            final dataList = uploadRes.data['data'];
+            if (dataList is List && dataList.isNotEmpty) {
+              final remote = dataList[0];
+              await db.imagesDao.markUploaded(
+                imageId: imgRecord.id,
+                remoteImageId: remote['id'] as String,
+                remoteImageUrl: remote['imageUrl'] as String,
+                thumbnailUrl: remote['thumbnailUrl'] as String?,
+              );
+              uploaded++;
+              continue;
+            }
+          }
+
+          await db.imagesDao.markUploadFailed(
+            imgRecord.id,
+            'Upload returned HTTP ${uploadRes.statusCode}',
+          );
+        } catch (e) {
+          await db.imagesDao.markUploadFailed(imgRecord.id, e.toString());
+        }
+      }
+
+      // 2. Process legacy single-photo spare parts
       final partsWithLocalPhoto = await (db.select(db.spareParts)
             ..where((t) =>
                 t.ownerId.equals(ownerId) &
