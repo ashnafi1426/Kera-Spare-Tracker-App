@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,16 +8,15 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
+import '../../../../core/services/image_management_service.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/app_picker_bottom_sheet.dart';
-import '../../../../core/widgets/kera_image_widget.dart';
+import '../../../../core/widgets/image_management_widgets.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
+import '../../../../data/local/app_database.dart';
+import '../../../../data/local/database_provider.dart';
 import '../../domain/models/part_item.dart';
 import '../../domain/models/picker_item.dart';
-import '../../../../core/widgets/image_management_widgets.dart';
-import '../../../../core/services/image_management_service.dart';
-import '../../../../data/local/database_provider.dart';
-import '../../../../data/local/app_database.dart';
 import '../providers/metadata_providers.dart';
 import '../providers/parts_providers.dart';
 
@@ -566,9 +565,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         if (_photoLocalPath != null && savedPartId != null) {
           unawaited(repo.uploadPartPhoto(partId: savedPartId, filePath: _photoLocalPath!));
         }
+        if (!mounted) return;
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
       } else {
+        if (!mounted) return;
         context.showSnackBar(
           result.failureOrNull?.message ?? 'Error saving part',
           isError: true,
@@ -625,9 +626,11 @@ class _PartFormScreenState extends ConsumerState<PartFormScreen> {
         if (_photoLocalPath != null && savedPartId != null) {
           unawaited(repo.uploadPartPhoto(partId: savedPartId, filePath: _photoLocalPath!));
         }
+        if (!mounted) return;
         context.showSnackBar(l10n.partSavedSuccess);
         Navigator.of(context).pop(true);
       } else {
+        if (!mounted) return;
         context.showSnackBar(
           result.failureOrNull?.message ?? 'Error creating part',
           isError: true,

@@ -318,18 +318,17 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                                   final res = await ref
                                       .read(authControllerProvider.notifier)
                                       .updateProfilePhoto(newPath);
-                                  if (mounted) {
-                                    if (res.isSuccess) {
-                                      context.showSnackBar(
-                                        'የንግድ ፎቶ በተሳካ ሁኔታ ተቀይሯል (Profile photo updated)',
-                                      );
-                                    } else {
-                                      context.showSnackBar(
-                                        res.failureOrNull?.message ??
-                                            'Failed to update photo',
-                                        isError: true,
-                                      );
-                                    }
+                                  if (!context.mounted) return;
+                                  if (res.isSuccess) {
+                                    context.showSnackBar(
+                                      'የንግድ ፎቶ በተሳካ ሁኔታ ተቀይሯል (Profile photo updated)',
+                                    );
+                                  } else {
+                                    context.showSnackBar(
+                                      res.failureOrNull?.message ??
+                                          'Failed to update photo',
+                                      isError: true,
+                                    );
                                   }
                                 },
                               ),

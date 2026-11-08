@@ -7,7 +7,6 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../data/local/app_database.dart';
 import '../../data/local/daos/images_dao.dart';
@@ -36,19 +35,20 @@ final imageManagementServiceProvider = Provider<ImageManagementService>((ref) {
 /// - Offline-first SQLite queueing and immediate local rendering
 /// - Multipart background uploading and fail-safe remote synchronization
 class ImageManagementService {
-  final ImagesDao _imagesDao;
-  final Dio _dio;
+  final ImagesDao imagesDao;
+  final Dio dio;
   final ImagePicker _picker;
   final Uuid _uuid;
 
+  ImagesDao get _imagesDao => imagesDao;
+  Dio get _dio => dio;
+
   ImageManagementService({
-    required ImagesDao imagesDao,
-    required Dio dio,
+    required this.imagesDao,
+    required this.dio,
     ImagePicker? picker,
     Uuid? uuid,
-  })  : _imagesDao = imagesDao,
-        _dio = dio,
-        _picker = picker ?? ImagePicker(),
+  })  : _picker = picker ?? ImagePicker(),
         _uuid = uuid ?? const Uuid();
 
   // ===========================================================================
