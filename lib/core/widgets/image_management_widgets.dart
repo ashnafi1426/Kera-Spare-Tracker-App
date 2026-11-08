@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../core/design/tokens/kera_colors.dart';
 import '../../core/utils/context_extensions.dart';
 import '../../data/local/app_database.dart';
 import '../services/image_management_service.dart';
@@ -113,7 +113,7 @@ class _ProfileImagePickerState extends ConsumerState<ProfileImagePicker> {
         widget.onPhotoChanged(storedPath);
 
         // Upload in background to remote server
-        imageService.uploadProfileAvatarToServer(localPath: storedPath);
+        unawaited(imageService.uploadProfileAvatarToServer(localPath: storedPath));
       }
     } catch (e) {
       if (mounted) {
@@ -662,3 +662,4 @@ class _InventoryImageGalleryState extends State<InventoryImageGallery> {
     );
   }
 }
+

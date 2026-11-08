@@ -28,3 +28,4 @@ ALTER TABLE `inventory_images` ADD CONSTRAINT `inventory_images_ownerId_fkey` FO
 
 -- AddForeignKey
 ALTER TABLE `inventory_images` ADD CONSTRAINT `inventory_images_partId_fkey` FOREIGN KEY (`partId`) REFERENCES `spare_parts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+

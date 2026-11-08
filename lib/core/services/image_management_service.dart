@@ -12,13 +12,20 @@ import 'package:uuid/uuid.dart';
 import '../../data/local/app_database.dart';
 import '../../data/local/daos/images_dao.dart';
 import '../../data/local/database_provider.dart';
-import '../../data/remote/dio_client.dart';
+import '../../features/auth/data/repositories/api_auth_repository.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../constants/constants.dart';
 
 final imageManagementServiceProvider = Provider<ImageManagementService>((ref) {
   final imagesDao = ref.watch(imagesDaoProvider);
-  final dio = ref.watch(dioClientProvider);
-  return ImageManagementService(imagesDao: imagesDao, dio: dio);
+  final authRepo = ref.watch(authRepositoryProvider);
+  Dio dioClient;
+  if (authRepo is ApiAuthRepository) {
+    dioClient = authRepo.dio;
+  } else {
+    dioClient = Dio(BaseOptions(baseUrl: AppConstants.apiBaseUrl));
+  }
+  return ImageManagementService(imagesDao: imagesDao, dio: dioClient);
 });
 
 /// Centralized Image Management Service for Kera Spare Tracker.
@@ -236,7 +243,7 @@ class ImageManagementService {
         await File(thumbPath).writeAsBytes(thumbBytes);
       }
 
-      final isPrimary = isPrimaryIfFirst && !hasPrimary && i === 0 && results.isEmpty;
+      final isPrimary = isPrimaryIfFirst && !hasPrimary && i == 0 && results.isEmpty;
 
       final companion = InventoryImagesCompanion(
         id: drift.Value(imageId),
@@ -452,3 +459,4 @@ Uint8List? _cropSquareAndCompress(_CompressParams params) {
     return null;
   }
 }
+

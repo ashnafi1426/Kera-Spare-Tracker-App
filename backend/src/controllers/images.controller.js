@@ -125,3 +125,4 @@ export async function setPrimaryInventoryImage(req, res, next) {
     next(err);
   }
 }
+

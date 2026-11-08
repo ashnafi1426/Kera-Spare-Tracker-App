@@ -7,6 +7,8 @@ import '../../../../core/design/tokens/kera_radii.dart';
 import '../../../../core/design/tokens/kera_spacing.dart';
 import '../../../../core/design/tokens/kera_typography.dart';
 import '../../../../core/utils/context_extensions.dart';
+import '../../../../core/widgets/image_management_widgets.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/models/business_profile.dart';
 import '../providers/business_profile_provider.dart';
 
@@ -146,6 +148,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authUser = ref.watch(authControllerProvider).value;
     return Scaffold(
       backgroundColor: KeraColors.surfaceCanvas,
       appBar: AppBar(
@@ -304,109 +307,49 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                           ),
                           const SizedBox(height: 14),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // Logo Display Badge
-                              Container(
-                                width: 90,
-                                height: 90,
-                                decoration: BoxDecoration(
-                                  color: KeraColors.primaryNavy,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: KeraColors.borderVariant,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.precision_manufacturing_rounded,
-                                      color: KeraColors.utilityTeal,
-                                      size: 32,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'TESFAYE',
-                                      style: KeraTypography.labelSmall(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      'ተስፋዬ መለዋወጫ',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        color: Colors.white.withAlpha(180),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              ProfileImagePicker(
+                                initialPhotoUrl: authUser?.photoUrl,
+                                ownerName: authUser?.businessName ?? 'Owner',
+                                radius: 42,
+                                isDark: context.isDark,
+                                onPhotoChanged: (newPath) async {
+                                  final res = await ref
+                                      .read(authControllerProvider.notifier)
+                                      .updateProfilePhoto(newPath);
+                                  if (mounted) {
+                                    if (res.isSuccess) {
+                                      context.showSnackBar(
+                                        'የንግድ ፎቶ በተሳካ ሁኔታ ተቀይሯል (Profile photo updated)',
+                                      );
+                                    } else {
+                                      context.showSnackBar(
+                                        res.failureOrNull?.message ??
+                                            'Failed to update photo',
+                                        isError: true,
+                                      );
+                                    }
+                                  }
+                                },
                               ),
                               const SizedBox(width: KeraSpacing.md),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      children: [
-                                        ElevatedButton.icon(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                KeraColors.primaryNavy,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            context.showSnackBar(
-                                              'ሎጎ መራጭ (Logo picker)',
-                                            );
-                                          },
-                                          icon: const Icon(
-                                            Icons.photo_camera_rounded,
-                                            size: 16,
-                                          ),
-                                          label: const Text('ሎጎ ቀይር'),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        OutlinedButton.icon(
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: KeraColors.error,
-                                            side: const BorderSide(
-                                              color: KeraColors.borderVariant,
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            context.showSnackBar(
-                                              'ሎጎ ተሰርዟል',
-                                            );
-                                          },
-                                          icon: const Icon(
-                                            Icons.delete_outline_rounded,
-                                            size: 16,
-                                          ),
-                                          label: const Text('አስወግድ'),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
                                     Text(
-                                      'የሚመከር መጠን 512x512 PNG ወይም JPG • ለደረሰኝ እና ማህበራዊ ሚዲያ ማጋሪያ ይጠቅማል',
+                                      authUser?.businessName ??
+                                          'Kera Spare Tracker',
+                                      style: KeraTypography.titleSmall(
+                                        color: context.isDark
+                                            ? Colors.white
+                                            : KeraColors.primaryNavy,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'የሚመከር መጠን 512x512 PNG ወይም JPG • ለደረሰኝ እና መገለጫ ይጠቅማል',
                                       style: KeraTypography.labelSmall(
                                         color: KeraColors.textMuted,
                                       ),

@@ -236,3 +236,4 @@ class LocalStorageService {
 }
 
 export const storageService = new LocalStorageService();
+

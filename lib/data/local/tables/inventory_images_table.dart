@@ -37,3 +37,4 @@ class InventoryImages extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+

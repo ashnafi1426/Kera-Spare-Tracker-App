@@ -704,7 +704,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
-                    'assets/images/kera_logo.png',
+                    'assets/images/logo.png',
                     fit: BoxFit.contain,
                     errorBuilder: (ctx, err, stack) {
                       return Container(
@@ -812,16 +812,13 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
-                        color: const Color(0xFFF7941D),
                       ),
-                      child: Center(
-                        child: Text(
-                          businessName.isNotEmpty ? businessName[0].toUpperCase() : 'A',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
+                      child: ClipOval(
+                        child: KeraAvatarWidget(
+                          photoUrl: authUser?.photoLocalPath ?? authUser?.photoUrl,
+                          name: businessName,
+                          radius: 17,
+                          isDark: isDark,
                         ),
                       ),
                     ),

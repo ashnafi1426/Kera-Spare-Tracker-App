@@ -9,6 +9,7 @@ class AuthUser {
   final String status;
   final String? suspendedReason;
   final String? avatarUrl;
+  final String? photoLocalPath;
 
   const AuthUser({
     required this.id,
@@ -20,6 +21,7 @@ class AuthUser {
     this.status = 'ACTIVE',
     this.suspendedReason,
     this.avatarUrl,
+    this.photoLocalPath,
   });
 
   bool get isAdmin => role.toLowerCase() == 'admin';
@@ -28,7 +30,7 @@ class AuthUser {
 
   String get name => businessName;
 
-  String? get photoUrl => avatarUrl;
+  String? get photoUrl => photoLocalPath ?? avatarUrl;
 
   AuthUser copyWith({
     String? id,
@@ -40,6 +42,7 @@ class AuthUser {
     String? status,
     String? suspendedReason,
     String? avatarUrl,
+    String? photoLocalPath,
   }) {
     return AuthUser(
       id: id ?? this.id,
@@ -51,6 +54,7 @@ class AuthUser {
       status: status ?? this.status,
       suspendedReason: suspendedReason ?? this.suspendedReason,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      photoLocalPath: photoLocalPath ?? this.photoLocalPath,
     );
   }
 
@@ -65,6 +69,7 @@ class AuthUser {
         'suspended_reason': suspendedReason,
         'avatar_url': avatarUrl,
         'photoUrl': avatarUrl,
+        'photoLocalPath': photoLocalPath,
       };
 
   factory AuthUser.fromJson(Map<String, dynamic> json) => AuthUser(
@@ -77,6 +82,7 @@ class AuthUser {
         status: (json['status'] as String? ?? 'ACTIVE').toUpperCase(),
         suspendedReason: (json['suspended_reason'] ?? json['suspendedReason']) as String?,
         avatarUrl: (json['avatar_url'] ?? json['avatarUrl'] ?? json['photoUrl'] ?? json['photo_url']) as String?,
+        photoLocalPath: (json['photo_local_path'] ?? json['photoLocalPath']) as String?,
       );
 
   @override
