@@ -11,6 +11,8 @@ import 'package:kera_spare_tracker/data/local/database_provider.dart';
 import 'package:kera_spare_tracker/data/local/tables/enums.dart';
 import 'package:kera_spare_tracker/features/auth/data/repositories/local_auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:kera_spare_tracker/features/auth/presentation/screens/login_screen.dart';
+import 'package:kera_spare_tracker/features/auth/presentation/screens/register_screen.dart';
 import 'package:kera_spare_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:kera_spare_tracker/features/parts/presentation/screens/part_form_screen.dart';
 import 'package:kera_spare_tracker/features/sales/presentation/screens/new_sale_screen.dart';
@@ -94,8 +96,8 @@ void main() {
     // ==========================================
     // STEP 1: REGISTER NEW OWNER
     // ==========================================
-    // App redirects to Login screen in Amharic by default
-    expect(find.text('ወደ መለያዎ ይግቡ'), findsOneWidget);
+    // App redirects to Login screen
+    expect(find.byType(LoginScreen), findsOneWidget);
 
     // Tap to switch to English for clearer assertions
     final englishButton = find.text('English');
@@ -104,14 +106,14 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    // Tap "Don't have an account? Register"
-    final registerLink = find.text("Don't have an account? Register");
-    expect(registerLink, findsOneWidget);
-    await tester.tap(registerLink);
+    // Tap "Register Shop" link
+    final registerLink = find.textContaining('Register');
+    expect(registerLink, findsWidgets);
+    await tester.tap(registerLink.first);
     await tester.pumpAndSettle();
 
     // On Register screen
-    expect(find.text('Create Business Account'), findsOneWidget);
+    expect(find.byType(RegisterScreen), findsOneWidget);
 
     // Fill registration form (4 text form fields: business name, phone, password, confirm password)
     final registerFields = find.byType(TextFormField);

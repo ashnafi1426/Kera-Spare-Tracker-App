@@ -513,7 +513,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0B1528) : const Color(0xFFF1F5F9),
-      bottomNavigationBar: widget.isStandaloneRoute
+      bottomNavigationBar: (widget.isStandaloneRoute || StatefulNavigationShell.maybeOf(context) == null)
           ? BottomNav(
               currentIndex: 4,
               onTabSelected: (index) {

@@ -303,26 +303,26 @@ class _BusinessDashboardScreenState
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF0A1D36),
-            Color(0xFF102B4C),
+            Color(0xFF142E50),
+            Color(0xFF1D416D),
           ],
         ),
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(22),
+          bottomRight: Radius.circular(22),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.16),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
           child: Column(
             children: [
               // Row: Logo + App Title/Slogan + Controls (Theme, Notifications, Avatar)
@@ -695,7 +695,7 @@ class _BusinessDashboardScreenState
               ),
               child: const Icon(
                 Icons.qr_code_scanner_rounded,
-                color: Color(0xFF102B4C),
+                color: Color(0xFF142E50),
                 size: 20,
               ),
             ),
@@ -718,21 +718,21 @@ class _BusinessDashboardScreenState
       width: double.infinity,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF101E33) : Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-          width: 1.2,
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+          width: 1.0,
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
             // Ambient Orange Glow on Right Edge
@@ -740,13 +740,13 @@ class _BusinessDashboardScreenState
               right: -20,
               top: -20,
               bottom: -20,
-              width: 140,
+              width: 120,
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      const Color(0xFFF7941D).withValues(alpha: isDark ? 0.25 : 0.18),
+                      const Color(0xFFF7931E).withValues(alpha: isDark ? 0.22 : 0.14),
                       Colors.transparent,
                     ],
                   ),
@@ -756,12 +756,12 @@ class _BusinessDashboardScreenState
 
             // Content Row
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
+              padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
               child: Row(
                 children: [
                   // Left Info Column
                   Expanded(
-                    flex: 12,
+                    flex: 13,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -769,18 +769,18 @@ class _BusinessDashboardScreenState
                         Text(
                           'Welcome back,',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white70 : const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           businessName,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF102B4C),
+                            color: isDark ? Colors.white : const Color(0xFF17243A),
                             letterSpacing: -0.3,
                           ),
                           maxLines: 1,
@@ -792,32 +792,32 @@ class _BusinessDashboardScreenState
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         // "+12% this month" Pill
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF16A36A).withValues(alpha: 0.18)
+                                  ? const Color(0xFF20A477).withValues(alpha: 0.18)
                                   : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF16A36A).withValues(alpha: 0.3)
+                                    ? const Color(0xFF20A477).withValues(alpha: 0.3)
                                     : const Color(0xFFE2E8F0),
                                 width: 1,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 1),
                                 ),
                               ],
                             ),
@@ -826,18 +826,18 @@ class _BusinessDashboardScreenState
                               children: [
                                 const Icon(
                                   Icons.trending_up_rounded,
-                                  size: 15,
-                                  color: Color(0xFF16A36A),
+                                  size: 14,
+                                  color: Color(0xFF20A477),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '+12% this month',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 10.5,
                                     fontWeight: FontWeight.w700,
                                     color: isDark
                                         ? const Color(0xFF34D399)
-                                        : const Color(0xFF16A36A),
+                                        : const Color(0xFF20A477),
                                   ),
                                 ),
                               ],
@@ -850,26 +850,26 @@ class _BusinessDashboardScreenState
 
                   // Right 3D Auto Parts Hero Graphic
                   Expanded(
-                    flex: 9,
+                    flex: 7,
                     child: SizedBox(
-                      height: 92,
+                      height: 74,
                       child: Image.asset(
                         'assets/images/hero_parts.jpg',
                         fit: BoxFit.contain,
                         errorBuilder: (ctx, err, stack) {
                           return Container(
-                            height: 80,
+                            height: 70,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFF7941D), Color(0xFFFFB049)],
+                                colors: [Color(0xFFF7931E), Color(0xFFFFB049)],
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Center(
                               child: Icon(
                                 Icons.settings_suggest_rounded,
                                 color: Colors.white,
-                                size: 36,
+                                size: 32,
                               ),
                             ),
                           );
@@ -909,7 +909,7 @@ class _BusinessDashboardScreenState
               onTap: () => _onDateFilterChanged(index),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                height: 40,
+                height: 38,
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 decoration: BoxDecoration(
                   gradient: isSelected
@@ -917,33 +917,33 @@ class _BusinessDashboardScreenState
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Color(0xFF0F2B52),
-                            Color(0xFF1B4983),
+                            Color(0xFF142E50),
+                            Color(0xFF1D416D),
                           ],
                         )
                       : null,
                   color: isSelected
                       ? null
                       : (isDark ? const Color(0xFF101E33) : Colors.white),
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? Colors.transparent
-                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
-                    width: 1.2,
+                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1)),
+                    width: 1.0,
                   ),
                   boxShadow: [
                     if (isSelected)
                       BoxShadow(
-                        color: const Color(0xFF102B4C).withValues(alpha: 0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFF142E50).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       )
                     else
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.02),
                         blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        offset: const Offset(0, 1),
                       ),
                   ],
                 ),
@@ -953,9 +953,11 @@ class _BusinessDashboardScreenState
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 13,
-                      color: isSelected ? Colors.white : const Color(0xFF102B4C),
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096)),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 5),
                     Flexible(
                       child: Text(
                         label,
@@ -964,7 +966,7 @@ class _BusinessDashboardScreenState
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                           color: isSelected
                               ? Colors.white
-                              : (isDark ? Colors.white : const Color(0xFF102B4C)),
+                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096)),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1006,10 +1008,10 @@ class _BusinessDashboardScreenState
         value: '${CurrencyFormatter.formatQuantity(totalQuantity)} pcs',
         subtitle: '$totalSkus ${context.tr('ምርቶች', 'products')}',
         icon: Icons.inventory_2_rounded,
-        iconGradient: const [Color(0xFF2563EB), Color(0xFF3B82F6)],
+        iconGradient: const [Color(0xFF142E50), Color(0xFF1D416D)],
         trendBadge: context.tr('ክምችት ዝርዝር', 'In Stock'),
         trendPositive: true,
-        waveColor: const Color(0xFF3B82F6),
+        waveColor: const Color(0xFF1D416D),
         onTap: () {
           if (widget.onSwitchToInventory != null) {
             widget.onSwitchToInventory!();
@@ -1026,10 +1028,10 @@ class _BusinessDashboardScreenState
         value: CurrencyFormatter.formatEtb(inventorySellingValue),
         subtitle: 'Cost: ${CurrencyFormatter.formatEtb(inventoryCostValue)}',
         icon: Icons.layers_rounded,
-        iconGradient: const [Color(0xFFF7941D), Color(0xFFFB923C)],
+        iconGradient: const [Color(0xFFF7931E), Color(0xFFFFB049)],
         trendBadge: context.tr('የሽያጭ ግምት', 'Valuation'),
         trendPositive: true,
-        waveColor: const Color(0xFFF7941D),
+        waveColor: const Color(0xFFF7931E),
         onTap: () {
           if (widget.onSwitchToReports != null) {
             widget.onSwitchToReports!();
@@ -1046,10 +1048,10 @@ class _BusinessDashboardScreenState
         value: CurrencyFormatter.formatEtb(totalSales),
         subtitle: '$salesCount ${context.tr('ሽያጮች', 'sales')}',
         icon: Icons.trending_up_rounded,
-        iconGradient: const [Color(0xFF16A36A), Color(0xFF34D399)],
+        iconGradient: const [Color(0xFF20A477), Color(0xFF34D399)],
         trendBadge: context.tr('የተጠናቀቀ', 'Revenue'),
         trendPositive: true,
-        waveColor: const Color(0xFF16A36A),
+        waveColor: const Color(0xFF20A477),
         onTap: () {
           if (widget.onSwitchToReports != null) {
             widget.onSwitchToReports!();
@@ -1119,14 +1121,15 @@ class _BusinessDashboardScreenState
     required Color waveColor,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 134),
-        padding: const EdgeInsets.all(12),
+        constraints: const BoxConstraints(minHeight: 122),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
         decoration: BoxDecoration(
           color: context.cardBg,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -1134,106 +1137,108 @@ class _BusinessDashboardScreenState
               offset: const Offset(0, 3),
             ),
           ],
-          border: Border.all(color: context.borderColor),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+            width: 1.0,
+          ),
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Bottom Wave Graph
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 38,
-              child: CustomPaint(
-                painter: _SparklineWavePainter(waveColor: waveColor),
+            // Top Row: Icon + Title + Chevron
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: iconGradient,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 16),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFFA0AEC0),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Middle: Large formatted value in FittedBox
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF17243A),
+                  letterSpacing: -0.3,
+                ),
+                maxLines: 1,
               ),
             ),
 
-            // Card Content
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+            const SizedBox(height: 8),
+
+            // Bottom: Secondary info on Left, Dedicated isolated Mini Sparkline on Right
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Top Row: Icon + Title + Chevron
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: iconGradient,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(9),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        trendPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                        size: 11,
+                        color: trendPositive ? const Color(0xFF20A477) : const Color(0xFFD94A5B),
                       ),
-                      child: Icon(icon, color: Colors.white, size: 17),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.textSecondaryColor,
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: context.textSecondaryColor,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                // Main Value with Responsive Scaling
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: context.textPrimaryColor,
-                      letterSpacing: -0.3,
-                    ),
-                    maxLines: 1,
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 8),
-
-                // Subtitle / Trend Badge
-                Row(
-                  children: [
-                    Icon(
-                      trendPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                      size: 11,
-                      color: trendPositive ? const Color(0xFF16A36A) : const Color(0xFFDC3545),
-                    ),
-                    const SizedBox(width: 3),
-                    Flexible(
-                      child: Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: trendPositive ? const Color(0xFF16A36A) : const Color(0xFFDC3545),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 6),
+                SizedBox(
+                  width: 44,
+                  height: 22,
+                  child: CustomPaint(
+                    painter: _MiniSparklinePainter(waveColor: waveColor),
+                  ),
                 ),
               ],
             ),
@@ -1257,8 +1262,11 @@ class _BusinessDashboardScreenState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -1280,12 +1288,12 @@ class _BusinessDashboardScreenState
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF102B4C).withValues(alpha: 0.1),
+                      color: const Color(0xFF142E50).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.bar_chart_rounded,
-                      color: Color(0xFF102B4C),
+                      color: Color(0xFF142E50),
                       size: 18,
                     ),
                   ),
@@ -1296,7 +1304,7 @@ class _BusinessDashboardScreenState
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
-                        color: context.textPrimaryColor,
+                        color: isDark ? Colors.white : const Color(0xFF17243A),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1344,15 +1352,15 @@ class _BusinessDashboardScreenState
           Row(
             children: [
               _buildChartLegend(
-                color: const Color(0xFF102B4C),
+                color: const Color(0xFF142E50),
                 label: context.tr('ገቢ', 'Revenue'),
-                textColor: context.textSecondaryColor,
+                textColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
               ),
               const SizedBox(width: 14),
               _buildChartLegend(
-                color: const Color(0xFFF7941D),
+                color: const Color(0xFFF7931E),
                 label: context.tr('ትርፍ', 'Profit'),
-                textColor: context.textSecondaryColor,
+                textColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
               ),
             ],
           ),
@@ -1367,7 +1375,10 @@ class _BusinessDashboardScreenState
               error: (err, _) => Center(
                 child: Text(
                   'Failed to load chart points',
-                  style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                    fontSize: 12,
+                  ),
                 ),
               ),
               data: (points) {
@@ -1376,11 +1387,18 @@ class _BusinessDashboardScreenState
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.show_chart_rounded, size: 36, color: context.textSecondaryColor),
+                        Icon(
+                          Icons.show_chart_rounded,
+                          size: 36,
+                          color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        ),
                         const SizedBox(height: 6),
                         Text(
                           context.tr('በተመረጠው ጊዜ ውስጥ ምንም ሽያጭ የለም', 'No sales recorded in this period'),
-                          style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -1404,14 +1422,14 @@ class _BusinessDashboardScreenState
                       // Revenue Bar
                       BarChartRodData(
                         toY: p.revenue > 0 ? p.revenue : 0,
-                        color: const Color(0xFF102B4C),
+                        color: const Color(0xFF142E50),
                         width: 9,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                       ),
                       // Profit Bar
                       BarChartRodData(
                         toY: p.profit > 0 ? p.profit : 0,
-                        color: const Color(0xFFF7941D),
+                        color: const Color(0xFFF7931E),
                         width: 9,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                       ),
@@ -1444,7 +1462,27 @@ class _BusinessDashboardScreenState
                     titlesData: FlTitlesData(
                       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 42,
+                          getTitlesWidget: (value, meta) {
+                            if (value == 0 || value == meta.max) return const SizedBox.shrink();
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Text(
+                                CurrencyFormatter.formatCompact(value),
+                                style: TextStyle(
+                                  fontSize: 9.5,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
@@ -1457,7 +1495,7 @@ class _BusinessDashboardScreenState
                                 points[idx].label,
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: context.textSecondaryColor,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1466,7 +1504,16 @@ class _BusinessDashboardScreenState
                         ),
                       ),
                     ),
-                    gridData: const FlGridData(show: false),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: maxY > 0 ? (maxY / 3) : 100,
+                      getDrawingHorizontalLine: (val) => FlLine(
+                        color: (isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
+                        strokeWidth: 1,
+                        dashArray: [4, 4],
+                      ),
+                    ),
                     borderData: FlBorderData(show: false),
                     barGroups: barGroups,
                   ),
@@ -1612,9 +1659,9 @@ class _BusinessDashboardScreenState
         // Row 1: Wide Record Sale Hero + Add Part + Low Stock
         Row(
           children: [
-            // Wide Record Sale Primary Action
+            // Wide Record Sale Primary Action (No truncation, prominent touch target)
             Expanded(
-              flex: 11,
+              flex: 12,
               child: GestureDetector(
                 onTap: () {
                   if (widget.onSwitchToSales != null) {
@@ -1624,21 +1671,21 @@ class _BusinessDashboardScreenState
                   }
                 },
                 child: Container(
-                  constraints: const BoxConstraints(minHeight: 76),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  height: 68,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFFF7941D),
+                        Color(0xFFF7931E),
                         Color(0xFFFF7A00),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF7941D).withValues(alpha: 0.35),
+                        color: const Color(0xFFF7931E).withValues(alpha: 0.35),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -1647,9 +1694,10 @@ class _BusinessDashboardScreenState
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(7),
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white.withValues(alpha: 0.22),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -1660,44 +1708,16 @@ class _BusinessDashboardScreenState
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              context.tr('ሽያጭ መዝግብ', 'Record Sale'),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              context.tr('አዲስ ሽያጭ ጀምር', 'Instant Checkout'),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.white.withValues(alpha: 0.85),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_rounded,
-                          size: 11,
-                          color: Color(0xFFF7941D),
+                        child: Text(
+                          context.tr('ሽያጭ መዝግብ', 'Record Sale'),
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -1716,7 +1736,7 @@ class _BusinessDashboardScreenState
                 iconWidget: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF102B4C),
+                    color: const Color(0xFF142E50),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -1726,7 +1746,7 @@ class _BusinessDashboardScreenState
                   ),
                 ),
                 label: context.tr('ዕቃ መዝግብ', 'Add Part'),
-                onTap: () => context.push('/parts/new'),
+                onTap: () => context.push('/parts/add'),
               ),
             ),
 
@@ -1742,7 +1762,7 @@ class _BusinessDashboardScreenState
                   children: [
                     const Icon(
                       Icons.warning_amber_rounded,
-                      color: Color(0xFFF7941D),
+                      color: Color(0xFFF2A23A),
                       size: 22,
                     ),
                     if (lowStockCount > 0)
@@ -1752,7 +1772,7 @@ class _BusinessDashboardScreenState
                         child: Container(
                           padding: const EdgeInsets.all(2.5),
                           decoration: const BoxDecoration(
-                            color: Color(0xFFDC3545),
+                            color: Color(0xFFD94A5B),
                             shape: BoxShape.circle,
                           ),
                           constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
@@ -1793,7 +1813,7 @@ class _BusinessDashboardScreenState
                 context: context,
                 iconWidget: const Icon(
                   Icons.bar_chart_rounded,
-                  color: Color(0xFF102B4C),
+                  color: Color(0xFF142E50),
                   size: 22,
                 ),
                 label: context.tr('ሪፖርቶች', 'Reports'),
@@ -1815,7 +1835,7 @@ class _BusinessDashboardScreenState
                 context: context,
                 iconWidget: const Icon(
                   Icons.settings_outlined,
-                  color: Color(0xFF102B4C),
+                  color: Color(0xFF142E50),
                   size: 22,
                 ),
                 label: context.tr('ቅንብሮች', 'Settings'),
@@ -1831,7 +1851,7 @@ class _BusinessDashboardScreenState
                 context: context,
                 iconWidget: const Icon(
                   Icons.more_horiz_rounded,
-                  color: Color(0xFF102B4C),
+                  color: Color(0xFF142E50),
                   size: 22,
                 ),
                 label: context.tr('ተጨማሪ', 'More'),
@@ -1850,15 +1870,19 @@ class _BusinessDashboardScreenState
     required String label,
     required VoidCallback onTap,
   }) {
+    final isDark = context.isDark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 76),
+        height: 68,
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         decoration: BoxDecoration(
           color: context.cardBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.borderColor),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+            width: 1.0,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -1878,7 +1902,7 @@ class _BusinessDashboardScreenState
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: context.textPrimaryColor,
+                color: isDark ? Colors.white : const Color(0xFF17243A),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -2056,12 +2080,12 @@ class _BusinessDashboardScreenState
             Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF16A36A).withValues(alpha: 0.08),
+                color: const Color(0xFF20A477).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: Color(0xFF16A36A), size: 20),
+                  const Icon(Icons.check_circle_rounded, color: Color(0xFF20A477), size: 20),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -2069,7 +2093,7 @@ class _BusinessDashboardScreenState
                         'ሁሉም የክምችት መጠኖች ጤናማ ናቸው። ምንም አስቸኳይ ክምችት የለም።',
                         'All inventory levels are healthy. No critical stock alerts.',
                       ),
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF16A36A), fontWeight: FontWeight.w600),
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF20A477), fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -2082,97 +2106,130 @@ class _BusinessDashboardScreenState
                 final minQty = part.lowStockLevel ?? 5.0;
                 final reorderSuggestion = math.max(10, (minQty * 2 - part.cachedQuantity).toInt());
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF101E33) : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isOutOfStock
-                          ? const Color(0xFFDC3545).withValues(alpha: 0.3)
-                          : const Color(0xFFF7941D).withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // Part Image Thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: KeraPartImage(
-                            localPath: part.photoLocalPath,
-                            remoteUrl: part.photoUrl,
-                            width: 40,
-                            height: 40,
-                          ),
-                        ),
+                return InkWell(
+                  onTap: () => context.push('/parts/${part.id}'),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF101E33) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isOutOfStock
+                            ? const Color(0xFFD94A5B).withValues(alpha: 0.35)
+                            : const Color(0xFFF2A23A).withValues(alpha: 0.35),
                       ),
-                      const SizedBox(width: 10),
-
-                      // Part Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Level 1: Thumbnail + Product Name & OEM in Column + Quantity Status Badge
+                        Row(
                           children: [
-                            Text(
-                              part.name ?? context.tr('ያልታወቀ ዕቃ', 'Unnamed Part'),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimaryColor,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: KeraPartImage(
+                                  localPath: part.photoLocalPath,
+                                  remoteUrl: part.photoUrl,
+                                  width: 36,
+                                  height: 36,
+                                ),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'OEM: ${part.partNumber ?? "N/A"} • Reorder +$reorderSuggestion pcs',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.textSecondaryColor,
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    part.name ?? context.tr('ያልታወቀ ዕቃ', 'Unnamed Part'),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? Colors.white : const Color(0xFF17243A),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'OEM: ${part.partNumber?.isNotEmpty == true ? part.partNumber : "N/A"}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: (isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A))
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: (isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A))
+                                      .withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                isOutOfStock ? '0 pcs · Out' : '${part.cachedQuantity.toInt()} pcs',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-
-                      // Stock Badge
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${part.cachedQuantity.toInt()} / ${minQty.toInt()} min',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: isOutOfStock ? const Color(0xFFDC3545) : const Color(0xFFF7941D),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: (isOutOfStock ? const Color(0xFFDC3545) : const Color(0xFFF7941D))
-                                  .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              isOutOfStock ? 'Out of Stock' : 'Low Stock',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: isOutOfStock ? const Color(0xFFDC3545) : const Color(0xFFF7941D),
+                        const SizedBox(height: 8),
+                        Divider(
+                          height: 1,
+                          thickness: 0.8,
+                          color: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
+                        ),
+                        const SizedBox(height: 8),
+                        // Level 2: Min Stock on Left + Reorder Recommendation on Right
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Min: ${minQty.toInt()} pcs',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 8),
+                            Text(
+                              'Reorder: +$reorderSuggestion pcs',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF142E50),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -2319,129 +2376,107 @@ class _BusinessDashboardScreenState
     final itemsCount = sale.items.length;
     final totalUnits = sale.totalUnitsCount;
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => _showSaleDetailsDialog(context, sale),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF101E33) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.borderColor),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+            width: 1.0,
+          ),
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 260;
-            if (isCompact) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF16A36A).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.check_circle_outline_rounded,
-                          color: Color(0xFF16A36A),
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          receiptNum,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        CurrencyFormatter.formatEtb(sale.totalAmount),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF16A36A),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '$formattedDate • ${sale.paymentMethod ?? "Cash"} • $itemsCount items',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: context.textSecondaryColor,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '+${CurrencyFormatter.formatEtb(sale.totalProfit)} profit',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: context.textSecondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            }
-
-            return Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Level: Receipt Icon + Receipt ID + Status Badge
+            Row(
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF16A36A).withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    color: const Color(0xFF20A477).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.check_circle_outline_rounded,
-                    color: Color(0xFF16A36A),
-                    size: 20,
+                    Icons.receipt_long_rounded,
+                    color: Color(0xFF20A477),
+                    size: 15,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    receiptNum,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : const Color(0xFF17243A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF20A477).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFF20A477).withValues(alpha: 0.25),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: const Text(
+                    'Completed',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF20A477),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Divider(
+              height: 1,
+              thickness: 0.8,
+              color: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
+            ),
+            const SizedBox(height: 8),
+            // Bottom Level: Date & Method on Left, Prominent Amount & Profit on Right
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        receiptNum,
+                        formattedDate,
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '$formattedDate • ${sale.paymentMethod ?? "Cash"} • ${CurrencyFormatter.formatQuantity(totalUnits)} pcs',
+                        '${sale.paymentMethod ?? "Cash"} • ${CurrencyFormatter.formatQuantity(totalUnits)} pcs ($itemsCount items)',
                         style: TextStyle(
                           fontSize: 11,
-                          color: context.textSecondaryColor,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : const Color(0xFF17243A),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -2452,30 +2487,29 @@ class _BusinessDashboardScreenState
                 const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       CurrencyFormatter.formatEtb(sale.totalAmount),
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: TextStyle(
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF16A36A),
+                        color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF142E50),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 1),
                     Text(
                       '+${CurrencyFormatter.formatEtb(sale.totalProfit)} profit',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: context.textSecondaryColor,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF20A477),
                       ),
                     ),
                   ],
                 ),
               ],
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -2594,8 +2628,11 @@ class _BusinessDashboardScreenState
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -2612,12 +2649,12 @@ class _BusinessDashboardScreenState
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF7941D).withValues(alpha: 0.12),
+                  color: const Color(0xFFF7931E).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.lightbulb_outline_rounded,
-                  color: Color(0xFFF7941D),
+                  color: Color(0xFFF7931E),
                   size: 18,
                 ),
               ),
@@ -2628,7 +2665,7 @@ class _BusinessDashboardScreenState
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: context.textPrimaryColor,
+                    color: isDark ? Colors.white : const Color(0xFF17243A),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -2647,7 +2684,7 @@ class _BusinessDashboardScreenState
                   context: context,
                   label: context.tr('ጠቅላላ ምርቶች', 'Total SKUs'),
                   value: '$totalSkus',
-                  color: const Color(0xFF102B4C),
+                  color: const Color(0xFF142E50),
                 ),
               ),
               const SizedBox(width: 8),
@@ -2656,7 +2693,7 @@ class _BusinessDashboardScreenState
                   context: context,
                   label: context.tr('አነስተኛ', 'Low Stock'),
                   value: '$lowStockCount',
-                  color: const Color(0xFFF7941D),
+                  color: const Color(0xFFF2A23A),
                 ),
               ),
               const SizedBox(width: 8),
@@ -2665,7 +2702,7 @@ class _BusinessDashboardScreenState
                   context: context,
                   label: context.tr('ያለቀ', 'Out of Stock'),
                   value: '$outOfStockCount',
-                  color: const Color(0xFFDC3545),
+                  color: const Color(0xFFD94A5B),
                 ),
               ),
             ],
@@ -2679,7 +2716,7 @@ class _BusinessDashboardScreenState
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: context.textPrimaryColor,
+              color: isDark ? Colors.white : const Color(0xFF17243A),
             ),
           ),
 
@@ -2695,7 +2732,10 @@ class _BusinessDashboardScreenState
                   child: Center(
                     child: Text(
                       context.tr('ምንም የሽያጭ መረጃ አልተገኘም', 'No sales volume data yet'),
-                      style: TextStyle(color: context.textSecondaryColor, fontSize: 11),
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 );
@@ -2711,7 +2751,7 @@ class _BusinessDashboardScreenState
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF102B4C).withValues(alpha: 0.1),
+                            color: const Color(0xFF142E50).withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -2720,7 +2760,7 @@ class _BusinessDashboardScreenState
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF102B4C),
+                                color: Color(0xFF142E50),
                               ),
                             ),
                           ),
@@ -2732,13 +2772,20 @@ class _BusinessDashboardScreenState
                             children: [
                               Text(
                                 p.partName,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : const Color(0xFF17243A),
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 '${CurrencyFormatter.formatQuantity(p.quantitySold)} units sold',
-                                style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                                ),
                               ),
                             ],
                           ),
@@ -2749,7 +2796,7 @@ class _BusinessDashboardScreenState
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF102B4C),
+                            color: isDark ? Colors.white : const Color(0xFF142E50),
                           ),
                         ),
                       ],
@@ -2807,25 +2854,24 @@ class _BusinessDashboardScreenState
 // CUSTOM PAINTERS: SPARKLINE WAVE & ORANGE SWOOSH
 // =============================================================================
 
-/// Dynamic bezier sparkline with smooth fill and crest dot for KPI cards
-class _SparklineWavePainter extends CustomPainter {
+/// Compact, isolated mini sparkline for KPI cards that never collides with text
+class _MiniSparklinePainter extends CustomPainter {
   final Color waveColor;
 
-  _SparklineWavePainter({required this.waveColor});
+  _MiniSparklinePainter({required this.waveColor});
 
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    final dotX = w - 6.0;
-    final dotY = h * 0.22;
+    if (w <= 0 || h <= 0) return;
 
     final fillPath = Path()
       ..moveTo(0, h)
-      ..lineTo(0, h * 0.8)
-      ..cubicTo(w * 0.25, h * 0.9, w * 0.45, h * 0.35, w * 0.68, h * 0.6)
-      ..cubicTo(w * 0.82, h * 0.72, w * 0.9, dotY, dotX, dotY)
-      ..lineTo(dotX, h)
+      ..lineTo(0, h * 0.75)
+      ..cubicTo(w * 0.28, h * 0.85, w * 0.48, h * 0.28, w * 0.72, h * 0.5)
+      ..cubicTo(w * 0.85, h * 0.62, w * 0.94, h * 0.16, w - 2, h * 0.2)
+      ..lineTo(w - 2, h)
       ..close();
 
     final fillPaint = Paint()
@@ -2833,7 +2879,7 @@ class _SparklineWavePainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          waveColor.withValues(alpha: 0.26),
+          waveColor.withValues(alpha: 0.28),
           waveColor.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, w, h))
@@ -2842,27 +2888,27 @@ class _SparklineWavePainter extends CustomPainter {
     canvas.drawPath(fillPath, fillPaint);
 
     final linePath = Path()
-      ..moveTo(0, h * 0.8)
-      ..cubicTo(w * 0.25, h * 0.9, w * 0.45, h * 0.35, w * 0.68, h * 0.6)
-      ..cubicTo(w * 0.82, h * 0.72, w * 0.9, dotY, dotX, dotY);
+      ..moveTo(0, h * 0.75)
+      ..cubicTo(w * 0.28, h * 0.85, w * 0.48, h * 0.28, w * 0.72, h * 0.5)
+      ..cubicTo(w * 0.85, h * 0.62, w * 0.94, h * 0.16, w - 2, h * 0.2);
 
     final linePaint = Paint()
       ..color = waveColor
-      ..strokeWidth = 2.4
+      ..strokeWidth = 1.8
       ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
     canvas.drawPath(linePath, linePaint);
 
-    // Peak dot with glowing outer halo
-    final peakOffset = Offset(dotX, dotY);
-    canvas.drawCircle(peakOffset, 5.5, Paint()..color = waveColor.withValues(alpha: 0.25));
-    canvas.drawCircle(peakOffset, 3.5, Paint()..color = waveColor);
-    canvas.drawCircle(peakOffset, 1.5, Paint()..color = Colors.white);
+    // End crest dot
+    final dotOffset = Offset(w - 2, h * 0.2);
+    canvas.drawCircle(dotOffset, 2.5, Paint()..color = waveColor);
+    canvas.drawCircle(dotOffset, 1.2, Paint()..color = Colors.white);
   }
 
   @override
-  bool shouldRepaint(covariant _SparklineWavePainter oldDelegate) =>
+  bool shouldRepaint(covariant _MiniSparklinePainter oldDelegate) =>
       oldDelegate.waveColor != waveColor;
 }
 
