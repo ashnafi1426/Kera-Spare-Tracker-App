@@ -5,6 +5,8 @@ import '../../../../data/local/database_provider.dart';
 import '../../../parts/domain/models/part_item.dart';
 import '../../../parts/presentation/providers/metadata_providers.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
+import '../../../reports/domain/models/sales_summary.dart';
+import '../../../reports/presentation/providers/reports_providers.dart';
 import '../../data/repositories/local_sales_repository.dart';
 import '../../domain/models/sale_line_item.dart';
 import '../../domain/models/sale_model.dart';
@@ -155,3 +157,139 @@ final newSaleCartProvider =
     NotifierProvider<NewSaleCartNotifier, List<SaleLineItem>>(
   NewSaleCartNotifier.new,
 );
+
+/// Model for the 3 performance summary cards on the Sales POS screen.
+class SalesPosMetrics {
+  final int salesCount;
+  final double totalRevenue;
+  final double totalProfit;
+  final double salesCountTrendPct;
+  final double revenueTrendPct;
+  final double profitTrendPct;
+
+  const SalesPosMetrics({
+    required this.salesCount,
+    required this.totalRevenue,
+    required this.totalProfit,
+    this.salesCountTrendPct = 0.0,
+    this.revenueTrendPct = 0.0,
+    this.profitTrendPct = 0.0,
+  });
+
+  static const zero = SalesPosMetrics(
+    salesCount: 0,
+    totalRevenue: 0.0,
+    totalProfit: 0.0,
+  );
+}
+
+/// Date filter notifier specifically for the Sales & POS screen.
+class SalesPosDateFilterNotifier extends Notifier<DateRangeType> {
+  @override
+  DateRangeType build() => DateRangeType.today;
+
+  void setFilter(DateRangeType type) => state = type;
+}
+
+final salesPosDateFilterProvider =
+    NotifierProvider<SalesPosDateFilterNotifier, DateRangeType>(
+  SalesPosDateFilterNotifier.new,
+);
+
+/// Custom date range notifier for the Sales & POS screen.
+class SalesPosCustomRangeNotifier extends Notifier<DateTimeRange?> {
+  @override
+  DateTimeRange? build() => null;
+
+  void setRange(DateTimeRange? range) => state = range;
+}
+
+final salesPosCustomRangeProvider =
+    NotifierProvider<SalesPosCustomRangeNotifier, DateTimeRange?>(
+  SalesPosCustomRangeNotifier.new,
+);
+
+/// Computes live sales KPI metrics (count, revenue, profit, trends) from SQLite.
+final salesPosMetricsProvider = FutureProvider<SalesPosMetrics>((ref) async {
+  final ownerId = ref.watch(currentOwnerIdProvider);
+  final repo = ref.watch(reportsRepositoryProvider);
+  final dateType = ref.watch(salesPosDateFilterProvider);
+  final customRange = ref.watch(salesPosCustomRangeProvider);
+
+  final currentRange = DateRange.forType(dateType, customRange: customRange);
+  final currentSummaryRes = await repo.getSalesSummary(
+    ownerId: ownerId,
+    range: currentRange,
+  );
+  final currentSummary = currentSummaryRes.valueOrNull ?? SalesSummary.zero;
+
+  // Compute previous range for trend comparison
+  DateRange? previousRange;
+  final now = DateTime.now();
+  switch (dateType) {
+    case DateRangeType.today:
+      final yesterday = now.subtract(const Duration(days: 1));
+      previousRange =
+          DateRange.forType(DateRangeType.today, referenceTime: yesterday);
+      break;
+    case DateRangeType.thisWeek:
+      final lastWeek = now.subtract(const Duration(days: 7));
+      previousRange =
+          DateRange.forType(DateRangeType.thisWeek, referenceTime: lastWeek);
+      break;
+    case DateRangeType.thisMonth:
+      final lastMonth = DateTime(now.year, now.month - 1, 1);
+      previousRange =
+          DateRange.forType(DateRangeType.thisMonth, referenceTime: lastMonth);
+      break;
+    case DateRangeType.custom:
+      previousRange = null;
+      break;
+  }
+
+  double countTrend = 0.0;
+  double revenueTrend = 0.0;
+  double profitTrend = 0.0;
+
+  if (previousRange != null) {
+    final prevRes =
+        await repo.getSalesSummary(ownerId: ownerId, range: previousRange);
+    final prevSummary = prevRes.valueOrNull ?? SalesSummary.zero;
+
+    if (prevSummary.salesCount > 0) {
+      countTrend =
+          ((currentSummary.salesCount - prevSummary.salesCount) /
+                  prevSummary.salesCount) *
+              100;
+    } else if (currentSummary.salesCount > 0) {
+      countTrend = 100.0;
+    }
+
+    if (prevSummary.totalRevenue > 0) {
+      revenueTrend =
+          ((currentSummary.totalRevenue - prevSummary.totalRevenue) /
+                  prevSummary.totalRevenue) *
+              100;
+    } else if (currentSummary.totalRevenue > 0) {
+      revenueTrend = 100.0;
+    }
+
+    if (prevSummary.totalProfit > 0) {
+      profitTrend =
+          ((currentSummary.totalProfit - prevSummary.totalProfit) /
+                  prevSummary.totalProfit) *
+              100;
+    } else if (currentSummary.totalProfit > 0) {
+      profitTrend = 100.0;
+    }
+  }
+
+  return SalesPosMetrics(
+    salesCount: currentSummary.salesCount,
+    totalRevenue: currentSummary.totalRevenue,
+    totalProfit: currentSummary.totalProfit,
+    salesCountTrendPct: countTrend,
+    revenueTrendPct: revenueTrend,
+    profitTrendPct: profitTrend,
+  );
+});

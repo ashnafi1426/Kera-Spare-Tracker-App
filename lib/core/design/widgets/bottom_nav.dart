@@ -76,54 +76,69 @@ class BottomNav extends StatelessWidget {
                 child: Center(
                   child: GestureDetector(
                     onTap: onSellPressed,
-                    child: Container(
-                      width: 58,
-                      height: 58,
-                      margin: const EdgeInsets.only(bottom: 4),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFFFF9E1B),
-                            Color(0xFFFF6D00),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
-                            blurRadius: 14,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2.5,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Colors.white,
-                            size: 21,
-                          ),
-                          const SizedBox(height: 1),
-                          Text(
-                            context.tr('ሽጥ', 'Sell'),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0xFFFF9E1B),
+                                Color(0xFFFF6D00),
+                              ],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            border: Border.all(
                               color: Colors.white,
-                              letterSpacing: 0.2,
-                              height: 1.0,
+                              width: 2.5,
                             ),
                           ),
-                        ],
-                      ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.shopping_cart_outlined,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              const SizedBox(height: 1),
+                              Text(
+                                context.tr('ሽጥ', 'Sell'),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  letterSpacing: 0.2,
+                                  height: 1.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        // Active indicator line matching mockup
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: (currentIndex == 4) ? 22 : 0,
+                          height: 2.5,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7941D),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

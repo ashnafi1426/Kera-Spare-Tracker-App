@@ -18,6 +18,7 @@ abstract class SalesRepository {
     String? saleId,
     String? notes,
     String? paymentMethod,
+    double discount = 0.0,
     bool forceAllowNegative = false,
   });
 

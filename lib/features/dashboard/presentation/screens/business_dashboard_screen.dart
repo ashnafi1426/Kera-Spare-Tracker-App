@@ -1616,7 +1616,13 @@ class _BusinessDashboardScreenState
             Expanded(
               flex: 11,
               child: GestureDetector(
-                onTap: () => context.push('/sales/new'),
+                onTap: () {
+                  if (widget.onSwitchToSales != null) {
+                    widget.onSwitchToSales!();
+                  } else {
+                    context.go('/sales');
+                  }
+                },
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 76),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -2243,7 +2249,7 @@ class _BusinessDashboardScreenState
                   if (widget.onSwitchToSales != null) {
                     widget.onSwitchToSales!();
                   } else {
-                    context.push('/sales');
+                    context.go('/sales');
                   }
                 },
                 child: Text(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/design/widgets/bottom_nav.dart';
 import '../../../../core/utils/context_extensions.dart';
@@ -8,7 +7,7 @@ import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../dashboard/presentation/screens/business_dashboard_screen.dart';
 import '../../../parts/presentation/screens/inventory_screen.dart';
 import '../../../reports/presentation/screens/reports_screen.dart';
-import '../../../sales/presentation/screens/sales_list_tab.dart';
+import '../../../sales/presentation/screens/sales_pos_screen.dart';
 import '../../../settings/presentation/screens/settings_screen.dart';
 
 /// Main container screen matching Kera Spare Tracker modern navigation:
@@ -47,7 +46,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       const InventoryScreen(),
       const ReportsScreen(),
       const SettingsScreen(),
-      const SalesListTab(),
+      SalesPosScreen(
+        onSwitchToInventory: () => setState(() => _currentIndex = 1),
+      ),
     ];
 
     return Scaffold(
@@ -67,12 +68,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       bottomNavigationBar: BottomNav(
-        currentIndex: _currentIndex > 3 ? 0 : _currentIndex,
+        currentIndex: _currentIndex,
         onTabSelected: (index) {
           setState(() => _currentIndex = index);
         },
         onSellPressed: () {
-          context.push('/sales/new');
+          setState(() => _currentIndex = 4);
         },
       ),
     );

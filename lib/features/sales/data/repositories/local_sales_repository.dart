@@ -34,6 +34,7 @@ class LocalSalesRepository implements SalesRepository {
     String? saleId,
     String? notes,
     String? paymentMethod,
+    double discount = 0.0,
     bool forceAllowNegative = false,
   }) async {
     if (items.isEmpty) {
@@ -154,10 +155,10 @@ class LocalSalesRepository implements SalesRepository {
                 soldAt: Value(now),
                 saleDate: Value(now),
                 subtotal: subtotal,
-                discount: const Value(0.0),
-                totalAmount: subtotal,
+                discount: Value(discount),
+                totalAmount: (subtotal - discount).clamp(0.0, double.infinity),
                 totalCost: Value(totalCost),
-                totalProfit: totalProfit,
+                totalProfit: totalProfit - discount,
                 paymentMethod: Value(paymentMethod),
                 notes: Value(notes?.trim()),
                 createdAt: Value(now),

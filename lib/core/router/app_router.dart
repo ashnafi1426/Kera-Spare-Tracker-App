@@ -31,9 +31,9 @@ import '../../features/parts/presentation/screens/inventory_screen.dart';
 import '../../features/parts/presentation/screens/part_details_screen.dart';
 import '../../features/parts/presentation/screens/part_form_screen.dart';
 import '../../features/reports/presentation/screens/reports_screen.dart';
-import '../../features/sales/presentation/screens/new_sale_screen.dart';
 import '../../features/sales/presentation/screens/sale_details_screen.dart';
 import '../../features/sales/presentation/screens/sale_success_screen.dart';
+import '../../features/sales/presentation/screens/sales_pos_screen.dart';
 import '../../features/settings/presentation/screens/brands_management_screen.dart';
 import '../../features/settings/presentation/screens/business_profile_screen.dart';
 import '../../features/settings/presentation/screens/categories_management_screen.dart';
@@ -197,8 +197,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // =======================================================================
-      // OWNER SHELL: 4 Stateful Branches (Home, Inventory, Reports, More)
-      // Note: Sell is NOT a branch; it pushes /sales/new to _rootNavigatorKey.
+      // OWNER SHELL: 5 Stateful Branches (Home, Inventory, Reports, More, Sell)
+      // Matches modern POS architecture: Sell is a primary branch with BottomNav
       // =======================================================================
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -212,7 +212,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   initialLocation: index == navigationShell.currentIndex,
                 );
               },
-              onSellPressed: () => context.push('/sales/new'),
+              onSellPressed: () {
+                navigationShell.goBranch(
+                  4,
+                  initialLocation: 4 == navigationShell.currentIndex,
+                );
+              },
             ),
           );
         },
@@ -223,7 +228,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 name: 'home',
-                builder: (context, state) => const BusinessDashboardScreen(),
+                builder: (context, state) => BusinessDashboardScreen(
+                  onSwitchToInventory: () => StatefulNavigationShell.of(context).goBranch(1),
+                  onSwitchToReports: () => StatefulNavigationShell.of(context).goBranch(2),
+                  onSwitchToSales: () => StatefulNavigationShell.of(context).goBranch(4),
+                ),
               ),
             ],
           ),
@@ -257,15 +266,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Branch 4: Sell / POS (Sales)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/sales',
+                name: 'sales',
+                builder: (context, state) => SalesPosScreen(
+                  onSwitchToInventory: () => StatefulNavigationShell.of(context).goBranch(1),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    name: 'sales-new',
+                    builder: (context, state) => SalesPosScreen(
+                      onSwitchToInventory: () => StatefulNavigationShell.of(context).goBranch(1),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
-      ),
-
-      // Root Checkout route above the shell with full screen and back/close prompt
-      GoRoute(
-        parentNavigatorKey: _rootNavigatorKey,
-        path: '/sales/new',
-        name: 'sales-new',
-        builder: (context, state) => const NewSaleScreen(),
       ),
 
       // Owner secondary routes (pushed above shell)
