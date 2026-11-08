@@ -5,7 +5,7 @@ import { requireActive } from '../middleware/status.middleware.js';
 import { requireRole } from '../middleware/rbac.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import { createPartSchema, updatePartSchema } from '../validators/parts.validator.js';
-import { uploadPartPhoto } from '../middleware/upload.middleware.js';
+import { uploadPartPhoto, flexibleInventoryUpload } from '../middleware/upload.middleware.js';
 
 const router = Router();
 
@@ -22,7 +22,7 @@ router.put('/:id', validate(updatePartSchema), partsController.updatePart);
 router.delete('/:id', partsController.deletePart);
 
 // Photo upload and delete endpoints
-router.post('/:id/photo', uploadPartPhoto.single('photo'), partsController.uploadPhoto);
+router.post('/:id/photo', flexibleInventoryUpload, partsController.uploadPhoto);
 router.delete('/:id/photo', partsController.deletePhoto);
 
 export default router;

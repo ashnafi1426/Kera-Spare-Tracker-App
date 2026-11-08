@@ -21,7 +21,7 @@ const imageAuth = [authenticate, requireActive, requireRole('OWNER')];
 router.post(
   '/profile/image',
   ...imageAuth,
-  uploadSingleProfilePhoto.single('image'),
+  flexibleProfilePhotoUpload,
   imagesController.uploadProfileImage
 );
 
@@ -29,7 +29,7 @@ router.post(
 router.post(
   '/profile/photo',
   ...imageAuth,
-  uploadSingleProfilePhoto.single('photo'),
+  flexibleProfilePhotoUpload,
   imagesController.uploadProfileImage
 );
 
@@ -42,7 +42,7 @@ router.delete('/profile/photo', ...imageAuth, imagesController.deleteProfileImag
 router.post(
   '/spare-parts/:id/images',
   ...imageAuth,
-  uploadInventoryImages.array('images', 10),
+  flexibleInventoryUpload,
   imagesController.uploadInventoryImages
 );
 
@@ -64,7 +64,7 @@ router.patch(
 router.post(
   '/parts/:id/images',
   ...imageAuth,
-  uploadInventoryImages.array('images', 10),
+  flexibleInventoryUpload,
   imagesController.uploadInventoryImages
 );
 

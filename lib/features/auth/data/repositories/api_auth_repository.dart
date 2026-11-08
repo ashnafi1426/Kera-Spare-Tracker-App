@@ -1032,8 +1032,8 @@ class ApiAuthRepository implements AuthRepository {
             '/auth/profile/photo',
             data: formData,
             options: Options(
-              sendTimeout: const Duration(seconds: 5),
-              receiveTimeout: const Duration(seconds: 5),
+              sendTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
             ),
           );
 
@@ -1094,8 +1094,8 @@ class ApiAuthRepository implements AuthRepository {
           await dio.delete(
             '/auth/profile/photo',
             options: Options(
-              sendTimeout: const Duration(seconds: 5),
-              receiveTimeout: const Duration(seconds: 5),
+              sendTimeout: const Duration(seconds: 15),
+              receiveTimeout: const Duration(seconds: 15),
             ),
           );
         } catch (_) {}
