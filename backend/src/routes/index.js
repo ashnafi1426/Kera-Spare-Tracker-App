@@ -10,10 +10,12 @@ import adminRoutes from './admin.routes.js';
 import configRoutes from './config.routes.js';
 import syncRoutes from './sync.routes.js';
 import reportsRoutes from './reports.routes.js';
+import imagesRoutes from './images.routes.js';
 
 const router = Router();
 
 router.use('/', configRoutes);
+router.use('/', imagesRoutes);
 router.use('/sync', syncRoutes);
 router.use('/auth', authRoutes);
 router.use('/parts', partsRoutes);

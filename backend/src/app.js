@@ -96,8 +96,9 @@ app.use('/api/v1/uploads', express.static(resolvedUploadDir));
 app.use('/', healthRoutes);
 app.use('/api/v1', healthRoutes);
 
-// 8. Main API Router
+// 8. Main API Router (Mounted at /api/v1 and /api for backward & standard REST compatibility)
 app.use('/api/v1', apiRoutes);
+app.use('/api', apiRoutes);
 
 // 9. Catch-all 404 for undefined routes
 app.use((req, res, next) => {

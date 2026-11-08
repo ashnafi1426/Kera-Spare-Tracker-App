@@ -85,6 +85,7 @@ model User {
   stockMovements     StockMovement[]
   sales              Sale[]
   saleItems          SaleItem[]
+  inventoryImages    InventoryImage[]
   subscriptions      Subscription[]
   refreshTokens      RefreshToken[]
   auditLogsCreated   AuditLog[]   @relation("AdminAuditLogs")
@@ -214,11 +215,40 @@ model SparePart {
   location       Location?       @relation(fields: [locationId], references: [id], onDelete: SetNull)
   stockMovements StockMovement[]
   saleItems      SaleItem[]
+  images         InventoryImage[]
 
   @@index([ownerId, updatedAt])
   @@index([ownerId, name])
   @@index([ownerId, partNumber])
   @@map("spare_parts")
+}
+
+model InventoryImage {
+  id                   String     @id @db.Char(36)
+  ownerId              String     @db.Char(36)
+  partId               String     @db.Char(36)
+  imageUrl             String     @db.VarChar(500)
+  thumbnailUrl         String?    @db.VarChar(500)
+  storagePath          String     @db.VarChar(500)
+  thumbnailStoragePath String?    @db.VarChar(500)
+  originalFilename     String?    @db.VarChar(255)
+  mimeType             String     @db.VarChar(50)
+  fileSize             Int
+  width                Int?
+  height               Int?
+  isPrimary            Boolean    @default(false)
+  createdAt            DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt            DateTime   @updatedAt @db.Timestamp(6)
+  deletedAt            DateTime?  @db.Timestamp(6)
+
+  // Relations
+  owner                User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  part                 SparePart  @relation(fields: [partId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, partId])
+  @@index([ownerId, updatedAt])
+  @@index([partId, isPrimary])
+  @@map("inventory_images")
 }
 
 model StockMovement {
