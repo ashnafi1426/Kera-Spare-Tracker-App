@@ -6,6 +6,8 @@ import { requireRole } from '../middleware/rbac.middleware.js';
 import {
   uploadSingleProfilePhoto,
   uploadInventoryImages,
+  flexibleProfilePhotoUpload,
+  flexibleInventoryUpload,
 } from '../middleware/upload.middleware.js';
 
 const router = Router();

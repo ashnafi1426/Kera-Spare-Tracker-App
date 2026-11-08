@@ -1,10 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../config/env.js';
 import { logger } from '../config/logger.js';
 import { BadRequestError } from '../utils/errors.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const BACKEND_ROOT = path.resolve(__dirname, '../../');
 
 // Allowed MIME types and corresponding magic numbers
 const MAGIC_NUMBERS = {
@@ -65,7 +70,9 @@ export function validateImageMagicBytes(buffer) {
  */
 class LocalStorageService {
   constructor() {
-    this.baseDir = path.resolve(config.uploadDir);
+    this.baseDir = path.isAbsolute(config.uploadDir)
+      ? config.uploadDir
+      : path.resolve(BACKEND_ROOT, config.uploadDir);
     this._ensureBaseDirectories();
   }
 

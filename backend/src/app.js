@@ -10,6 +10,7 @@ import healthRoutes from './routes/health.routes.js';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import { NotFoundError } from './utils/errors.js';
+import { storageService } from './services/storage.service.js';
 
 const app = express();
 
@@ -88,7 +89,7 @@ app.use((req, res, next) => {
 setupSwagger(app);
 
 // Static uploads serving (both at root and /api/v1 for reverse proxies and mobile apps)
-const resolvedUploadDir = path.resolve(config.uploadDir);
+const resolvedUploadDir = storageService.baseDir;
 app.use('/uploads', express.static(resolvedUploadDir));
 app.use('/api/v1/uploads', express.static(resolvedUploadDir));
 

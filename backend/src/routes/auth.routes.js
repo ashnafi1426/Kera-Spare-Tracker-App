@@ -10,7 +10,7 @@ import {
 } from '../validators/auth.validator.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { requireActive } from '../middleware/status.middleware.js';
-import { uploadProfilePhoto } from '../middleware/upload.middleware.js';
+import { uploadProfilePhoto, flexibleProfilePhotoUpload } from '../middleware/upload.middleware.js';
 
 const router = Router();
 
@@ -66,7 +66,7 @@ router.post(
   '/profile/photo',
   authenticate,
   requireActive,
-  uploadProfilePhoto.single('photo'),
+  flexibleProfilePhotoUpload,
   authController.uploadProfilePhoto
 );
 router.delete(
