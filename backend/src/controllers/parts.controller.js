@@ -2,6 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import prisma from '../config/db.js';
 import * as partsService from '../services/parts.service.js';
+import { imagesService } from '../services/images.service.js';
+import { storageService } from '../services/storage.service.js';
 import { NotFoundError, BadRequestError } from '../utils/errors.js';
 import { config } from '../config/env.js';
 
@@ -82,12 +84,21 @@ export async function uploadPhoto(req, res, next) {
       throw new BadRequestError('No image file uploaded');
     }
 
-    const part = await partsService.updatePartPhoto(req.user.id, req.params.id, req.file.filename);
+    const savedImages = await imagesService.uploadInventoryImages({
+      ownerId: req.user.id,
+      partId: req.params.id,
+      files: [req.file],
+    });
+
+    const primary = savedImages.find((img) => img.isPrimary) || savedImages[0];
+
     res.status(200).json({
       success: true,
       message: 'Part photo uploaded successfully',
       data: {
-        photoUrl: part.photoUrl || `/uploads/parts/${req.user.id}/${req.file.filename}`,
+        photoUrl: primary.imageUrl,
+        thumbnailUrl: primary.thumbnailUrl,
+        image: primary,
       },
     });
   } catch (err) {
@@ -97,7 +108,22 @@ export async function uploadPhoto(req, res, next) {
 
 export async function deletePhoto(req, res, next) {
   try {
-    await partsService.deletePartPhoto(req.user.id, req.params.id);
+    const part = await prisma.sparePart.findFirst({
+      where: { id: req.params.id, ownerId: req.user.id, deletedAt: null },
+    });
+    if (!part) {
+      throw new NotFoundError('Spare part not found');
+    }
+
+    if (part.photoUrl) {
+      await storageService.deleteFile(part.photoUrl);
+    }
+
+    await prisma.sparePart.update({
+      where: { id: req.params.id },
+      data: { photoUrl: null },
+    });
+
     res.status(200).json({
       success: true,
       message: 'Part photo removed successfully',

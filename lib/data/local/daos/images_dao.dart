@@ -125,8 +125,8 @@ class ImagesDao extends DatabaseAccessor<AppDatabase> with _$ImagesDaoMixin {
     required String remoteImageId,
     required String remoteImageUrl,
     String? thumbnailUrl,
-  }) {
-    return (update(inventoryImages)..where((tbl) => tbl.id.equals(imageId))).write(
+  }) async {
+    await (update(inventoryImages)..where((tbl) => tbl.id.equals(imageId))).write(
       InventoryImagesCompanion(
         uploadStatus: const Value('uploaded'),
         remoteImageId: Value(remoteImageId),
@@ -136,6 +136,17 @@ class ImagesDao extends DatabaseAccessor<AppDatabase> with _$ImagesDaoMixin {
         errorMessage: const Value(null),
       ),
     );
+
+    // If primary, mirror to spare_parts.photoUrl
+    final img = await (select(inventoryImages)..where((t) => t.id.equals(imageId))).getSingleOrNull();
+    if (img != null && img.isPrimary) {
+      await (update(spareParts)..where((p) => p.id.equals(img.partId))).write(
+        SparePartsCompanion(
+          photoUrl: Value(remoteImageUrl),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
   }
 
   /// Marks upload as failed with error message and incremented retry count.

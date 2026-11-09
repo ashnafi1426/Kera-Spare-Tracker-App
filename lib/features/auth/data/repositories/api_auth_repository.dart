@@ -1048,7 +1048,10 @@ class ApiAuthRepository implements AuthRepository {
         }
       }
 
-      final updatedUser = user.copyWith(avatarUrl: remotePhotoUrl);
+      final updatedUser = user.copyWith(
+        avatarUrl: remotePhotoUrl,
+        photoLocalPath: localFilePath,
+      );
       await _sessionStore.updateUserProfile(updatedUser.toJson());
       try {
         await db.into(db.profiles).insertOnConflictUpdate(

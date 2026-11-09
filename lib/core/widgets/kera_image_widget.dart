@@ -7,6 +7,7 @@ import '../design/tokens/kera_colors.dart';
 String? resolveImageUrl(String? pathOrUrl, {bool cacheBust = false}) {
   if (pathOrUrl == null || pathOrUrl.trim().isEmpty) return null;
   var clean = pathOrUrl.trim().replaceAll(r'\', '/');
+  if (clean.contains('undefined')) return null;
 
   // 1. If already an asset
   if (clean.startsWith('assets/')) {

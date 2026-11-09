@@ -1,4 +1,5 @@
 import * as authService from '../services/auth.service.js';
+import { imagesService } from '../services/images.service.js';
 import { ForbiddenError } from '../utils/errors.js';
 
 function extractClientIp(req) {
@@ -136,15 +137,19 @@ export async function uploadProfilePhoto(req, res, next) {
       });
     }
 
-    const photoUrl = `/uploads/profiles/${req.user.id}/${req.file.filename}`;
-    const user = await authService.updateUserProfilePhoto(req.user.id, photoUrl);
+    const result = await imagesService.updateProfilePhoto({
+      userId: req.user.id,
+      fileBuffer: req.file.buffer,
+      originalFilename: req.file.originalname,
+    });
 
     res.status(200).json({
       success: true,
       message: 'Profile photo updated successfully',
       data: {
-        photoUrl,
-        user,
+        photoUrl: result.photoUrl,
+        thumbnailUrl: result.thumbnailUrl,
+        user: result.user,
       },
     });
   } catch (err) {
@@ -154,13 +159,14 @@ export async function uploadProfilePhoto(req, res, next) {
 
 export async function deleteProfilePhoto(req, res, next) {
   try {
-    const user = await authService.removeUserProfilePhoto(req.user.id);
+    const result = await imagesService.deleteProfilePhoto({
+      userId: req.user.id,
+    });
+
     res.status(200).json({
       success: true,
       message: 'Profile photo removed successfully',
-      data: {
-        user,
-      },
+      data: result,
     });
   } catch (err) {
     next(err);

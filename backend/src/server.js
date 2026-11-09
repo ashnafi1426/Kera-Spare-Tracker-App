@@ -11,7 +11,27 @@ const server = app.listen(PORT, () => {
   logger.info(` Swagger Documentation: http://localhost:${PORT}/api-docs`);
   logger.info(` Health Check: http://localhost:${PORT}/health`);
   startTokenCleanupScheduler();
+  sanitizeBrokenPhotoUrls();
 });
+
+// Sanitize any broken /undefined photo URLs from previous attempts
+async function sanitizeBrokenPhotoUrls() {
+  try {
+    const userResult = await prisma.user.updateMany({
+      where: { photoUrl: { contains: 'undefined' } },
+      data: { photoUrl: null },
+    });
+    const partResult = await prisma.sparePart.updateMany({
+      where: { photoUrl: { contains: 'undefined' } },
+      data: { photoUrl: null },
+    });
+    if (userResult.count > 0 || partResult.count > 0) {
+      logger.info(`Cleaned up ${userResult.count} broken user photoUrls and ${partResult.count} broken part photoUrls in database.`);
+    }
+  } catch (err) {
+    logger.warn('Non-blocking photo URL sanitization skipped:', err?.message || err);
+  }
+}
 
 // Graceful shutdown
 async function gracefulShutdown(signal) {
