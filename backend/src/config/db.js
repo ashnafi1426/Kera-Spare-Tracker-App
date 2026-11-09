@@ -14,4 +14,5 @@ prisma.$on('error', (e) => {
   logger.error(`Prisma error: ${e.message}`, { target: e.target });
 });
 
+export { prisma };
 export default prisma;

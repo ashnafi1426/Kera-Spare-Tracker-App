@@ -1,4 +1,4 @@
-import { prisma } from '../config/db.js';
+import prisma from '../config/db.js';
 import { storageService } from './storage.service.js';
 import { BadRequestError, NotFoundError, ForbiddenError } from '../utils/errors.js';
 import { logger } from '../config/logger.js';
