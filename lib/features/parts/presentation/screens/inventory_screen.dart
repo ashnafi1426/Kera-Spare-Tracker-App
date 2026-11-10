@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/design/tokens/kera_colors.dart';
 import '../../../../core/design/tokens/kera_radii.dart';
@@ -227,18 +228,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'inventory_screen_fab',
-        onPressed: () => context.push('/parts/add'),
-        backgroundColor: const Color(0xFFF7941D),
-        foregroundColor: Colors.white,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded, size: 22),
-        label: Text(
-          context.tr('ዕቃ ጨምር', 'Add Part'),
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
-        ),
-      ),
       body: SafeArea(
         top: false,
         child: Column(
@@ -301,12 +290,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         child: _buildFilterAndSortRow(filter),
                       ),
 
-                      // Section F: Products List or Empty States
+                      // Section F: List Header (Item Count & Inline Add Part CTA matching Figma)
+                      SliverToBoxAdapter(
+                        child: _buildListHeaderRow(context, state.totalCount ?? allCount),
+                      ),
+
+                      // Section G: Products List or Empty States
                       _buildProductsListSliver(state, filter, l10n),
 
-                      // Bottom spacing so FAB and navigation bar don't obscure content
+                      // Bottom spacing
                       const SliverToBoxAdapter(
-                        child: SizedBox(height: 90),
+                        child: SizedBox(height: 32),
                       ),
                     ],
                   ),
@@ -319,12 +313,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  // 1. PINNED DARK NAVY MASTHEAD
+  // 1. PINNED DARK NAVY MASTHEAD (MATCHING APPROVED FIGMA DESIGN)
   Widget _buildPinnedMasthead(BuildContext context, dynamic authUser) {
     final isDark = context.isDark;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF071322) : const Color(0xFF0C2340),
+        color: isDark ? const Color(0xFF0B1528) : const Color(0xFF173655),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -366,7 +360,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => const Icon(
                 Icons.settings_suggest_rounded,
-                color: Color(0xFF0C2340),
+                color: Color(0xFF173655),
                 size: 24,
               ),
             ),
@@ -390,26 +384,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Text(
-                      'Track • Manage • Grow',
-                      style: TextStyle(
-                        color: Color(0xFFA5B4CB),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Container(
-                      width: 14,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7941D),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Track · Manage · Grow',
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFFA5B4CB),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -457,12 +440,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 1.5),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.35),
+                  width: 1.5,
+                ),
               ),
               child: KeraAvatarWidget(
                 photoUrl: authUser?.photoUrl,
-                name: authUser?.businessName ?? 'Admin',
+                name: authUser?.businessName ?? 'HK',
                 radius: 17,
+                isDark: true,
+                backgroundColor: const Color(0xFF1E3A5F),
+                textColor: Colors.white,
               ),
             ),
           ),
@@ -490,16 +479,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
-                    color: isDark ? Colors.white : const Color(0xFF0C2340),
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  context.tr('የመለዋወጫ ዕቃዎችዎን ያስተዳድሩ', 'Manage your spare parts inventory'),
+                  context.tr('የመለዋወጫ ዕቃዎችዎን ያስተዳድሩ።', 'Manage your spare parts inventory.'),
                   style: TextStyle(
                     fontSize: 12.5,
                     color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -507,20 +498,24 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           const SizedBox(width: 8),
           // Pending pill + Export button
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6),
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.access_time_rounded,
-                      size: 14,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF0C2340),
+                      size: 13,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF173655),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -528,7 +523,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF0C2340),
+                        color: isDark ? Colors.white : const Color(0xFF173655),
                       ),
                     ),
                   ],
@@ -541,11 +536,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0C2340),
+                    color: const Color(0xFF173655),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: const [
                       BoxShadow(
-                        color: Color(0x1F0C2340),
+                        color: Color(0x1F173655),
                         blurRadius: 4,
                         offset: Offset(0, 2),
                       ),
@@ -554,7 +549,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.download_rounded, color: Colors.white, size: 15),
+                      Icon(Icons.file_download_outlined, color: Colors.white, size: 15),
                       SizedBox(width: 4),
                       Text(
                         'Export',
@@ -575,7 +570,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  // 3. 4 KPI SUMMARY CARDS (2x2 Grid)
+  // 3. 4 KPI SUMMARY CARDS (2x2 Grid matching Figma specification)
   Widget _buildKpiGrid(
     BuildContext context, {
     required int allCount,
@@ -596,6 +591,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   count: allCount,
                   icon: Icons.inventory_2_rounded,
                   accentColor: const Color(0xFF2563EB),
+                  iconBgLight: const Color(0xFFEFF6FF),
                   bgLight: const Color(0xFFEFF6FF),
                   borderLight: const Color(0xFFDBEAFE),
                   bgDark: const Color(0xFF0F1E36),
@@ -611,6 +607,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   count: inStockCount,
                   icon: Icons.check_circle_rounded,
                   accentColor: const Color(0xFF16A34A),
+                  iconBgLight: const Color(0xFFECFDF5),
                   bgLight: const Color(0xFFF0FDF4),
                   borderLight: const Color(0xFFDCFCE7),
                   bgDark: const Color(0xFF06231A),
@@ -628,8 +625,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 child: _buildKpiCard(
                   title: context.tr('ሊያልቅ ነው', 'Low Stock'),
                   count: lowStockCount,
-                  icon: Icons.warning_rounded,
-                  accentColor: const Color(0xFFF59E0B),
+                  icon: Icons.warning_amber_rounded,
+                  accentColor: const Color(0xFFD97706),
+                  iconBgLight: const Color(0xFFFEF3C7),
                   bgLight: const Color(0xFFFFFBEB),
                   borderLight: const Color(0xFFFEF3C7),
                   bgDark: const Color(0xFF261908),
@@ -645,6 +643,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   count: outOfStockCount,
                   icon: Icons.cancel_rounded,
                   accentColor: const Color(0xFFDC2626),
+                  iconBgLight: const Color(0xFFFEE2E2),
                   bgLight: const Color(0xFFFEF2F2),
                   borderLight: const Color(0xFFFEE2E2),
                   bgDark: const Color(0xFF260D0D),
@@ -665,6 +664,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required int count,
     required IconData icon,
     required Color accentColor,
+    required Color iconBgLight,
     required Color bgLight,
     required Color borderLight,
     required Color bgDark,
@@ -677,7 +677,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? bgDark : bgLight,
           borderRadius: BorderRadius.circular(16),
@@ -686,34 +686,31 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             width: isSelected ? 1.8 : 1.0,
           ),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: accentColor.withValues(alpha: 0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isDark ? accentColor.withValues(alpha: 0.2) : iconBgLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: accentColor, size: 20),
               ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
+              const SizedBox(width: 10),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
                     style: TextStyle(
                       fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                     maxLines: 1,
@@ -730,30 +727,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 ],
               ),
-            ),
-            _buildMiniBarChart(accentColor),
-          ],
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMiniBarChart(Color color) {
-    final heights = [8.0, 13.0, 18.0, 24.0];
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: heights.map((h) {
-        return Container(
-          margin: const EdgeInsets.only(left: 2.5),
-          width: 3.5,
-          height: h,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        );
-      }).toList(),
     );
   }
 
