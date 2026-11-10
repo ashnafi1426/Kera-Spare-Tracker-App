@@ -495,75 +495,85 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           // Pending pill + Export button
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.access_time_rounded,
-                      size: 13,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF173655),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Pending ($pendingSync)',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF173655),
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: _handleExport,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF173655),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x1F173655),
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.file_download_outlined, color: Colors.white, size: 15),
-                      SizedBox(width: 4),
-                      Text(
-                        'Export',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 13,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF173655),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          'Pending ($pendingSync)',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : const Color(0xFF173655),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _handleExport,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF173655),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x1F173655),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.download_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Export',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -696,10 +706,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: isDark ? accentColor.withValues(alpha: 0.2) : iconBgLight,
+                  color: isDark ? accentColor.withValues(alpha: 0.35) : accentColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: accentColor, size: 20),
+                child: Icon(icon, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 10),
               Column(
@@ -782,9 +792,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     onPressed: _onClearSearch,
                   ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.qr_code_scanner_rounded,
-                    color: Color(0xFF0C2340),
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF173655),
                     size: 22,
                   ),
                   tooltip: 'Scan barcode or QR code',
@@ -809,10 +819,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     required int outOfStockCount,
   }) {
     final pills = [
-      (label: context.tr('ሁሉም ($allCount)', 'All ($allCount)'), filter: StockFilter.all, hasIcon: true),
-      (label: context.tr('ክምችት ያለው ($inStockCount)', 'In Stock ($inStockCount)'), filter: StockFilter.inStock, hasIcon: false),
-      (label: context.tr('ሊያልቅ ነው ($lowStockCount)', 'Low Stock ($lowStockCount)'), filter: StockFilter.lowStock, hasIcon: false),
-      (label: context.tr('ያለቀ ($outOfStockCount)', 'Out of Stock ($outOfStockCount)'), filter: StockFilter.outOfStock, hasIcon: false),
+      (label: context.tr('ሁሉም ($allCount)', 'All ($allCount)'), filter: StockFilter.all),
+      (label: context.tr('ክምችት ያለው ($inStockCount)', 'In Stock ($inStockCount)'), filter: StockFilter.inStock),
+      (label: context.tr('ሊያልቅ ነው ($lowStockCount)', 'Low Stock ($lowStockCount)'), filter: StockFilter.lowStock),
+      (label: context.tr('ያለቀ ($outOfStockCount)', 'Out of Stock ($outOfStockCount)'), filter: StockFilter.outOfStock),
     ];
 
     final isDark = context.isDark;
@@ -827,47 +837,38 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               padding: const EdgeInsets.only(right: 8),
               child: InkWell(
                 onTap: () => ref.read(inventoryFilterProvider.notifier).setStockFilter(p.filter),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(14),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFFF7941D)
+                        ? const Color(0xFFC25E00)
                         : (isDark ? const Color(0xFF1E293B) : Colors.white),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFF7941D)
+                          ? const Color(0xFFC25E00)
                           : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                     ),
                     boxShadow: isSelected
-                        ? [
+                        ? const [
                             BoxShadow(
-                              color: const Color(0xFFF7941D).withValues(alpha: 0.35),
+                              color: Color(0x33C25E00),
                               blurRadius: 6,
-                              offset: const Offset(0, 2),
+                              offset: Offset(0, 2),
                             ),
                           ]
                         : null,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (p.hasIcon && isSelected) ...[
-                        const Icon(Icons.grid_view_rounded, size: 15, color: Colors.white),
-                        const SizedBox(width: 5),
-                      ],
-                      Text(
-                        p.label,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                          color: isSelected
-                              ? Colors.white
-                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    p.label,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                    ),
                   ),
                 ),
               ),
@@ -904,7 +905,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: filter.filterCount > 0
-                      ? const Color(0xFFF7941D)
+                      ? const Color(0xFFC25E00)
                       : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                 ),
               ),
@@ -927,44 +928,106 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
             ),
           ),
+          const SizedBox(width: 8),
           // Sort button
-          PopupMenuButton<PartsSortBy>(
-            onSelected: (sort) {
-              ref.read(inventoryFilterProvider.notifier).setSort(
-                    sort,
-                    ascending: sort == PartsSortBy.name ? true : false,
-                  );
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: PartsSortBy.newest, child: Text('Recently Added')),
-              PopupMenuItem(value: PartsSortBy.name, child: Text('Name (A-Z)')),
-              PopupMenuItem(value: PartsSortBy.quantity, child: Text('Quantity')),
-              PopupMenuItem(value: PartsSortBy.price, child: Text('Price')),
-            ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          Flexible(
+            child: PopupMenuButton<PartsSortBy>(
+              onSelected: (sort) {
+                ref.read(inventoryFilterProvider.notifier).setSort(
+                      sort,
+                      ascending: sort == PartsSortBy.name ? true : false,
+                    );
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: PartsSortBy.newest, child: Text('Recently Added')),
+                PopupMenuItem(value: PartsSortBy.name, child: Text('Name (A-Z)')),
+                PopupMenuItem(value: PartsSortBy.quantity, child: Text('Quantity')),
+                PopupMenuItem(value: PartsSortBy.price, child: Text('Price')),
+              ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.swap_vert_rounded, size: 16, color: Color(0xFF64748B)),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        'Sort by: $sortLabel',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF64748B)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 6.5. LIST HEADER ROW (Item count & Add Part CTA matching approved Figma design)
+  Widget _buildListHeaderRow(BuildContext context, int totalCount) {
+    final isDark = context.isDark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '$totalCount ${context.tr("ዕቃዎች", "parts")}',
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            ),
+          ),
+          InkWell(
+            onTap: () => context.push('/parts/add'),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7.5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFC25E00),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x33C25E00),
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.swap_vert_rounded, size: 16, color: Color(0xFF64748B)),
+                  const Icon(Icons.add_rounded, size: 16, color: Colors.white),
                   const SizedBox(width: 4),
                   Text(
-                    'Sort by: $sortLabel',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    context.tr('ዕቃ አክል', 'Add Part'),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF64748B)),
                 ],
               ),
             ),
@@ -980,10 +1043,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final isLowStock = !isOutOfStock && (part.isLowStock || part.cachedQuantity <= 5);
     final isDark = context.isDark;
 
-    final oemText = (part.partNumber != null && part.partNumber!.isNotEmpty)
-        ? part.partNumber!
-        : (part.brandName != null ? part.brandName! : 'OEM');
-    final locationText = part.customLocation ?? 'Shelf 1';
+    final categoryText = (part.categoryName != null && part.categoryName!.trim().isNotEmpty)
+        ? part.categoryName!.trim()
+        : (part.brandName != null && part.brandName!.trim().isNotEmpty ? part.brandName!.trim() : 'Parts');
+    final locationText = (part.customLocation != null && part.customLocation!.trim().isNotEmpty)
+        ? part.customLocation!.trim()
+        : (part.locationName != null && part.locationName!.trim().isNotEmpty ? part.locationName!.trim() : 'Shelf 1');
+    final metaLine1 = '$categoryText · $locationText';
+
+    final oemNumber = (part.partNumber != null && part.partNumber!.trim().isNotEmpty)
+        ? part.partNumber!.trim()
+        : (part.brandName != null ? part.brandName!.trim() : '-');
+    final metaLine2 = 'OEM $oemNumber';
+
+    final priceStr = '${NumberFormat("#,###", "en_US").format(part.sellingPrice ?? 0)} ETB';
+    final qtyStr = '${part.cachedQuantity.toInt()} ${context.tr("ፍሬ", "pcs")}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
@@ -1006,131 +1080,72 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product Photo Thumbnail (64x64)
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                  ),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: KeraPartImage(
-                  localPath: part.photoLocalPath,
-                  remoteUrl: part.photoUrl,
-                  width: 64,
-                  height: 64,
-                  borderRadius: 12,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Middle Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      part.displayName,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF0C2340),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$oemText • $locationText',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    // Stock badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: isOutOfStock
-                            ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
-                            : isLowStock
-                                ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
-                                : (isDark ? const Color(0xFF052E16) : const Color(0xFFDCFCE7)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isOutOfStock
-                                ? Icons.error_outline_rounded
-                                : isLowStock
-                                    ? Icons.warning_amber_rounded
-                                    : Icons.check_circle_outline_rounded,
-                            size: 13,
-                            color: isOutOfStock
-                                ? const Color(0xFFDC2626)
-                                : isLowStock
-                                    ? const Color(0xFFD97706)
-                                    : const Color(0xFF16A34A),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isOutOfStock
-                                ? context.tr('ያለቀ', 'Out of Stock')
-                                : isLowStock
-                                    ? context.tr('ሊያልቅ ነው', 'Low Stock')
-                                    : context.tr('ክምችት ያለው', 'In Stock'),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: isOutOfStock
-                                  ? const Color(0xFFDC2626)
-                                  : isLowStock
-                                      ? const Color(0xFFD97706)
-                                      : const Color(0xFF16A34A),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Right side: Price & quantity + more menu
+              // Top Row: Thumbnail + Middle Info + Kebab Menu
               Row(
-                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${(part.sellingPrice ?? 0).toStringAsFixed(0)} ETB',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : const Color(0xFF0C2340),
-                        ),
+                  // Product Photo Thumbnail (60x60, radius 10)
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${part.cachedQuantity.toStringAsFixed(0)} ${context.tr("ፍሬ", "pcs")}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: KeraPartImage(
+                      localPath: part.photoLocalPath,
+                      remoteUrl: part.photoUrl,
+                      width: 60,
+                      height: 60,
+                      borderRadius: 10,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Middle Info Column
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          part.displayName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 3),
+                        Text(
+                          metaLine1,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          metaLine2,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(width: 4),
                   PopupMenuButton<String>(
@@ -1143,6 +1158,91 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       PopupMenuItem(value: 'edit', child: Text('Edit')),
                       PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
                     ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Bottom Row: Stock Badge on Left, Quantity & Price on Right
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Stock badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: isOutOfStock
+                          ? (isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2))
+                          : isLowStock
+                              ? (isDark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7))
+                              : (isDark ? const Color(0xFF052E16) : const Color(0xFFDCFCE7)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isOutOfStock
+                              ? Icons.cancel_outlined
+                              : isLowStock
+                                  ? Icons.warning_amber_rounded
+                                  : Icons.check_circle_outline_rounded,
+                          size: 13,
+                          color: isOutOfStock
+                              ? const Color(0xFFDC2626)
+                              : isLowStock
+                                  ? const Color(0xFFD97706)
+                                  : const Color(0xFF16A34A),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isOutOfStock
+                              ? context.tr('ያለቀ', 'Out of stock')
+                              : isLowStock
+                                  ? context.tr('ሊያልቅ ነው', 'Low stock')
+                                  : context.tr('ክምችት ያለው', 'In stock'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isOutOfStock
+                                ? const Color(0xFFDC2626)
+                                : isLowStock
+                                    ? const Color(0xFFD97706)
+                                    : const Color(0xFF16A34A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Quantity and Price
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            qtyStr,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            priceStr,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

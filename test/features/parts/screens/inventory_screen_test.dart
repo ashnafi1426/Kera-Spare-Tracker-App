@@ -76,6 +76,11 @@ void main() {
 
   testWidgets('InventoryScreen renders search bar, stock chips, and paged parts',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final sampleParts = [
       PartItem(
         id: 'p1',
@@ -137,12 +142,12 @@ void main() {
     // Verify Parts rendered
     expect(find.text('Oil Filter CAT'), findsOneWidget);
     expect(find.textContaining('1R-0716'), findsOneWidget);
-    expect(find.textContaining('1200 ETB'), findsOneWidget);
+    expect(find.textContaining('1,200 ETB'), findsOneWidget);
     expect(find.textContaining('15 ፍሬ'), findsOneWidget);
 
     expect(find.text('Brake Pad Set'), findsOneWidget);
     expect(find.textContaining('BP-2020'), findsOneWidget);
-    expect(find.textContaining('2400 ETB'), findsOneWidget);
+    expect(find.textContaining('2,400 ETB'), findsOneWidget);
   });
 
   testWidgets('InventoryScreen debounces search input and refreshes list',
