@@ -232,8 +232,8 @@ class AppConfigService {
             Dio(
               BaseOptions(
                 baseUrl: AppConstants.apiBaseUrl,
-                connectTimeout: const Duration(seconds: 4),
-                receiveTimeout: const Duration(seconds: 4),
+                connectTimeout: const Duration(seconds: 25),
+                receiveTimeout: const Duration(seconds: 25),
               ),
             ),
         _connectivity = connectivity ?? Connectivity();

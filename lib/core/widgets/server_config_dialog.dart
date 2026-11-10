@@ -105,24 +105,32 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                       : () async {
                           setDialogState(() {
                             isTesting = true;
-                            statusMessage = null;
+                            statusMessage = 'Connecting... (Render cloud may take 20-30s if waking up)';
                             testSuccess = null;
                           });
                           try {
-                            final url = serverController.text.trim();
+                            final rawUrl = serverController.text.trim();
+                            final isCloud = rawUrl.contains('onrender.com');
+                            final timeout = Duration(seconds: isCloud ? 25 : 5);
                             final testDio = Dio(
                               BaseOptions(
-                                baseUrl: url,
-                                connectTimeout: const Duration(seconds: 3),
-                                receiveTimeout: const Duration(seconds: 3),
+                                connectTimeout: timeout,
+                                receiveTimeout: timeout,
                               ),
                             );
-                            final res = await testDio.get('/health');
+                            // Probe /api/v1/health or /health depending on format
+                            final target = rawUrl.endsWith('/api/v1')
+                                ? '$rawUrl/health'
+                                : (rawUrl.endsWith('/') ? '${rawUrl}health' : '$rawUrl/health');
+                            final res = await testDio.get(target);
                             if (res.statusCode == 200) {
+                              final db = (res.data is Map && res.data['database'] != null)
+                                  ? ' (Database: ${res.data['database']})'
+                                  : '';
                               setDialogState(() {
                                 isTesting = false;
                                 testSuccess = true;
-                                statusMessage = 'Connected! Backend is reachable.';
+                                statusMessage = 'Connected! Backend is healthy$db.';
                               });
                             } else {
                               setDialogState(() {
@@ -132,10 +140,13 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                               });
                             }
                           } catch (err) {
+                            final errMsg = (err is DioException && err.type == DioExceptionType.connectionTimeout)
+                                ? 'Connection timeout. If server was sleeping, please retry in 10s.'
+                                : 'Connection failed. Check network & address.';
                             setDialogState(() {
                               isTesting = false;
                               testSuccess = false;
-                              statusMessage = 'Connection failed. Check IP & port.';
+                              statusMessage = errMsg;
                             });
                           }
                         },

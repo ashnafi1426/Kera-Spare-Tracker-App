@@ -85,10 +85,10 @@ class ApiAuthRepository implements AuthRepository {
            Dio(
              BaseOptions(
                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
-               // Generous timeouts: hotspots and cold servers are slow.
-               connectTimeout: const Duration(seconds: 10),
-               receiveTimeout: const Duration(seconds: 20),
-               sendTimeout: const Duration(seconds: 20),
+               // Generous timeouts: cloud cold starts (Render) and mobile networks need time.
+               connectTimeout: const Duration(seconds: 35),
+               receiveTimeout: const Duration(seconds: 35),
+               sendTimeout: const Duration(seconds: 35),
                headers: {
                  'Content-Type': 'application/json',
                  'Accept': 'application/json',
@@ -524,12 +524,14 @@ class ApiAuthRepository implements AuthRepository {
       final results = await Future.wait(
         candidates.map((candidate) async {
           try {
+            final isCloud = candidate.contains('onrender.com');
+            final timeout = Duration(seconds: isCloud ? 8 : 2);
             final probeDio = Dio(
               BaseOptions(
                 baseUrl: candidate,
-                connectTimeout: const Duration(milliseconds: 1500),
-                receiveTimeout: const Duration(milliseconds: 1500),
-                sendTimeout: const Duration(milliseconds: 1500),
+                connectTimeout: timeout,
+                receiveTimeout: timeout,
+                sendTimeout: timeout,
               ),
             );
             final res = await probeDio.get('/health');
