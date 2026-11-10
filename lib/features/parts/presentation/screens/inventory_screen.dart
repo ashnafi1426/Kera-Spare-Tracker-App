@@ -292,7 +292,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
                       // Section F: List Header (Item Count & Inline Add Part CTA matching Figma)
                       SliverToBoxAdapter(
-                        child: _buildListHeaderRow(context, state.totalCount ?? allCount),
+                        child: _buildListHeaderRow(
+                          context,
+                          state.totalCount > 0 ? state.totalCount : allCount,
+                        ),
                       ),
 
                       // Section G: Products List or Empty States
