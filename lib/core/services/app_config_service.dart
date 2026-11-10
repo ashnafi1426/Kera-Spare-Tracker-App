@@ -267,11 +267,13 @@ class AppConfigService {
         final probeResults = await Future.wait(
           candidates.map((candidate) async {
             try {
+              final isCloud = candidate.contains('onrender.com');
+              final timeout = Duration(seconds: isCloud ? 8 : 2);
               final candidateDio = Dio(
                 BaseOptions(
                   baseUrl: candidate,
-                  connectTimeout: const Duration(milliseconds: 1500),
-                  receiveTimeout: const Duration(milliseconds: 1500),
+                  connectTimeout: timeout,
+                  receiveTimeout: timeout,
                 ),
               );
               final res = await candidateDio.get('/app-config');
