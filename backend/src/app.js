@@ -97,6 +97,17 @@ app.use('/api/v1/uploads', express.static(resolvedUploadDir));
 app.use('/', healthRoutes);
 app.use('/api/v1', healthRoutes);
 
+// Root landing endpoint for browser verification and uptime monitors
+app.get(['/', '/api', '/api/v1'], (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Kera Spare Tracker API is running',
+    version: '1.0.0',
+    health: '/health',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // 8. Main API Router (Mounted at /api/v1 and /api for backward & standard REST compatibility)
 app.use('/api/v1', apiRoutes);
 app.use('/api', apiRoutes);
