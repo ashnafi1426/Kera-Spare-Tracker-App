@@ -11,7 +11,6 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../auth/presentation/widgets/session_banners.dart';
 import '../../../parts/presentation/providers/inventory_providers.dart';
@@ -777,14 +776,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       titleEn: '/ Restore Database',
                       subtitle: 'የተቀመጠ የመጠባበቂያ ፋይል ይመልሱ / Restore database from saved file',
                       onTap: () => _confirmRestoreDatabase(context),
-                    ),
-                    Divider(height: 1, color: context.borderColor),
-                    _buildSettingsRow(
-                      icon: Icons.settings_ethernet_rounded,
-                      titleAm: 'የአገልጋይ ግንኙነት',
-                      titleEn: '/ Server Settings',
-                      subtitle: 'የአገልጋይ አድራሻ እና ግንኙነት ፈትሽ / API URL & connection test',
-                      onTap: () => showServerConfigDialog(context, ref),
                     ),
                   ],
                 ),

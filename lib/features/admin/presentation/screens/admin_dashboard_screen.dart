@@ -8,7 +8,6 @@ import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_header_bar.dart';
 import '../widgets/admin_metric_tile.dart';
@@ -49,9 +48,6 @@ class AdminDashboardScreen extends ConsumerWidget {
                 child: ErrorState(
                   message: err.toString().replaceAll('Exception: ', ''),
                   onRetry: () => ref.refresh(adminDashboardProvider),
-                  secondaryActionLabel: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
-                  secondaryActionIcon: Icons.settings_ethernet_rounded,
-                  onSecondaryAction: () => showServerConfigDialog(context, ref),
                 ),
               ),
               data: (stats) => RefreshIndicator(
@@ -408,28 +404,6 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
             trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
             onTap: () => context.push('/admin/sync'),
-          ),
-          Divider(height: 16, color: context.borderColor),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.settings_ethernet_rounded, color: context.textPrimaryColor),
-            ),
-            title: Text(
-              context.tr('ሰርቨር ማስተካከያ · Server Connection', 'Server & API Connection'),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: context.textPrimaryColor),
-            ),
-            subtitle: Text(
-              context.tr('የአይፒ አድራሻና ፖርት ያቀናብሩ', 'Configure backend IP and API port'),
-              style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
-            ),
-            trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
-            onTap: () => showServerConfigDialog(context, ref),
           ),
         ],
       ),

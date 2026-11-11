@@ -8,7 +8,6 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../security/presentation/widgets/app_lock_settings_card.dart';
 import '../../../settings/presentation/widgets/profile_photo_avatar.dart';
@@ -1421,26 +1420,6 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 ),
               ),
             ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Server Config Pill
-        Material(
-          color: context.cardBg,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: context.borderColor),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14),
-            leading: Icon(Icons.settings_ethernet_rounded, color: context.textPrimaryColor),
-            title: Text(
-              context.tr('ሰርቨር ማስተካከያ · Server Settings', 'Server Host & Network Config'),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: context.textPrimaryColor),
-            ),
-            trailing: Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor),
-            onTap: () => showServerConfigDialog(context, ref),
           ),
         ),
         const SizedBox(height: 16),

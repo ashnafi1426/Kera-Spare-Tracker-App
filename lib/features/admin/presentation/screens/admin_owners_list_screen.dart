@@ -10,7 +10,6 @@ import '../../../../core/design/widgets/owner_header_bar.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../domain/models/admin_models.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_header_bar.dart';
@@ -217,9 +216,6 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                     child: ErrorState(
                       message: state.errorMessage!,
                       onRetry: () => ref.read(adminOwnersProvider.notifier).loadOwners(),
-                      secondaryActionLabel: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
-                      secondaryActionIcon: Icons.settings_ethernet_rounded,
-                      onSecondaryAction: () => showServerConfigDialog(context, ref),
                     ),
                   );
                 }

@@ -12,7 +12,6 @@ import '../../../../core/design/widgets/error_state.dart';
 import '../../../../core/design/widgets/skeleton_loader.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../data/local/app_database.dart';
 import '../../../../data/local/database_provider.dart';
 import '../providers/admin_providers.dart';
@@ -237,9 +236,6 @@ class _AdminOwnerDetailsScreenState
           child: ErrorState(
             message: err.toString().replaceAll('Exception: ', ''),
             onRetry: () => ref.refresh(adminOwnerDetailsProvider(widget.ownerId)),
-            secondaryActionLabel: 'Server Settings',
-            secondaryActionIcon: Icons.settings_ethernet_rounded,
-            onSecondaryAction: () => showServerConfigDialog(context, ref),
           ),
         ),
         data: (details) {

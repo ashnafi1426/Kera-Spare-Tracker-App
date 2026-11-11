@@ -10,7 +10,6 @@ import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../auth/domain/models/auth_user.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
@@ -567,14 +566,6 @@ class _BusinessDashboardScreenState
                   onTap: () {
                     Navigator.pop(ctx);
                     context.push('/settings');
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.dns_outlined, color: Color(0xFF102B4C)),
-                  title: Text(context.tr('የአገልጋይ ግንኙነት', 'Server Configuration')),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    showServerConfigDialog(context, ref);
                   },
                 ),
                 ListTile(
