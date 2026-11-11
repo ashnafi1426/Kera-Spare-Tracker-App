@@ -10,7 +10,9 @@ import '../../../../core/services/app_lock_service.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
+import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../../data/local/database_provider.dart';
+import '../../data/repositories/api_auth_repository.dart';
 import '../controllers/auth_controller.dart';
 
 /// Pixel-perfect native mobile login screen strictly matching Stitch Design Page 03.
@@ -45,6 +47,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _errorMessage;
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _warmUpBackend();
+    });
+  }
+
+  void _warmUpBackend() {
+    try {
+      final authRepo = ref.read(authRepositoryProvider);
+      if (authRepo is ApiAuthRepository) {
+        authRepo.warmUp();
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -434,7 +453,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               tooltip: 'ድጋፍ / Support',
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 8),
+
+          // Server Settings Pill [⚙️]
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: isDark ? KeraColors.navy800 : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.4)
+                    : KeraColors.border,
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                Icons.settings_ethernet_rounded,
+                size: 20,
+                color: isDark ? Colors.white : KeraColors.navy800,
+              ),
+              tooltip: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
+              onPressed: () => showServerConfigDialog(context, ref),
+            ),
+          ),
         ],
       ),
     );
@@ -594,47 +639,102 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildErrorBanner(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = context.isDark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: KeraColors.errorLight,
-        borderRadius: BorderRadius.circular(12),
+        color: isDark
+            ? KeraColors.orange700.withValues(alpha: 0.2)
+            : KeraColors.errorLight,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: KeraColors.orange500.withValues(alpha: 0.6),
-          width: 1,
+          color: KeraColors.orange500.withValues(alpha: 0.7),
+          width: 1.2,
         ),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: KeraColors.orange700,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              _errorMessage!,
-              style: const TextStyle(
-                fontFamily: KeraTypography.fontEthiopic,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: KeraColors.orange700,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  color: KeraColors.orange700,
+                  size: 20,
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    fontFamily: KeraTypography.fontEthiopic,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.35,
+                    color: KeraColors.orange700,
+                  ),
+                ),
+              ),
+            ],
           ),
           if (_isOfflineError) ...[
-            const SizedBox(width: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                foregroundColor: KeraColors.orange700,
-              ),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: Text(l10n.retry),
-              onPressed: () => _handleLogin(),
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    foregroundColor: KeraColors.orange700,
+                    side: BorderSide(
+                      color: KeraColors.orange700.withValues(alpha: 0.6),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.settings_ethernet_rounded, size: 15),
+                  label: Text(
+                    context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: () => showServerConfigDialog(context, ref),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    backgroundColor: KeraColors.orange700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 13,
+                          height: 13,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.refresh_rounded, size: 15),
+                  label: Text(
+                    l10n.retry,
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
+                  ),
+                  onPressed: _isLoading ? null : () => _handleLogin(),
+                ),
+              ],
             ),
           ],
         ],
@@ -1097,123 +1197,133 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isDark = context.isDark;
     final l10n = context.l10n;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isDark
-            ? KeraColors.navy900.withValues(alpha: 0.5)
-            : KeraColors.flagContainerBg,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => showServerConfigDialog(context, ref),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark
-              ? KeraColors.navy600.withValues(alpha: 0.3)
-              : KeraColors.border.withValues(alpha: 0.6),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Shield Icon Badge
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: isDark ? KeraColors.navy800 : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.security_rounded,
-              size: 19,
-              color: KeraColors.navy800,
-            ),
-          ),
-          const SizedBox(width: 10),
-
-          // Security Titles
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    text: '${l10n.secureReliableTitle} ',
-                    style: TextStyle(
-                      fontFamily: KeraTypography.fontEthiopic,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : KeraColors.navy900,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: l10n.secureReliableAccess,
-                        style: const TextStyle(
-                          fontFamily: KeraTypography.fontLatin,
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  l10n.secureReliableSubtitle,
-                  style: const TextStyle(
-                    fontFamily: KeraTypography.fontLatin,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: KeraColors.textMutedColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Vertical Divider
-          Container(
-            width: 1,
-            height: 28,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
             color: isDark
-                ? KeraColors.navy600.withValues(alpha: 0.4)
-                : KeraColors.border,
-            margin: const EdgeInsets.symmetric(horizontal: 8),
+                ? KeraColors.navy900.withValues(alpha: 0.5)
+                : KeraColors.flagContainerBg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark
+                  ? KeraColors.navy600.withValues(alpha: 0.3)
+                  : KeraColors.border.withValues(alpha: 0.6),
+              width: 1,
+            ),
           ),
-
-          // Online Status
-          Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Icon(
-                    Icons.wifi_rounded,
-                    size: 18,
-                    color: isDark ? Colors.white : KeraColors.navy900,
-                  ),
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                      color: KeraColors.orange500,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
+              // Shield Icon Badge
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isDark ? KeraColors.navy800 : Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.security_rounded,
+                  size: 19,
+                  color: KeraColors.navy800,
+                ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                'Online',
-                style: TextStyle(
-                  fontFamily: KeraTypography.fontLatin,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : KeraColors.navy900,
+              const SizedBox(width: 10),
+
+              // Security Titles
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        text: '${l10n.secureReliableTitle} ',
+                        style: TextStyle(
+                          fontFamily: KeraTypography.fontEthiopic,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : KeraColors.navy900,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: l10n.secureReliableAccess,
+                            style: const TextStyle(
+                              fontFamily: KeraTypography.fontLatin,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      l10n.secureReliableSubtitle,
+                      style: const TextStyle(
+                        fontFamily: KeraTypography.fontLatin,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: KeraColors.textMutedColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Vertical Divider
+              Container(
+                width: 1,
+                height: 28,
+                color: isDark
+                    ? KeraColors.navy600.withValues(alpha: 0.4)
+                    : KeraColors.border,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+
+              // Online Status / Server Settings
+              Tooltip(
+                message: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Icon(
+                          Icons.wifi_rounded,
+                          size: 18,
+                          color: isDark ? Colors.white : KeraColors.navy900,
+                        ),
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: KeraColors.orange500,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Online',
+                      style: TextStyle(
+                        fontFamily: KeraTypography.fontLatin,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : KeraColors.navy900,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1458,3 +1568,4 @@ class _BottomWavePainter extends CustomPainter {
   bool shouldRepaint(covariant _BottomWavePainter oldDelegate) =>
       oldDelegate.isDark != isDark;
 }
+

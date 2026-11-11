@@ -86,9 +86,9 @@ class ApiAuthRepository implements AuthRepository {
              BaseOptions(
                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
                // Generous timeouts: cloud cold starts (Render) and mobile networks need time.
-               connectTimeout: const Duration(seconds: 35),
-               receiveTimeout: const Duration(seconds: 35),
-               sendTimeout: const Duration(seconds: 35),
+               connectTimeout: const Duration(seconds: 45),
+               receiveTimeout: const Duration(seconds: 45),
+               sendTimeout: const Duration(seconds: 45),
                headers: {
                  'Content-Type': 'application/json',
                  'Accept': 'application/json',
@@ -96,6 +96,28 @@ class ApiAuthRepository implements AuthRepository {
              ),
            ) {
     _setupInterceptors();
+  }
+
+  /// Silently pre-warms the backend in the background so that Render free-tier
+  /// spinning up happens while the user is typing credentials.
+  void warmUp() {
+    if (kIsWeb) return;
+    unawaited(() async {
+      try {
+        final isCloud = dio.options.baseUrl.contains('onrender.com');
+        final probeDio = Dio(
+          BaseOptions(
+            connectTimeout: Duration(seconds: isCloud ? 45 : 5),
+            receiveTimeout: Duration(seconds: isCloud ? 45 : 5),
+          ),
+        );
+        final raw = dio.options.baseUrl;
+        final target = raw.endsWith('/api/v1')
+            ? '$raw/health'
+            : (raw.endsWith('/') ? '${raw}health' : '$raw/health');
+        await probeDio.get(target);
+      } catch (_) {}
+    }());
   }
 
   SessionStore get sessionStore => _sessionStore;
@@ -525,16 +547,18 @@ class ApiAuthRepository implements AuthRepository {
         candidates.map((candidate) async {
           try {
             final isCloud = candidate.contains('onrender.com');
-            final timeout = Duration(seconds: isCloud ? 8 : 2);
+            final timeout = Duration(seconds: isCloud ? 35 : 3);
             final probeDio = Dio(
               BaseOptions(
-                baseUrl: candidate,
                 connectTimeout: timeout,
                 receiveTimeout: timeout,
                 sendTimeout: timeout,
               ),
             );
-            final res = await probeDio.get('/health');
+            final target = candidate.endsWith('/api/v1')
+                ? '$candidate/health'
+                : (candidate.endsWith('/') ? '${candidate}health' : '$candidate/health');
+            final res = await probeDio.get(target);
             if (res.statusCode == 200) {
               return candidate;
             }
@@ -561,14 +585,15 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     try {
       final trimmedPhone = phoneNumber.trim();
-      final isAdmin = trimmedPhone == '0900000000' || trimmedPhone == '+251900000000';
+      final normalizedPhone = Validators.normalizeEthiopianPhone(trimmedPhone);
+      final isAdmin = normalizedPhone == '+251900000000' || trimmedPhone == '0900000000';
       final endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
 
       final deviceId = await _sessionStore.getOrCreateDeviceId();
       final response = await dio.post(
         endpoint,
         data: {
-          'phoneNumber': trimmedPhone,
+          'phoneNumber': normalizedPhone,
           // Never trim a password: register() sends it exactly as typed.
           'password': password,
           'deviceId': deviceId,
@@ -640,11 +665,14 @@ class ApiAuthRepository implements AuthRepository {
           // First login on a new or empty phone (or admin) REQUIRES the server (Rule 1).
           // If the server is unreachable or device has a network, report SERVER_UNREACHABLE.
           if (failure.code == kServerUnreachableCode || hasNetwork) {
+            final isCloud = dio.options.baseUrl.contains('onrender.com');
+            final cloudHint = isCloud
+                ? ' The cloud server may be waking up from sleep. Please wait a moment and retry, or check Server Settings.'
+                : ' Please check the server address in Server Settings.';
             return Result.failure(
               NetworkFailure(
                 message:
-                    'Cannot reach the server at ${dio.options.baseUrl}. '
-                    'Please check the server address in Server Settings.',
+                    'Cannot reach the server at ${dio.options.baseUrl}.$cloudHint',
                 code: kServerUnreachableCode,
               ),
             );
@@ -1148,10 +1176,14 @@ class ApiAuthRepository implements AuthRepository {
         );
       }
 
+      final isCloud = dio.options.baseUrl.contains('onrender.com');
+      final cloudHint = isCloud
+          ? ' (${e.type.name} - cloud server may be waking up). Check Server Settings.'
+          : ' (${e.type.name}). Check the server address in Server Settings.';
+
       return NetworkFailure(
         message:
-            'Cannot reach the server at ${dio.options.baseUrl} '
-            '(${e.type.name}). Check the server address in Server Settings.',
+            'Cannot reach the server at ${dio.options.baseUrl}$cloudHint',
         code: kServerUnreachableCode,
       );
     }

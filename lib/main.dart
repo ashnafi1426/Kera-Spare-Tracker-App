@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -79,6 +82,26 @@ Future<void> main() async {
         AppConstants.setApiBaseUrl(savedUrl);
       }
     } catch (_) {}
+
+    // Pre-warm the backend server in background so Render cloud is ready
+    if (!kIsWeb) {
+      unawaited(() async {
+        try {
+          final baseUrl = AppConstants.apiBaseUrl;
+          if (baseUrl.contains('onrender.com')) {
+            final dio = Dio(BaseOptions(
+              connectTimeout: const Duration(seconds: 45),
+              receiveTimeout: const Duration(seconds: 45),
+            ));
+            final target = baseUrl.endsWith('/api/v1')
+                ? '$baseUrl/health'
+                : (baseUrl.endsWith('/') ? '${baseUrl}health' : '$baseUrl/health');
+            await dio.get(target);
+            debugPrint('[BACKEND] Cloud server pre-warmed successfully.');
+          }
+        } catch (_) {}
+      }());
+    }
   });
 }
 

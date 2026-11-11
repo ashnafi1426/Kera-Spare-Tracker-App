@@ -27,9 +27,10 @@ class KeraColors {
   static const Color navy50  = Color(0xFFF4F6FA);
 
   // --- Professional Accent Orange Palette ---
+  static const Color orange900 = Color(0xFF78350F);
+  static const Color orange700 = Color(0xFFB45309);
   static const Color orange600 = Color(0xFFE07F00);
   static const Color orange500 = Color(0xFFF7941D); // Primary accent & CTA
-  static const Color orange700 = Color(0xFFB45309);
   static const Color orange200 = Color(0xFFFED7AA);
   static const Color orange100 = Color(0xFFFFF1DC);
   static const Color orange50  = Color(0xFFFFFBF5);

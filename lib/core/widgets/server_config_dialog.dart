@@ -105,13 +105,13 @@ void showServerConfigDialog(BuildContext context, WidgetRef ref) {
                       : () async {
                           setDialogState(() {
                             isTesting = true;
-                            statusMessage = 'Connecting... (Render cloud may take 20-30s if waking up)';
+                            statusMessage = 'Connecting... (Render cloud server may take 30-45s if waking up)';
                             testSuccess = null;
                           });
                           try {
                             final rawUrl = serverController.text.trim();
                             final isCloud = rawUrl.contains('onrender.com');
-                            final timeout = Duration(seconds: isCloud ? 25 : 5);
+                            final timeout = Duration(seconds: isCloud ? 45 : 5);
                             final testDio = Dio(
                               BaseOptions(
                                 connectTimeout: timeout,

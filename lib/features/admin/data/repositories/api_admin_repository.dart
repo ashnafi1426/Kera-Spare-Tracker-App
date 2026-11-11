@@ -53,7 +53,7 @@ class ApiAdminRepository implements AdminRepository {
         candidates.map((candidate) async {
           try {
             final isCloud = candidate.contains('onrender.com');
-            final timeout = Duration(seconds: isCloud ? 8 : 2);
+            final timeout = Duration(seconds: isCloud ? 35 : 3);
             final probeDio = Dio(
               BaseOptions(
                 baseUrl: candidate,
