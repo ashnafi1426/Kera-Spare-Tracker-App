@@ -198,8 +198,8 @@ class ApiAuthRepository implements AuthRepository {
       e.type == DioExceptionType.unknown ||
       e.response == null;
 
-  bool get _shouldProbeCandidates => _autoProbeServer && !kIsWeb;
-  bool get _shouldProbeOnAndroid => _shouldProbeCandidates;
+  bool get _shouldProbeCandidates => false;
+  bool get _shouldProbeOnAndroid => false;
 
   // ---------------------------------------------------------------------------
   // Interceptors
@@ -511,20 +511,6 @@ class ApiAuthRepository implements AuthRepository {
 
       return Result.success(user);
     } on DioException catch (e) {
-      if (_shouldProbeOnAndroid && _isConnectionProblem(e)) {
-        final working = await _probeWorkingCandidate();
-        if (working != null) {
-          AppConstants.setApiBaseUrl(working);
-          dio.options.baseUrl = working;
-          await _sessionStore.saveApiBaseUrl(working);
-          return register(
-            phoneNumber: phoneNumber,
-            businessName: businessName,
-            password: password,
-          );
-        }
-      }
-
       final hasNetwork = await _hasNetwork();
       final failure = _mapDioError(e, hasNetwork: hasNetwork);
       if (failure is NetworkFailure) {
@@ -537,40 +523,6 @@ class ApiAuthRepository implements AuthRepository {
         AuthFailure(message: 'Registration failed: ${e.toString()}', cause: e),
       );
     }
-  }
-
-  /// Probes candidate Android base URLs in parallel to quickly discover the active backend host.
-  Future<String?> _probeWorkingCandidate() async {
-    final candidates = AppConstants.candidateAndroidBaseUrls;
-    try {
-      final results = await Future.wait(
-        candidates.map((candidate) async {
-          try {
-            final isCloud = candidate.contains('onrender.com');
-            final timeout = Duration(seconds: isCloud ? 35 : 3);
-            final probeDio = Dio(
-              BaseOptions(
-                connectTimeout: timeout,
-                receiveTimeout: timeout,
-                sendTimeout: timeout,
-              ),
-            );
-            final target = candidate.endsWith('/api/v1')
-                ? '$candidate/health'
-                : (candidate.endsWith('/') ? '${candidate}health' : '$candidate/health');
-            final res = await probeDio.get(target);
-            if (res.statusCode == 200) {
-              return candidate;
-            }
-          } catch (_) {}
-          return null;
-        }),
-      );
-      for (final c in results) {
-        if (c != null) return c;
-      }
-    } catch (_) {}
-    return null;
   }
 
   // ---------------------------------------------------------------------------
@@ -607,48 +559,6 @@ class ApiAuthRepository implements AuthRepository {
       );
     } on DioException catch (e) {
       final hasNetwork = await _hasNetwork();
-
-      // Android loopback / Wi-Fi candidate check (USB reverse, Wi-Fi LAN, emulator)
-      if (_shouldProbeCandidates && _isConnectionProblem(e)) {
-        final working = await _probeWorkingCandidate();
-        if (working != null) {
-          AppConstants.setApiBaseUrl(working);
-          dio.options.baseUrl = working;
-          await _sessionStore.saveApiBaseUrl(working);
-          try {
-            final trimmedPhone = phoneNumber.trim();
-            final isAdmin = trimmedPhone == '0900000000' || trimmedPhone == '+251900000000';
-            final endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
-
-            final deviceId = await _sessionStore.getOrCreateDeviceId();
-            final response = await dio.post(
-              endpoint,
-              data: {
-                'phoneNumber': trimmedPhone,
-                'password': password,
-                'deviceId': deviceId,
-              },
-            );
-            if (response.statusCode == 200 &&
-                response.data['success'] == true) {
-              return await _handleSuccessfulAuthResponse(
-                response.data['data'] as Map<String, dynamic>,
-                password: password,
-                forceDiscardUnsynced: forceDiscardUnsynced,
-              );
-            }
-          } on DioException catch (retryErr) {
-            // The server answered (for example wrong password): report that,
-            // do not fall back to "no internet".
-            if (retryErr.response != null) {
-              return Result.failure(
-                _mapDioError(retryErr, hasNetwork: hasNetwork),
-              );
-            }
-          } catch (_) {}
-        }
-      }
-
       final failure = _mapDioError(e, hasNetwork: hasNetwork);
       if (failure is NetworkFailure) {
         // Existing local owner on this phone: authenticate offline with the local hash.
@@ -665,14 +575,10 @@ class ApiAuthRepository implements AuthRepository {
           // First login on a new or empty phone (or admin) REQUIRES the server (Rule 1).
           // If the server is unreachable or device has a network, report SERVER_UNREACHABLE.
           if (failure.code == kServerUnreachableCode || hasNetwork) {
-            final isCloud = dio.options.baseUrl.contains('onrender.com');
-            final cloudHint = isCloud
-                ? ' The cloud server may be waking up from sleep. Please wait a moment and retry, or check Server Settings.'
-                : ' Please check the server address in Server Settings.';
-            return Result.failure(
+            return const Result.failure(
               NetworkFailure(
                 message:
-                    'Cannot reach the server at ${dio.options.baseUrl}.$cloudHint',
+                    'Cannot reach server. The cloud server may be waking up, please wait a moment and retry.',
                 code: kServerUnreachableCode,
               ),
             );
@@ -1176,14 +1082,9 @@ class ApiAuthRepository implements AuthRepository {
         );
       }
 
-      final isCloud = dio.options.baseUrl.contains('onrender.com');
-      final cloudHint = isCloud
-          ? ' (${e.type.name} - cloud server may be waking up). Check Server Settings.'
-          : ' (${e.type.name}). Check the server address in Server Settings.';
-
       return NetworkFailure(
         message:
-            'Cannot reach the server at ${dio.options.baseUrl}$cloudHint',
+            'Cannot reach server (${e.type.name}). The cloud server may be waking up, please wait a moment and retry.',
         code: kServerUnreachableCode,
       );
     }

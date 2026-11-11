@@ -301,15 +301,18 @@ class SessionStore {
     } catch (_) {}
   }
 
-  /// Persists working API base URL discovered dynamically or configured by user.
-  Future<void> saveApiBaseUrl(String url) async {
+  /// Clears any legacy custom API base URL from storage (locked to Render cloud).
+  Future<void> clearSavedApiBaseUrl() async {
     try {
-      await _storage.write(key: keyApiBaseUrl, value: url);
+      await _storage.delete(key: keyApiBaseUrl);
     } catch (_) {}
   }
 
-  /// Retrieves persisted working API base URL if previously saved.
+  /// No-op: API URL is locked to Render cloud.
+  Future<void> saveApiBaseUrl(String url) async {}
+
+  /// Always returns null: locked to Render cloud.
   Future<String?> getSavedApiBaseUrl() async {
-    return _safeRead(keyApiBaseUrl, timeout: const Duration(milliseconds: 800));
+    return null;
   }
 }

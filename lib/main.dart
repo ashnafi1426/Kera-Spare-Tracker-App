@@ -77,28 +77,19 @@ Future<void> main() async {
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     debugPrint('[STARTUP] First frame rendered (PostFrameCallback): ${totalStartupStopwatch.elapsedMilliseconds}ms');
     try {
-      final savedUrl = await SessionStore().getSavedApiBaseUrl();
-      if (savedUrl != null && savedUrl.isNotEmpty) {
-        AppConstants.setApiBaseUrl(savedUrl);
-      }
+      await SessionStore().clearSavedApiBaseUrl();
     } catch (_) {}
 
-    // Pre-warm the backend server in background so Render cloud is ready
+    // Pre-warm the Render backend server in background so cloud is ready
     if (!kIsWeb) {
       unawaited(() async {
         try {
-          final baseUrl = AppConstants.apiBaseUrl;
-          if (baseUrl.contains('onrender.com')) {
-            final dio = Dio(BaseOptions(
-              connectTimeout: const Duration(seconds: 45),
-              receiveTimeout: const Duration(seconds: 45),
-            ));
-            final target = baseUrl.endsWith('/api/v1')
-                ? '$baseUrl/health'
-                : (baseUrl.endsWith('/') ? '${baseUrl}health' : '$baseUrl/health');
-            await dio.get(target);
-            debugPrint('[BACKEND] Cloud server pre-warmed successfully.');
-          }
+          final dio = Dio(BaseOptions(
+            connectTimeout: const Duration(seconds: 45),
+            receiveTimeout: const Duration(seconds: 45),
+          ));
+          await dio.get('https://kera-spare-tracker-api.onrender.com/health');
+          debugPrint('[BACKEND] Cloud server pre-warmed successfully.');
         } catch (_) {}
       }());
     }
