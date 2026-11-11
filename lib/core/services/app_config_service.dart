@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../constants/constants.dart';
@@ -257,8 +256,6 @@ class AppConfigService {
         return AppConfig.fromJson(data, installedVersion: currentVersion);
       }
     } catch (_) {}
-      // Return defaults on network error
-    }
     return AppConfig.defaults(installedVersion: currentVersion);
   }
 

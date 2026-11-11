@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/constants/constants.dart';
@@ -37,14 +36,6 @@ class ApiAdminRepository implements AdminRepository {
   }
 
   Dio get dio => _dio;
-
-  bool _isConnectionProblem(DioException e) =>
-      e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.connectionError ||
-      e.type == DioExceptionType.sendTimeout ||
-      e.type == DioExceptionType.receiveTimeout ||
-      e.type == DioExceptionType.unknown ||
-      e.response == null;
 
   void _setupInterceptors() {
     _dio.interceptors.add(

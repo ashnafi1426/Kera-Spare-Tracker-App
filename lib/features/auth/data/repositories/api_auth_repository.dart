@@ -45,13 +45,6 @@ class ApiAuthRepository implements AuthRepository {
   final String baseUrl;
   final bool _isCustomDioClient;
 
-  /// When true, on Android the repository probes the candidate base URLs
-  /// (USB reverse, Wi-Fi LAN, emulator) if the current one cannot be reached.
-  /// Defaults to true when the repository creates its own Dio client. Pass
-  /// `true` explicitly if your provider supplies a [Dio] but you still want
-  /// the automatic detection.
-  final bool _autoProbeServer;
-
   final _authStateController = StreamController<AuthUser?>.broadcast();
   final _needsLoginController = StreamController<bool>.broadcast();
   final _passwordChangedController = StreamController<bool>.broadcast();
@@ -79,7 +72,6 @@ class ApiAuthRepository implements AuthRepository {
        _localAuthRepo =
            localAuthRepo ?? LocalAuthRepository(db: db, storage: storage),
        _isCustomDioClient = dioClient != null,
-       _autoProbeServer = autoProbeServer ?? (dioClient == null),
        dio =
            dioClient ??
            Dio(
@@ -189,17 +181,6 @@ class ApiAuthRepository implements AuthRepository {
     }
     return false;
   }
-
-  bool _isConnectionProblem(DioException e) =>
-      e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.connectionError ||
-      e.type == DioExceptionType.sendTimeout ||
-      e.type == DioExceptionType.receiveTimeout ||
-      e.type == DioExceptionType.unknown ||
-      e.response == null;
-
-  bool get _shouldProbeCandidates => false;
-  bool get _shouldProbeOnAndroid => false;
 
   // ---------------------------------------------------------------------------
   // Interceptors
