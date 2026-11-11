@@ -715,23 +715,28 @@ class _BusinessDashboardScreenState
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.arrow_upward_rounded,
-                        size: 13,
-                        color: Color(0xFF10B981),
-                      ),
-                      SizedBox(width: 3),
-                      Text(
-                        '12% this month',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                  const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.arrow_upward_rounded,
+                          size: 13,
                           color: Color(0xFF10B981),
                         ),
-                      ),
-                    ],
+                        SizedBox(width: 3),
+                        Text(
+                          '12% this month',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF10B981),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -812,30 +817,39 @@ class _BusinessDashboardScreenState
                       ),
                   ],
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 13,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected
-                            ? Colors.white
-                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 13,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -1429,14 +1443,19 @@ class _BusinessDashboardScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              context.tr('ፈጣን እርምጃዎች', 'Quick actions'),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : const Color(0xFF1E293B),
+            Expanded(
+              child: Text(
+                context.tr('ፈጣን እርምጃዎች', 'Quick actions'),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(width: 8),
             GestureDetector(
               onTap: () => _showMoreActionsBottomSheet(context),
               child: Text(
@@ -1765,14 +1784,19 @@ class _BusinessDashboardScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              context.tr('የቅርብ ሽያጮች', 'Recent sales'),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : const Color(0xFF1E293B),
+            Expanded(
+              child: Text(
+                context.tr('የቅርብ ሽያጮች', 'Recent sales'),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               'የቅርብ ሽያጮች',
               style: TextStyle(

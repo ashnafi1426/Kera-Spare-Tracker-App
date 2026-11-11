@@ -223,8 +223,8 @@ void main() {
         // Verify key dashboard widgets are mounted
         expect(find.text('Kera Spare Tracker'), findsWidgets);
         expect(find.text('Today'), findsOneWidget);
-        expect(find.text('Total Stock'), findsOneWidget);
-        expect(find.text('Stock Value'), findsOneWidget);
+        expect(find.text('Total stock'), findsOneWidget);
+        expect(find.text('Stock value'), findsOneWidget);
         expect(find.text('Record Sale'), findsOneWidget);
         expect(find.text('Sales Performance'), findsOneWidget);
 
@@ -261,9 +261,9 @@ void main() {
       final scrollFinder = find.byType(CustomScrollView);
       expect(scrollFinder, findsOneWidget);
 
-      final reportsFinder = find.text('Reports');
-      expect(reportsFinder, findsOneWidget);
-      final initialReportsPosition = tester.getTopLeft(reportsFinder);
+      final bodyItemFinder = find.text('Sales Performance');
+      expect(bodyItemFinder, findsOneWidget);
+      final initialPosition = tester.getTopLeft(bodyItemFinder);
 
       // Scroll the body down by 300 pixels
       await tester.drag(scrollFinder, const Offset(0, -300));
@@ -278,8 +278,8 @@ void main() {
       expect(scrolledSearchPosition.dy, equals(initialSearchPosition.dy));
 
       // Verify body item DID move up as body scrolled
-      final scrolledReportsPosition = tester.getTopLeft(reportsFinder);
-      expect(scrolledReportsPosition.dy, lessThan(initialReportsPosition.dy));
+      final scrolledPosition = tester.getTopLeft(bodyItemFinder);
+      expect(scrolledPosition.dy, lessThan(initialPosition.dy));
 
       // Verify no exceptions
       expect(tester.takeException(), isNull);
