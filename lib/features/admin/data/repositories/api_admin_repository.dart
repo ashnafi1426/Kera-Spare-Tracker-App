@@ -46,37 +46,6 @@ class ApiAdminRepository implements AdminRepository {
       e.type == DioExceptionType.unknown ||
       e.response == null;
 
-  Future<String?> _probeWorkingCandidate() async {
-    final candidates = AppConstants.candidateAndroidBaseUrls;
-    try {
-      final results = await Future.wait(
-        candidates.map((candidate) async {
-          try {
-            final isCloud = candidate.contains('onrender.com');
-            final timeout = Duration(seconds: isCloud ? 35 : 3);
-            final probeDio = Dio(
-              BaseOptions(
-                baseUrl: candidate,
-                connectTimeout: timeout,
-                receiveTimeout: timeout,
-                sendTimeout: timeout,
-              ),
-            );
-            final res = await probeDio.get('/health');
-            if (res.statusCode == 200) {
-              return candidate;
-            }
-          } catch (_) {}
-          return null;
-        }),
-      );
-      for (final c in results) {
-        if (c != null) return c;
-      }
-    } catch (_) {}
-    return null;
-  }
-
   void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -93,24 +62,6 @@ class ApiAdminRepository implements AdminRepository {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
-        },
-        onError: (DioException err, handler) async {
-          if (!kIsWeb && _isConnectionProblem(err)) {
-            final working = await _probeWorkingCandidate();
-            if (working != null) {
-              AppConstants.setApiBaseUrl(working);
-              final newBase = '$working/admin';
-              _dio.options.baseUrl = newBase;
-              err.requestOptions.baseUrl = newBase;
-              try {
-                final response = await _dio.fetch(err.requestOptions);
-                return handler.resolve(response);
-              } on DioException catch (retryErr) {
-                return handler.reject(retryErr);
-              }
-            }
-          }
-          return handler.next(err);
         },
       ),
     );

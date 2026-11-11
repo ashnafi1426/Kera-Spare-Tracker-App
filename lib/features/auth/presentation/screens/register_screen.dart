@@ -9,7 +9,6 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
-import '../../../../core/widgets/server_config_dialog.dart';
 import '../../data/repositories/api_auth_repository.dart';
 import '../controllers/auth_controller.dart';
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -357,33 +356,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               tooltip: 'ድጋፍ / Support',
             ),
           ),
-          const SizedBox(width: 8),
-
-          // Server Settings Pill [⚙️]
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: isDark ? KeraColors.navy800 : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark
-                    ? KeraColors.navy600.withValues(alpha: 0.4)
-                    : KeraColors.border,
-                width: 1,
-              ),
-            ),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: Icon(
-                Icons.settings_ethernet_rounded,
-                size: 20,
-                color: isDark ? Colors.white : KeraColors.navy800,
-              ),
-              tooltip: context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
-              onPressed: () => showServerConfigDialog(context, ref),
-            ),
-          ),
+          const SizedBox(width: 6),
         ],
       ),
     );
@@ -649,57 +622,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           if (_isOfflineError) ...[
             const SizedBox(height: 10),
-            Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: KeraColors.orange700,
-                    side: BorderSide(
-                      color: KeraColors.orange700.withValues(alpha: 0.6),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  backgroundColor: KeraColors.orange700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  icon: const Icon(Icons.settings_ethernet_rounded, size: 15),
-                  label: Text(
-                    context.tr('ሰርቨር ማስተካከያ', 'Server Settings'),
-                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: () => showServerConfigDialog(context, ref),
                 ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: KeraColors.orange700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 13,
-                          height: 13,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.refresh_rounded, size: 15),
-                  label: Text(
-                    l10n.retry,
-                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
-                  ),
-                  onPressed: _isLoading ? null : _handleRegister,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 13,
+                        height: 13,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.refresh_rounded, size: 15),
+                label: Text(
+                  l10n.retry,
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700),
                 ),
-              ],
+                onPressed: _isLoading ? null : _handleRegister,
+              ),
             ),
           ],
         ],

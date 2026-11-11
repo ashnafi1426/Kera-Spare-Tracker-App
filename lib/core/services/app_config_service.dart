@@ -256,43 +256,7 @@ class AppConfigService {
         final data = response.data['data'] as Map<String, dynamic>;
         return AppConfig.fromJson(data, installedVersion: currentVersion);
       }
-    } on DioException catch (e) {
-      if (!kIsWeb &&
-          defaultTargetPlatform == TargetPlatform.android &&
-          (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.connectionError)) {
-        final candidates = AppConstants.candidateAndroidBaseUrls
-            .where((c) => c != _dio.options.baseUrl)
-            .toList();
-        final probeResults = await Future.wait(
-          candidates.map((candidate) async {
-            try {
-              final isCloud = candidate.contains('onrender.com');
-              final timeout = Duration(seconds: isCloud ? 35 : 3);
-              final candidateDio = Dio(
-                BaseOptions(
-                  baseUrl: candidate,
-                  connectTimeout: timeout,
-                  receiveTimeout: timeout,
-                ),
-              );
-              final res = await candidateDio.get('/app-config');
-              if (res.statusCode == 200 && res.data['success'] == true) {
-                return (candidate, res.data['data'] as Map<String, dynamic>);
-              }
-            } catch (_) {}
-            return null;
-          }),
-        );
-        for (final item in probeResults) {
-          if (item != null) {
-            AppConstants.setApiBaseUrl(item.$1);
-            _dio.options.baseUrl = item.$1;
-            return AppConfig.fromJson(item.$2, installedVersion: currentVersion);
-          }
-        }
-      }
-    } catch (_) {
+    } catch (_) {}
       // Return defaults on network error
     }
     return AppConfig.defaults(installedVersion: currentVersion);
