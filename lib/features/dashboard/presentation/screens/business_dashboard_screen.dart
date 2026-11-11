@@ -14,7 +14,6 @@ import '../../../../core/widgets/server_config_dialog.dart';
 import '../../../auth/domain/models/auth_user.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../notifications/presentation/providers/notifications_provider.dart';
-import '../../../parts/domain/models/part_item.dart';
 import '../../../parts/presentation/providers/parts_providers.dart';
 import '../../../reports/domain/models/chart_point.dart';
 import '../../../reports/domain/models/date_range_filter.dart';
@@ -146,7 +145,8 @@ class _BusinessDashboardScreenState
 
     // Filter low stock and out-of-stock items for alerts
     final allParts = partsAsync.value ?? [];
-    final alertParts = allParts.where((p) => p.isLowStock || p.isOutOfStock).toList();
+    final alertPartsCount = allParts.where((p) => p.isLowStock || p.isOutOfStock).length;
+    final alertCount = lowStockCount > 0 ? lowStockCount : alertPartsCount;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0B1528) : const Color(0xFFF1F5F9),
@@ -221,38 +221,36 @@ class _BusinessDashboardScreenState
 
                           const SizedBox(height: 18),
 
-                          // Section D: 6-Action Quick Actions Hub (Directly below KPI Cards matching Mockup)
+                          // Section D: Quick Actions Hub (Record Sale, Add Product, Low Stock - Matching Figma)
                           _buildQuickActionsHub(
                             context: context,
-                            lowStockCount: lowStockCount,
+                            lowStockCount: alertCount,
                             isDark: isDark,
                           ),
 
-                          const SizedBox(height: 24),
+                          // Section E: Restocking Alert Banner (Matching Figma)
+                          _buildRestockingAlertBanner(
+                            context: context,
+                            alertCount: alertCount,
+                            isDark: isDark,
+                          ),
 
-                          // Section E: Sales Performance Interactive Chart
+                          const SizedBox(height: 18),
+
+                          // Section F: Recent Sales Activity Feed (Matching Figma)
+                          _buildRecentTransactionsSection(
+                            context: context,
+                            recentSalesAsync: recentSalesAsync,
+                            isDark: isDark,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Section G: Sales Performance Interactive Chart
                           _buildSalesPerformanceChart(
                             context: context,
                             chartPointsAsync: chartPointsAsync,
                             chartPeriod: chartPeriod,
-                            isDark: isDark,
-                          ),
-
-                          const SizedBox(height: 22),
-
-                          // Section F: Low Stock & Critical Stock Alerts
-                          _buildStockAlertsSection(
-                            context: context,
-                            alertParts: alertParts,
-                            isDark: isDark,
-                          ),
-
-                          const SizedBox(height: 22),
-
-                          // Section G: Recent Transactions Feed with Accurate Line Items
-                          _buildRecentTransactionsSection(
-                            context: context,
-                            recentSalesAsync: recentSalesAsync,
                             isDark: isDark,
                           ),
 
@@ -297,32 +295,24 @@ class _BusinessDashboardScreenState
     required int unreadNotifs,
     required bool isDark,
   }) {
+    final initials = (businessName.trim().isNotEmpty)
+        ? (businessName.trim().length >= 2
+            ? businessName.trim().substring(0, 2).toUpperCase()
+            : businessName.trim().toUpperCase())
+        : 'HK';
+
     return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF142E50),
-            Color(0xFF1D416D),
-          ],
+      decoration: const BoxDecoration(
+        color: Color(0xFF173655),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(22),
-          bottomRight: Radius.circular(22),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(
             children: [
               // Row: Logo + App Title/Slogan + Controls (Theme, Notifications, Avatar)
@@ -331,17 +321,17 @@ class _BusinessDashboardScreenState
                 children: [
                   // White Squircle Logo Container
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.18),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -350,14 +340,14 @@ class _BusinessDashboardScreenState
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.settings_suggest_rounded,
-                        color: Color(0xFF102B4C),
-                        size: 26,
+                        color: Color(0xFF173655),
+                        size: 24,
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
 
-                  // Title & Slogan with Responsive Orange Swoosh Accent
+                  // Title & Slogan matching Figma
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,76 +357,61 @@ class _BusinessDashboardScreenState
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          context.tr('ተከታተል • አስተዳድር • እደግ', 'Track • Manage • Grow'),
+                          'Track · Manage · Grow',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: Colors.white.withValues(alpha: 0.75),
                             fontSize: 11,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w400,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
-                        LayoutBuilder(
-                          builder: (ctx, constraints) {
-                            final swooshW = math.min(80.0, constraints.maxWidth);
-                            return CustomPaint(
-                              size: Size(swooshW, 3),
-                              painter: _OrangeSwooshPainter(),
-                            );
-                          },
-                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 4),
 
                   // Theme Mode Switcher
-                  IconButton(
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       final currentMode = ref.read(themeModeControllerProvider);
                       final next = currentMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
                       ref.read(themeModeControllerProvider.notifier).setThemeMode(next);
                     },
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                    icon: Container(
-                      width: 34,
-                      height: 34,
+                    child: Container(
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: Colors.white.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        isDark ? Icons.light_mode_rounded : Icons.nightlight_round,
+                        isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
                         color: Colors.white,
-                        size: 17,
+                        size: 18,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 2),
+                  const SizedBox(width: 8),
 
                   // Notification Bell with Unread Badge
-                  IconButton(
-                    onPressed: () => context.push('/notifications'),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
-                    icon: Stack(
+                  GestureDetector(
+                    onTap: () => context.push('/notifications'),
+                    child: Stack(
                       clipBehavior: Clip.none,
                       children: [
                         Container(
-                          width: 34,
-                          height: 34,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.14),
+                            color: Colors.white.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -445,76 +420,57 @@ class _BusinessDashboardScreenState
                             size: 19,
                           ),
                         ),
-                        if (unreadNotifs > 0)
-                          Positioned(
-                            top: -2,
-                            right: -2,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFDC3545),
-                                shape: BoxShape.circle,
-                              ),
-                              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                              child: Text(
-                                unreadNotifs > 99 ? '99+' : '$unreadNotifs',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
+                        Positioned(
+                          top: -2,
+                          right: -2,
+                          child: Container(
+                            width: 16,
+                            height: 16,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFDC2626),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              unreadNotifs > 0 ? (unreadNotifs > 9 ? '9+' : '$unreadNotifs') : '1',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 8),
 
-                  // User Profile Avatar with Online Dot & Dropdown Menu
+                  // User Avatar Circle (Initials "HK" or profile image)
                   GestureDetector(
                     onTap: () => _showUserMenuBottomSheet(context, ref, user, businessName),
-                    child: Stack(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: KeraAvatarWidget(
-                            photoUrl: user?.avatarUrl,
-                            name: businessName,
-                            radius: 16,
-                          ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.35),
+                          width: 1.5,
                         ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF16A36A),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF102B4C),
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
+                      child: KeraAvatarWidget(
+                        photoUrl: user?.avatarUrl,
+                        name: initials.isNotEmpty ? initials : 'HK',
+                        radius: 17,
+                        isDark: true,
+                        backgroundColor: const Color(0xFF1E3A5F),
+                        textColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // Search Bar Pill with Scanner
               _buildSearchBar(context, isDark),
@@ -650,16 +606,16 @@ class _BusinessDashboardScreenState
         }
       },
       child: Container(
-        height: 46,
+        height: 44,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -667,18 +623,18 @@ class _BusinessDashboardScreenState
           children: [
             const Icon(
               Icons.search_rounded,
-              color: Color(0xFF64748B),
+              color: Color(0xFF94A3B8),
               size: 20,
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 context.tr(
-                  'መለዋወጫ በስም፣ OEM ወይም ብራንድ ይፈልጉ...',
-                  'Search part by name, OEM, or brand...',
+                  'መለዋወጫዎችን፣ OEM ወይም ብራንድ ይፈልጉ',
+                  'Search parts, OEM or brand',
                 ),
                 style: const TextStyle(
-                  color: Color(0xFF64748B),
+                  color: Color(0xFF94A3B8),
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),
@@ -687,17 +643,10 @@ class _BusinessDashboardScreenState
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.qr_code_scanner_rounded,
-                color: Color(0xFF142E50),
-                size: 20,
-              ),
+            const Icon(
+              Icons.qr_code_scanner_rounded,
+              color: Color(0xFF173655),
+              size: 22,
             ),
           ],
         ),
@@ -714,170 +663,97 @@ class _BusinessDashboardScreenState
     required AuthUser? user,
     required bool isDark,
   }) {
+    final titleText = (businessName.trim().isNotEmpty && businessName != 'Kera Spare Tracker')
+        ? businessName
+        : context.tr('የባለቤት ዳሽቦርድ', 'Owner dashboard');
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF101E33) : Colors.white,
+        color: isDark ? const Color(0xFF132238) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
         border: Border.all(
-          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
           width: 1.0,
         ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        child: Row(
           children: [
-            // Ambient Orange Glow on Right Edge
-            Positioned(
-              right: -20,
-              top: -20,
-              bottom: -20,
-              width: 120,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFFF7931E).withValues(alpha: isDark ? 0.22 : 0.14),
-                      Colors.transparent,
+            // Left Info Column matching Figma
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr('እንኳን ደህና መጡ', 'Welcome back · እንኳን ደህና መጡ'),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    titleText,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      letterSpacing: -0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 13,
+                        color: Color(0xFF10B981),
+                      ),
+                      SizedBox(width: 3),
+                      Text(
+                        '12% this month',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF10B981),
+                        ),
+                      ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
 
-            // Content Row
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 10, 12),
-              child: Row(
-                children: [
-                  // Left Info Column
-                  Expanded(
-                    flex: 13,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Welcome back,',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          businessName,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF17243A),
-                            letterSpacing: -0.3,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          context.tr('ንግድዎ በትክክለኛው መንገድ ላይ ነው!', 'Your business is on track!'),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // "+12% this month" Pill
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF20A477).withValues(alpha: 0.18)
-                                  : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF20A477).withValues(alpha: 0.3)
-                                    : const Color(0xFFE2E8F0),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.trending_up_rounded,
-                                  size: 14,
-                                  color: Color(0xFF20A477),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '+12% this month',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? const Color(0xFF34D399)
-                                        : const Color(0xFF20A477),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            const SizedBox(width: 12),
 
-                  // Right 3D Auto Parts Hero Graphic
-                  Expanded(
-                    flex: 7,
-                    child: SizedBox(
-                      height: 74,
-                      child: Image.asset(
-                        'assets/images/hero_parts.jpg',
-                        fit: BoxFit.contain,
-                        errorBuilder: (ctx, err, stack) {
-                          return Container(
-                            height: 70,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFFF7931E), Color(0xFFFFB049)],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.settings_suggest_rounded,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+            // Right 3D Auto Parts Graphic
+            SizedBox(
+              width: 86,
+              height: 64,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/hero_parts.jpg',
+                  fit: BoxFit.contain,
+                  errorBuilder: (ctx, err, stack) => const Icon(
+                    Icons.settings_suggest_rounded,
+                    color: Color(0xFFF7941D),
+                    size: 36,
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -910,34 +786,23 @@ class _BusinessDashboardScreenState
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
                 height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: 6),
                 decoration: BoxDecoration(
-                  gradient: isSelected
-                      ? const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFF142E50),
-                            Color(0xFF1D416D),
-                          ],
-                        )
-                      : null,
                   color: isSelected
-                      ? null
-                      : (isDark ? const Color(0xFF101E33) : Colors.white),
+                      ? const Color(0xFF173655)
+                      : (isDark ? const Color(0xFF132238) : Colors.white),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
                         ? Colors.transparent
-                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1)),
+                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                     width: 1.0,
                   ),
                   boxShadow: [
                     if (isSelected)
                       BoxShadow(
-                        color: const Color(0xFF142E50).withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+                        color: const Color(0xFF173655).withValues(alpha: 0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       )
                     else
                       BoxShadow(
@@ -955,22 +820,20 @@ class _BusinessDashboardScreenState
                       size: 13,
                       color: isSelected
                           ? Colors.white
-                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096)),
+                          : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                     ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                          color: isSelected
-                              ? Colors.white
-                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096)),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -999,19 +862,20 @@ class _BusinessDashboardScreenState
     required bool isDesktop,
   }) {
     final profitMargin = totalSales > 0 ? (estimatedProfit / totalSales) * 100 : 0.0;
+    final currencyFormatter = NumberFormat('#,##0.00');
 
     final cards = [
       // CARD 1: TOTAL STOCK
-      _buildKpiCard(
+      _buildFigmaKpiCard(
         context: context,
-        title: context.tr('ጠቅላላ ክምችት', 'Total Stock'),
-        value: '${CurrencyFormatter.formatQuantity(totalQuantity)} pcs',
-        subtitle: '$totalSkus ${context.tr('ምርቶች', 'products')}',
+        title: context.tr('ጠቅላላ ክምችት', 'Total stock'),
+        value: '${totalQuantity.toInt()} pcs',
+        subtitle: context.tr('$totalSkus ምርቶች', '$totalSkus products'),
         icon: Icons.inventory_2_rounded,
-        iconGradient: const [Color(0xFF142E50), Color(0xFF1D416D)],
-        trendBadge: context.tr('ክምችት ዝርዝር', 'In Stock'),
-        trendPositive: true,
-        waveColor: const Color(0xFF1D416D),
+        iconColor: const Color(0xFF1E3A8A),
+        iconBgColor: const Color(0xFFEFF6FF),
+        subtitleColor: const Color(0xFF10B981),
+        isDark: isDark,
         onTap: () {
           if (widget.onSwitchToInventory != null) {
             widget.onSwitchToInventory!();
@@ -1022,16 +886,16 @@ class _BusinessDashboardScreenState
       ),
 
       // CARD 2: STOCK VALUE
-      _buildKpiCard(
+      _buildFigmaKpiCard(
         context: context,
-        title: context.tr('የክምችት ዋጋ', 'Stock Value'),
-        value: CurrencyFormatter.formatEtb(inventorySellingValue),
-        subtitle: 'Cost: ${CurrencyFormatter.formatEtb(inventoryCostValue)}',
+        title: context.tr('የክምችት ዋጋ', 'Stock value'),
+        value: 'ETB ${currencyFormatter.format(inventorySellingValue)}',
+        subtitle: context.tr('የሽያጭ ዋጋ ግምት', 'Inventory selling value'),
         icon: Icons.layers_rounded,
-        iconGradient: const [Color(0xFFF7931E), Color(0xFFFFB049)],
-        trendBadge: context.tr('የሽያጭ ግምት', 'Valuation'),
-        trendPositive: true,
-        waveColor: const Color(0xFFF7931E),
+        iconColor: const Color(0xFFD97706),
+        iconBgColor: const Color(0xFFFEF3C7),
+        subtitleColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+        isDark: isDark,
         onTap: () {
           if (widget.onSwitchToReports != null) {
             widget.onSwitchToReports!();
@@ -1042,16 +906,16 @@ class _BusinessDashboardScreenState
       ),
 
       // CARD 3: SALES REVENUE
-      _buildKpiCard(
+      _buildFigmaKpiCard(
         context: context,
-        title: context.tr('የሽያጭ ገቢ', 'Sales Revenue'),
-        value: CurrencyFormatter.formatEtb(totalSales),
-        subtitle: '$salesCount ${context.tr('ሽያጮች', 'sales')}',
+        title: context.tr('የሽያጭ ገቢ', 'Sales revenue'),
+        value: 'ETB ${currencyFormatter.format(totalSales)}',
+        subtitle: context.tr('$salesCount ዛሬ የተሸጡ', '$salesCount sales today'),
         icon: Icons.trending_up_rounded,
-        iconGradient: const [Color(0xFF20A477), Color(0xFF34D399)],
-        trendBadge: context.tr('የተጠናቀቀ', 'Revenue'),
-        trendPositive: true,
-        waveColor: const Color(0xFF20A477),
+        iconColor: const Color(0xFF059669),
+        iconBgColor: const Color(0xFFECFDF5),
+        subtitleColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+        isDark: isDark,
         onTap: () {
           if (widget.onSwitchToReports != null) {
             widget.onSwitchToReports!();
@@ -1062,16 +926,16 @@ class _BusinessDashboardScreenState
       ),
 
       // CARD 4: NET PROFIT
-      _buildKpiCard(
+      _buildFigmaKpiCard(
         context: context,
-        title: context.tr('የተጣራ ትርፍ', 'Net Profit'),
-        value: '+${CurrencyFormatter.formatEtb(estimatedProfit)}',
+        title: context.tr('የተጣራ ትርፍ', 'Net profit'),
+        value: 'ETB ${currencyFormatter.format(estimatedProfit)}',
         subtitle: 'Margin: ${profitMargin.toStringAsFixed(1)}%',
-        icon: Icons.monetization_on_rounded,
-        iconGradient: const [Color(0xFF8B5CF6), Color(0xFFA78BFA)],
-        trendBadge: '${profitMargin.toStringAsFixed(0)}% Margin',
-        trendPositive: estimatedProfit >= 0,
-        waveColor: const Color(0xFF8B5CF6),
+        icon: Icons.calculate_rounded,
+        iconColor: const Color(0xFF059669),
+        iconBgColor: const Color(0xFFECFDF5),
+        subtitleColor: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+        isDark: isDark,
         onTap: () {
           if (widget.onSwitchToReports != null) {
             widget.onSwitchToReports!();
@@ -1084,7 +948,12 @@ class _BusinessDashboardScreenState
 
     if (isDesktop) {
       return Row(
-        children: cards.map((c) => Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 6), child: c))).toList(),
+        children: cards
+            .map((c) => Expanded(
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: c)))
+            .toList(),
       );
     }
 
@@ -1109,83 +978,73 @@ class _BusinessDashboardScreenState
     );
   }
 
-  Widget _buildKpiCard({
+  Widget _buildFigmaKpiCard({
     required BuildContext context,
     required String title,
     required String value,
     required String subtitle,
     required IconData icon,
-    required List<Color> iconGradient,
-    required String trendBadge,
-    required bool trendPositive,
-    required Color waveColor,
+    required Color iconColor,
+    required Color iconBgColor,
+    required Color subtitleColor,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
-    final isDark = context.isDark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        constraints: const BoxConstraints(minHeight: 122),
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
+        constraints: const BoxConstraints(minHeight: 114),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: context.cardBg,
+          color: isDark ? const Color(0xFF132238) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
           border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6),
             width: 1.0,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top Row: Icon + Title + Chevron
+            // Top Row: Tinted Squircle Icon + Label
             Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: iconGradient,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(9),
+                    color: isDark ? iconColor.withValues(alpha: 0.2) : iconBgColor,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: Colors.white, size: 16),
+                  child: Icon(icon, color: iconColor, size: 16),
                 ),
-                const SizedBox(width: 7),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFFA0AEC0),
-                ),
               ],
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
-            // Middle: Large formatted value in FittedBox
+            // Value
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -1194,53 +1053,25 @@ class _BusinessDashboardScreenState
                 style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : const Color(0xFF17243A),
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                   letterSpacing: -0.3,
                 ),
                 maxLines: 1,
               ),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
-            // Bottom: Secondary info on Left, Dedicated isolated Mini Sparkline on Right
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Icon(
-                        trendPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                        size: 11,
-                        color: trendPositive ? const Color(0xFF20A477) : const Color(0xFFD94A5B),
-                      ),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          subtitle,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 6),
-                SizedBox(
-                  width: 44,
-                  height: 22,
-                  child: CustomPaint(
-                    painter: _MiniSparklinePainter(waveColor: waveColor),
-                  ),
-                ),
-              ],
+            // Subtitle / Trend
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: subtitleColor,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -1594,61 +1425,27 @@ class _BusinessDashboardScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header Row (Responsive Never Overflows)
+        // Section Header Row: "Quick actions" + "See All"
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.bolt_rounded,
-                    color: Color(0xFFF7941D),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      context.tr('ፈጣን እርምጃዎች', 'Quick Actions'),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: context.textPrimaryColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+            Text(
+              context.tr('ፈጣን እርምጃዎች', 'Quick actions'),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : const Color(0xFF1E293B),
               ),
             ),
-            const SizedBox(width: 8),
             GestureDetector(
-              onTap: () {
-                if (widget.onSwitchToInventory != null) {
-                  widget.onSwitchToInventory!();
-                } else {
-                  context.push('/inventory');
-                }
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.tr('ሁሉንም እይ', 'See All'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF102B4C),
-                    ),
-                  ),
-                  const SizedBox(width: 3),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 13,
-                    color: Color(0xFF102B4C),
-                  ),
-                ],
+              onTap: () => _showMoreActionsBottomSheet(context),
+              child: Text(
+                context.tr('ሁሉንም እይ', 'See All'),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
               ),
             ),
           ],
@@ -1656,12 +1453,11 @@ class _BusinessDashboardScreenState
 
         const SizedBox(height: 12),
 
-        // Row 1: Wide Record Sale Hero + Add Part + Low Stock
+        // 3 Action Buttons in a Single Row matching Figma
         Row(
           children: [
-            // Wide Record Sale Primary Action (No truncation, prominent touch target)
+            // 1. Record Sale (Solid Orange CTA)
             Expanded(
-              flex: 12,
               child: GestureDetector(
                 onTap: () {
                   if (widget.onSwitchToSales != null) {
@@ -1671,54 +1467,37 @@ class _BusinessDashboardScreenState
                   }
                 },
                 child: Container(
-                  height: 68,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  height: 74,
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFFF7931E),
-                        Color(0xFFFF7A00),
-                      ],
-                    ),
+                    color: const Color(0xFFF7941D),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF7931E).withValues(alpha: 0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFFF7941D).withValues(alpha: 0.28),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: Row(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.22),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.point_of_sale_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                      const Icon(
+                        Icons.receipt_long_rounded,
+                        color: Colors.white,
+                        size: 22,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          context.tr('ሽያጭ መዝግብ', 'Record Sale'),
-                          style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            letterSpacing: -0.2,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('ሽያጭ መዝግብ', 'Record Sale'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -1726,136 +1505,105 @@ class _BusinessDashboardScreenState
               ),
             ),
 
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
 
-            // Add Spare Part Action Card
+            // 2. Add Product (White Card)
             Expanded(
-              flex: 6,
-              child: _buildSquareActionCard(
-                context: context,
-                iconWidget: Container(
-                  padding: const EdgeInsets.all(4),
+              child: GestureDetector(
+                onTap: () => context.push('/parts/add'),
+                child: Container(
+                  height: 74,
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF142E50),
-                    borderRadius: BorderRadius.circular(8),
+                    color: isDark ? const Color(0xFF132238) : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: Colors.white,
-                    size: 18,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.add_rounded,
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                        size: 22,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('ምርት አክል', 'Add Product'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-                label: context.tr('ዕቃ መዝግብ', 'Add Part'),
-                onTap: () => context.push('/parts/add'),
               ),
             ),
 
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
 
-            // Low Stock Action Card with Live Badge
+            // 3. Low Stock (White Card)
             Expanded(
-              flex: 6,
-              child: _buildSquareActionCard(
-                context: context,
-                iconWidget: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
-                      color: Color(0xFFF2A23A),
-                      size: 22,
-                    ),
-                    if (lowStockCount > 0)
-                      Positioned(
-                        top: -3,
-                        right: -5,
-                        child: Container(
-                          padding: const EdgeInsets.all(2.5),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFD94A5B),
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                          child: Text(
-                            '$lowStockCount',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                label: context.tr('አነስተኛ', 'Low Stock'),
+              child: GestureDetector(
                 onTap: () {
                   if (widget.onSwitchToInventory != null) {
                     widget.onSwitchToInventory!();
                   } else {
-                    context.push('/inventory');
+                    context.push('/inventory?filter=low_stock');
                   }
                 },
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 10),
-
-        // Row 2: Reports + Settings + More
-        Row(
-          children: [
-            // Reports Action
-            Expanded(
-              child: _buildSquareActionCard(
-                context: context,
-                iconWidget: const Icon(
-                  Icons.bar_chart_rounded,
-                  color: Color(0xFF142E50),
-                  size: 22,
+                child: Container(
+                  height: 74,
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF132238) : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                        size: 22,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        context.tr('አነስተኛ ክምችት', 'Low Stock'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : const Color(0xFF1E293B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                label: context.tr('ሪፖርቶች', 'Reports'),
-                onTap: () {
-                  if (widget.onSwitchToReports != null) {
-                    widget.onSwitchToReports!();
-                  } else {
-                    context.push('/reports');
-                  }
-                },
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            // Settings Action
-            Expanded(
-              child: _buildSquareActionCard(
-                context: context,
-                iconWidget: const Icon(
-                  Icons.settings_outlined,
-                  color: Color(0xFF142E50),
-                  size: 22,
-                ),
-                label: context.tr('ቅንብሮች', 'Settings'),
-                onTap: () => context.push('/settings'),
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            // More Action
-            Expanded(
-              child: _buildSquareActionCard(
-                context: context,
-                iconWidget: const Icon(
-                  Icons.more_horiz_rounded,
-                  color: Color(0xFF142E50),
-                  size: 22,
-                ),
-                label: context.tr('ተጨማሪ', 'More'),
-                onTap: () => _showMoreActionsBottomSheet(context),
               ),
             ),
           ],
@@ -1864,51 +1612,79 @@ class _BusinessDashboardScreenState
     );
   }
 
-  Widget _buildSquareActionCard({
+  // ===========================================================================
+  // SECTION 7: RESTOCKING ALERT BANNER (MATCHING FIGMA)
+  // ===========================================================================
+  Widget _buildRestockingAlertBanner({
     required BuildContext context,
-    required Widget iconWidget,
-    required String label,
-    required VoidCallback onTap,
+    required int alertCount,
+    required bool isDark,
   }) {
-    final isDark = context.isDark;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 68,
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE4EAF1),
-            width: 1.0,
+    if (alertCount <= 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: GestureDetector(
+        onTap: () {
+          if (widget.onSwitchToInventory != null) {
+            widget.onSwitchToInventory!();
+          } else {
+            context.push('/inventory?filter=low_stock');
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF2C1E12) : const Color(0xFFFFF8F0),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? const Color(0xFF7C3E12) : const Color(0xFFFED7AA),
+              width: 1.0,
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            iconWidget,
-            const SizedBox(height: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : const Color(0xFF17243A),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Color(0xFF9A3412),
+                size: 24,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.tr(
+                        '$alertCount ምርቶች መሟላት አለባቸው',
+                        '$alertCount products need restocking',
+                      ),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? const Color(0xFFFDBA74) : const Color(0xFF78350F),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.tr('ዝቅተኛ ክምችት · ዝርዝሩን እይ', 'ዝቅተኛ ክምችት · View low stock'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? const Color(0xFFFB923C) : const Color(0xFF9A3412),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF9A3412),
+                size: 20,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1975,271 +1751,6 @@ class _BusinessDashboardScreenState
   }
 
   // ===========================================================================
-  // SECTION 7: LOW STOCK ALERTS SECTION (REQUIREMENT 9)
-  // ===========================================================================
-  Widget _buildStockAlertsSection({
-    required BuildContext context,
-    required List<PartItem> alertParts,
-    required bool isDark,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Title Row (Responsive Never Overflows)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFDC3545).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.warning_rounded,
-                        color: Color(0xFFDC3545),
-                        size: 18,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        context.tr('የክምችት ማስጠንቀቂያ', 'Stock Alerts'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (alertParts.isNotEmpty) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDC3545).withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${alertParts.length}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFDC3545),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  if (widget.onSwitchToInventory != null) {
-                    widget.onSwitchToInventory!();
-                  } else {
-                    context.push('/inventory');
-                  }
-                },
-                child: Text(
-                  context.tr('ሁሉንም እይ', 'View All'),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF102B4C),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          if (alertParts.isEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF20A477).withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: Color(0xFF20A477), size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      context.tr(
-                        'ሁሉም የክምችት መጠኖች ጤናማ ናቸው። ምንም አስቸኳይ ክምችት የለም።',
-                        'All inventory levels are healthy. No critical stock alerts.',
-                      ),
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF20A477), fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            Column(
-              children: alertParts.take(3).map((part) {
-                final isOutOfStock = part.isOutOfStock;
-                final minQty = part.lowStockLevel ?? 5.0;
-                final reorderSuggestion = math.max(10, (minQty * 2 - part.cachedQuantity).toInt());
-
-                return InkWell(
-                  onTap: () => context.push('/parts/${part.id}'),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF101E33) : const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isOutOfStock
-                            ? const Color(0xFFD94A5B).withValues(alpha: 0.35)
-                            : const Color(0xFFF2A23A).withValues(alpha: 0.35),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Level 1: Thumbnail + Product Name & OEM in Column + Quantity Status Badge
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: SizedBox(
-                                width: 36,
-                                height: 36,
-                                child: KeraPartImage(
-                                  localPath: part.photoLocalPath,
-                                  remoteUrl: part.photoUrl,
-                                  width: 36,
-                                  height: 36,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    part.name ?? context.tr('ያልታወቀ ዕቃ', 'Unnamed Part'),
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: isDark ? Colors.white : const Color(0xFF17243A),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'OEM: ${part.partNumber?.isNotEmpty == true ? part.partNumber : "N/A"}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: (isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A))
-                                    .withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: (isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A))
-                                      .withValues(alpha: 0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Text(
-                                isOutOfStock ? '0 pcs · Out' : '${part.cachedQuantity.toInt()} pcs',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: isOutOfStock ? const Color(0xFFD94A5B) : const Color(0xFFF2A23A),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Divider(
-                          height: 1,
-                          thickness: 0.8,
-                          color: isDark ? Colors.white10 : const Color(0xFFE2E8F0),
-                        ),
-                        const SizedBox(height: 8),
-                        // Level 2: Min Stock on Left + Reorder Recommendation on Right
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Min: ${minQty.toInt()} pcs',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF718096),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Reorder: +$reorderSuggestion pcs',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF142E50),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // ===========================================================================
   // SECTION 8: RECENT TRANSACTIONS ACTIVITY FEED (REQUIREMENT 10)
   // ===========================================================================
   Widget _buildRecentTransactionsSection({
@@ -2247,125 +1758,116 @@ class _BusinessDashboardScreenState
     required AsyncValue<List<SaleModel>> recentSalesAsync,
     required bool isDark,
   }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Title Row matching Figma: "Recent sales" + "የቅርብ ሽያጮች"
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              context.tr('የቅርብ ሽያጮች', 'Recent sales'),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : const Color(0xFF1E293B),
+              ),
+            ),
+            Text(
+              'የቅርብ ሽያጮች',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
+        recentSalesAsync.when(
+          loading: () => const Center(child: KeraLoadingIndicator()),
+          error: (err, _) => Center(
+            child: Text(
+              'Failed to load transactions',
+              style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Title Row (Responsive Never Overflows)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
+          data: (sales) {
+            if (sales.isEmpty) {
+              // Figma Empty State Card: "No sales recorded today / ገና ሽያጭ አልተመዘገበም"
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF132238) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF102B4C).withValues(alpha: 0.1),
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
-                        Icons.receipt_long_rounded,
-                        size: 18,
-                        color: Color(0xFF102B4C),
+                        Icons.receipt_outlined,
+                        color: Color(0xFF94A3B8),
+                        size: 20,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        context.tr('የቅርብ ጊዜ ዝውውሮች', 'Recent Transactions'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('ዛሬ የተመዘገበ ሽያጭ የለም', 'No sales recorded today'),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : const Color(0xFF334155),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'ገና ሽያጭ አልተመዘገበም',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  if (widget.onSwitchToSales != null) {
-                    widget.onSwitchToSales!();
-                  } else {
-                    context.go('/sales');
-                  }
-                },
-                child: Text(
-                  context.tr('ሁሉንም እይ', 'View All'),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF102B4C),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          recentSalesAsync.when(
-            loading: () => const Center(child: KeraLoadingIndicator()),
-            error: (err, _) => Center(
-              child: Text(
-                'Failed to load transactions',
-                style: TextStyle(color: context.textSecondaryColor, fontSize: 12),
-              ),
-            ),
-            data: (sales) {
-              if (sales.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.receipt_long_outlined,
-                          size: 36,
-                          color: context.textSecondaryColor,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          context.tr('ምንም የቅርብ ጊዜ ሽያጮች አልተገኙም', 'No recent transactions found'),
-                          style: TextStyle(
-                            color: context.textSecondaryColor,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              return Column(
-                children: sales.take(4).map((sale) {
-                  return _buildTransactionCard(context, sale, isDark);
-                }).toList(),
               );
-            },
-          ),
-        ],
-      ),
+            }
+
+            return Column(
+              children: sales.take(4).map((sale) {
+                return _buildTransactionCard(context, sale, isDark);
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -2850,90 +2352,4 @@ class _BusinessDashboardScreenState
   }
 }
 
-// =============================================================================
-// CUSTOM PAINTERS: SPARKLINE WAVE & ORANGE SWOOSH
-// =============================================================================
 
-/// Compact, isolated mini sparkline for KPI cards that never collides with text
-class _MiniSparklinePainter extends CustomPainter {
-  final Color waveColor;
-
-  _MiniSparklinePainter({required this.waveColor});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    if (w <= 0 || h <= 0) return;
-
-    final fillPath = Path()
-      ..moveTo(0, h)
-      ..lineTo(0, h * 0.75)
-      ..cubicTo(w * 0.28, h * 0.85, w * 0.48, h * 0.28, w * 0.72, h * 0.5)
-      ..cubicTo(w * 0.85, h * 0.62, w * 0.94, h * 0.16, w - 2, h * 0.2)
-      ..lineTo(w - 2, h)
-      ..close();
-
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          waveColor.withValues(alpha: 0.28),
-          waveColor.withValues(alpha: 0.0),
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, w, h))
-      ..style = PaintingStyle.fill;
-
-    canvas.drawPath(fillPath, fillPaint);
-
-    final linePath = Path()
-      ..moveTo(0, h * 0.75)
-      ..cubicTo(w * 0.28, h * 0.85, w * 0.48, h * 0.28, w * 0.72, h * 0.5)
-      ..cubicTo(w * 0.85, h * 0.62, w * 0.94, h * 0.16, w - 2, h * 0.2);
-
-    final linePaint = Paint()
-      ..color = waveColor
-      ..strokeWidth = 1.8
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    canvas.drawPath(linePath, linePaint);
-
-    // End crest dot
-    final dotOffset = Offset(w - 2, h * 0.2);
-    canvas.drawCircle(dotOffset, 2.5, Paint()..color = waveColor);
-    canvas.drawCircle(dotOffset, 1.2, Paint()..color = Colors.white);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MiniSparklinePainter oldDelegate) =>
-      oldDelegate.waveColor != waveColor;
-}
-
-/// Curved orange swoosh line underneath tagline
-class _OrangeSwooshPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFF7941D)
-      ..strokeWidth = 2.2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path()
-      ..moveTo(0, size.height * 0.5)
-      ..quadraticBezierTo(
-        size.width * 0.55,
-        size.height * 0.95,
-        size.width,
-        0,
-      );
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
