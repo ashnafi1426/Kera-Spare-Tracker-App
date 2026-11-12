@@ -126,7 +126,6 @@ class AdminDashboardScreen extends ConsumerWidget {
     final isDark = context.isDark;
     final isAmharic = context.isAmharic;
     final topPadding = MediaQuery.of(context).padding.top;
-    final user = ref.watch(authControllerProvider).value;
 
     return Container(
       width: double.infinity,
@@ -139,39 +138,25 @@ class AdminDashboardScreen extends ConsumerWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar with KS initials or photo
-              if (user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty)
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AdminColors.keraOrange, width: 1.5),
-                  ),
-                  child: KeraAvatarWidget(
-                    photoUrl: user.avatarUrl!,
-                    name: user.businessName,
-                    radius: 19,
-                    isDark: isDark,
-                  ),
-                )
-              else
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF102D55),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AdminColors.keraOrange, width: 1.5),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'KS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
+              // Avatar with KS initials and orange border matching Figma
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF102D55),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AdminColors.keraOrange, width: 1.5),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'KS',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
+              ),
               const SizedBox(width: 12),
 
               // Title & Subtitle
@@ -308,7 +293,10 @@ class AdminDashboardScreen extends ConsumerWidget {
               // Theme Mode Toggle Button
               InkWell(
                 onTap: () {
-                  ref.read(themeControllerProvider.notifier).toggleTheme();
+                  final isDarkNow = context.isDark;
+                  ref
+                      .read(themeModeControllerProvider.notifier)
+                      .setThemeMode(isDarkNow ? ThemeMode.light : ThemeMode.dark);
                 },
                 borderRadius: BorderRadius.circular(14),
                 child: Container(

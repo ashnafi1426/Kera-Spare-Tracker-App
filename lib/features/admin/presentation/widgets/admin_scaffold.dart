@@ -226,8 +226,8 @@ class _AdminScaffoldState extends ConsumerState<AdminScaffold> {
                 onDestinationSelected: (idx) => _onDestinationSelected(context, idx),
                 destinations: [
                   NavigationDestination(
-                    icon: Icon(Icons.dashboard_outlined, color: context.textSecondaryColor),
-                    selectedIcon: Icon(Icons.dashboard_rounded, color: activeColor),
+                    icon: Icon(Icons.grid_view_outlined, color: context.textSecondaryColor),
+                    selectedIcon: Icon(Icons.grid_view_rounded, color: activeColor),
                     label: l10n.adminDashboard,
                   ),
                   NavigationDestination(
