@@ -52,6 +52,7 @@ void main() {
         pendingSyncCountProvider.overrideWith((ref) => Stream.value(pendingCount)),
         lastOnlineTimestampProvider.overrideWith((ref) async => DateTime.now()),
         businessProfileProvider.overrideWith(() => _MockBusinessProfileNotifier()),
+        offlineMaxDaysExceededProvider.overrideWith((ref) async => false),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,

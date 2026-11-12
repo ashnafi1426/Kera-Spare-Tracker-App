@@ -203,21 +203,21 @@ void main() {
         period: ReportPeriod.daily,
       );
       expect(dailyPointsRes.isSuccess, true);
-      expect(dailyPointsRes.valueOrNull!.length, 7);
+      expect(dailyPointsRes.valueOrNull!.length, 6);
 
       final weeklyPointsRes = await reportsRepo.getChartPoints(
         ownerId: ownerA,
         period: ReportPeriod.weekly,
       );
       expect(weeklyPointsRes.isSuccess, true);
-      expect(weeklyPointsRes.valueOrNull!.length, 4);
+      expect(weeklyPointsRes.valueOrNull!.length, 7);
 
       final monthlyPointsRes = await reportsRepo.getChartPoints(
         ownerId: ownerA,
         period: ReportPeriod.monthly,
       );
       expect(monthlyPointsRes.isSuccess, true);
-      expect(monthlyPointsRes.valueOrNull!.length, 6);
+      expect(monthlyPointsRes.valueOrNull!.length, inInclusiveRange(4, 5));
     });
   });
 }

@@ -71,74 +71,57 @@ class BottomNav extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
 
-              // Center Raised Floating Orange Sell Button
+              // Tab 4: Sell / POS (Figma Pill Tab Matching Design)
               Expanded(
                 child: Center(
                   child: GestureDetector(
                     onTap: onSellPressed,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Color(0xFFFF9E1B),
-                                Color(0xFFFF6D00),
-                              ],
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: 64,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: currentIndex == 4
+                            ? (isDark ? const Color(0xFF2B1D14) : const Color(0xFFFFF7ED))
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 22,
+                            color: currentIndex == 4
+                                ? (isDark ? const Color(0xFFF97316) : const Color(0xFF0F172A))
+                                : inactiveColor,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr('ሽጥ', 'Sell'),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: currentIndex == 4 ? FontWeight.w800 : FontWeight.w500,
+                              color: currentIndex == 4
+                                  ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                  : inactiveColor,
+                              letterSpacing: 0.1,
                             ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
-                                blurRadius: 12,
-                                spreadRadius: 1,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 2.5,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 2),
+                          // Active Orange Indicator Line matching Figma
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: (currentIndex == 4) ? 22 : 0,
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF97316),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.shopping_cart_outlined,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              const SizedBox(height: 1),
-                              Text(
-                                context.tr('ሽጥ', 'Sell'),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.2,
-                                  height: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        // Active indicator line matching mockup
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          width: (currentIndex == 4) ? 22 : 0,
-                          height: 2.5,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF7941D),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -155,12 +138,12 @@ class BottomNav extends StatelessWidget {
                 inactiveColor: inactiveColor,
               ),
 
-              // Tab 3: More / Settings
+              // Tab 3: More / Settings (3 horizontal dots matching Figma)
               _buildNavItem(
                 context: context,
                 index: 3,
-                icon: Icons.menu_rounded,
-                selectedIcon: Icons.menu_open_rounded,
+                icon: Icons.more_horiz_rounded,
+                selectedIcon: Icons.more_horiz_rounded,
                 label: context.tr('ተጨማሪ', 'More'),
                 activeColor: activeColor,
                 inactiveColor: inactiveColor,

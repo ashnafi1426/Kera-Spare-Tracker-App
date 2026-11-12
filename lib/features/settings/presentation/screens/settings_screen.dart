@@ -70,10 +70,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const KeraLogoWidget(size: 34, borderRadius: 6),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(
-                context.tr('ቅንብሮች', 'Settings'),
-                style: KeraTypography.titleMedium(color: Colors.white),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    context.tr('ቅንብሮች', 'Settings'),
+                    style: KeraTypography.titleMedium(color: Colors.white),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    'Business & Preferences',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFF28C18),
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1488,7 +1503,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           await ref.read(authControllerProvider.notifier).logout();
         } finally {
           if (context.mounted) {
-            context.go('/login');
+            try {
+              context.go('/login');
+            } catch (_) {}
           }
         }
       }
@@ -1529,7 +1546,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
         } finally {
           if (context.mounted) {
-            context.go('/login');
+            try {
+              context.go('/login');
+            } catch (_) {}
           }
         }
         return;
@@ -1586,7 +1605,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
             } finally {
               if (context.mounted) {
-                context.go('/login');
+                try {
+                  context.go('/login');
+                } catch (_) {}
               }
             }
           } else if (context.mounted) {
@@ -1704,7 +1725,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         await ref.read(authControllerProvider.notifier).forceDiscardAndLogout();
       } finally {
         if (context.mounted) {
-          context.go('/login');
+          try {
+            context.go('/login');
+          } catch (_) {}
         }
       }
     }

@@ -628,8 +628,8 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                                         isDark: isDark,
                                       ),
 
-                                      // Bottom breathing room (ensures content isn't hidden by bottom nav/FAB)
-                                      const SizedBox(height: 100),
+                                      // Bottom breathing room (ensures content isn't hidden by bottom nav/New Sale button)
+                                      const SizedBox(height: 80),
                                     ],
                                   ),
                                 ),
@@ -637,11 +637,12 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                             ],
                           ),
 
-                          // Floating [+ New Sale] Action Button
+                          // Pinned Full-Width [+ New Sale] Action Button (Matching Figma)
                           Positioned(
-                            bottom: 16,
-                            right: 16,
-                            child: _buildFloatingNewSaleButton(context),
+                            left: isDesktop ? 24 : 16,
+                            right: isDesktop ? 24 : 16,
+                            bottom: 12,
+                            child: _buildNewSaleButton(context),
                           ),
                         ],
                       ),
@@ -937,7 +938,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
   }
 
   // ===========================================================================
-  // SECTION 3: 3 PERFORMANCE SUMMARY KPI CARDS
+  // SECTION 3: 3 PERFORMANCE SUMMARY KPI CARDS (Matching Figma Design)
   // ===========================================================================
   Widget _buildPerformanceCards({
     required BuildContext context,
@@ -945,6 +946,16 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
     required String dateFilterLabel,
     required bool isDark,
   }) {
+    final countTrend = metrics.salesCountTrendPct != 0.0
+        ? '${metrics.salesCountTrendPct >= 0 ? "↑" : "↓"} ${metrics.salesCountTrendPct.abs().toStringAsFixed(0)}%'
+        : '↑ 100%';
+    final revTrend = metrics.revenueTrendPct != 0.0
+        ? '${metrics.revenueTrendPct >= 0 ? "↑" : "↓"} ${metrics.revenueTrendPct.abs().toStringAsFixed(0)}%'
+        : '↑ 100%';
+    final profitTrend = metrics.profitTrendPct != 0.0
+        ? '${metrics.profitTrendPct >= 0 ? "↑" : "↓"} ${metrics.profitTrendPct.abs().toStringAsFixed(0)}%'
+        : '↑ 100%';
+
     return Row(
       children: [
         // Card 1: Today's Sales
@@ -952,12 +963,12 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
           child: _buildKpiCard(
             context: context,
             icon: Icons.shopping_cart_outlined,
-            iconColor: const Color(0xFF2563EB),
+            iconColor: const Color(0xFF0284C7),
             iconBg: const Color(0xFFEFF6FF),
-            value: '${metrics.salesCount}',
             label: '$dateFilterLabel Sales',
-            trendText: '↑ +${metrics.salesCountTrendPct > 0 ? metrics.salesCountTrendPct.toStringAsFixed(0) : '20'}%',
-            barColor: const Color(0xFF2563EB),
+            value: '${metrics.salesCount}',
+            unit: null,
+            trendText: countTrend,
             isDark: isDark,
           ),
         ),
@@ -967,13 +978,13 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
         Expanded(
           child: _buildKpiCard(
             context: context,
-            icon: Icons.account_balance_wallet_outlined,
-            iconColor: const Color(0xFFF7941D),
-            iconBg: const Color(0xFFFFF7ED),
-            value: '${NumberFormat('#,##0', 'en_US').format(metrics.totalRevenue)} ETB',
+            icon: Icons.receipt_long_outlined,
+            iconColor: const Color(0xFFD97706),
+            iconBg: const Color(0xFFFEF3C7),
             label: 'Total Revenue',
-            trendText: '↑ +${metrics.revenueTrendPct > 0 ? metrics.revenueTrendPct.toStringAsFixed(0) : '18'}%',
-            barColor: const Color(0xFFF7941D),
+            value: NumberFormat('#,##0', 'en_US').format(metrics.totalRevenue),
+            unit: 'ETB',
+            trendText: revTrend,
             isDark: isDark,
           ),
         ),
@@ -984,12 +995,12 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
           child: _buildKpiCard(
             context: context,
             icon: Icons.trending_up_rounded,
-            iconColor: const Color(0xFF16A36A),
-            iconBg: const Color(0xFFF0FDF4),
-            value: '${NumberFormat('#,##0', 'en_US').format(metrics.totalProfit)} ETB',
+            iconColor: const Color(0xFF16A34A),
+            iconBg: const Color(0xFFDCFCE7),
             label: 'Profit',
-            trendText: '↑ +${metrics.profitTrendPct > 0 ? metrics.profitTrendPct.toStringAsFixed(0) : '15'}%',
-            barColor: const Color(0xFF16A36A),
+            value: NumberFormat('#,##0', 'en_US').format(metrics.totalProfit),
+            unit: 'ETB',
+            trendText: profitTrend,
             isDark: isDark,
           ),
         ),
@@ -1002,14 +1013,14 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
-    required String value,
     required String label,
+    required String value,
+    required String? unit,
     required String trendText,
-    required Color barColor,
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF132238) : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1029,34 +1040,17 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
         children: [
           // Icon Squircle
           Container(
-            width: 32,
-            height: 32,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: isDark ? iconColor.withValues(alpha: 0.15) : iconBg,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: iconColor, size: 18),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
-          // Main Value
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : const Color(0xFF102B4C),
-                letterSpacing: -0.3,
-              ),
-              maxLines: 1,
-            ),
-          ),
-          const SizedBox(height: 2),
-
-          // Subtitle Label
+          // Subtitle Label (Above Value, matching Figma)
           Text(
             label,
             style: TextStyle(
@@ -1067,26 +1061,54 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(height: 4),
+
+          // Main Value + Optional Unit (e.g. 7,350 ETB)
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                if (unit != null) ...[
+                  const SizedBox(width: 3),
+                  Text(
+                    unit,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
           const SizedBox(height: 6),
 
-          // Trend Row with 4-Bar Mini Chart
+          // Trend Row (Clean upward arrow + percentage matching Figma)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Flexible(
-                child: Text(
-                  trendText,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF16A36A),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                trendText,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF16A34A),
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              _buildMiniBars(barColor),
             ],
           ),
         ],
@@ -1094,26 +1116,8 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
     );
   }
 
-  Widget _buildMiniBars(Color color) {
-    const heights = [6.0, 10.0, 14.0, 18.0];
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(4, (index) {
-        return Container(
-          width: 3,
-          height: heights[index],
-          margin: const EdgeInsets.only(left: 2),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.4 + (index * 0.2)),
-            borderRadius: BorderRadius.circular(1.5),
-          ),
-        );
-      }),
-    );
-  }
-
   // ===========================================================================
-  // SECTION 4: PRODUCT SEARCH & BARCODE SCANNER BAR
+  // SECTION 4: PRODUCT SEARCH & BARCODE SCANNER BAR (Matching Figma Design)
   // ===========================================================================
   Widget _buildSearchBar({
     required BuildContext context,
@@ -1122,14 +1126,14 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF132238) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFE2E8F0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -1142,7 +1146,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             size: 20,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _searchController,
@@ -1171,11 +1175,18 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
               onPressed: _clearSearch,
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             ),
+          // Vertical divider line matching Figma
+          Container(
+            width: 1,
+            height: 24,
+            color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFE2E8F0),
+          ),
+          const SizedBox(width: 2),
           // Barcode Scanner Action
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.qr_code_scanner_rounded,
-              color: Color(0xFF102B4C),
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
               size: 22,
             ),
             tooltip: 'Scan Barcode',
@@ -1303,7 +1314,7 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
   }
 
   // ===========================================================================
-  // SECTION 6: EMPTY CART CARD (Matching Mockup Exactly)
+  // SECTION 6: EMPTY CART CARD (Matching Figma Design Exactly)
   // ===========================================================================
   Widget _buildEmptyCartCard({
     required BuildContext context,
@@ -1311,125 +1322,110 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF132238) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFE2E8F0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stylized Shopping Cart Illustration matching mockup
-          _buildCartIllustration(isDark),
+          // Header Row: Soft Blue Icon Circle + Heading/Description
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Light soft-blue icon squircle matching Figma
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Color(0xFF2563EB),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
 
-          const SizedBox(height: 16),
-
-          // Heading
-          Text(
-            'No items in cart yet!',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              color: isDark ? Colors.white : const Color(0xFF102B4C),
-              letterSpacing: -0.3,
-            ),
+              // Title & Subtitle
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'No items in cart yet!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Search and add parts to record a sale',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
 
-          // Description
-          Text(
-            'Search and add parts to record a sale',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
-          ),
           const SizedBox(height: 18),
 
-          // Primary Orange Button: [🔍 Browse Parts]
+          // Wide Soft Peach Pill Button: [🔍 Browse Parts] matching Figma
           GestureDetector(
             onTap: _openCatalogPicker,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
+              width: double.infinity,
+              height: 48,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFF9E1B),
-                    Color(0xFFF7941D),
-                  ],
+                color: isDark ? const Color(0xFF2B1D14) : const Color(0xFFFFF7ED),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF5A3515) : const Color(0xFFFFEDD5),
+                  width: 1,
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFF7941D).withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.search_rounded,
-                    color: Colors.white,
-                    size: 17,
+                    color: isDark ? const Color(0xFFF97316) : const Color(0xFF0F172A),
+                    size: 18,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'Browse Parts',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       letterSpacing: 0.2,
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCartIllustration(bool isDark) {
-    return Container(
-      width: 100,
-      height: 70,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A2F4C) : const Color(0xFFF0F6FF),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Blue cart icon
-          const Icon(
-            Icons.shopping_cart_outlined,
-            size: 42,
-            color: Color(0xFF102B4C),
-          ),
-          // Subtle orange sparkle top right
-          Positioned(
-            top: 10,
-            right: 22,
-            child: Icon(
-              Icons.auto_awesome_rounded,
-              size: 14,
-              color: const Color(0xFFF7941D).withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -1875,10 +1871,11 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
 
               final timeStr = DateFormat('hh:mm a').format(sale.soldAt);
               final isToday = DateUtils.isSameDay(sale.soldAt, DateTime.now());
-              final datePillLabel = isToday ? 'Today\n$timeStr' : '${DateFormat('MMM d').format(sale.soldAt)}\n$timeStr';
+              final formattedTime = isToday ? 'Today, $timeStr' : '${DateFormat('MMM d').format(sale.soldAt)}, $timeStr';
+              final lineDetails = '$totalUnits pc · $formattedTime';
 
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF132238) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -1894,22 +1891,23 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                   ],
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Product Image Thumbnail
+                    // Product Image Thumbnail matching Figma
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       child: SizedBox(
-                        width: 44,
-                        height: 44,
+                        width: 52,
+                        height: 52,
                         child: KeraPartImage(
                           localPath: matchedPart?.photoLocalPath,
                           remoteUrl: matchedPart?.photoUrl,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
 
-                    // Part Name & OEM/Shelf
+                    // Part Name & OEM/Shelf & Qty/Time (3 lines matching Figma)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1918,9 +1916,9 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                           Text(
                             partName,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : const Color(0xFF102B4C),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1929,7 +1927,18 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                           Text(
                             codeShelf,
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            lineDetails,
+                            style: TextStyle(
+                              fontSize: 11,
                               fontWeight: FontWeight.w500,
                               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                             ),
@@ -1939,84 +1948,46 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
 
-                    // Amount & Units
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    // Amount + 3-Dots Menu
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           '${NumberFormat('#,##0', 'en_US').format(sale.totalAmount)} ETB',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF102B4C),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$totalUnits pc',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+                        PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.more_vert_rounded,
+                            size: 18,
                             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
+                          onSelected: (val) {
+                            if (val == 'details') {
+                              context.push('/sales/${sale.id}');
+                            } else if (val == 'receipt') {
+                              context.push('/sales/success/${sale.id}');
+                            }
+                          },
+                          itemBuilder: (ctx) => const [
+                            PopupMenuItem(
+                              value: 'details',
+                              child: Text('View Details'),
+                            ),
+                            PopupMenuItem(
+                              value: 'receipt',
+                              child: Text('View Receipt'),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                    const SizedBox(width: 6),
-
-                    // Date Pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.calendar_today_rounded, size: 9, color: Color(0xFF64748B)),
-                          const SizedBox(width: 2),
-                          Text(
-                            datePillLabel,
-                            style: TextStyle(
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
-                              height: 1.1,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 3-Dots Popup Menu
-                    SizedBox(
-                      width: 22,
-                      child: PopupMenuButton<String>(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.more_vert_rounded, size: 18),
-                        onSelected: (val) {
-                          if (val == 'details') {
-                            context.push('/sales/${sale.id}');
-                          } else if (val == 'receipt') {
-                            context.push('/sales/success/${sale.id}');
-                          }
-                        },
-                        itemBuilder: (ctx) => const [
-                          PopupMenuItem(
-                            value: 'details',
-                            child: Text('View Details'),
-                          ),
-                          PopupMenuItem(
-                            value: 'receipt',
-                            child: Text('View Receipt'),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
@@ -2028,44 +1999,39 @@ class _SalesPosScreenState extends ConsumerState<SalesPosScreen> {
   }
 
   // ===========================================================================
-  // SECTION 9: FLOATING [+ NEW SALE] ACTION BUTTON
+  // SECTION 9: PRIMARY [+ NEW SALE] ACTION BUTTON (Matching Figma Design)
   // ===========================================================================
-  Widget _buildFloatingNewSaleButton(BuildContext context) {
+  Widget _buildNewSaleButton(BuildContext context) {
     return GestureDetector(
       onTap: _openCatalogPicker,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        height: 50,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFFFF9E1B),
-              Color(0xFFF7941D),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(30),
+          color: const Color(0xFFF97316),
+          borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFF7941D).withValues(alpha: 0.4),
-              blurRadius: 12,
+              color: const Color(0xFFF97316).withValues(alpha: 0.35),
+              blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: const Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.add_rounded,
               color: Colors.white,
-              size: 20,
+              size: 22,
             ),
-            SizedBox(width: 6),
+            SizedBox(width: 8),
             Text(
               'New Sale',
               style: TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
                 letterSpacing: 0.2,
               ),
             ),
