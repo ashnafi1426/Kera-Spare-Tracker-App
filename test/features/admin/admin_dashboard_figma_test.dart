@@ -91,14 +91,7 @@ void main() {
       await tester.pumpWidget(_buildTestApp(width: 393, height: 852));
       await tester.pumpAndSettle();
 
-      final error = tester.takeException();
-      if (error is FlutterError) {
-        debugPrint('FLUTTER ERROR MESSAGE: ${error.message}');
-        for (final d in error.diagnostics) {
-          debugPrint('${d.name}: ${d.toDescription()}');
-        }
-      }
-      expect(error, isNull);
+      expect(tester.takeException(), isNull);
 
       // 1. Header elements
       expect(find.text('KS'), findsOneWidget);
@@ -162,14 +155,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final error = tester.takeException();
-      if (error is FlutterError) {
-        debugPrint('FLUTTER ERROR MESSAGE: ${error.message}');
-        for (final d in error.diagnostics) {
-          debugPrint('${d.name}: ${d.toDescription()}');
-        }
-      }
-      expect(error, isNull);
+      expect(tester.takeException(), isNull);
       expect(find.text('81'), findsOneWidget);
     });
   });
