@@ -8,9 +8,7 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/widgets/kera_image_widget.dart';
 import '../../../../core/widgets/kera_loading_indicator.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../providers/admin_providers.dart';
 import '../widgets/admin_metric_tile.dart';
 
