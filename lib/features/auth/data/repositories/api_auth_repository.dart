@@ -78,9 +78,9 @@ class ApiAuthRepository implements AuthRepository {
              BaseOptions(
                baseUrl: baseUrl ?? AppConstants.apiBaseUrl,
                // Generous timeouts: cloud cold starts (Render) and mobile networks need time.
-               connectTimeout: const Duration(seconds: 45),
-               receiveTimeout: const Duration(seconds: 45),
-               sendTimeout: const Duration(seconds: 45),
+               connectTimeout: const Duration(seconds: 60),
+               receiveTimeout: const Duration(seconds: 60),
+               sendTimeout: const Duration(seconds: 60),
                headers: {
                  'Content-Type': 'application/json',
                  'Accept': 'application/json',
@@ -99,8 +99,8 @@ class ApiAuthRepository implements AuthRepository {
         final isCloud = dio.options.baseUrl.contains('onrender.com');
         final probeDio = Dio(
           BaseOptions(
-            connectTimeout: Duration(seconds: isCloud ? 45 : 5),
-            receiveTimeout: Duration(seconds: isCloud ? 45 : 5),
+            connectTimeout: Duration(seconds: isCloud ? 60 : 5),
+            receiveTimeout: Duration(seconds: isCloud ? 60 : 5),
           ),
         );
         final raw = dio.options.baseUrl;
@@ -430,15 +430,42 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     try {
       final deviceId = await _sessionStore.getOrCreateDeviceId();
-      final response = await dio.post(
-        '/auth/register',
-        data: {
-          'phoneNumber': phoneNumber.trim(),
-          'businessName': businessName.trim(),
-          'password': password,
-          'deviceId': deviceId,
-        },
-      );
+      Response<dynamic>? response;
+      DioException? lastDioException;
+
+      for (int attempt = 1; attempt <= 2; attempt++) {
+        try {
+          response = await dio.post(
+            '/auth/register',
+            data: {
+              'phoneNumber': phoneNumber.trim(),
+              'businessName': businessName.trim(),
+              'password': password,
+              'deviceId': deviceId,
+            },
+          );
+          lastDioException = null;
+          break;
+        } on DioException catch (e) {
+          lastDioException = e;
+          final isTimeoutOrConnError =
+              e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.connectionError ||
+              (e.response?.statusCode != null && e.response!.statusCode! >= 502);
+
+          if (attempt < 2 && isTimeoutOrConnError) {
+            debugPrint('[AUTH] Server cold start during register, retrying in 2s (attempt $attempt)...');
+            await Future.delayed(const Duration(seconds: 2));
+            continue;
+          }
+          break;
+        }
+      }
+
+      if (response == null) {
+        throw lastDioException!;
+      }
 
       final data = response.data['data'] as Map<String, dynamic>;
       final userMap = data['user'] as Map<String, dynamic>;
@@ -523,15 +550,42 @@ class ApiAuthRepository implements AuthRepository {
       final endpoint = isAdmin ? '/auth/admin/login' : '/auth/login';
 
       final deviceId = await _sessionStore.getOrCreateDeviceId();
-      final response = await dio.post(
-        endpoint,
-        data: {
-          'phoneNumber': normalizedPhone,
-          // Never trim a password: register() sends it exactly as typed.
-          'password': password,
-          'deviceId': deviceId,
-        },
-      );
+      Response<dynamic>? response;
+      DioException? lastDioException;
+
+      for (int attempt = 1; attempt <= 2; attempt++) {
+        try {
+          response = await dio.post(
+            endpoint,
+            data: {
+              'phoneNumber': normalizedPhone,
+              // Never trim a password: register() sends it exactly as typed.
+              'password': password,
+              'deviceId': deviceId,
+            },
+          );
+          lastDioException = null;
+          break;
+        } on DioException catch (e) {
+          lastDioException = e;
+          final isTimeoutOrConnError =
+              e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.connectionError ||
+              (e.response?.statusCode != null && e.response!.statusCode! >= 502);
+
+          if (attempt < 2 && isTimeoutOrConnError) {
+            debugPrint('[AUTH] Server cold start during login, retrying in 2s (attempt $attempt)...');
+            await Future.delayed(const Duration(seconds: 2));
+            continue;
+          }
+          break;
+        }
+      }
+
+      if (response == null) {
+        throw lastDioException!;
+      }
 
       return await _handleSuccessfulAuthResponse(
         response.data['data'] as Map<String, dynamic>,
@@ -559,7 +613,7 @@ class ApiAuthRepository implements AuthRepository {
             return const Result.failure(
               NetworkFailure(
                 message:
-                    'Cannot reach server. The cloud server may be waking up, please wait a moment and retry.',
+                    'የደመና ሰርቨሩ እየነቃ ሊሆን ይችላል፣ እባክዎ ጥቂት ሰከንዶች ቆይተው እንደገና ይሞክሩ (Server waking up, please wait a moment and retry)',
                 code: kServerUnreachableCode,
               ),
             );
@@ -1063,9 +1117,9 @@ class ApiAuthRepository implements AuthRepository {
         );
       }
 
-      return NetworkFailure(
+      return const NetworkFailure(
         message:
-            'Cannot reach server (${e.type.name}). The cloud server may be waking up, please wait a moment and retry.',
+            'የደመና ሰርቨሩ እየነቃ ሊሆን ይችላል፣ እባክዎ ጥቂት ሰከንዶች ቆይተው እንደገና ይሞክሩ (Server waking up, please wait a moment and retry)',
         code: kServerUnreachableCode,
       );
     }

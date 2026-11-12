@@ -84,8 +84,8 @@ Future<void> main() async {
       unawaited(() async {
         try {
           final dio = Dio(BaseOptions(
-            connectTimeout: const Duration(seconds: 45),
-            receiveTimeout: const Duration(seconds: 45),
+            connectTimeout: const Duration(seconds: 60),
+            receiveTimeout: const Duration(seconds: 60),
           ));
           await dio.get('https://kera-spare-tracker-api.onrender.com/health');
           debugPrint('[BACKEND] Cloud server pre-warmed successfully.');

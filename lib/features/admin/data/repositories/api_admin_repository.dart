@@ -22,9 +22,9 @@ class ApiAdminRepository implements AdminRepository {
             Dio(
               BaseOptions(
                 baseUrl: '${AppConstants.apiBaseUrl}/admin',
-                connectTimeout: const Duration(seconds: 35),
-                receiveTimeout: const Duration(seconds: 35),
-                sendTimeout: const Duration(seconds: 35),
+                connectTimeout: const Duration(seconds: 60),
+                receiveTimeout: const Duration(seconds: 60),
+                sendTimeout: const Duration(seconds: 60),
                 headers: {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
@@ -64,9 +64,9 @@ class ApiAdminRepository implements AdminRepository {
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.connectionError ||
         e.response == null) {
-      return NetworkFailure(
+      return const NetworkFailure(
         message:
-            'Cannot reach the admin server at ${_dio.options.baseUrl}. Please check your connection or server settings.',
+            'የደመና ሰርቨሩ እየነቃ ሊሆን ይችላል፣ እባክዎ ጥቂት ሰከንዶች ቆይተው እንደገና ይሞክሩ (Admin server waking up, please wait a moment and retry)',
         code: kServerUnreachableCode,
       );
     }
