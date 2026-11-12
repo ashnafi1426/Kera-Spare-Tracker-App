@@ -382,7 +382,7 @@ class AdminDashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -402,27 +402,33 @@ class AdminDashboardScreen extends ConsumerWidget {
                 '$totalOwners',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 36,
+                  fontSize: 34,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A5F),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AdminColors.keraOrange.withValues(alpha: 0.3),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E3A5F),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AdminColors.keraOrange.withValues(alpha: 0.3),
+                    ),
                   ),
-                ),
-                child: Text(
-                  '+$newThisWeek ${context.tr("በዚህ ሳምንት", "this week")}',
-                  style: const TextStyle(
-                    color: AdminColors.keraOrange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '+$newThisWeek ${context.tr("በዚህ ሳምንት", "this week")}',
+                      style: const TextStyle(
+                        color: AdminColors.keraOrange,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                    ),
                   ),
                 ),
               ),

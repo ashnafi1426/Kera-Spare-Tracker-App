@@ -12,7 +12,7 @@ import 'package:kera_spare_tracker/features/admin/presentation/screens/admin_das
 import 'package:kera_spare_tracker/features/admin/presentation/widgets/admin_metric_tile.dart';
 import 'package:kera_spare_tracker/l10n/app_localizations.dart';
 
-class _FakeAdminRepo implements AdminRepository {
+class _FakeAdminRepo extends Fake implements AdminRepository {
   @override
   Future<Result<AdminDashboardStats>> getDashboard() async {
     return const Result.success(
@@ -30,51 +30,6 @@ class _FakeAdminRepo implements AdminRepository {
     );
   }
 
-  @override
-  Future<Result<Map<String, dynamic>>> getAuditLogs({
-    int page = 1,
-    int limit = 50,
-    String? action,
-    String? targetUserId,
-    String? adminId,
-    String? startDate,
-    String? endDate,
-  }) async => throw UnimplementedError();
-
-  @override
-  Future<Result<Map<String, dynamic>>> getOwners({
-    int page = 1,
-    int limit = 20,
-    String? search,
-    String? status,
-    int? inactiveDays,
-    String? sortBy,
-  }) async => throw UnimplementedError();
-
-  @override
-  Future<Result<AdminOwnerDetail>> getOwnerDetail(String id) async => throw UnimplementedError();
-  @override
-  Future<Result<void>> updateOwnerStatus(String id, String status, {String? reason}) async => throw UnimplementedError();
-  @override
-  Future<Result<void>> forceSync(String id) async => throw UnimplementedError();
-  @override
-  Future<Result<void>> triggerGlobalSync() async => throw UnimplementedError();
-  @override
-  Future<Result<List<GlobalCatalogItem>>> getCategories() async => const Result.success([]);
-  @override
-  Future<Result<GlobalCatalogItem>> createCategory(String name) async => throw UnimplementedError();
-  @override
-  Future<Result<GlobalCatalogItem>> updateCategory(String id, {String? name, bool? isActive}) async => throw UnimplementedError();
-  @override
-  Future<Result<List<GlobalCatalogItem>>> getUnits() async => const Result.success([]);
-  @override
-  Future<Result<GlobalCatalogItem>> createUnit(String name) async => throw UnimplementedError();
-  @override
-  Future<Result<GlobalCatalogItem>> updateUnit(String id, {String? name, bool? isActive}) async => throw UnimplementedError();
-  @override
-  Future<Result<dynamic>> getSetting(String key) async => throw UnimplementedError();
-  @override
-  Future<Result<dynamic>> updateSetting(String key, dynamic value) async => throw UnimplementedError();
   @override
   Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'}) async =>
       const Result.success(AdminReportSummary(
@@ -136,7 +91,14 @@ void main() {
       await tester.pumpWidget(_buildTestApp(width: 393, height: 852));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final error = tester.takeException();
+      if (error is FlutterError) {
+        debugPrint('FLUTTER ERROR MESSAGE: ${error.message}');
+        for (final d in error.diagnostics) {
+          debugPrint('${d.name}: ${d.toDescription()}');
+        }
+      }
+      expect(error, isNull);
 
       // 1. Header elements
       expect(find.text('KS'), findsOneWidget);
@@ -200,7 +162,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      final error = tester.takeException();
+      if (error is FlutterError) {
+        debugPrint('FLUTTER ERROR MESSAGE: ${error.message}');
+        for (final d in error.diagnostics) {
+          debugPrint('${d.name}: ${d.toDescription()}');
+        }
+      }
+      expect(error, isNull);
       expect(find.text('81'), findsOneWidget);
     });
   });
