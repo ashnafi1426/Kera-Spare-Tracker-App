@@ -215,7 +215,7 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
       clipBehavior: Clip.none,
       children: [
         GestureDetector(
-          onTap: widget.canEdit ? () => _showPhotoPickerSheet(context) : null,
+          onTap: widget.canEdit ? _showPhotoPickerSheet : null,
           child: Container(
             width: widget.radius * 2,
             height: widget.radius * 2,
@@ -243,7 +243,7 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
             right: -2,
             bottom: -2,
             child: InkWell(
-              onTap: () => _showPhotoPickerSheet(context),
+              onTap: _showPhotoPickerSheet,
               borderRadius: BorderRadius.circular(16),
               child: Container(
                 width: badgeSize,

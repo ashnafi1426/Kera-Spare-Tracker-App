@@ -171,5 +171,24 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('Tapping avatar camera badge opens photo picker bottom sheet', (tester) async {
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(_buildTestApp(width: 393, height: 852));
+      await tester.pumpAndSettle();
+
+      // Find camera icon on avatar and tap it
+      final cameraBadge = find.byIcon(Icons.camera_alt_rounded);
+      expect(cameraBadge, findsOneWidget);
+      await tester.tap(cameraBadge);
+      await tester.pumpAndSettle();
+
+      // Bottom sheet should appear with photo options
+      expect(find.text('Take Photo (Camera)'), findsOneWidget);
+      expect(find.text('Choose from Gallery'), findsOneWidget);
+    });
   });
 }

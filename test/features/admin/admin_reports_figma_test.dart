@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,12 +71,21 @@ class _FakeAdminReportsRepo extends Fake implements AdminRepository {
   }
 }
 
+class _CompleterAdminReportsRepo extends Fake implements AdminRepository {
+  final Completer<Result<AdminReportSummary>> completer;
+  _CompleterAdminReportsRepo(this.completer);
+
+  @override
+  Future<Result<AdminReportSummary>> getReportsSummary({String period = 'month'}) =>
+      completer.future;
+}
+
 Widget _buildTestApp({
   required double width,
   required double height,
   ThemeData? theme,
   Locale locale = const Locale('en'),
-  _FakeAdminReportsRepo? repo,
+  AdminRepository? repo,
 }) {
   return ProviderScope(
     overrides: [
@@ -243,6 +253,34 @@ void main() {
       expect(find.text('Thu'), findsOneWidget);
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Loading skeleton displays branded indicator with message', (tester) async {
+      tester.view.physicalSize = const Size(393, 852);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final completer = Completer<Result<AdminReportSummary>>();
+      final repo = _CompleterAdminReportsRepo(completer);
+
+      await tester.pumpWidget(_buildTestApp(width: 393, height: 852, repo: repo));
+      await tester.pump();
+
+      // Verifies loading state
+      expect(find.text('Loading financial analytics...'), findsOneWidget);
+
+      // Complete future to clean up state
+      completer.complete(const Result.success(AdminReportSummary(
+        period: 'daily',
+        totalRevenue: 0.0,
+        totalProfit: 0.0,
+        transactionsCount: 0,
+        activeOwnersCount: 0,
+        totalPartsCount: 0,
+        points: [],
+        topSellingItems: [],
+      )));
+      await tester.pumpAndSettle();
     });
   });
 }
