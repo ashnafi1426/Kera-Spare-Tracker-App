@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
+import 'package:kera_spare_tracker/features/parts/presentation/providers/metadata_providers.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/chart_point.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/inventory_valuation.dart';
 import 'package:kera_spare_tracker/features/reports/domain/models/sales_summary.dart';
@@ -36,6 +37,11 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        currentOwnerIdProvider.overrideWithValue('test-owner-id'),
+        brandBreakdownProvider.overrideWith((ref) async => const [
+          BrandBreakdownItem(brandName: 'CAT', count: 18, percentage: 38.0, totalRevenue: 145000),
+          BrandBreakdownItem(brandName: 'Doosan', count: 12, percentage: 26.0, totalRevenue: 98000),
+        ]),
         salesSummaryProvider.overrideWith((ref) async => summary),
         chartPointsProvider.overrideWith((ref) async => effectivePoints),
         topSellingPartsProvider.overrideWith((ref) async => topParts),
