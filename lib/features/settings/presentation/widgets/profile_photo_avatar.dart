@@ -29,18 +29,17 @@ class ProfilePhotoAvatar extends ConsumerStatefulWidget {
 class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
   bool _isProcessing = false;
 
-  Future<void> _showPhotoPickerSheet(BuildContext context) async {
-    var user = ref.read(authControllerProvider).value;
+  Future<void> _showPhotoPickerSheet() async {
+    final user = ref.read(authControllerProvider).value;
     if (user == null) {
-      user = await ref.read(authControllerProvider.future);
-    }
-    if (user == null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.tr('እባክዎ መጀመሪያ ይግቡ', 'Please log in to manage profile photo')),
-          backgroundColor: const Color(0xFFDC2626),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('እባክዎ መጀመሪያ ይግቡ', 'Please log in to manage profile photo')),
+            backgroundColor: const Color(0xFFDC2626),
+          ),
+        );
+      }
       return;
     }
 
@@ -62,11 +61,11 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  context.tr('የመገለጫ ፎቶ · Profile Photo', 'Update Profile Photo'),
+                  ctx.tr('የመገለጫ ፎቶ · Profile Photo', 'Update Profile Photo'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: context.textPrimaryColor,
+                    color: ctx.textPrimaryColor,
                   ),
                 ),
               ),
@@ -74,8 +73,8 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
               ListTile(
                 leading: const Icon(Icons.camera_alt_rounded, color: AdminColors.keraOrange),
                 title: Text(
-                  context.tr('ፎቶ አንሳ', 'Take Photo (Camera)'),
-                  style: TextStyle(color: context.textPrimaryColor, fontWeight: FontWeight.w500),
+                  ctx.tr('ፎቶ አንሳ', 'Take Photo (Camera)'),
+                  style: TextStyle(color: ctx.textPrimaryColor, fontWeight: FontWeight.w500),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -85,8 +84,8 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded, color: AdminColors.keraOrange),
                 title: Text(
-                  context.tr('ከጋለሪ ምረጥ', 'Choose from Gallery'),
-                  style: TextStyle(color: context.textPrimaryColor, fontWeight: FontWeight.w500),
+                  ctx.tr('ከጋለሪ ምረጥ', 'Choose from Gallery'),
+                  style: TextStyle(color: ctx.textPrimaryColor, fontWeight: FontWeight.w500),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -98,17 +97,15 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                 ListTile(
                   leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFFDC2626)),
                   title: Text(
-                    context.tr('ፎቶ አስወግድ', 'Remove Photo'),
+                    ctx.tr('ፎቶ አስወግድ', 'Remove Photo'),
                     style: const TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w500),
                   ),
                   onTap: () async {
-                    final messenger = ScaffoldMessenger.of(context);
-                    final message = context.tr('ፎቶ ተሰርዟል', 'Profile photo removed');
                     Navigator.pop(ctx);
                     await ref.read(authControllerProvider.notifier).updateProfilePhoto(null);
                     if (mounted) {
-                      messenger.showSnackBar(
-                        SnackBar(content: Text(message)),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(context.tr('ፎቶ ተሰርዟል', 'Profile photo removed'))),
                       );
                     }
                   },

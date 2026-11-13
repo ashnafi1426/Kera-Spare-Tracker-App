@@ -84,24 +84,34 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. Navy System Reports Header
-            _buildSystemReportsHeader(context),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(adminReportsProvider(_periodKey));
+          try {
+            await ref.read(adminReportsProvider(_periodKey).future);
+          } catch (_) {}
+        },
+        color: AdminColors.keraOrange,
+        backgroundColor: AdminColors.surfaceOf(isDark),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Navy System Reports Header
+              _buildSystemReportsHeader(context),
 
-            // 2. Segmented Period Selector (Daily / Weekly / Monthly)
-            _buildPeriodSelector(context, isDark),
+              // 2. Segmented Period Selector (Daily / Weekly / Monthly)
+              _buildPeriodSelector(context, isDark),
 
-            // 3. Reports Content Body (Financial Overview, KPI Cards, Chart, Leaderboard)
-            reportsAsync.when(
-              loading: () => _buildLoadingSkeleton(context, isDark),
-              error: (err, _) => _buildErrorState(context, isDark, err),
-              data: (summary) => _buildPopulatedReports(context, isDark, summary),
-            ),
-          ],
+              // 3. Reports Content Body (Financial Overview, KPI Cards, Chart, Leaderboard)
+              reportsAsync.when(
+                loading: () => _buildLoadingSkeleton(context, isDark),
+                error: (err, _) => _buildErrorState(context, isDark, err),
+                data: (summary) => _buildPopulatedReports(context, isDark, summary),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1033,13 +1043,18 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Chart Card Skeleton
+          // Chart Card Skeleton with Branded Indicator
           Container(
             height: 220,
             decoration: BoxDecoration(
               color: AdminColors.surfaceOf(isDark),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AdminColors.borderOf(isDark)),
+            ),
+            alignment: Alignment.center,
+            child: KeraLoadingIndicator(
+              size: 32,
+              message: context.tr('ሪፖርቶች በመጫን ላይ...', 'Loading financial analytics...'),
             ),
           ),
         ],
