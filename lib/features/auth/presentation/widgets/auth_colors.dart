@@ -32,3 +32,4 @@ class AuthColors {
   static Color textPrimaryOf(bool isDark) => isDark ? darkPrimaryText : primaryText;
   static Color textSecondaryOf(bool isDark) => isDark ? darkSecondaryText : secondaryText;
 }
+

@@ -354,43 +354,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    InkWell(
-                                      onTap: () => setState(() => _rememberMe = !_rememberMe),
-                                      borderRadius: BorderRadius.circular(6),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: 19,
-                                            height: 19,
-                                            decoration: BoxDecoration(
-                                              color: _rememberMe ? AuthColors.primaryNavy : Colors.transparent,
-                                              borderRadius: BorderRadius.circular(5),
-                                              border: Border.all(
-                                                color: _rememberMe ? AuthColors.primaryNavy : borderColor,
-                                                width: 1.5,
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () => setState(() => _rememberMe = !_rememberMe),
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              width: 19,
+                                              height: 19,
+                                              decoration: BoxDecoration(
+                                                color: _rememberMe ? AuthColors.primaryNavy : Colors.transparent,
+                                                borderRadius: BorderRadius.circular(5),
+                                                border: Border.all(
+                                                  color: _rememberMe ? AuthColors.primaryNavy : borderColor,
+                                                  width: 1.5,
+                                                ),
+                                              ),
+                                              child: _rememberMe
+                                                  ? const Icon(
+                                                      Icons.check_rounded,
+                                                      size: 14,
+                                                      color: Colors.white,
+                                                    )
+                                                  : null,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Flexible(
+                                              child: Text(
+                                                'Remember me',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: textPrimary,
+                                                ),
                                               ),
                                             ),
-                                            child: _rememberMe
-                                                ? const Icon(
-                                                    Icons.check_rounded,
-                                                    size: 14,
-                                                    color: Colors.white,
-                                                  )
-                                                : null,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'Remember me',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                              color: textPrimary,
-                                            ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     TextButton(
                                       onPressed: () => context.push('/forgot-password'),
                                       style: TextButton.styleFrom(
@@ -432,24 +439,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                       padding: const EdgeInsets.symmetric(horizontal: 16),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.fingerprint_rounded,
-                                          size: 20,
-                                          color: textPrimary,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Log in with Touch ID',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.fingerprint_rounded,
+                                            size: 20,
                                             color: textPrimary,
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Log in with Touch ID',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: textPrimary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -476,24 +486,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Create a merchant account',
-                                        style: TextStyle(
-                                          fontSize: 14.5,
-                                          fontWeight: FontWeight.bold,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Create a merchant account',
+                                          style: TextStyle(
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 16,
                                           color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
                                         ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Icon(
-                                        Icons.arrow_forward_rounded,
-                                        size: 16,
-                                        color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -503,48 +516,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 24),
 
                         // 2.5 Security & Connectivity Status
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shield_outlined,
-                              size: 16,
-                              color: textSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Secure & private',
-                              style: TextStyle(
-                                fontSize: 12,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.shield_outlined,
+                                size: 16,
                                 color: textSecondary,
-                                fontWeight: FontWeight.w500,
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: Text(
-                                '·',
-                                style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Secure & private',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            Container(
-                              width: 7.5,
-                              height: 7.5,
-                              decoration: BoxDecoration(
-                                color: isOnline ? AuthColors.success : AuthColors.accentOrange,
-                                shape: BoxShape.circle,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  '·',
+                                  style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              isOnline ? 'Online' : 'Offline',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: textSecondary,
-                                fontWeight: FontWeight.w500,
+                              Container(
+                                width: 7.5,
+                                height: 7.5,
+                                decoration: BoxDecoration(
+                                  color: isOnline ? AuthColors.success : AuthColors.accentOrange,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Text(
+                                isOnline ? 'Online' : 'Offline',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -569,27 +586,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Orange Kicker Bar: "— BUILT FOR YOUR BUSINESS"
-        Row(
-          children: [
-            Container(
-              width: 18,
-              height: 3,
-              decoration: BoxDecoration(
-                color: AuthColors.accentOrange,
-                borderRadius: BorderRadius.circular(2),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 18,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: AuthColors.accentOrange,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(width: 7),
-            const Text(
-              'BUILT FOR YOUR BUSINESS',
-              style: TextStyle(
-                color: Color(0xFFB45309),
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
+              const SizedBox(width: 7),
+              const Text(
+                'BUILT FOR YOUR BUSINESS',
+                style: TextStyle(
+                  color: Color(0xFFB45309),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 

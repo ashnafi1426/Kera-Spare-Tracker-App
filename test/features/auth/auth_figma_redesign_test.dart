@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 import 'package:kera_spare_tracker/core/utils/result.dart';
 import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
@@ -32,6 +33,7 @@ Widget _buildAuthTestApp({
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(repo),
+      initialLocaleCodeProvider.overrideWithValue('en'),
     ],
     child: MaterialApp(
       theme: theme ?? AppTheme.lightTheme,
@@ -105,14 +107,29 @@ void main() {
 
     testWidgets('2. Login screen renders with 0 overflows at 320dp narrow viewport',
         (tester) async {
+      FlutterErrorDetails? errorDetails;
+      final oldOnError = FlutterError.onError;
+      FlutterError.onError = (details) {
+        errorDetails = details;
+        oldOnError?.call(details);
+      };
+
       tester.view.physicalSize = const Size(320 * 2.0, 640 * 2.0);
       tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+      addTearDown(() {
+        FlutterError.onError = oldOnError;
+        tester.view.resetPhysicalSize();
+      });
 
       await tester.pumpWidget(
         _buildAuthTestApp(child: const LoginScreen(), width: 320, height: 640),
       );
       await tester.pumpAndSettle();
+
+      if (errorDetails != null) {
+        // ignore: avoid_print
+        print('LOGIN 320DP ERROR: ${errorDetails.toString()}');
+      }
 
       expect(find.text('KERA SPARE'), findsOneWidget);
       expect(find.text('Log in'), findsOneWidget);

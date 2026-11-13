@@ -35,37 +35,42 @@ class PhoneNumberInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Bilingual Label Row
-        Row(
-          children: [
-            Text(
-              'Phone number',
-              style: TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
-                color: textPrimary,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'ስልክ ቁጥር',
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w400,
-                color: textSecondary,
-              ),
-            ),
-            if (isRequired) ...[
-              const SizedBox(width: 4),
-              const Text(
-                '*',
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Phone number',
                 style: TextStyle(
-                  color: Color(0xFFD97706),
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
                 ),
               ),
+              const SizedBox(width: 6),
+              Text(
+                'ስልክ ቁጥር',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w400,
+                  color: textSecondary,
+                ),
+              ),
+              if (isRequired) ...[
+                const SizedBox(width: 4),
+                const Text(
+                  '*',
+                  style: TextStyle(
+                    color: Color(0xFFD97706),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
         const SizedBox(height: 7),
 

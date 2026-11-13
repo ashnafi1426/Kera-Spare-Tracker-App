@@ -362,38 +362,41 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                         // 2.6 Footer: Already have an account? Log in
                         Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Already have an account? ',
-                                style: TextStyle(
-                                  fontSize: 13.5,
-                                  color: textSecondary,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Already have an account? ',
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    color: textSecondary,
+                                  ),
                                 ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  if (Navigator.of(context).canPop()) {
-                                    context.pop();
-                                  } else {
-                                    context.go('/login');
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(6),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                  child: Text(
-                                    'Log in',
-                                    style: TextStyle(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
+                                InkWell(
+                                  onTap: () {
+                                    if (Navigator.of(context).canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go('/login');
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    child: Text(
+                                      'Log in',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -416,91 +419,98 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     Color textSecondary,
     Color borderColor,
   ) {
-    return Row(
-      children: [
-        // Step number badge: "1"
-        Container(
-          width: 22,
-          height: 22,
-          decoration: const BoxDecoration(
-            color: AuthColors.primaryNavy,
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: const Text(
-            '1',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-
-        // Text "of 2"
-        Text(
-          'of 2',
-          style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: textSecondary,
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // 2-Segment Progress Bar
-        Row(
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: 350,
+        child: Row(
           children: [
+            // Step number badge: "1"
             Container(
-              width: 32,
-              height: 3.5,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
-                borderRadius: BorderRadius.circular(2),
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                color: AuthColors.primaryNavy,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                '1',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
+
+            // Text "of 2"
+            Text(
+              'of 2',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: textSecondary,
+              ),
+            ),
+            const SizedBox(width: 10),
+
+            // 2-Segment Progress Bar
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 3.5,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF60A5FA) : AuthColors.primaryNavy,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  width: 32,
+                  height: 3.5,
+                  decoration: BoxDecoration(
+                    color: borderColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+
+            // Offline Ready Badge
             Container(
-              width: 32,
-              height: 3.5,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: borderColor,
-                borderRadius: BorderRadius.circular(2),
+                color: isDark ? const Color(0xFF3B2D11) : const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.bolt_rounded,
+                    color: AuthColors.accentOrange,
+                    size: 14,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'Offline ready',
+                    style: TextStyle(
+                      color: Color(0xFFB45309),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        const Spacer(),
-
-        // Offline Ready Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF3B2D11) : const Color(0xFFFEF3C7),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.bolt_rounded,
-                color: AuthColors.accentOrange,
-                size: 14,
-              ),
-              SizedBox(width: 4),
-              Text(
-                'Offline ready',
-                style: TextStyle(
-                  color: Color(0xFFB45309),
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -567,25 +577,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
         ),
         const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.bold,
-                color: textPrimary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                ),
               ),
-            ),
-            Text(
-              amharicTitle,
-              style: TextStyle(
-                fontSize: 11.5,
-                color: textSecondary,
+              Text(
+                amharicTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: textSecondary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
