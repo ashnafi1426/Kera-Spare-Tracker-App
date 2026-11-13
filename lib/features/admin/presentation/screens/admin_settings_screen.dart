@@ -9,6 +9,7 @@ import '../../../../core/utils/context_extensions.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../security/presentation/widgets/app_lock_settings_card.dart';
+import '../../../settings/presentation/widgets/profile_photo_avatar.dart';
 
 /// Screen 8: Complete Admin Settings & System Screen matching the finalized Figma Design Specification.
 ///

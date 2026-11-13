@@ -490,18 +490,23 @@ export async function getAdminReportsSummary({ period = 'month' } = {}) {
   if (partIds.length > 0) {
     const parts = await prisma.sparePart.findMany({
       where: { id: { in: partIds } },
-      select: { id: true, nameAm: true, nameEn: true, brand: true },
+      select: {
+        id: true,
+        name: true,
+        brand: { select: { id: true, name: true } },
+      },
     });
     parts.forEach((p) => { partMap[p.id] = p; });
   }
 
   const topSellingItems = topItems.map((item) => {
     const p = partMap[item.partId];
+    const brandName = p?.brand?.name ? ` · ${p.brand.name}` : '';
     return {
       partId: item.partId,
-      name: p ? `${p.nameEn || p.nameAm || 'Part'} · ${p.brand || ''}` : 'Spare Part',
-      units: Number(item._sum.quantity || 0),
-      totalAmount: Number(item._sum.subtotal || 0),
+      name: p ? `${p.name}${brandName}` : 'Spare Part',
+      units: Number(item._sum?.quantity || 0),
+      totalAmount: Number(item._sum?.subtotal || 0),
     };
   });
 

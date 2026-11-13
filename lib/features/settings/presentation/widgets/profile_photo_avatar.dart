@@ -13,11 +13,13 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 class ProfilePhotoAvatar extends ConsumerStatefulWidget {
   final double radius;
   final bool canEdit;
+  final String? fallbackInitials;
 
   const ProfilePhotoAvatar({
     super.key,
     this.radius = 36,
     this.canEdit = true,
+    this.fallbackInitials,
   });
 
   @override
@@ -28,8 +30,21 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
   bool _isProcessing = false;
 
   Future<void> _showPhotoPickerSheet(BuildContext context) async {
-    final user = ref.read(authControllerProvider).value;
-    if (user == null) return;
+    var user = ref.read(authControllerProvider).value;
+    if (user == null) {
+      user = await ref.read(authControllerProvider.future);
+    }
+    if (user == null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('እባክዎ መጀመሪያ ይግቡ', 'Please log in to manage profile photo')),
+          backgroundColor: const Color(0xFFDC2626),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
 
     await showModalBottomSheet(
       context: context,
@@ -169,15 +184,22 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider).value;
-    final photoUrl = user?.avatarUrl;
-    final name = user?.businessName ?? user?.phoneNumber ?? '?';
+    final photoUrl = user?.photoUrl ?? user?.avatarUrl;
+    final name = (widget.fallbackInitials != null && widget.fallbackInitials!.isNotEmpty)
+        ? widget.fallbackInitials!
+        : (user?.businessName != null && user!.businessName.isNotEmpty)
+            ? user.businessName
+            : (user?.phoneNumber ?? 'KS');
     final isDark = context.isDark;
+
+    final badgeSize = (widget.radius * 0.77).clamp(20.0, 28.0);
+    final badgeIconSize = (widget.radius * 0.42).clamp(11.0, 14.0);
 
     Widget avatarContent;
     if (_isProcessing) {
       avatarContent = const SizedBox(
-        width: 24,
-        height: 24,
+        width: 22,
+        height: 22,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(AdminColors.keraOrange),
@@ -193,44 +215,48 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
     }
 
     return Stack(
+      clipBehavior: Clip.none,
       children: [
-        Container(
-          width: widget.radius * 2,
-          height: widget.radius * 2,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E3A5F) : AdminColors.headerNavy,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: AdminColors.keraOrange,
-              width: 2,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
+        GestureDetector(
+          onTap: widget.canEdit ? () => _showPhotoPickerSheet(context) : null,
+          child: Container(
+            width: widget.radius * 2,
+            height: widget.radius * 2,
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E3A5F) : AdminColors.headerNavy,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AdminColors.keraOrange,
+                width: 1.5,
               ),
-            ],
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: avatarContent,
           ),
-          alignment: Alignment.center,
-          child: avatarContent,
         ),
         if (widget.canEdit)
           Positioned(
-            right: 0,
-            bottom: 0,
+            right: -2,
+            bottom: -2,
             child: InkWell(
               onTap: () => _showPhotoPickerSheet(context),
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                width: 28,
-                height: 28,
+                width: badgeSize,
+                height: badgeSize,
                 decoration: BoxDecoration(
                   color: AdminColors.keraOrange,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: context.cardBg,
-                    width: 2,
+                    width: 1.5,
                   ),
                   boxShadow: const [
                     BoxShadow(
@@ -240,9 +266,10 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                     ),
                   ],
                 ),
-                child: const Icon(
+                alignment: Alignment.center,
+                child: Icon(
                   Icons.camera_alt_rounded,
-                  size: 14,
+                  size: badgeIconSize,
                   color: Colors.white,
                 ),
               ),
