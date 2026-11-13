@@ -8,8 +8,7 @@ import '../../../../core/utils/result.dart';
 import '../../domain/models/admin_models.dart';
 import '../../domain/repositories/admin_repository.dart';
 
-/// Production implementation of [AdminRepository] connecting to /api/v1/admin/* via Dio.
-/// Strictly ONLINE ONLY; never accesses local Drift tables or sync queues.
+
 class ApiAdminRepository implements AdminRepository {
   final Dio _dio;
   final FlutterSecureStorage _storage;

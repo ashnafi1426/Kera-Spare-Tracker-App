@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kera_spare_tracker/core/providers/locale_provider.dart';
 import 'package:kera_spare_tracker/core/theme/app_theme.dart';
 import 'package:kera_spare_tracker/core/utils/result.dart';
-import 'package:kera_spare_tracker/features/auth/domain/models/auth_user.dart';
 import 'package:kera_spare_tracker/features/auth/domain/repositories/auth_repository.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:kera_spare_tracker/features/auth/presentation/screens/login_screen.dart';
