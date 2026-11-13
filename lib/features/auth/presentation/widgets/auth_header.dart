@@ -257,17 +257,17 @@ class AuthHeader extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              ListTile(
+              const ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.phone_in_talk_rounded, color: AuthColors.primaryNavy),
-                title: const Text('+251 911 000 000 / +251 977 777 777', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Kera, Addis Ababa, Ethiopia'),
+                leading: Icon(Icons.phone_in_talk_rounded, color: AuthColors.primaryNavy),
+                title: Text('+251 911 000 000 / +251 977 777 777', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text('Kera, Addis Ababa, Ethiopia'),
               ),
-              ListTile(
+              const ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.email_outlined, color: AuthColors.primaryNavy),
-                title: const Text('support@keraspares.com', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('24/7 Merchant Support'),
+                leading: Icon(Icons.email_outlined, color: AuthColors.primaryNavy),
+                title: Text('support@keraspares.com', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text('24/7 Merchant Support'),
               ),
             ],
           ),
