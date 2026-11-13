@@ -491,47 +491,11 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar circle with camera badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF102D55),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'KS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -2,
-                right: -2,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: AdminColors.keraOrange,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: context.cardBg, width: 1.5),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.camera_alt_rounded,
-                    size: 11,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          // Avatar circle with camera badge & interactive photo upload
+          const ProfilePhotoAvatar(
+            radius: 26,
+            canEdit: true,
+            fallbackInitials: 'KS',
           ),
           const SizedBox(width: 14),
 

@@ -397,11 +397,11 @@ class AdminReportSummary {
   factory AdminReportSummary.fromJson(Map<String, dynamic> json) {
     return AdminReportSummary(
       period: json['period']?.toString() ?? 'month',
-      totalRevenue: (json['totalRevenue'] as num?)?.toDouble() ?? 0.0,
-      totalProfit: (json['totalProfit'] as num?)?.toDouble() ?? 0.0,
-      transactionsCount: (json['transactionsCount'] as num?)?.toInt() ?? 0,
-      activeOwnersCount: (json['activeOwnersCount'] as num?)?.toInt() ?? 0,
-      totalPartsCount: (json['totalPartsCount'] as num?)?.toInt() ?? 0,
+      totalRevenue: ((json['totalRevenue'] ?? json['revenue'] ?? json['sales']) as num?)?.toDouble() ?? 0.0,
+      totalProfit: ((json['totalProfit'] ?? json['profit'] ?? json['estProfit']) as num?)?.toDouble() ?? 0.0,
+      transactionsCount: ((json['transactionsCount'] ?? json['totalTransactions'] ?? json['transactions']) as num?)?.toInt() ?? 0,
+      activeOwnersCount: ((json['activeOwnersCount'] ?? json['activeOwners'] ?? json['ownersCount']) as num?)?.toInt() ?? 0,
+      totalPartsCount: ((json['totalPartsCount'] ?? json['partsCount'] ?? json['totalParts']) as num?)?.toInt() ?? 0,
       points: (json['points'] as List?)
               ?.map((p) => AdminReportPoint.fromJson(p as Map<String, dynamic>))
               .toList() ??
