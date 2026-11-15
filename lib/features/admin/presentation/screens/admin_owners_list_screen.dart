@@ -642,13 +642,13 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
               value: OwnerSortOption.oldest,
               child: Text(context.tr('የቆየ', 'Oldest')),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
               value: OwnerSortOption.nameAsc,
-              child: const Text('Name (A-Z)'),
+              child: Text('Name (A-Z)'),
             ),
-            PopupMenuItem(
+            const PopupMenuItem(
               value: OwnerSortOption.nameDesc,
-              child: const Text('Name (Z-A)'),
+              child: Text('Name (Z-A)'),
             ),
             PopupMenuItem(
               value: OwnerSortOption.lastSync,
@@ -761,16 +761,6 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
     final isInactive = statusUpper == 'INACTIVE';
     final isActive = !isSuspended && !isPending && !isInactive;
 
-    // Extract initials
-    final initials = owner.businessName.trim().isNotEmpty
-        ? owner.businessName
-            .trim()
-            .split(RegExp(r'\s+'))
-            .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
-            .take(2)
-            .join()
-        : 'KS';
-
     return ListCard(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 14),
@@ -782,30 +772,15 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Avatar
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEAF1FA),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                clipBehavior: Clip.antiAlias,
-                child: (owner.photoUrl != null && owner.photoUrl!.isNotEmpty)
-                    ? KeraImageWidget(
-                        imageUrl: owner.photoUrl,
-                        width: 42,
-                        height: 42,
-                        fit: BoxFit.cover,
-                      )
-                    : Text(
-                        initials,
-                        style: TextStyle(
-                          color: isDark ? Colors.white : const Color(0xFF173655),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+              KeraAvatarWidget(
+                photoUrl: owner.photoUrl ?? owner.thumbnailUrl,
+                name: owner.businessName,
+                radius: 21,
+                isDark: isDark,
+                backgroundColor:
+                    isDark ? const Color(0xFF1E293B) : const Color(0xFFEAF1FA),
+                textColor:
+                    isDark ? Colors.white : const Color(0xFF173655),
               ),
               const SizedBox(width: 12),
 
@@ -904,25 +879,29 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Row(
-                    children: [
-                      Text(
-                        '${context.tr("ዕቃ", "Parts")} ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.textSecondaryColor,
-                          fontWeight: FontWeight.w500,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${context.tr("ዕቃ", "Parts")} ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.textSecondaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${owner.partsCount}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: context.textPrimaryColor,
+                        TextSpan(
+                          text: '${owner.partsCount}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: context.textPrimaryColor,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
@@ -930,27 +909,31 @@ class _AdminOwnersListScreenState extends ConsumerState<AdminOwnersListScreen> {
                   height: 16,
                   color: context.borderColor,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Row(
-                    children: [
-                      Text(
-                        '${context.tr("ሽያጭ", "Sales")} ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.textSecondaryColor,
-                          fontWeight: FontWeight.w500,
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${context.tr("ሽያጭ", "Sales")} ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.textSecondaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${owner.salesCount}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: context.textPrimaryColor,
+                        TextSpan(
+                          text: '${owner.salesCount}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: context.textPrimaryColor,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
