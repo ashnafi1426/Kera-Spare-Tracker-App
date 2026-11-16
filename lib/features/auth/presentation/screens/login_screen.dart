@@ -203,7 +203,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
 
         _failedAttempts++;
-        if (_failedAttempts >= 5) {
+        if (_failedAttempts >= 5) { 
           _lockoutUntil = DateTime.now().add(const Duration(seconds: 30));
         }
 
