@@ -6,28 +6,23 @@ import '../../../../core/design/tokens/admin_colors.dart';
 import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/utils/context_extensions.dart';
-import '../../../../core/widgets/kera_loading_indicator.dart';
 import '../../../../core/widgets/kera_logo_widget.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../security/presentation/widgets/app_lock_settings_card.dart';
-import '../../../settings/presentation/widgets/profile_photo_avatar.dart';
-import '../providers/admin_providers.dart';
-import '../widgets/admin_header_bar.dart';
 
-/// Screen 8: Complete Admin Settings Screen with all 13 sections:
-/// 1. Profile: admin name, phone, change profile photo
-/// 2. Language: Amharic (default) / English
-/// 3. Appearance: System / Light / Dark
-/// 4. App Lock: PIN, biometrics, auto-lock timeouts, lockout, PBKDF2 hash, offline
-/// 5. Password: Change account password with strength check & show/hide
-/// 6. Brands: CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY with add/edit/toggle
-/// 7. Categories & Units of measurement
-/// 8. Subscription plans: Free trial, Standard, Pro (Coming soon)
-/// 9. Notifications: new registrations, sync conflicts, backup results
-/// 10. Sync rules: unique record IDs, conflict policy (newest edit wins)
-/// 11. Backup and recovery: last backup time, back up now, restore points
-/// 12. Security and activity log: session timeout, recent actions
-/// 13. About: logo, version, support, Logout
+/// Screen 8: Complete Admin Settings & System Screen matching the finalized Figma Design Specification.
+///
+/// Features:
+/// - Executive Navy Settings Header with Kera Logo, Title, Subtitle, and Notification Bell.
+/// - Admin Profile Card: KS avatar with camera badge, admin name, phone, Super Administrator role badge,
+///   and edit pencil action.
+/// - Language Selector Card: Globe icon with segmented control (Amharic / English).
+/// - Appearance / Theme Mode Card: Sun icon with segmented control (Light / Dark / System).
+/// - App Lock & Security Section:
+///   - App Lock Card: Lock icon, title, dynamic status subtitle, and switch toggle.
+///   - Account Password Card: Key icon, title, subtitle, and navigation chevron.
+/// - Preserved administrative modules: OEM Brands, Categories, Backup & Recovery, Logout.
+/// - Zero RenderFlex overflows down to 320dp screen width and dark mode support.
 class AdminSettingsScreen extends ConsumerStatefulWidget {
   const AdminSettingsScreen({super.key});
 
@@ -38,49 +33,9 @@ class AdminSettingsScreen extends ConsumerStatefulWidget {
 class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   bool _isLoggingOut = false;
 
-  // 1. Profile state
-  String _adminName = 'Admin Tesfaye';
+  // Profile local fallback state
+  String _adminName = 'Admin Tesfa';
   String _adminPhone = '+251 911 234 567';
-
-  // 6. Brands list
-  final Map<String, bool> _brandToggles = {
-    'CAT': true,
-    'Doosan': true,
-    'Develon': true,
-    'CTP': true,
-    'IPD': true,
-    'Hitachi': true,
-    'SANY': true,
-  };
-
-  // 7. Categories & Units
-  final List<String> _categories = [
-    'Engine (ሞተር)',
-    'Hydraulics (ሃይድሮሊክስ)',
-    'Transmission (ማስተላለፊያ)',
-    'Undercarriage (የስር ዕቃዎች)',
-    'Electrical (ኤሌክትሪክ)',
-    'Filters (ማጣሪያዎች)',
-  ];
-
-  final List<String> _units = [
-    'Pcs (ቁራጭ)',
-    'Sets (ስብስብ)',
-    'Kg (ኪሎግራም)',
-    'Liters (ሊትር)',
-    'Meters (ሜትር)',
-  ];
-
-  // 9. Notifications toggles
-  bool _notifyNewRegistrations = true;
-  bool _notifySyncConflicts = true;
-  bool _notifyBackupResult = true;
-
-  // 10. Sync Rules state
-  final String _conflictPolicy = 'newest_wins'; // 'newest_wins' or 'flag_for_review'
-
-  // 12. Security state
-  final String _sessionTimeout = '30m';
 
   // Dialog to Edit Profile
   void _showEditProfileDialog() {
@@ -91,10 +46,14 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.cardBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(
           context.tr('የአድሚን መረጃ አድስ', 'Edit Admin Profile'),
-          style: TextStyle(color: context.textPrimaryColor),
+          style: TextStyle(
+            color: context.textPrimaryColor,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -104,7 +63,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               style: TextStyle(color: context.textPrimaryColor),
               decoration: InputDecoration(
                 labelText: context.tr('ሙሉ ስም', 'Full Name'),
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 12),
@@ -113,7 +72,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               style: TextStyle(color: context.textPrimaryColor),
               decoration: InputDecoration(
                 labelText: context.tr('ስልክ ቁጥር', 'Phone Number'),
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
@@ -121,12 +80,13 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(context.tr('ሰርዝ', 'Cancel')),
+            child: Text(context.tr('ሰርዝ', 'Cancel'), style: TextStyle(color: context.textSecondaryColor)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AdminColors.keraOrange,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
               setState(() {
@@ -136,7 +96,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               Navigator.pop(ctx);
               context.showSnackBar(context.tr('መረጃው ተዘምኗል', 'Profile updated'));
             },
-            child: Text(context.tr('አስቀምጥ', 'Save')),
+            child: Text(context.tr('አስቀምጥ', 'Save'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -156,14 +116,20 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDlgState) => AlertDialog(
           backgroundColor: context.cardBg,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           title: Row(
             children: [
-              const Icon(Icons.password_rounded, color: AdminColors.keraOrange),
+              const Icon(Icons.vpn_key_outlined, color: AdminColors.keraOrange, size: 22),
               const SizedBox(width: 8),
-              Text(
-                context.tr('የይለፍ ቃል ቀይር', 'Change Password'),
-                style: TextStyle(color: context.textPrimaryColor),
+              Expanded(
+                child: Text(
+                  context.tr('የይለፍ ቃል ቀይር', 'Change Password'),
+                  style: TextStyle(
+                    color: context.textPrimaryColor,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ],
           ),
@@ -173,6 +139,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
               children: [
                 if (errorMsg != null) ...[
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.red.shade100,
@@ -191,7 +158,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: TextStyle(color: context.textPrimaryColor),
                   decoration: InputDecoration(
                     labelText: context.tr('የአሁኑ የይለፍ ቃል', 'Current Password'),
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -200,8 +167,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   obscureText: obscure,
                   style: TextStyle(color: context.textPrimaryColor),
                   decoration: InputDecoration(
-                    labelText: context.tr('አዲስ የይለፍ ቃል (ቢያንስ 6 ፊደላት)', 'New Password (min 6 chars)'),
-                    border: const OutlineInputBorder(),
+                    labelText: context.tr('አዲስ የይለፍ ቃል', 'New Password (min 6 chars)'),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -211,7 +178,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   style: TextStyle(color: context.textPrimaryColor),
                   decoration: InputDecoration(
                     labelText: context.tr('አዲሱን የይለፍ ቃል አረጋግጥ', 'Confirm New Password'),
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -219,6 +186,7 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   children: [
                     Checkbox(
                       value: !obscure,
+                      activeColor: AdminColors.keraOrange,
                       onChanged: (val) => setDlgState(() => obscure = !(val ?? false)),
                     ),
                     Text(
@@ -233,12 +201,13 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(context.tr('ሰርዝ', 'Cancel')),
+              child: Text(context.tr('ሰርዝ', 'Cancel'), style: TextStyle(color: context.textSecondaryColor)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AdminColors.keraOrange,
                 foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () async {
                 if (newPassCtrl.text.length < 6) {
@@ -266,57 +235,10 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                   setDlgState(() => errorMsg = e.toString());
                 }
               },
-              child: Text(context.tr('ቀይር', 'Change')),
+              child: Text(context.tr('ቀይር', 'Change'), style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Dialog to Add / Edit Brand
-  void _showAddBrandDialog([String? existingBrand]) {
-    final controller = TextEditingController(text: existingBrand ?? '');
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: context.cardBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          existingBrand == null
-              ? context.tr('አዲስ ብራንድ ጨምር', 'Add OEM Brand')
-              : context.tr('ብራንድ አድስ', 'Edit Brand'),
-          style: TextStyle(color: context.textPrimaryColor),
-        ),
-        content: TextField(
-          controller: controller,
-          style: TextStyle(color: context.textPrimaryColor),
-          decoration: InputDecoration(
-            hintText: context.tr('የብራንድ ስም (ምሳሌ፦ Komatsu)', 'Brand name (e.g. Komatsu, Volvo)'),
-            hintStyle: TextStyle(color: context.textSecondaryColor),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(context.tr('ሰርዝ', 'Cancel')),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AdminColors.keraOrange,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                setState(() => _brandToggles[name] = true);
-                ref.read(adminRepositoryProvider).createBrand(name);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Text(existingBrand == null ? context.tr('ጨምር', 'Add') : context.tr('አስቀምጥ', 'Save')),
-          ),
-        ],
       ),
     );
   }
@@ -326,14 +248,18 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: context.cardBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Row(
           children: [
-            const Icon(Icons.logout_rounded, color: AdminColors.danger),
+            const Icon(Icons.logout_rounded, color: AdminColors.danger, size: 22),
             const SizedBox(width: 8),
             Text(
               context.tr('ከአካውንት መውጣት', 'Logout'),
-              style: TextStyle(color: context.textPrimaryColor),
+              style: TextStyle(
+                color: context.textPrimaryColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
             ),
           ],
         ),
@@ -342,20 +268,21 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             'ከአስተዳዳሪ አካውንት መውጣት ይፈልጋሉ? ያልተመሳሰለ መረጃ በስልክዎ ላይ እንደተጠበቀ ይቆያል።',
             'Are you sure you want to log out of Admin Console? Unsynced changes remain safely on this device.',
           ),
-          style: TextStyle(color: context.textSecondaryColor),
+          style: TextStyle(color: context.textSecondaryColor, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.tr('ይቅር', 'Cancel')),
+            child: Text(context.tr('ይቅር', 'Cancel'), style: TextStyle(color: context.textSecondaryColor)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AdminColors.danger,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.tr('ውጣ', 'Logout')),
+            child: Text(context.tr('ውጣ', 'Logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -382,225 +309,347 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     final currentLocale = ref.watch(localeControllerProvider);
     final isAmharic = currentLocale.languageCode == 'am';
     final themeMode = ref.watch(themeModeControllerProvider);
+    final authState = ref.watch(authControllerProvider);
+    final isDark = context.isDark;
+
+    // Use live session info if available
+    final user = authState.asData?.value;
+    final displayName = (user != null && user.name.isNotEmpty) ? user.name : _adminName;
+    final displayPhone = (user != null && user.phoneNumber.isNotEmpty) ? user.phoneNumber : _adminPhone;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Fixed Navy Header
-            _buildNavyHeader(context),
+      body: Column(
+        children: [
+          // 1. Executive Navy Settings Header matching Figma
+          _buildExecutiveNavyHeader(context),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-              child: Column(
-                children: [
-                  // 1. Profile Section
-                  _buildProfileCard(),
-                  const SizedBox(height: 16),
+          // 2. Scrollable Body
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+              children: [
+                // A. Admin Profile Card
+                _buildAdminProfileCard(context, displayName, displayPhone, isDark),
+                const SizedBox(height: 14),
 
-                  // 2. Language Section
-                  _buildLanguageCard(isAmharic),
-                  const SizedBox(height: 16),
+                // B. Language Selector Card
+                _buildLanguageCard(context, isAmharic, isDark),
+                const SizedBox(height: 14),
 
-                  // 3. Appearance Section
-                  _buildThemeCard(themeMode),
-                  const SizedBox(height: 16),
+                // C. Appearance / Theme Mode Card
+                _buildThemeModeCard(context, themeMode, isDark),
+                const SizedBox(height: 14),
 
-                  // 4. App Lock (New - PIN, Biometrics, Timeouts, Lockout)
-                  _buildAppLockSection(),
-                  const SizedBox(height: 16),
+                // D. App Lock & Security Section
+                _buildAppLockAndSecuritySection(context, isDark),
+                const SizedBox(height: 14),
 
-                  // 5. Password Section
-                  _buildPasswordCard(),
-                  const SizedBox(height: 16),
-
-                  // 6. Brands Section (CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY)
-                  _buildBrandsCard(),
-                  const SizedBox(height: 16),
-
-                  // 7. Categories & Units Section
-                  _buildCategoriesAndUnitsCard(),
-                  const SizedBox(height: 16),
-
-                  // 8. Subscription Plans Section
-                  _buildSubscriptionPlansCard(),
-                  const SizedBox(height: 16),
-
-                  // 9. Notifications Section
-                  _buildNotificationsCard(),
-                  const SizedBox(height: 16),
-
-                  // 10. Sync Rules Section
-                  _buildSyncRulesCard(),
-                  const SizedBox(height: 16),
-
-                  // 11. Backup & Recovery Section
-                  _buildBackupRecoveryCard(),
-                  const SizedBox(height: 16),
-
-                  // 12. Security & Activity Log Section
-                  _buildSecurityActivityLogCard(),
-                  const SizedBox(height: 16),
-
-                  // 13. About & Logout Section
-                  _buildAboutAndLogoutCard(),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                // E. Additional Administrative Hub (Brands, Backup, Logout)
+                _buildAdditionalModulesCard(context, isDark),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildNavyHeader(BuildContext context) {
+  // 1. Executive Navy Settings Header matching Figma
+  Widget _buildExecutiveNavyHeader(BuildContext context) {
     final isDark = context.isDark;
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF071322) : AdminColors.headerNavy,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      color: isDark ? const Color(0xFF071322) : const Color(0xFF173655),
+      padding: EdgeInsets.fromLTRB(16, topPadding + 10, 16, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row: Kera Logo Plate + Brand Text + Notification Bell
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Logo
               const KeraLogoWidget(size: 38, borderRadius: 10),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
+
+              // KERA / SPARE TRACKER brand text
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.tr('ቅንብሮች · Settings', 'Admin Settings & System'),
-                      style: const TextStyle(
+                    const Text(
+                      'KERA',
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
                       ),
                     ),
                     Text(
-                      context.tr('የስርዓት ቁጥጥር እና ማስተካከያዎች', 'Complete system administration & security'),
-                      style: const TextStyle(
-                        color: AdminColors.headerTextSecondary,
-                        fontSize: 12,
+                      'SPARE TRACKER',
+                      style: TextStyle(
+                        color: const Color(0xFFA5B4CB).withValues(alpha: 0.9),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.1,
                       ),
                     ),
                   ],
                 ),
               ),
-              AdminHeaderIconButton(
-                icon: Icons.notifications_outlined,
-                hasBadge: true,
+
+              // Notification Bell with Unread Dot
+              InkWell(
                 onTap: () => context.push('/admin/notifications'),
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E3A5F),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const Icon(
+                        Icons.notifications_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      Positioned(
+                        top: 9,
+                        right: 9,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: AdminColors.keraOrange,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 14),
+
+          // Header Title & Subtitle
+          Text(
+            context.tr('ቅንብሮችና ሲስተም', 'Admin Settings & System'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            context.tr('የስርዓት አስተዳደር እና ደህንነት', 'Complete system administration & security.'),
+            style: const TextStyle(
+              color: Color(0xFFA5B4CB),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // 1. Profile Section Card
-  Widget _buildProfileCard() {
+  // A. Admin Profile Card matching Figma
+  Widget _buildAdminProfileCard(
+    BuildContext context,
+    String name,
+    String phone,
+    bool isDark,
+  ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: context.borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const ProfilePhotoAvatar(radius: 30),
+          // Avatar circle with camera badge
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF102D55),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  'KS',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -2,
+                right: -2,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: AdminColors.keraOrange,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: context.cardBg, width: 1.5),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    size: 11,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(width: 14),
+
+          // Name, Phone, Role Badge
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _adminName,
+                  name,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: context.textPrimaryColor,
+                    letterSpacing: -0.2,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _adminPhone,
+                  phone,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: context.textSecondaryColor,
+                    fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AdminColors.keraOrange.withValues(alpha: 0.15),
+                    color: isDark ? const Color(0xFF38230D) : const Color(0xFFFFF3E3),
                     borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFFE8A33A).withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
                   ),
                   child: Text(
                     context.tr('ዋና አስተዳዳሪ', 'Super Administrator'),
                     style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AdminColors.keraOrange,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFD97706),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            color: AdminColors.keraOrange,
-            tooltip: context.tr('አድስ', 'Edit'),
-            onPressed: _showEditProfileDialog,
+          const SizedBox(width: 8),
+
+          // Edit pencil icon button
+          InkWell(
+            onTap: _showEditProfileDialog,
+            borderRadius: BorderRadius.circular(8),
+            child: const Padding(
+              padding: EdgeInsets.all(6.0),
+              child: Icon(
+                Icons.edit_outlined,
+                color: AdminColors.keraOrange,
+                size: 20,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // 2. Language Section Card
-  Widget _buildLanguageCard(bool isAmharic) {
-    final isDark = context.isDark;
+  // B. Language Selector Card matching Figma
+  Widget _buildLanguageCard(BuildContext context, bool isAmharic, bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: context.borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title Row with Globe Icon
           Row(
             children: [
-              const Icon(Icons.language_rounded, color: AdminColors.keraOrange, size: 20),
+              const Icon(
+                Icons.language_rounded,
+                color: AdminColors.keraOrange,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   context.tr('ቋንቋ · Language', 'Language / ቋንቋ'),
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                     color: context.textPrimaryColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
+
+          // Segmented Switch: Amharic / English
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -610,51 +659,25 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: InkWell(
-                    onTap: () => ref.read(localeControllerProvider.notifier).setLocale(const Locale('am')),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isAmharic
-                            ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'አማርኛ (ነባሪ)',
-                        style: TextStyle(
-                          color: isAmharic ? Colors.white : context.textSecondaryColor,
-                          fontWeight: isAmharic ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
+                  child: _buildSegmentOption(
+                    context,
+                    label: 'አማርኛ (የአገር)',
+                    isSelected: isAmharic,
+                    isDark: isDark,
+                    onTap: () => ref
+                        .read(localeControllerProvider.notifier)
+                        .setLocale(const Locale('am')),
                   ),
                 ),
                 Expanded(
-                  child: InkWell(
-                    onTap: () => ref.read(localeControllerProvider.notifier).setLocale(const Locale('en')),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: !isAmharic
-                            ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'English',
-                        style: TextStyle(
-                          color: !isAmharic ? Colors.white : context.textSecondaryColor,
-                          fontWeight: !isAmharic ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
+                  child: _buildSegmentOption(
+                    context,
+                    label: 'English',
+                    isSelected: !isAmharic,
+                    isDark: isDark,
+                    onTap: () => ref
+                        .read(localeControllerProvider.notifier)
+                        .setLocale(const Locale('en')),
                   ),
                 ),
               ],
@@ -665,37 +688,56 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     );
   }
 
-  // 3. Theme Mode Card
-  Widget _buildThemeCard(ThemeMode themeMode) {
-    final isDark = context.isDark;
+  // C. Appearance / Theme Mode Card matching Figma
+  Widget _buildThemeModeCard(
+    BuildContext context,
+    ThemeMode themeMode,
+    bool isDark,
+  ) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: context.borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 4,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title Row with Sun Icon
           Row(
             children: [
-              const Icon(Icons.palette_outlined, color: AdminColors.keraOrange, size: 20),
+              const Icon(
+                Icons.wb_sunny_outlined,
+                color: AdminColors.keraOrange,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   context.tr('ገጽታ · Theme Mode', 'Appearance / Theme Mode'),
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                     color: context.textPrimaryColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
+
+          // 3-Segment Switch: Light / Dark / System
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
@@ -704,23 +746,41 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
             ),
             child: Row(
               children: [
-                _buildThemeOption(
-                  label: context.tr('ቀላል', 'Light'),
-                  icon: Icons.light_mode_rounded,
-                  isSelected: themeMode == ThemeMode.light,
-                  onTap: () => ref.read(themeModeControllerProvider.notifier).setThemeMode(ThemeMode.light),
+                Expanded(
+                  child: _buildThemeSegmentOption(
+                    context,
+                    label: context.tr('ቀላል', 'Light'),
+                    icon: Icons.light_mode_outlined,
+                    isSelected: themeMode == ThemeMode.light,
+                    isDark: isDark,
+                    onTap: () => ref
+                        .read(themeModeControllerProvider.notifier)
+                        .setThemeMode(ThemeMode.light),
+                  ),
                 ),
-                _buildThemeOption(
-                  label: context.tr('ጨለማ', 'Dark'),
-                  icon: Icons.dark_mode_rounded,
-                  isSelected: themeMode == ThemeMode.dark,
-                  onTap: () => ref.read(themeModeControllerProvider.notifier).setThemeMode(ThemeMode.dark),
+                Expanded(
+                  child: _buildThemeSegmentOption(
+                    context,
+                    label: context.tr('ጨለማ', 'Dark'),
+                    icon: Icons.dark_mode_outlined,
+                    isSelected: themeMode == ThemeMode.dark,
+                    isDark: isDark,
+                    onTap: () => ref
+                        .read(themeModeControllerProvider.notifier)
+                        .setThemeMode(ThemeMode.dark),
+                  ),
                 ),
-                _buildThemeOption(
-                  label: context.tr('ሲስተም', 'System'),
-                  icon: Icons.brightness_auto_rounded,
-                  isSelected: themeMode == ThemeMode.system,
-                  onTap: () => ref.read(themeModeControllerProvider.notifier).setThemeMode(ThemeMode.system),
+                Expanded(
+                  child: _buildThemeSegmentOption(
+                    context,
+                    label: context.tr('ሲስተም', 'System'),
+                    icon: Icons.devices_rounded,
+                    isSelected: themeMode == ThemeMode.system,
+                    isDark: isDark,
+                    onTap: () => ref
+                        .read(themeModeControllerProvider.notifier)
+                        .setThemeMode(ThemeMode.system),
+                  ),
                 ),
               ],
             ),
@@ -730,740 +790,354 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     );
   }
 
-  Widget _buildThemeOption({
+  Widget _buildSegmentOption(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? const Color(0xFF1E3A5F) : const Color(0xFF173655))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : context.textSecondaryColor,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeSegmentOption(
+    BuildContext context, {
     required String label,
     required IconData icon,
     required bool isSelected,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
-    final isDark = context.isDark;
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFF0C2340))
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 15,
-                color: isSelected ? Colors.white : context.textSecondaryColor,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : context.textSecondaryColor,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 4. App Lock Section (PIN, Biometrics, Timeouts, Lockout)
-  Widget _buildAppLockSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Row(
-            children: [
-              const Icon(Icons.security_rounded, color: AdminColors.keraOrange, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                context.tr('የመተግበሪያ ቁልፍ · App Lock', 'App Lock & Security'),
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: context.textPrimaryColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const AppLockSettingsCard(),
-      ],
-    );
-  }
-
-  // 5. Password Section
-  Widget _buildPasswordCard() {
-    return Material(
-      color: context.cardBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: context.borderColor),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
-        leading: const Icon(Icons.password_rounded, color: AdminColors.keraOrange),
-        title: Text(
-          context.tr('የይለፍ ቃል መቀየሪያ', 'Account Password'),
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: context.textPrimaryColor,
-          ),
-        ),
-        subtitle: Text(
-          context.tr('የአስተዳዳሪ መለያ የይለፍ ቃል ቀይር', 'Change admin login password & strength check'),
-          style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-        ),
-        trailing: const Icon(Icons.chevron_right_rounded),
-        onTap: _showChangePasswordDialog,
-      ),
-    );
-  }
-
-  // 6. Brands Section (CAT, Doosan, Develon, CTP, IPD, Hitachi, SANY)
-  Widget _buildBrandsCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.sell_outlined, color: AdminColors.keraOrange, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('ብራንዶች · Brands (OEM)', 'OEM Brands & Manufacturers'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AdminColors.keraOrange,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                ),
-                onPressed: () => _showAddBrandDialog(),
-                child: Text(
-                  context.tr('+ ጨምር', '+ Add'),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          for (final entry in _brandToggles.entries) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: context.isDark ? const Color(0xFF1E385C) : const Color(0xFFE2E8F0),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          entry.key.substring(0, entry.key.length >= 2 ? 2 : 1),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: context.isDark ? Colors.white : AdminColors.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        entry.key,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 18),
-                        color: context.textSecondaryColor,
-                        onPressed: () => _showAddBrandDialog(entry.key),
-                      ),
-                      Switch(
-                        value: entry.value,
-                        activeThumbColor: AdminColors.keraOrange,
-                        activeTrackColor: const Color(0xFFFED7AA),
-                        onChanged: (val) {
-                          setState(() => _brandToggles[entry.key] = val);
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            if (entry.key != _brandToggles.keys.last) Divider(height: 8, color: context.borderColor),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // 7. Categories & Units of Measurement Section
-  Widget _buildCategoriesAndUnitsCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.category_outlined, color: AdminColors.keraOrange, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  context.tr('ምድቦች እና መለኪያ አሃዶች', 'Categories & Units of Measurement'),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimaryColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            context.tr('የእቃ ምድቦች', 'Part Categories'),
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondaryColor),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: _categories.map((c) => Chip(
-              label: Text(c, style: const TextStyle(fontSize: 11)),
-              backgroundColor: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-              side: BorderSide(color: context.borderColor),
-            )).toList(),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            context.tr('መለኪያ አሃዶች (Units)', 'Measurement Units'),
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondaryColor),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: _units.map((u) => Chip(
-              label: Text(u, style: const TextStyle(fontSize: 11)),
-              backgroundColor: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-              side: BorderSide(color: context.borderColor),
-            )).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 8. Subscription Plans Section
-  Widget _buildSubscriptionPlansCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.card_membership_rounded, color: AdminColors.keraOrange, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('እቅዶች · Subscription Plans', 'Subscription Plans & Tiers'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => context.push('/admin/plans'),
-                child: Text(context.tr('ዝርዝር እይ', 'View Details')),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              _buildPlanBadge('Free Trial (ነጻ ሙከራ)', context.tr('ነጻ', 'Active Free')),
-              const SizedBox(width: 8),
-              _buildPlanBadge('Standard (መደበኛ)', context.tr('በቅርቡ', 'Coming soon')),
-              const SizedBox(width: 8),
-              _buildPlanBadge('Pro (ፕሪሚየም)', context.tr('በቅርቡ', 'Coming soon')),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlanBadge(String title, String badge) {
-    return Expanded(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: context.isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+          color: isSelected
+              ? (isDark ? const Color(0xFF1E3A5F) : const Color(0xFF173655))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: context.borderColor),
-        ),
-        child: Column(
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textPrimaryColor),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AdminColors.keraOrange.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                badge,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AdminColors.keraOrange),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 9. Notifications Section
-  Widget _buildNotificationsCard() {
-    return Material(
-      color: context.cardBg,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: context.borderColor),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.notifications_active_outlined, color: AdminColors.keraOrange, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    context.tr('ማሳወቂያዎች · Notifications', 'Administrative Alerts & Notifications'),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimaryColor,
-                    ),
+          boxShadow: isSelected
+              ? const [
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 1),
                   ),
+                ]
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 15,
+                  color: isSelected ? Colors.white : context.textSecondaryColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : context.textSecondaryColor,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(context.tr('አዲስ የባለቤት ምዝገባዎች', 'New owner registrations'), style: const TextStyle(fontSize: 13)),
-              value: _notifyNewRegistrations,
-              activeThumbColor: AdminColors.keraOrange,
-              onChanged: (v) => setState(() => _notifyNewRegistrations = v),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(context.tr('የማመሳሰል ግጭቶች (Sync conflicts)', 'Sync conflict alerts'), style: const TextStyle(fontSize: 13)),
-              value: _notifySyncConflicts,
-              activeThumbColor: AdminColors.keraOrange,
-              onChanged: (v) => setState(() => _notifySyncConflicts = v),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(context.tr('የምትኬ ውጤት (Backup results)', 'Backup completion result'), style: const TextStyle(fontSize: 13)),
-              value: _notifyBackupResult,
-              activeThumbColor: AdminColors.keraOrange,
-              onChanged: (v) => setState(() => _notifyBackupResult = v),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // 10. Sync Rules Section
-  Widget _buildSyncRulesCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.sync_problem_rounded, color: AdminColors.keraOrange, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('የማመሳሰል ደንቦች · Sync Rules', 'Sync Rules & Conflict Policy'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => context.push('/admin/sync'),
-                child: Text(context.tr('ሞኒተር', 'Monitor')),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.fingerprint_rounded, size: 16, color: AdminColors.navy),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  context.tr('ልዩ የመዝገብ መለያ (UUIDv4) ድግግሞሽን ይከላከላል', 'Unique record IDs (UUIDv4) prevent duplicates'),
-                  style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.rule_rounded, size: 16, color: AdminColors.keraOrange),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  '${context.tr("ግጭት ፖሊሲ", "Conflict policy")}: ${_conflictPolicy == "newest_wins" ? context.tr("የቅርብ ጊዜ ለውጥ ይቀድማል (Newest edit wins)", "Newest edit wins") : "Review"}',
-                  style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.flag_outlined, size: 16, color: AdminColors.danger),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  context.tr('የክምችት መጠን ልዩነት ለግምገማ ምልክት ይደረጋል', 'Quantity conflicts flagged for review'),
-                  style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 11. Backup and Recovery Section
-  Widget _buildBackupRecoveryCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.cloud_sync_rounded, color: AdminColors.navy, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('ምትኬ እና መልሶ ማግኛ', 'Backup & Recovery'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AdminColors.navy),
-                  foregroundColor: AdminColors.navy,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                ),
-                onPressed: () => context.push('/admin/backup'),
-                child: Text(context.tr('አሁን ምትኬ ውሰድ', 'Back up now'), style: const TextStyle(fontSize: 11)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${context.tr("የመጨረሻ ምትኬ", "Last backup")}: ${context.tr("ዛሬ 14:30 (የተሳካ)", "Today 2:30 PM (Successful)")}',
-            style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            context.tr('4 የመልሶ ማግኛ ነጥቦች (Restore points) ተዘጋጅተዋል', '4 restore points available on cloud & device'),
-            style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 12. Security and Activity Log Section
-  Widget _buildSecurityActivityLogCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.cardBg,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.borderColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.history_toggle_off_rounded, color: AdminColors.keraOrange, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        context.tr('የደህንነት እና ክንውን መዝገብ', 'Security & Activity Log'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => context.push('/admin/audit'),
-                child: Text(context.tr('ሁሉንም እይ', 'View all')),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${context.tr("የክፍለ-ጊዜ ማብቂያ (Session timeout)", "Session timeout")}: $_sessionTimeout',
-            style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '• ${context.tr("ባለቤት ጸደቀ: ተስፋዬ ስፔር", "Owner approved: Tesfaye Spare")} (10m ago)',
-            style: TextStyle(fontSize: 11, color: context.textPrimaryColor),
-          ),
-          Text(
-            '• ${context.tr("አዲስ ብራንድ ተጨምሯል: SANY", "New brand added: SANY")} (1h ago)',
-            style: TextStyle(fontSize: 11, color: context.textPrimaryColor),
-          ),
-          Text(
-            '• ${context.tr("የዳታቤዝ ምትኬ ተጠናቋል", "Database backup completed")} (2h ago)',
-            style: TextStyle(fontSize: 11, color: context.textPrimaryColor),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 13. About & Logout Section
-  Widget _buildAboutAndLogoutCard() {
-    final isDark = context.isDark;
+  // D. App Lock & Security Section matching Figma
+  Widget _buildAppLockAndSecuritySection(BuildContext context, bool isDark) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Section Title: Shield icon + App Lock & Security
+        Row(
+          children: [
+            const Icon(
+              Icons.shield_outlined,
+              color: AdminColors.keraOrange,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                context.tr('የመተግበሪያ ቁልፍና ደህንነት', 'App Lock & Security'),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: context.textPrimaryColor,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Item 1: App Lock Card
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
             color: context.cardBg,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: context.borderColor),
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x14000000), blurRadius: 6, offset: Offset(0, 2)),
-                  ],
-                ),
-                child: const KeraLogoWidget(size: 64, borderRadius: 14),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Kera Admin Console · v1.0.0',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: context.textPrimaryColor,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'support@keraspares.com · +251 911 000 000',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.textSecondaryColor,
-                ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 4,
+                offset: Offset(0, 1),
               ),
             ],
           ),
+          clipBehavior: Clip.antiAlias,
+          child: const AppLockSettingsCard(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
 
-        // Logout Card
-        Material(
-          color: context.cardBg,
-          shape: RoundedRectangleBorder(
+        // Item 2: Account Password Card
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: context.cardBg,
             borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: AdminColors.border),
+            border: Border.all(color: context.borderColor),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 4,
+                offset: Offset(0, 1),
+              ),
+            ],
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AdminColors.dangerBg,
-                borderRadius: BorderRadius.circular(10),
+          clipBehavior: Clip.antiAlias,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _showChangePasswordDialog,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.vpn_key_outlined,
+                      color: AdminColors.keraOrange,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('የይለፍ ቃል መቀየሪያ', 'Account Password'),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr(
+                              'የአስተዳዳሪ መለያ የይለፍ ቃል ቀይር',
+                              'Change admin login password & strength check',
+                            ),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: context.textSecondaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: context.textSecondaryColor,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
-              child: const Icon(Icons.logout_rounded, color: AdminColors.danger, size: 22),
             ),
-            title: Text(
-              context.tr('ከአካውንት ውጣ · Logout', 'Logout / Exit Session'),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: AdminColors.danger,
-              ),
-            ),
-            subtitle: Text(
-              context.tr('የአስተዳዳሪ ክፍለ-ጊዜን ዝጋ', 'Terminate current admin session'),
-              style: TextStyle(
-                fontSize: 12,
-                color: context.textSecondaryColor,
-              ),
-            ),
-            trailing: _isLoggingOut
-                ? const KeraLoadingIndicator.small(color: AdminColors.danger)
-                : const Icon(Icons.chevron_right_rounded, color: AdminColors.danger),
-            onTap: _isLoggingOut ? null : _confirmLogout,
           ),
         ),
       ],
+    );
+  }
+
+  // E. Additional Administrative Hub (Brands, Backup, Logout)
+  Widget _buildAdditionalModulesCard(BuildContext context, bool isDark) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          children: [
+            // Module 1: Backup & Cloud Recovery
+            InkWell(
+              onTap: () => context.push('/admin/backup'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.cloud_upload_outlined, color: Color(0xFF2563EB), size: 20),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('ምትኬና ማገገሚያ', 'Backup & Recovery'),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr('የዳታ ምትኬ ይፍጠሩ ወይም ይመልሱ', 'Create and restore system data points'),
+                            style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor, size: 20),
+                  ],
+                ),
+              ),
+            ),
+            Divider(height: 1, color: context.borderColor),
+
+            // Module 2: System Audit Logs
+            InkWell(
+              onTap: () => context.push('/admin/audit-logs'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.history_toggle_off_rounded, color: Color(0xFF159B55), size: 20),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('የደህንነት ኦዲት መዝገብ', 'Security & Audit Logs'),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr('የአስተዳዳሪ እርምጃዎች እና እንቅስቃሴዎች', 'Review administrator activities and events'),
+                            style: TextStyle(fontSize: 11, color: context.textSecondaryColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: context.textSecondaryColor, size: 20),
+                  ],
+                ),
+              ),
+            ),
+            Divider(height: 1, color: context.borderColor),
+
+            // Module 3: Logout
+            InkWell(
+              onTap: _isLoggingOut ? null : _confirmLogout,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    const Icon(Icons.logout_rounded, color: AdminColors.danger, size: 20),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        context.tr('ከአካውንት መውጣት', 'Logout'),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AdminColors.danger,
+                        ),
+                      ),
+                    ),
+                    if (_isLoggingOut)
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AdminColors.danger),
+                      )
+                    else
+                      const Icon(Icons.chevron_right_rounded, color: AdminColors.danger, size: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

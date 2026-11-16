@@ -48,56 +48,8 @@ class AdminHeaderBar extends StatelessWidget {
                   ],
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.2,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (subtitle != null && subtitle!.isNotEmpty)
-                          Text(
-                            subtitle!,
-                            style: const TextStyle(
-                              color: AdminColors.headerTextSecondary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                  ),
-                  if (actions != null) ...?actions,
-                ],
-              ),
 
-              // Bottom Extension (e.g. Search bar, tabs, hero stats)
-              if (bottomContent != null) ...[
-                const SizedBox(height: 16),
-                bottomContent!,
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
-/// Circular action button used within the dark navy header (e.g. notifications, back)
-class AdminHeaderIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool hasBadge;
   final String? tooltip;
 
   const AdminHeaderIconButton({
